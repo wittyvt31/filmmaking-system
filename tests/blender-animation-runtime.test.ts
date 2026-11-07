@@ -8,10 +8,16 @@ import {
 } from '@filmmaking/engine-blender';
 import { describe, expect, it } from 'vitest';
 
-describe('Blender humanoid runtime acceptance', () => {
+const blenderExecutable =
+  process.env['FILMIE_BLENDER'] ?? defaultBlenderExecutable();
+const blenderAvailable =
+  blenderExecutable === 'blender'
+    ? true
+    : existsSync(blenderExecutable);
+
+describe.skipIf(!blenderAvailable)('Blender humanoid runtime acceptance', () => {
   it('deforms weighted humanoid geometry and exercises IK, attachments, and facial controls', async () => {
-    const blender = process.env['FILMIE_BLENDER'] ?? defaultBlenderExecutable();
-    if (!existsSync(blender) && blender !== 'blender') return;
+    const blender = blenderExecutable;
 
     const projectDirectory = resolve('examples/they-have-reached-procedural');
     const spec = JSON.parse(

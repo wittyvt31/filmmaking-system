@@ -251,6 +251,8 @@ describe('procedural pre-production contracts', () => {
         startFrame: 90,
         endFrame: 120,
         leg: 'right',
+        targetEntityId: 'prop-kick-target',
+        contactFrame: 15,
         angleDegrees: 55,
       },
       {

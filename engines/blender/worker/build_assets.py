@@ -328,7 +328,40 @@ def skin_character_meshes(collection, armature):
             if bone_name not in armature.data.bones:
                 continue
             group = obj.vertex_groups.get(bone_name) or obj.vertex_groups.new(name=bone_name)
-            group.add(range(len(obj.data.vertices)), weight, "REPLACE")
+            group.remove(range(len(obj.data.vertices)))
+        first_name, first_weight = candidates[0]
+        second_name, second_weight = candidates[1] if len(candidates) > 1 else (None, 0.0)
+        first_group = obj.vertex_groups.get(first_name)
+        second_group = obj.vertex_groups.get(second_name) if second_name else None
+        coordinates = [vertex.co.z for vertex in obj.data.vertices]
+        if coordinates:
+            minimum = min(coordinates)
+            maximum = max(coordinates)
+            span = max(1.0e-6, maximum - minimum)
+        else:
+            minimum = 0.0
+            span = 1.0
+        for vertex_index, vertex in enumerate(obj.data.vertices):
+            axial = (vertex.co.z - minimum) / span
+            primary_ratio = 0.78 if len(coordinates) == 0 else 0.78
+            if "sleeve" in lower_name or "arm" in lower_name or "shin" in lower_name or "thigh" in lower_name:
+                primary_ratio = 0.25 + 0.65 * axial
+            elif "hand" in lower_name:
+                primary_ratio = 0.82 + 0.12 * axial
+            elif "foot" in lower_name or "sandal" in lower_name:
+                primary_ratio = 0.88
+            elif "face" in lower_name:
+                primary_ratio = 0.92
+            else:
+                primary_ratio = 0.65 + 0.25 * (1.0 - axial)
+            primary = max(0.05, min(0.95, primary_ratio))
+            secondary = 1.0 - primary
+            if second_group is None:
+                secondary = 0.0
+                primary = 1.0
+            first_group.add([vertex_index], primary, "REPLACE")
+            if second_group is not None:
+                second_group.add([vertex_index], secondary, "REPLACE")
         modifier = obj.modifiers.new("FILMIE Humanoid Skin", "ARMATURE")
         modifier.object = armature
 

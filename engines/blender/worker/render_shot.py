@@ -158,6 +158,9 @@ def instantiate_asset(asset, transform, style, entity_id):
     root.scale = (float(transform["scale"]),) * 3
     root.name = entity_id
     root["filmie_entity_id"] = entity_id
+    for armature in collection.objects:
+        if armature.type == "ARMATURE":
+            armature["filmie_character_id"] = entity_id
     controls = {
         obj.get("filmie_semantic_id", obj.get("filmie_control_id", obj.name)): obj
         for obj in collection.objects
@@ -378,14 +381,11 @@ def bind_authoritative_rig(control_objects):
             obj for obj in bpy.context.scene.objects
             if obj.type == "ARMATURE" and obj.get("filmie_rig_type") == "humanoid-semantic-v1"
         ]
-        armature = armatures[0] if armatures else None
-        # Collections can contain more than one character. Match by collection
-        # ownership instead of silently binding the first rig to every character.
-        for candidate in armatures:
-            roots = [obj for obj in candidate.users_collection[0].objects if obj.get("filmie_entity_id") == character_id]
-            if roots:
-                armature = candidate
-                break
+        armature = next(
+            (candidate for candidate in armatures
+             if candidate.get("filmie_character_id") == character_id),
+            None,
+        )
         if armature is None:
             continue
         for semantic, bone_name in bone_semantics.items():
@@ -393,9 +393,11 @@ def bind_authoritative_rig(control_objects):
             if control is None or bone_name not in armature.pose.bones:
                 continue
             bone = armature.pose.bones[bone_name]
-            while bone.constraints:
-                bone.constraints.remove(bone.constraints[-1])
+            for existing in list(bone.constraints):
+                if existing.name.startswith("FILMIE Semantic"):
+                    bone.constraints.remove(existing)
             constraint = bone.constraints.new("COPY_TRANSFORMS")
+            constraint.name = "FILMIE Semantic " + semantic
             constraint.target = control
             constraint.target_space = "WORLD"
             constraint.owner_space = "WORLD"
@@ -507,23 +509,32 @@ def apply_actions(spec, entity_roots, control_objects):
             character_root = entity_roots.get(character_id)
             if character_root is None:
                 raise RuntimeError("Walk action requires a character root")
+            rig = next((obj for obj in bpy.context.scene.objects
+                        if obj.type == "ARMATURE"
+                        and obj.get("filmie_character_id") == character_id), None)
+            collection = rig.users_collection[0] if rig is not None else None
             character_root.keyframe_insert(data_path="location", frame=start)
             character_root.location.y -= float(action["distanceMeters"])
             character_root.keyframe_insert(data_path="location", frame=end)
             cycle = int(action["cycleFrames"])
             stride = float(action["strideMeters"])
+            velocity_scale = 1.0 if action["type"] == "run" else 0.72
             for frame in range(start, end + 1):
                 phase = 2.0 * math.pi * (frame - start) / cycle
                 for side, leg in enumerate(legs):
-                    leg.rotation_euler[1] = math.sin(phase + side * math.pi) * min(0.55, stride)
+                    leg.rotation_euler[1] = math.sin(phase + side * math.pi) * min(0.8, stride) * velocity_scale
                     leg.keyframe_insert(data_path="rotation_euler", index=1, frame=frame)
                     foot_side = "L" if side == 0 else "R"
-                    foot_target = next((obj for obj in bpy.context.scene.objects
-                                        if obj.name == "IK_foot." + foot_side + ".Target"), None)
+                    foot_target = next((obj for obj in collection.objects
+                                        if obj.name == "IK_foot." + foot_side + ".Target"), None) if collection is not None else None
                     if foot_target is not None:
-                        planted = 0.55 * (1.0 if math.sin(phase + side * math.pi) >= -0.05 else 0.0)
-                        foot_target.location.y = foot_target.location.y - planted * stride * 0.01
-                        foot_target.location.z = 0.0
+                        planted = math.sin(phase + side * math.pi) >= -0.05
+                        if planted:
+                            foot_target.location.z = 0.0
+                        else:
+                            foot_target.location.z = min(0.12, 0.04 + stride * 0.08) * abs(math.sin(phase + side * math.pi))
+                        progress = (frame - start) / max(1, end - start)
+                        foot_target.location.y += float(action["distanceMeters"]) * progress / max(1, end - start)
                         foot_target.keyframe_insert(data_path="location", frame=frame)
         elif action["type"] == "jump":
             character_root = entity_roots.get(character_id)
@@ -546,13 +557,51 @@ def apply_actions(spec, entity_roots, control_objects):
             leg = controls.get(leg_key)
             if leg is None:
                 raise RuntimeError("Kick action requires semantic " + leg_key + " control")
+            target = entity_roots.get(action["targetEntityId"])
+            if target is None:
+                raise RuntimeError("Kick action requires targetEntityId to resolve a target object")
             angle = math.radians(float(action["angleDegrees"]))
             leg.rotation_euler.x = 0.0
             leg.keyframe_insert(data_path="rotation_euler", index=0, frame=start)
+            contact_frame = start + min(end - start, int(action["contactFrame"]))
             leg.rotation_euler.x = angle
-            leg.keyframe_insert(data_path="rotation_euler", index=0, frame=start + max(1, (end - start) // 2))
+            leg.keyframe_insert(data_path="rotation_euler", index=0, frame=contact_frame)
             leg.rotation_euler.x = 0.0
             leg.keyframe_insert(data_path="rotation_euler", index=0, frame=end)
+            rig = next((obj for obj in bpy.context.scene.objects
+                        if obj.type == "ARMATURE"
+                        and obj.get("filmie_character_id") == character_id), None)
+            collection = rig.users_collection[0] if rig is not None else None
+            foot_target = next((obj for obj in collection.objects
+                                if obj.name == "IK_foot." + ("L" if action["leg"] == "left" else "R") + ".Target"),
+                               None) if collection is not None else None
+            if foot_target is None:
+                raise RuntimeError("Kick action requires a mapped foot IK target")
+            anchor_world = target.matrix_world.translation
+            if action.get("targetAnchorId"):
+                anchors = json.loads(target.get("filmie_anchors", "{}"))
+                anchor = anchors.get(action["targetAnchorId"])
+                if anchor is None:
+                    raise RuntimeError("Kick target does not define targetAnchorId " + action["targetAnchorId"])
+                anchor_world = target.matrix_world @ Vector(anchor)
+            foot_target.location = (
+                foot_target.parent.matrix_world.inverted() @ anchor_world
+                if foot_target.parent is not None else anchor_world
+            )
+            foot_target.keyframe_insert(data_path="location", frame=contact_frame)
+            bpy.context.view_layer.update()
+            foot_bone = rig.pose.bones["foot." + ("L" if action["leg"] == "left" else "R")]
+            achieved_world = rig.matrix_world @ foot_bone.matrix.translation
+            contact_distance = (achieved_world - anchor_world).length
+            tolerance = float(action["contactToleranceMeters"])
+            if contact_distance > tolerance:
+                raise RuntimeError(
+                    "Kick contact validation failed at frame %d: foot %.3f m from target"
+                    % (contact_frame, contact_distance)
+                )
+            target.keyframe_insert(data_path="location", frame=contact_frame)
+            target.location.x += float(action["targetImpulseMeters"])
+            target.keyframe_insert(data_path="location", frame=end)
         elif action["type"] == "celebrate":
             arms = [controls.get("left-arm"), controls.get("right-arm")]
             chest = controls.get("chest")

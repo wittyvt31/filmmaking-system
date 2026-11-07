@@ -589,9 +589,23 @@ export const CharacterActionSchema = z.discriminatedUnion('type', [
   SceneActionBaseSchema.extend({
     type: z.literal('kick'),
     leg: z.enum(['left', 'right']),
-    targetEntityId: StableIdSchema.optional(),
+    targetEntityId: StableIdSchema,
+    targetAnchorId: StableIdSchema.optional(),
+    contactFrame: z.number().int().nonnegative().safe(),
+    contactToleranceMeters: z.number().positive().max(0.5).default(0.08),
+    targetImpulseMeters: z.number().positive().max(10).default(0.35),
     angleDegrees: z.number().positive().max(120),
-  }).strict(),
+  })
+    .strict()
+    .superRefine((action, context) => {
+      if (action.contactFrame > action.endFrame - action.startFrame) {
+        context.addIssue({
+          code: 'custom',
+          path: ['contactFrame'],
+          message: 'Kick contactFrame must fall within the action interval',
+        });
+      }
+    }),
   SceneActionBaseSchema.extend({
     type: z.literal('celebrate'),
     intensity: z.number().positive().max(1),
