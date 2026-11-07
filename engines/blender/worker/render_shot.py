@@ -512,15 +512,20 @@ def apply_actions(spec, entity_roots, control_objects):
             rig = next((obj for obj in bpy.context.scene.objects
                         if obj.type == "ARMATURE"
                         and obj.get("filmie_character_id") == character_id), None)
-            collection = rig.users_collection[0] if rig is not None else None
-            character_root.keyframe_insert(data_path="location", frame=start)
-            character_root.location.y -= float(action["distanceMeters"])
-            character_root.keyframe_insert(data_path="location", frame=end)
+            collection = rig.users_collection[0]             if rig is not None else None
+            initial_y = float(character_root.location.y)
+            initial_x = float(character_root.location.x)
+            initial_z = float(character_root.location.z)
             cycle = int(action["cycleFrames"])
             stride = float(action["strideMeters"])
             velocity_scale = 1.0 if action["type"] == "run" else 0.72
             for frame in range(start, end + 1):
                 phase = 2.0 * math.pi * (frame - start) / cycle
+                progress = (frame - start) / max(1, end - start)
+                character_root.location.x = initial_x
+                character_root.location.y = initial_y - float(action["distanceMeters"]) * progress
+                character_root.location.z = initial_z
+                character_root.keyframe_insert(data_path="location", frame=frame)
                 for side, leg in enumerate(legs):
                     leg.rotation_euler[1] = math.sin(phase + side * math.pi) * min(0.8, stride) * velocity_scale
                     leg.keyframe_insert(data_path="rotation_euler", index=1, frame=frame)
@@ -533,13 +538,12 @@ def apply_actions(spec, entity_roots, control_objects):
                             foot_target.location.z = 0.0
                         else:
                             foot_target.location.z = min(0.12, 0.04 + stride * 0.08) * abs(math.sin(phase + side * math.pi))
-                        progress = (frame - start) / max(1, end - start)
-                        foot_target.location.y += float(action["distanceMeters"]) * progress / max(1, end - start)
                         foot_target.keyframe_insert(data_path="location", frame=frame)
         elif action["type"] == "jump":
             character_root = entity_roots.get(character_id)
             if character_root is None:
                 raise RuntimeError("Jump action requires a character root")
+            scene.frame_set(start)
             base_z = float(character_root.location.z)
             base_y = float(character_root.location.y)
             height = float(action["heightMeters"])
@@ -589,6 +593,7 @@ def apply_actions(spec, entity_roots, control_objects):
                 if foot_target.parent is not None else anchor_world
             )
             foot_target.keyframe_insert(data_path="location", frame=contact_frame)
+            scene.frame_set(contact_frame)
             bpy.context.view_layer.update()
             foot_bone = rig.pose.bones["foot." + ("L" if action["leg"] == "left" else "R")]
             achieved_world = rig.matrix_world @ foot_bone.matrix.translation
@@ -661,19 +666,29 @@ def apply_actions(spec, entity_roots, control_objects):
                 parent = effector.parent
                 if parent is None:
                     raise RuntimeError("Semantic hand control must have a parent rig control")
-                local_target = parent.matrix_world.inverted() @ anchor_world
+                start_world = effector.matrix_world.copy()
+                effector.matrix_world = start_world
                 effector.keyframe_insert(data_path="location", frame=start)
-                effector.location = local_target
+                effector.location = parent.matrix_world.inverted() @ anchor_world
+                bpy.context.view_layer.update()
                 effector.keyframe_insert(data_path="location", frame=end)
+                effector.keyframe_insert(data_path="location", frame=end + 1)
+                scene.frame_set(end)
+                bpy.context.view_layer.update()
             elif action["type"] == "grasp":
+                scene.frame_set(start)
+                parent = effector.parent
+                if parent is not None:
+                    effector.location = parent.matrix_world.inverted() @ anchor_world
+                bpy.context.view_layer.update()
                 effector.keyframe_insert(data_path="rotation_euler", frame=start)
                 effector.rotation_euler.y = -0.25
                 effector.keyframe_insert(data_path="rotation_euler", frame=end)
                 contact_distance = (effector.matrix_world.translation - anchor_world).length
                 if contact_distance > 0.18:
                     raise RuntimeError(
-                        "Object grasp contact validation failed: hand is %.3f m from anchor"
-                        % contact_distance
+                        "Object grasp contact validation failed: hand is %.3f m from anchor (hand=%s anchor=%s)"
+                        % (contact_distance, tuple(round(v, 3) for v in effector.matrix_world.translation), tuple(round(v, 3) for v in anchor_world))
                     )
                 world_matrix = target.matrix_world.copy()
                 target["filmie_attachment_state"] = "Attached"
@@ -725,26 +740,44 @@ def apply_motion_curves(spec, control_objects, entity_roots):
             control = entity_roots.get(character_id)
         if control is None:
             raise RuntimeError("Motion clip requires missing semantic control " + control_name)
-        curves.sort(key=lambda curve: int(curve["frame"]))
+        curves.sort(key=lambda curve: (
+            int(curve["frame"]),
+            0 if curve.get("blendMode") == "replace" else 1,
+        ))
         property_name = "rotation_euler" if channel == "rotation" else channel
         original = tuple(getattr(control, property_name))
-        frames = [int(curve["frame"]) + 1 for curve in curves]
+        frames = sorted(set(int(curve["frame"]) + 1 for curve in curves))
         start_frame = frames[0]
         end_frame = frames[-1]
         for frame in range(start_frame, end_frame + 1):
             source_frame = frame - 1
-            right_index = next((index for index, curve in enumerate(curves)
-                                if int(curve["frame"]) >= source_frame), len(curves) - 1)
-            left_index = max(0, right_index - 1)
-            left = curves[left_index]
-            right = curves[right_index]
-            span = max(1, int(right["frame"]) - int(left["frame"]))
-            blend = (source_frame - int(left["frame"])) / span
-            blend = max(0.0, min(1.0, blend))
-            left_value = tuple(float(component) for component in left["value"])
-            right_value = tuple(float(component) for component in right["value"])
-            value = tuple(a + (b - a) * blend for a, b in zip(left_value, right_value))
-            if curves[0]["blendMode"] == "additive":
+            same_frame = [
+                curve for curve in curves
+                if int(curve["frame"]) == source_frame
+            ]
+            if same_frame:
+                replace = [curve for curve in same_frame if curve.get("blendMode") == "replace"]
+                selected = replace[-1] if replace else same_frame[-1]
+                value = tuple(float(component) for component in selected["value"])
+            else:
+                later = [curve for curve in curves if int(curve["frame"]) >= source_frame]
+                prior = [curve for curve in curves if int(curve["frame"]) <= source_frame]
+                if later and prior:
+                    left = prior[-1]
+                    right = later[0]
+                    span = max(1, int(right["frame"]) - int(left["frame"]))
+                    blend = (source_frame - int(left["frame"])) / span
+                    selected = left
+                    left_value = tuple(float(component) for component in left["value"])
+                    right_value = tuple(float(component) for component in right["value"])
+                    value = tuple(a + (b - a) * blend for a, b in zip(left_value, right_value))
+                elif prior:
+                    selected = prior[-1]
+                    value = tuple(float(component) for component in selected["value"])
+                else:
+                    selected = later[0]
+                    value = tuple(float(component) for component in selected["value"])
+            if selected.get("blendMode") == "additive":
                 value = tuple(base + delta for base, delta in zip(original, value))
             setattr(control, property_name, value)
             control.keyframe_insert(data_path=property_name, frame=frame)

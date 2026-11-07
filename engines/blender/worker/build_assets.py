@@ -333,34 +333,34 @@ def skin_character_meshes(collection, armature):
         second_name, second_weight = candidates[1] if len(candidates) > 1 else (None, 0.0)
         first_group = obj.vertex_groups.get(first_name)
         second_group = obj.vertex_groups.get(second_name) if second_name else None
-        coordinates = [vertex.co.z for vertex in obj.data.vertices]
-        if coordinates:
-            minimum = min(coordinates)
-            maximum = max(coordinates)
-            span = max(1.0e-6, maximum - minimum)
-        else:
-            minimum = 0.0
-            span = 1.0
         for vertex_index, vertex in enumerate(obj.data.vertices):
-            axial = (vertex.co.z - minimum) / span
-            primary_ratio = 0.78 if len(coordinates) == 0 else 0.78
-            if "sleeve" in lower_name or "arm" in lower_name or "shin" in lower_name or "thigh" in lower_name:
-                primary_ratio = 0.25 + 0.65 * axial
-            elif "hand" in lower_name:
-                primary_ratio = 0.82 + 0.12 * axial
-            elif "foot" in lower_name or "sandal" in lower_name:
-                primary_ratio = 0.88
-            elif "face" in lower_name:
-                primary_ratio = 0.92
-            else:
-                primary_ratio = 0.65 + 0.25 * (1.0 - axial)
-            primary = max(0.05, min(0.95, primary_ratio))
-            secondary = 1.0 - primary
+            world_point = obj.matrix_world @ vertex.co
+            influences = []
+            for bone_name, nominal_weight in candidates:
+                bone = armature.data.bones.get(bone_name)
+                if bone is None:
+                    continue
+                head = armature.matrix_world @ bone.head_local
+                tail = armature.matrix_world @ bone.tail_local
+                segment = tail - head
+                segment_length_squared = segment.length_squared
+                if segment_length_squared <= 1.0e-8:
+                    distance = (world_point - head).length
+                else:
+                    projection = max(0.0, min(1.0, (world_point - head).dot(segment) / segment_length_squared))
+                    distance = (world_point - (head + segment * projection)).length
+                influences.append((bone_name, nominal_weight / max(0.03, distance)))
+            influence_sum = sum(weight for _name, weight in influences)
+            resolved = {
+                name: weight / influence_sum if influence_sum > 0.0 else 0.0
+                for name, weight in influences
+            }
+            primary = resolved.get(first_name, 0.0)
             if second_group is None:
-                secondary = 0.0
                 primary = 1.0
             first_group.add([vertex_index], primary, "REPLACE")
             if second_group is not None:
+                secondary = resolved.get(second_name, 1.0 - primary)
                 second_group.add([vertex_index], secondary, "REPLACE")
         modifier = obj.modifiers.new("FILMIE Humanoid Skin", "ARMATURE")
         modifier.object = armature
