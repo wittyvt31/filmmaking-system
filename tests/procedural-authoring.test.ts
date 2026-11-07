@@ -228,10 +228,42 @@ describe('procedural pre-production contracts', () => {
         targetEntityId: 'phone',
         maxYawDegrees: 45,
       },
+      {
+        id: 'run',
+        type: 'run',
+        startFrame: 30,
+        endFrame: 60,
+        cycleFrames: 12,
+        strideMeters: 0.7,
+        distanceMeters: 3,
+      },
+      {
+        id: 'jump',
+        type: 'jump',
+        startFrame: 60,
+        endFrame: 90,
+        heightMeters: 0.7,
+        distanceMeters: 1.5,
+      },
+      {
+        id: 'kick',
+        type: 'kick',
+        startFrame: 90,
+        endFrame: 120,
+        leg: 'right',
+        angleDegrees: 55,
+      },
+      {
+        id: 'celebrate',
+        type: 'celebrate',
+        startFrame: 120,
+        endFrame: 150,
+        intensity: 0.8,
+      },
     ];
     expect(
       actions.map((action) => CharacterActionSchema.parse(action).type),
-    ).toHaveLength(13);
+    ).toHaveLength(17);
     expect(() =>
       CharacterActionSchema.parse({
         id: 'bad-mouth',

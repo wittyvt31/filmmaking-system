@@ -197,10 +197,106 @@ def assign_controller(obj, control):
     obj.matrix_world = world_matrix
 
 
+def create_character_skeleton(collection, root, height, build):
+    armature_data = bpy.data.armatures.new("FILMIE_HUMANOID_RIG")
+    armature = bpy.data.objects.new("FILMIE_Humanoid", armature_data)
+    collection.objects.link(armature)
+    armature.parent = root
+    armature["filmie_rig_type"] = "humanoid-semantic-v1"
+    armature["filmie_control_contract"] = "chest,head,left-arm,right-arm,left-leg,right-leg,left-hand,right-hand,left-eye,right-eye,left-brow,right-brow,mouth"
+
+    bpy.context.view_layer.objects.active = armature
+    armature.select_set(True)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bones = armature_data.edit_bones
+
+    def bone(name, head, tail, parent=None):
+        item = bones.new(name)
+        item.head = head
+        item.tail = tail
+        if parent:
+            item.parent = bones[parent]
+        return item
+
+    bone("root", (0.0, 0.0, 0.0), (0.0, 0.0, 0.06))
+    bone("pelvis", (0.0, 0.0, 0.18 * height), (0.0, 0.0, 0.36 * height), "root")
+    bone("spine", (0.0, 0.0, 0.36 * height), (0.0, 0.0, 0.58 * height), "pelvis")
+    bone("chest", (0.0, 0.0, 0.58 * height), (0.0, 0.0, 0.78 * height), "spine")
+    bone("head", (0.0, 0.0, 0.76 * height), (0.0, 0.0, 0.92 * height), "chest")
+    for side_name, side in (("L", -1.0), ("R", 1.0)):
+        bone("upper_arm." + side_name,
+             (side * 0.28 * build, 0.0, 0.74 * height),
+             (side * 0.43 * build, 0.0, 0.52 * height), "chest")
+        bone("forearm." + side_name,
+             (side * 0.43 * build, 0.0, 0.52 * height),
+             (side * 0.43 * build, -0.08, 0.31 * height),
+             "upper_arm." + side_name)
+        bone("hand." + side_name,
+             (side * 0.43 * build, -0.08, 0.31 * height),
+             (side * 0.43 * build, -0.08, 0.25 * height),
+             "forearm." + side_name)
+        bone("thigh." + side_name,
+             (side * 0.15 * build, 0.0, 0.18 * height),
+             (side * 0.15 * build, -0.16, -0.04 * height), "pelvis")
+        bone("shin." + side_name,
+             (side * 0.15 * build, -0.16, -0.04 * height),
+             (side * 0.15 * build, -0.48, -0.27 * height),
+             "thigh." + side_name)
+        bone("foot." + side_name,
+             (side * 0.15 * build, -0.48, -0.27 * height),
+             (side * 0.15 * build, -0.66, -0.27 * height),
+             "shin." + side_name)
+
+    bpy.ops.object.mode_set(mode="POSE")
+    for side_name in ("L", "R"):
+        forearm = armature.pose.bones["forearm." + side_name]
+        ik_target = bpy.data.objects.new("IK_hand." + side_name + ".Target", None)
+        collection.objects.link(ik_target)
+        ik_target.empty_display_type = "CUBE"
+        ik_target.empty_display_size = 0.04
+        ik_target.parent = root
+        ik_target["filmie_ik_chain"] = "hand." + side_name
+        constraint = forearm.constraints.new("IK")
+        constraint.name = "FILMIE Hand IK"
+        constraint.target = ik_target
+        constraint.subtarget = ""
+        constraint.chain_count = 2
+    bpy.ops.object.mode_set(mode="OBJECT")
+    armature.select_set(False)
+    return armature
+
+
+def skin_character_meshes(collection, armature):
+    for obj in collection.objects:
+        if obj.type != "MESH":
+            continue
+        lower_name = obj.name.lower()
+        bone_name = None
+        if "torso" in lower_name or "garment" in lower_name or "neck" in lower_name:
+            bone_name = "chest"
+        elif "hand.r" in lower_name or ("hand" in lower_name and "right" in lower_name):
+            bone_name = "hand.R"
+        elif "hand.l" in lower_name or ("hand" in lower_name and "left" in lower_name):
+            bone_name = "hand.L"
+        elif any(token in lower_name for token in ("face", "hair", "ear", "nose", "mouth", "brow", "eye")):
+            bone_name = "head"
+        elif "right" in lower_name or ".r" in lower_name:
+            bone_name = "thigh.R"
+        elif "left" in lower_name or ".l" in lower_name:
+            bone_name = "thigh.L"
+        if bone_name is None:
+            continue
+        group = obj.vertex_groups.new(name=bone_name)
+        group.add(range(len(obj.data.vertices)), 1.0, "REPLACE")
+        modifier = obj.modifiers.new("FILMIE Humanoid Skin", "ARMATURE")
+        modifier.object = armature
+
+
 def build_character(spec, collection, root, style, seed):
     height = spec["heightMeters"]
     proportions = spec.get("bodyProportions", {})
     build = {"slender": 0.88, "average": 1.0, "stocky": 1.16}[spec["build"]] * float(proportions.get("shoulderWidth", 1.0))
+    skeleton = create_character_skeleton(collection, root, height, build)
     materials = spec.get("materialOverrides", {})
     skin = make_material("Graphite | weathered skin", hex_color(materials.get("skin"), (0.31, 0.285, 0.255)), style)
     cloth = make_material("Graphite | homespun cloth", hex_color(materials.get("clothing"), (0.16, 0.15, 0.14)), style)
@@ -348,6 +444,7 @@ def build_character(spec, collection, root, style, seed):
         for obj in collection.objects
         if obj.get("filmie_semantic_id")
     }
+    skin_character_meshes(collection, skeleton)
     return {
         "collection": collection.name,
         "controls": [obj.name for obj in collection.objects if obj.get("filmie_control_id")],

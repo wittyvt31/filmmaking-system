@@ -442,7 +442,7 @@ def apply_actions(spec, entity_roots, control_objects):
                 for frame in (int(viseme["startFrame"]) + 1, int(viseme["endFrame"])):
                     mouth.scale.z, mouth.scale.x = shape_scale[viseme["shape"]]
                     mouth.keyframe_insert(data_path="scale", frame=frame)
-        elif action["type"] == "walk":
+        elif action["type"] in ("walk", "run"):
             legs = [controls.get("left-leg"), controls.get("right-leg")]
             if any(leg is None for leg in legs):
                 raise RuntimeError("Walk action requires semantic leg controls on " + character_id)
@@ -459,6 +459,48 @@ def apply_actions(spec, entity_roots, control_objects):
                 for side, leg in enumerate(legs):
                     leg.rotation_euler[1] = math.sin(phase + side * math.pi) * min(0.55, stride)
                     leg.keyframe_insert(data_path="rotation_euler", index=1, frame=frame)
+        elif action["type"] == "jump":
+            character_root = entity_roots.get(character_id)
+            if character_root is None:
+                raise RuntimeError("Jump action requires a character root")
+            base_z = float(character_root.location.z)
+            base_y = float(character_root.location.y)
+            height = float(action["heightMeters"])
+            character_root.keyframe_insert(data_path="location", frame=start)
+            for frame in range(start, end + 1):
+                progress = (frame - start) / max(1, end - start)
+                character_root.location.z = base_z + height * 4.0 * progress * (1.0 - progress)
+                character_root.location.y = base_y - float(action["distanceMeters"]) * progress
+                character_root.keyframe_insert(data_path="location", frame=frame)
+            character_root.location.z = base_z
+            character_root.location.y = base_y - float(action["distanceMeters"])
+            character_root.keyframe_insert(data_path="location", frame=end)
+        elif action["type"] == "kick":
+            leg_key = action["leg"] + "-leg"
+            leg = controls.get(leg_key)
+            if leg is None:
+                raise RuntimeError("Kick action requires semantic " + leg_key + " control")
+            angle = math.radians(float(action["angleDegrees"]))
+            leg.rotation_euler.x = 0.0
+            leg.keyframe_insert(data_path="rotation_euler", index=0, frame=start)
+            leg.rotation_euler.x = angle
+            leg.keyframe_insert(data_path="rotation_euler", index=0, frame=start + max(1, (end - start) // 2))
+            leg.rotation_euler.x = 0.0
+            leg.keyframe_insert(data_path="rotation_euler", index=0, frame=end)
+        elif action["type"] == "celebrate":
+            arms = [controls.get("left-arm"), controls.get("right-arm")]
+            chest = controls.get("chest")
+            if chest is None or any(arm is None for arm in arms):
+                raise RuntimeError("Celebration requires semantic arms and chest controls")
+            intensity = float(action["intensity"])
+            for frame in range(start, end + 1):
+                phase = 2.0 * math.pi * (frame - start) / max(2, end - start)
+                for side, arm in enumerate(arms):
+                    arm.rotation_euler.z = math.sin(phase) * intensity * (1 if side == 0 else -1)
+                    arm.rotation_euler.x = -intensity * 0.9
+                    arm.keyframe_insert(data_path="rotation_euler", frame=frame)
+                chest.rotation_euler.x = math.sin(phase * 2.0) * intensity * 0.08
+                chest.keyframe_insert(data_path="rotation_euler", index=0, frame=frame)
         elif action["type"] in ("sit", "stand"):
             chest = controls.get("chest")
             legs = [controls.get("left-leg"), controls.get("right-leg")]

@@ -105,17 +105,11 @@ export function compileScene(
           `Action "${action.id}" on character "${character.id}" is outside shot "${shot.id}"`,
         );
       }
-      if (
-        (action.type === 'head-turn' ||
-          action.type === 'interaction' ||
-          action.type === 'reach' ||
-          action.type === 'grasp' ||
-          action.type === 'lift' ||
-          action.type === 'place') &&
-        !entities.has(action.targetEntityId)
-      ) {
+      const targetEntityId =
+        'targetEntityId' in action ? action.targetEntityId : undefined;
+      if (targetEntityId !== undefined && !entities.has(targetEntityId)) {
         throw new TypeError(
-          `Action "${action.id}" targets unknown scene entity "${action.targetEntityId}"`,
+          `Action "${action.id}" targets unknown scene entity "${targetEntityId}"`,
         );
       }
     }

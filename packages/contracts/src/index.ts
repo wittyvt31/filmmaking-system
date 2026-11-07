@@ -576,6 +576,27 @@ export const CharacterActionSchema = z.discriminatedUnion('type', [
     distanceMeters: z.number().finite().min(-50).max(50),
   }).strict(),
   SceneActionBaseSchema.extend({
+    type: z.literal('run'),
+    cycleFrames: z.number().int().positive().safe(),
+    strideMeters: z.number().positive().max(2.5),
+    distanceMeters: z.number().finite().min(-50).max(50),
+  }).strict(),
+  SceneActionBaseSchema.extend({
+    type: z.literal('jump'),
+    heightMeters: z.number().positive().max(2),
+    distanceMeters: z.number().finite().min(-50).max(50),
+  }).strict(),
+  SceneActionBaseSchema.extend({
+    type: z.literal('kick'),
+    leg: z.enum(['left', 'right']),
+    targetEntityId: StableIdSchema.optional(),
+    angleDegrees: z.number().positive().max(120),
+  }).strict(),
+  SceneActionBaseSchema.extend({
+    type: z.literal('celebrate'),
+    intensity: z.number().positive().max(1),
+  }).strict(),
+  SceneActionBaseSchema.extend({
     type: z.enum(['sit', 'stand']),
     blendFrames: z.number().int().positive().safe().max(120),
   }).strict(),
@@ -638,6 +659,18 @@ export const MotionClipLibrarySchema = z
           .object({
             id: StableIdSchema,
             durationFrames: z.number().int().positive().safe(),
+            rootMotion: z
+              .object({
+                control: z.enum(['root', 'hips']),
+                channel: z.literal('location'),
+                distance: z.tuple([
+                  z.number().finite(),
+                  z.number().finite(),
+                  z.number().finite(),
+                ]),
+              })
+              .strict()
+              .optional(),
             tracks: z
               .array(
                 z
