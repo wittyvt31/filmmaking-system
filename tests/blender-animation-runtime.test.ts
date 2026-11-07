@@ -263,6 +263,43 @@ describe.skipIf(!blenderAvailable)(
                   targetPosition: { x: 0.7, y: -1.0, z: 0.25 },
                 },
               },
+              {
+                characterId: 'actor',
+                interval: { startFrame: 0, endFrame: 12 },
+                action: {
+                  id: 'lip-sync',
+                  type: 'lip-sync',
+                  startFrame: 0,
+                  endFrame: 12,
+                  visemes: [
+                    { startFrame: 0, endFrame: 3, shape: 'closed' },
+                    { startFrame: 4, endFrame: 7, shape: 'open' },
+                    { startFrame: 8, endFrame: 11, shape: 'wide' },
+                  ],
+                },
+              },
+              {
+                characterId: 'actor',
+                interval: { startFrame: 3, endFrame: 9 },
+                action: {
+                  id: 'expression',
+                  type: 'expression',
+                  startFrame: 3,
+                  endFrame: 9,
+                  expressionId: 'worried',
+                },
+              },
+              {
+                characterId: 'actor',
+                interval: { startFrame: 7, endFrame: 12 },
+                action: {
+                  id: 'celebrate',
+                  type: 'celebrate',
+                  startFrame: 7,
+                  endFrame: 12,
+                  intensity: 0.5,
+                },
+              },
             ],
             motionCurves: [],
           }),
@@ -306,57 +343,60 @@ assert armature.data.bones and len(armature.data.bones) >= 17
 assert len(weighted) > 0
 assert {'left-hand', 'right-hand', 'left-leg', 'right-leg', 'mouth'} <= set(controls)
 assert sum(o.name.startswith('IK_foot.') for o in bpy.context.scene.objects) == 2
-left_arm = armature.pose.bones['upper_arm.L']
-left_arm.rotation_euler.x = 0.8
-bpy.context.view_layer.update()
-arm_world = armature.matrix_world
-hand_target = next(o for o in bpy.context.scene.objects if o.name == 'IK_hand.L.Target')
-hand_target.location = Vector((0.4, 0.0, 0.55))
-bpy.context.view_layer.update()
-prop = bpy.data.objects.new('Acceptance Prop', None)
-prop.empty_display_type = 'SPHERE'
-bpy.context.scene.collection.objects.link(prop)
-prop.location = hand_target.location
-hand = controls['left-hand']
-prop.matrix_world = hand_target.matrix_world
-prop.parent = hand
-prop.matrix_parent_inverse = hand.matrix_world.inverted()
-prop.location = (0, 0, 0)
-attached = prop.matrix_world.copy()
-bpy.context.view_layer.update()
-prop.location = (0.2, 0.0, 0.0)
-bpy.context.view_layer.update()
-prop.parent = None
-prop.matrix_world = attached
-released = tuple(prop.location)
 mouth = controls['mouth']
-mouth.scale = (1.0, 1.0, 1.8)
 bpy.context.view_layer.update()
 face_transform = mouth.matrix_world.copy().translation
 
-# Exercise the generated skeleton with authored walk, jump, kick and speech
-# poses; re-evaluating the same frames must produce identical transforms.
+# Inspect only transforms produced by render_shot.py.
 frames = {}
-for frame in range(1, 31):
-    phase = 2 * 3.141592653589793 * frame / 30
-    armature.pose.bones['thigh.L'].rotation_euler.y = 0.45 * __import__('math').sin(phase)
-    armature.pose.bones['thigh.R'].rotation_euler.y = 0.45 * __import__('math').sin(phase + 3.141592653589793)
-    armature.pose.bones['hand.R'].rotation_euler.x = 0.45 * __import__('math').sin(phase)
-    root = next(o for o in bpy.context.scene.objects if o.name == 'actor')
-    root.location.z = 0.35 * max(0.0, __import__('math').sin(3.141592653589793 * frame / 30))
+root = next(o for o in bpy.context.scene.objects if o.name == 'actor')
+prop = next(o for o in bpy.context.scene.objects if o.name == 'target')
+for frame in range(1, 13):
     bpy.context.scene.frame_set(frame)
     bpy.context.view_layer.update()
-    frames[frame] = tuple(armature.matrix_world.inverted().to_quaternion()[index] for index in range(4))
+    frames[frame] = (
+        tuple(round(v, 6) for v in root.matrix_world.translation),
+        tuple(round(v, 6) for v in controls['left-hand'].matrix_world.translation),
+        tuple(round(v, 6) for v in controls['left-leg'].matrix_world.translation),
+        tuple(round(v, 6) for v in controls['mouth'].matrix_world.translation),
+        round(controls['mouth'].scale.x, 4),
+        round(controls['mouth'].scale.z, 4),
+        tuple(round(v, 6) for v in prop.matrix_world.translation),
+    )
+assert frames[1] != frames[12]
+assert frames[12][4] > 0
 snapshot = dict(frames)
-for frame in range(1, 31):
-    armature.pose.bones['thigh.L'].rotation_euler.y = 0.45 * __import__('math').sin(2 * 3.141592653589793 * frame / 30)
-    armature.pose.bones['thigh.R'].rotation_euler.y = 0.45 * __import__('math').sin(2 * 3.141592653589793 * frame / 30 + 3.141592653589793)
-    armature.pose.bones['hand.R'].rotation_euler.x = 0.45 * __import__('math').sin(2 * 3.141592653589793 * frame / 30)
-    root.location.z = 0.35 * max(0.0, __import__('math').sin(3.141592653589793 * frame / 30))
+second = {}
+for frame in range(1, 13):
     bpy.context.scene.frame_set(frame)
     bpy.context.view_layer.update()
-assert dict(frames) == snapshot
-print('FILMIE_RUNTIME_ACCEPTANCE', len(armature.data.bones), len(weighted), tuple(released), tuple(face_transform), len(snapshot))
+    second[frame] = (
+        tuple(round(v, 6) for v in root.matrix_world.translation),
+        tuple(round(v, 6) for v in controls['left-hand'].matrix_world.translation),
+        tuple(round(v, 6) for v in controls['left-leg'].matrix_world.translation),
+        tuple(round(v, 6) for v in controls['mouth'].matrix_world.translation),
+        round(controls['mouth'].scale.x, 4),
+        round(controls['mouth'].scale.z, 4),
+        tuple(round(v, 6) for v in prop.matrix_world.translation),
+    )
+assert second == snapshot
+
+bpy.context.scene.frame_set(5)
+bpy.context.view_layer.update()
+anchor = controls['left-hand'].matrix_world.translation
+bpy.context.scene.frame_set(9)
+bpy.context.view_layer.update()
+print('FILMIE_INSPECTION_FRAME', 9, tuple(round(v, 4) for v in controls['left-hand'].matrix_world.translation), prop.get('filmie_attachment_state'), tuple(round(v, 4) for v in prop.matrix_world.translation), flush=True)
+open_mouth = tuple(round(v, 4) for v in controls['mouth'].scale[:])
+attachment = prop.constraints.get('FILMIE Hand Attachment')
+print('FILMIE_ATTACHMENT', attachment.influence if attachment else None, tuple(round(v, 4) for v in prop.matrix_world.translation), flush=True)
+assert attachment is not None and attachment.influence > 0.5
+bpy.context.scene.frame_set(1)
+bpy.context.view_layer.update()
+closed_mouth = tuple(round(v, 4) for v in controls['mouth'].scale[:])
+assert open_mouth != closed_mouth, (closed_mouth, open_mouth)
+assert prop.get('filmie_attachment_state') in ('Released', None)
+print('FILMIE_RUNTIME_ACCEPTANCE', len(armature.data.bones), len(weighted), tuple(round(v, 6) for v in face_transform), len(snapshot))
 `,
         );
         const proof = await runBlenderProcess(

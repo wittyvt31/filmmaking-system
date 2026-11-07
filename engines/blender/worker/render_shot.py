@@ -695,10 +695,21 @@ def apply_actions(spec, entity_roots, control_objects):
                 target["filmie_attached_character"] = character_id
                 target["filmie_attached_effector"] = action["effector"]
                 target["filmie_original_parent"] = target.parent.name if target.parent else ""
-                target.parent = effector
+                attachment = target.constraints.get("FILMIE Hand Attachment")
+                if attachment is None:
+                    attachment = target.constraints.new("CHILD_OF")
+                    attachment.name = "FILMIE Hand Attachment"
+                attachment.target = effector
+                attachment.inverse_matrix = effector.matrix_world.inverted() @ world_matrix
+                bpy.context.view_layer.update()
+                attachment.influence = 0.0
+                attachment.keyframe_insert(data_path="influence", frame=start)
+                attachment.influence = 1.0
                 target.matrix_world = world_matrix
                 target.keyframe_insert(data_path="location", frame=end)
                 target.keyframe_insert(data_path="rotation_euler", frame=end)
+                attachment.keyframe_insert(data_path="influence", frame=end)
+                bpy.context.view_layer.update()
             elif action["type"] == "lift":
                 target.keyframe_insert(data_path="location", frame=start)
                 target.location.z += float(action["verticalOffset"])
@@ -711,13 +722,16 @@ def apply_actions(spec, entity_roots, control_objects):
                     effector.keyframe_insert(data_path="location", frame=end)
             else:
                 if target.get("filmie_attachment_state") == "Attached":
-                    target_matrix = target.matrix_world.copy()
-                    target.parent = None
-                    target.matrix_world = target_matrix
                     target["filmie_attachment_state"] = "Released"
                 target.keyframe_insert(data_path="location", frame=start)
                 target.location = tuple(float(action["targetPosition"][axis]) for axis in ("x", "y", "z"))
                 target.keyframe_insert(data_path="location", frame=end)
+                attachment = target.constraints.get("FILMIE Hand Attachment")
+                if attachment is not None:
+                    attachment.influence = 1.0
+                    attachment.keyframe_insert(data_path="influence", frame=start)
+                    attachment.influence = 0.0
+                    attachment.keyframe_insert(data_path="influence", frame=end)
                 bpy.context.view_layer.update()
                 target_anchor = target.matrix_world @ Vector(anchor)
                 parent = effector.parent

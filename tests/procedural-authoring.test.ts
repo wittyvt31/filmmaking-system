@@ -367,12 +367,26 @@ describe('procedural pre-production contracts', () => {
               ],
             },
           ],
+          rootMotion: {
+            control: 'root',
+            channel: 'location',
+            distance: [1.5, -0.25, 0],
+          },
         },
       ],
     });
     const compiled = compileScene(shot, manifest.video.frameRate, [library]);
-    expect(compiled.motionCurves).toHaveLength(3);
-    expect(compiled.motionCurves[1]?.frame).toBe(15);
-    expect(compiled.motionCurves[1]?.control).toBe('head');
+    expect(compiled.motionCurves).toHaveLength(5);
+    const headCurves = compiled.motionCurves.filter(
+      (curve) => curve.control === 'head',
+    );
+    expect(headCurves[1]?.frame).toBe(15);
+    expect(headCurves[1]?.control).toBe('head');
+    expect(
+      compiled.motionCurves.filter((curve) => curve.control === 'root'),
+    ).toMatchObject([
+      { frame: 0, value: [0, 0, 0], blendMode: 'replace' },
+      { frame: 29, value: [1.5, -0.25, 0], blendMode: 'replace' },
+    ]);
   });
 });
