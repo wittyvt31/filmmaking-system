@@ -1,0 +1,17 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/contracts" },
+    { "path": "./packages/manifest" },
+    { "path": "./packages/assets" },
+    { "path": "./packages/timeline" },
+    { "path": "./packages/planner" },
+    { "path": "./packages/scene" },
+    { "path": "./packages/cache" },
+    { "path": "./packages/media" },
+    { "path": "./engines/remotion" },
+    { "path": "./engines/blender" },
+    { "path": "./packages/orchestrator" },
+    { "path": "./apps/cli" }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "projectId": "they-have-reached.procedural-proof",
+  "version": "1.0.0",
+  "video": {
+    "resolution": { "width": 640, "height": 360 },
+    "frameRate": { "numerator": 30, "denominator": 1 }
+  },
+  "renderPolicy": {
+    "outputDimensions": { "width": 640, "height": 360 },
+    "frameRate": { "numerator": 30, "denominator": 1 },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": { "mode": "crf", "value": 22 },
+    "renderer": {
+      "id": "blender",
+      "config": { "engine": "BLENDER_EEVEE", "samples": 4 }
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.father-hears-telephone",
+      "durationFrames": 90,
+      "visualDescription": "The father sits alone in his rural village home. He breathes subtly, hears the rotary telephone, and turns his head toward it while the camera slowly pushes closer.",
+      "composition": {
+        "framing": "Wide medium interior view showing father, chair, table, lantern and telephone",
+        "subjectPlacement": "Father left of center; telephone on table to the right",
+        "cameraMovement": "Slow push toward the father and telephone",
+        "camera": { "type": "static" },
+        "instructions": [
+          "All visible objects in this proof are procedurally authored from asset-spec.json.",
+          "Father breathing and head turn are evaluated as frame-based rig control animation."
+        ]
+      },
+      "requiredAssets": [
+        { "assetId": "character.father", "version": "1.1.0" },
+        { "assetId": "environment.village-interior", "version": "1.1.0" },
+        { "assetId": "furniture.chair", "version": "1.1.0" },
+        { "assetId": "furniture.table", "version": "1.1.0" },
+        { "assetId": "prop.telephone", "version": "1.1.0" },
+        { "assetId": "prop.lantern", "version": "1.1.0" }
+      ],
+      "scene": {
+        "stylePreset": "charcoal_horror",
+        "styleVersion": "1.1.0",
+        "environment": {
+          "assetId": "environment.village-interior",
+          "version": "1.1.0"
+        },
+        "layers": [
+          {
+            "id": "seat.chair",
+            "asset": { "assetId": "furniture.chair", "version": "1.1.0" },
+            "role": "prop",
+            "transform": {
+              "position": { "x": -1.05, "y": 0.75, "z": 0 },
+              "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+              "scale": 1
+            }
+          },
+          {
+            "id": "table.side",
+            "asset": { "assetId": "furniture.table", "version": "1.1.0" },
+            "role": "prop",
+            "transform": {
+              "position": { "x": 1.05, "y": 0.75, "z": 0 },
+              "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+              "scale": 1
+            }
+          }
+        ],
+        "characters": [
+          {
+            "id": "character.father.instance",
+            "artwork": { "assetId": "character.father", "version": "1.1.0" },
+            "rig": { "assetId": "character.father", "version": "1.1.0" },
+            "transform": {
+              "position": { "x": -1.05, "y": 0.65, "z": 0 },
+              "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+              "scale": 1
+            },
+            "actions": [
+              {
+                "id": "father.breathes",
+                "type": "breathing",
+                "startFrame": 0,
+                "endFrame": 90,
+                "cycleFrames": 60,
+                "amplitude": 0.018
+              },
+              {
+                "id": "father.looks-toward-phone",
+                "type": "head-turn",
+                "startFrame": 18,
+                "endFrame": 60,
+                "targetEntityId": "prop.telephone.instance",
+                "maxYawDegrees": 34
+              }
+            ]
+          }
+        ],
+        "props": [
+          {
+            "id": "prop.telephone.instance",
+            "artwork": { "assetId": "prop.telephone", "version": "1.1.0" },
+            "transform": {
+              "position": { "x": 1.05, "y": 0.68, "z": 0.76 },
+              "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+              "scale": 1
+            }
+          },
+          {
+            "id": "prop.lantern.instance",
+            "artwork": { "assetId": "prop.lantern", "version": "1.1.0" },
+            "transform": {
+              "position": { "x": -2.1, "y": 0.62, "z": 0.02 },
+              "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+              "scale": 1
+            }
+          }
+        ],
+        "camera": {
+          "type": "push-in",
+          "startFrame": 0,
+          "durationFrames": 90,
+          "fromDistance": 9.4,
+          "toDistance": 8.7,
+          "target": { "x": 0, "y": 0.55, "z": 1.2 }
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "durationFrames": 90,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [{ "shotId": "shot.father-hears-telephone", "startFrame": 0 }]
+      }
+    ],
+    "audioTracks": [],
+    "transitions": []
+  }
+}

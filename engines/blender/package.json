@@ -1,0 +1,26 @@
+{
+  "name": "@filmmaking/engine-blender",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./authoring": {
+      "types": "./dist/authoring.d.ts",
+      "import": "./dist/authoring.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b --pretty"
+  },
+  "dependencies": {
+    "@filmmaking/assets": "workspace:*",
+    "@filmmaking/cache": "workspace:*",
+    "@filmmaking/contracts": "workspace:*",
+    "@filmmaking/scene": "workspace:*"
+  }
+}

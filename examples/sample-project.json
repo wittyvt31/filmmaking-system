@@ -1,0 +1,157 @@
+{
+  "projectId": "example.prepared-film",
+  "version": "1.0.0",
+  "video": {
+    "resolution": { "width": 1920, "height": 1080 },
+    "frameRate": { "numerator": 30, "denominator": 1 }
+  },
+  "renderPolicy": {
+    "outputDimensions": { "width": 1920, "height": 1080 },
+    "frameRate": { "numerator": 30, "denominator": 1 },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": { "mode": "crf", "value": 20 },
+    "renderer": {
+      "id": "remotion",
+      "config": { "compositionId": "PreparedShot", "concurrency": 2 }
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.establishing",
+      "durationFrames": 30,
+      "visualDescription": "Prepared landscape image with a character in the foreground.",
+      "composition": {
+        "framing": "Wide establishing frame",
+        "subjectPlacement": "Character left of center",
+        "cameraMovement": "Slow pan",
+        "camera": {
+          "type": "pan",
+          "startFrame": 0,
+          "durationFrames": 30,
+          "from": { "x": 0.42, "y": 0.5 },
+          "to": { "x": 0.58, "y": 0.5 }
+        },
+        "instructions": ["Keep the mountain horizon visible"]
+      },
+      "requiredAssets": [
+        { "assetId": "sample.background", "version": "1.0.0" },
+        { "assetId": "sample.character", "version": "1.0.0" }
+      ],
+      "visualElements": [
+        {
+          "id": "background",
+          "asset": { "assetId": "sample.background", "version": "1.0.0" },
+          "role": "background",
+          "position": { "x": 0.5, "y": 0.5 },
+          "scale": 1,
+          "zIndex": 0,
+          "animation": { "type": "static" }
+        },
+        {
+          "id": "character",
+          "asset": { "assetId": "sample.character", "version": "1.0.0" },
+          "role": "character",
+          "position": { "x": 0.34, "y": 0.72 },
+          "scale": 0.72,
+          "zIndex": 5,
+          "animation": {
+            "type": "float",
+            "startFrame": 0,
+            "durationFrames": 30,
+            "amplitudePx": 8
+          }
+        }
+      ]
+    },
+    {
+      "id": "shot.character-detail",
+      "durationFrames": 30,
+      "visualDescription": "Prepared character asset in a closer composition against the landscape.",
+      "composition": {
+        "framing": "Medium character shot",
+        "subjectPlacement": "Character centered",
+        "cameraMovement": "Gentle push-in",
+        "camera": {
+          "type": "zoom",
+          "startFrame": 0,
+          "durationFrames": 30,
+          "fromScale": 1,
+          "toScale": 1.12
+        },
+        "instructions": ["Keep the face unobstructed"]
+      },
+      "requiredAssets": [
+        { "assetId": "sample.background", "version": "1.0.0" },
+        { "assetId": "sample.character", "version": "1.0.0" }
+      ],
+      "visualElements": [
+        {
+          "id": "background",
+          "asset": { "assetId": "sample.background", "version": "1.0.0" },
+          "role": "background",
+          "position": { "x": 0.5, "y": 0.5 },
+          "scale": 1,
+          "zIndex": 0,
+          "animation": { "type": "static" }
+        },
+        {
+          "id": "character",
+          "asset": { "assetId": "sample.character", "version": "1.0.0" },
+          "role": "character",
+          "position": { "x": 0.5, "y": 0.7 },
+          "scale": 0.92,
+          "zIndex": 5,
+          "animation": {
+            "type": "fade-in",
+            "startFrame": 0,
+            "durationFrames": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "shot.closing-landscape",
+      "durationFrames": 30,
+      "visualDescription": "Prepared landscape asset as a calm closing image.",
+      "composition": {
+        "framing": "Wide landscape frame",
+        "subjectPlacement": "Horizon centered in upper half",
+        "cameraMovement": "Locked-off",
+        "camera": { "type": "static" },
+        "instructions": ["Preserve the wide landscape crop"]
+      },
+      "requiredAssets": [
+        { "assetId": "sample.background", "version": "1.0.0" }
+      ],
+      "visualElements": [
+        {
+          "id": "background",
+          "asset": { "assetId": "sample.background", "version": "1.0.0" },
+          "role": "background",
+          "position": { "x": 0.5, "y": 0.5 },
+          "scale": 1,
+          "zIndex": 0,
+          "animation": { "type": "static" }
+        }
+      ]
+    }
+  ],
+  "timeline": {
+    "durationFrames": 90,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [
+          { "shotId": "shot.establishing", "startFrame": 0 },
+          { "shotId": "shot.character-detail", "startFrame": 30 },
+          { "shotId": "shot.closing-landscape", "startFrame": 60 }
+        ]
+      }
+    ],
+    "audioTracks": [],
+    "transitions": []
+  }
+}

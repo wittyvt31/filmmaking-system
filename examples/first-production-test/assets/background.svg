@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#17334d"/><stop offset="1" stop-color="#aec6c0"/></linearGradient>
+    <linearGradient id="water" x2="0" y2="1"><stop stop-color="#547c83"/><stop offset="1" stop-color="#152a37"/></linearGradient>
+  </defs>
+  <rect width="1920" height="650" fill="url(#sky)"/>
+  <path d="M0 520 260 240 520 520 830 180 1180 540 1480 260 1920 600V700H0Z" fill="#263e4a"/>
+  <path d="M0 590 Q400 530 800 600 T1600 580 T2200 600V1080H0Z" fill="url(#water)"/>
+  <path d="M0 700 Q450 650 920 710 T1920 680" fill="none" stroke="#d4d9c9" stroke-opacity=".38" stroke-width="8"/>
+</svg>

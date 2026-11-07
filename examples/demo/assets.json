@@ -1,0 +1,36 @@
+[
+  {
+    "type": "graphic",
+    "provenance": {
+      "source": "filmmaking-system example fixture"
+    },
+    "assetId": "sample.background",
+    "version": "1.0.0",
+    "sourceUri": "../assets/sample-background.svg",
+    "metadata": {
+      "role": "background"
+    },
+    "contentHash": "82d0cbfcd5ca8b616eba94c79e8952c9cfb98a078183a6561f314609c70eb4a4",
+    "license": {
+      "name": "Original sample artwork",
+      "restrictions": ["sample use"]
+    }
+  },
+  {
+    "type": "graphic",
+    "provenance": {
+      "source": "filmmaking-system example fixture"
+    },
+    "assetId": "sample.character",
+    "version": "1.0.0",
+    "sourceUri": "../assets/sample-character.svg",
+    "metadata": {
+      "role": "character"
+    },
+    "contentHash": "513535ac87b232ac9423a0ffeea54c43e57f4db74cf496d113a791ef7dff5983",
+    "license": {
+      "name": "Original sample artwork",
+      "restrictions": ["sample use"]
+    }
+  }
+]

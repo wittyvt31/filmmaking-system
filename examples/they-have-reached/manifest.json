@@ -1,0 +1,200 @@
+{
+  "projectId": "they.have.reached",
+  "version": "1.0.0",
+  "video": {
+    "resolution": {
+      "width": 1920,
+      "height": 1080
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    }
+  },
+  "renderPolicy": {
+    "outputDimensions": {
+      "width": 1920,
+      "height": 1080
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": {
+      "mode": "crf",
+      "value": 20
+    },
+    "renderer": {
+      "id": "remotion",
+      "config": {
+        "compositionId": "PreparedShot",
+        "concurrency": 2
+      }
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.waiting",
+      "durationFrames": 90,
+      "visualDescription": "Wide view of the old Indian house interior at night; father sits alone and the telephone is visible nearby.",
+      "composition": {
+        "framing": "Wide interior panel",
+        "subjectPlacement": "Use complete interior-wide panel",
+        "cameraMovement": "Slow zoom from 1.0 to 1.08",
+        "camera": {
+          "type": "zoom",
+          "startFrame": 0,
+          "durationFrames": 90,
+          "fromScale": 1,
+          "toScale": 1.08
+        },
+        "instructions": [
+          "Render supplied opaque interior-wide artwork as one complete image panel."
+        ]
+      },
+      "requiredAssets": [
+        {
+          "assetId": "background.interior-wide",
+          "version": "1.0.0"
+        }
+      ],
+      "visualElements": [
+        {
+          "id": "interior",
+          "asset": {
+            "assetId": "background.interior-wide",
+            "version": "1.0.0"
+          },
+          "role": "background",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "scale": 1,
+          "zIndex": 0,
+          "animation": {
+            "type": "static"
+          }
+        }
+      ]
+    },
+    {
+      "id": "shot.silence",
+      "durationFrames": 90,
+      "visualDescription": "Closer view of father sitting alone in silence, conveying exhaustion and loneliness.",
+      "composition": {
+        "framing": "Closer interior panel",
+        "subjectPlacement": "Full interior-close panel centered with father fully visible",
+        "cameraMovement": "Slow zoom from 1.0 to 1.06",
+        "camera": {
+          "type": "zoom",
+          "startFrame": 0,
+          "durationFrames": 90,
+          "fromScale": 1,
+          "toScale": 1.06
+        },
+        "instructions": [
+          "Contain the complete supplied opaque interior-close artwork panel so the father remains fully visible."
+        ]
+      },
+      "requiredAssets": [
+        {
+          "assetId": "background.interior-close",
+          "version": "1.0.0"
+        }
+      ],
+      "visualElements": [
+        {
+          "id": "interior-close",
+          "asset": {
+            "assetId": "background.interior-close",
+            "version": "1.0.0"
+          },
+          "role": "character",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "scale": 2.2,
+          "zIndex": 0,
+          "animation": {
+            "type": "static"
+          }
+        }
+      ]
+    },
+    {
+      "id": "shot.telephone",
+      "durationFrames": 90,
+      "visualDescription": "Close-up of the old telephone, using the complete supplied telephone artwork panel.",
+      "composition": {
+        "framing": "Telephone close-up panel",
+        "subjectPlacement": "Use complete telephone panel",
+        "cameraMovement": "Slow zoom from 1.0 to 1.08",
+        "camera": {
+          "type": "zoom",
+          "startFrame": 0,
+          "durationFrames": 90,
+          "fromScale": 1,
+          "toScale": 1.08
+        },
+        "instructions": [
+          "Telephone artwork has its own opaque background and is used as a complete panel."
+        ]
+      },
+      "requiredAssets": [
+        {
+          "assetId": "prop.telephone-panel",
+          "version": "1.0.0"
+        }
+      ],
+      "visualElements": [
+        {
+          "id": "telephone-panel",
+          "asset": {
+            "assetId": "prop.telephone-panel",
+            "version": "1.0.0"
+          },
+          "role": "background",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "scale": 1,
+          "zIndex": 0,
+          "animation": {
+            "type": "static"
+          }
+        }
+      ]
+    }
+  ],
+  "timeline": {
+    "durationFrames": 270,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [
+          {
+            "shotId": "shot.waiting",
+            "startFrame": 0
+          },
+          {
+            "shotId": "shot.silence",
+            "startFrame": 90
+          },
+          {
+            "shotId": "shot.telephone",
+            "startFrame": 180
+          }
+        ]
+      }
+    ],
+    "audioTracks": [],
+    "transitions": []
+  }
+}

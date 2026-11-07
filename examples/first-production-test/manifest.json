@@ -1,0 +1,330 @@
+{
+  "projectId": "first-production-test",
+  "version": "1.0.0",
+  "video": {
+    "resolution": {
+      "width": 1920,
+      "height": 1080
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    }
+  },
+  "renderPolicy": {
+    "outputDimensions": {
+      "width": 1920,
+      "height": 1080
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": {
+      "mode": "crf",
+      "value": 20
+    },
+    "renderer": {
+      "id": "remotion",
+      "config": {
+        "compositionId": "PreparedShot",
+        "concurrency": 2
+      }
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.dawn",
+      "durationFrames": 90,
+      "visualDescription": "Wide dawn view of Mira beside the coast, looking toward the distant beacon.",
+      "composition": {
+        "framing": "Wide shot",
+        "subjectPlacement": "Mira left of center",
+        "cameraMovement": "slow pan right.",
+        "camera": {
+          "type": "pan",
+          "startFrame": 0,
+          "durationFrames": 90,
+          "from": {
+            "x": 0.42,
+            "y": 0.5
+          },
+          "to": {
+            "x": 0.58,
+            "y": 0.5
+          }
+        },
+        "instructions": [
+          "Wide shot; Mira left of center; slow pan right."
+        ]
+      },
+      "requiredAssets": [
+        {
+          "assetId": "background.coast",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "character.mira",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "audio.silence-placeholder",
+          "version": "1.0.0"
+        }
+      ],
+      "visualElements": [
+        {
+          "id": "background",
+          "asset": {
+            "assetId": "background.coast",
+            "version": "1.0.0"
+          },
+          "role": "background",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "scale": 1,
+          "zIndex": 0,
+          "animation": {
+            "type": "static"
+          }
+        },
+        {
+          "id": "mira",
+          "asset": {
+            "assetId": "character.mira",
+            "version": "1.0.0"
+          },
+          "role": "character",
+          "position": {
+            "x": 0.36,
+            "y": 0.72
+          },
+          "scale": 0.72,
+          "zIndex": 5,
+          "animation": {
+            "type": "static"
+          }
+        }
+      ],
+      "audioCues": [
+        {
+          "id": "cue.dawn",
+          "asset": {
+            "assetId": "audio.silence-placeholder",
+            "version": "1.0.0"
+          },
+          "trackId": "audio.ambience",
+          "offsetFrames": 0,
+          "durationFrames": 90,
+          "sourceOffsetFrames": 0
+        }
+      ]
+    },
+    {
+      "id": "shot.turn",
+      "durationFrames": 90,
+      "visualDescription": "Medium view of the same Mira turning toward the camera with the coastal background visible.",
+      "composition": {
+        "framing": "Medium shot",
+        "subjectPlacement": "Mira centered",
+        "cameraMovement": "gentle push-in.",
+        "camera": {
+          "type": "zoom",
+          "startFrame": 0,
+          "durationFrames": 90,
+          "fromScale": 1,
+          "toScale": 1.08
+        },
+        "instructions": [
+          "Medium shot; Mira centered; gentle push-in."
+        ]
+      },
+      "requiredAssets": [
+        {
+          "assetId": "background.coast",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "character.mira",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "audio.silence-placeholder",
+          "version": "1.0.0"
+        }
+      ],
+      "visualElements": [
+        {
+          "id": "background",
+          "asset": {
+            "assetId": "background.coast",
+            "version": "1.0.0"
+          },
+          "role": "background",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "scale": 1,
+          "zIndex": 0,
+          "animation": {
+            "type": "static"
+          }
+        },
+        {
+          "id": "mira",
+          "asset": {
+            "assetId": "character.mira",
+            "version": "1.0.0"
+          },
+          "role": "character",
+          "position": {
+            "x": 0.5,
+            "y": 0.7
+          },
+          "scale": 0.72,
+          "zIndex": 5,
+          "animation": {
+            "type": "static"
+          }
+        }
+      ],
+      "audioCues": [
+        {
+          "id": "cue.turn",
+          "asset": {
+            "assetId": "audio.silence-placeholder",
+            "version": "1.0.0"
+          },
+          "trackId": "audio.ambience",
+          "offsetFrames": 0,
+          "durationFrames": 90,
+          "sourceOffsetFrames": 0
+        }
+      ]
+    },
+    {
+      "id": "shot.beacon",
+      "durationFrames": 90,
+      "visualDescription": "Mira remains in the foreground as the beacon becomes visible over the same coast.",
+      "composition": {
+        "framing": "Wide shot",
+        "subjectPlacement": "Mira right of center",
+        "cameraMovement": "slow pan toward the beacon.",
+        "camera": {
+          "type": "pan",
+          "startFrame": 0,
+          "durationFrames": 90,
+          "from": {
+            "x": 0.58,
+            "y": 0.5
+          },
+          "to": {
+            "x": 0.44,
+            "y": 0.5
+          }
+        },
+        "instructions": [
+          "Wide shot; Mira right of center; slow pan toward the beacon."
+        ]
+      },
+      "requiredAssets": [
+        {
+          "assetId": "background.coast",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "character.mira",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "audio.silence-placeholder",
+          "version": "1.0.0"
+        }
+      ],
+      "visualElements": [
+        {
+          "id": "background",
+          "asset": {
+            "assetId": "background.coast",
+            "version": "1.0.0"
+          },
+          "role": "background",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "scale": 1,
+          "zIndex": 0,
+          "animation": {
+            "type": "static"
+          }
+        },
+        {
+          "id": "mira",
+          "asset": {
+            "assetId": "character.mira",
+            "version": "1.0.0"
+          },
+          "role": "character",
+          "position": {
+            "x": 0.66,
+            "y": 0.72
+          },
+          "scale": 0.72,
+          "zIndex": 5,
+          "animation": {
+            "type": "static"
+          }
+        }
+      ],
+      "audioCues": [
+        {
+          "id": "cue.beacon",
+          "asset": {
+            "assetId": "audio.silence-placeholder",
+            "version": "1.0.0"
+          },
+          "trackId": "audio.ambience",
+          "offsetFrames": 0,
+          "durationFrames": 90,
+          "sourceOffsetFrames": 0
+        }
+      ]
+    }
+  ],
+  "timeline": {
+    "durationFrames": 270,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [
+          {
+            "shotId": "shot.dawn",
+            "startFrame": 0
+          },
+          {
+            "shotId": "shot.turn",
+            "startFrame": 90
+          },
+          {
+            "shotId": "shot.beacon",
+            "startFrame": 180
+          }
+        ]
+      }
+    ],
+    "audioTracks": [
+      {
+        "id": "audio.ambience"
+      }
+    ],
+    "transitions": []
+  }
+}

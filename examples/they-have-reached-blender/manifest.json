@@ -1,0 +1,101 @@
+{
+  "projectId": "they-have-reached.blender-proof",
+  "version": "1.0.0",
+  "video": {
+    "resolution": {
+      "width": 1280,
+      "height": 720
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    }
+  },
+  "renderPolicy": {
+    "outputDimensions": {
+      "width": 1280,
+      "height": 720
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": {
+      "mode": "crf",
+      "value": 20
+    },
+    "renderer": {
+      "id": "blender",
+      "config": {
+        "engine": "BLENDER_EEVEE",
+        "samples": 8
+      }
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.charcoal-interior",
+      "durationFrames": 150,
+      "visualDescription": "A dark 1950s Indian village-house interior at night. The father sits silently in a chair; the old telephone rests on a nearby table.",
+      "composition": {
+        "framing": "Wide establishing view using the intact supplied storyboard panel",
+        "subjectPlacement": "Keep the father and telephone visible within the original composition",
+        "cameraMovement": "Slow cinematic push-in",
+        "camera": {
+          "type": "static"
+        },
+        "instructions": [
+          "The father and telephone are part of the opaque interior artwork; do not separate or animate them in this proof-of-concept."
+        ]
+      },
+      "requiredAssets": [
+        {
+          "assetId": "background.interior-wide",
+          "version": "1.0.0"
+        }
+      ],
+      "scene": {
+        "stylePreset": "charcoal_horror",
+        "environment": {
+          "assetId": "background.interior-wide",
+          "version": "1.0.0"
+        },
+        "layers": [],
+        "characters": [],
+        "props": [],
+        "camera": {
+          "type": "push-in",
+          "startFrame": 0,
+          "durationFrames": 150,
+          "fromDistance": 6,
+          "toDistance": 5.45,
+          "target": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "durationFrames": 150,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [
+          {
+            "shotId": "shot.charcoal-interior",
+            "startFrame": 0
+          }
+        ]
+      }
+    ],
+    "audioTracks": [],
+    "transitions": []
+  }
+}

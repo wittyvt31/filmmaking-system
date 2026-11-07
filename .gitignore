@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+.cache/
+renders/
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
