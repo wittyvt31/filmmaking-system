@@ -113,6 +113,18 @@ export function compileScene(
         );
       }
     }
+    const motionClips = character.actions
+      .filter((action) => action.type === 'motion-clip')
+      .sort((left, right) => left.startFrame - right.startFrame);
+    for (let index = 1; index < motionClips.length; index += 1) {
+      const previous = motionClips[index - 1];
+      const current = motionClips[index];
+      if (previous && current && current.startFrame < previous.endFrame) {
+        throw new TypeError(
+          `Overlapping motion clips "${previous.id}" and "${current.id}" on character "${character.id}" are unsupported`,
+        );
+      }
+    }
   }
   const libraryMap = new Map(
     motionClipLibraries.map((library) => [

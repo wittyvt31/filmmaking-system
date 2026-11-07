@@ -7,7 +7,7 @@ import sys
 import traceback
 
 import bpy
-from mathutils import Vector
+from mathutils import Euler, Matrix, Vector
 
 
 def read_spec():
@@ -426,9 +426,21 @@ def apply_actions(spec, entity_roots, control_objects):
         raise RuntimeError("Unsupported semantic animation library version: " + str(spec.get("animationLibraryVersion")))
     scene = bpy.context.scene
     bind_authoritative_rig(control_objects)
+    action_priority = {
+        "walk": 0, "run": 0, "jump": 0,
+        "breathing": 1, "head-turn": 1, "blink": 1, "expression": 1,
+        "lip-sync": 1, "celebrate": 1, "sit": 1, "stand": 1,
+        "interaction": 2, "kick": 2, "reach": 3, "grasp": 4,
+        "lift": 5, "place": 6, "motion-clip": 7,
+    }
     for instruction in sorted(
         spec["actions"],
-        key=lambda item: (item["interval"]["startFrame"], item["characterId"], item["action"]["id"]),
+        key=lambda item: (
+            item["interval"]["startFrame"],
+            item["characterId"],
+            action_priority.get(item["action"]["type"], 99),
+            item["action"]["id"],
+        ),
     ):
         character_id = instruction["characterId"]
         action = instruction["action"]
@@ -666,17 +678,24 @@ def apply_actions(spec, entity_roots, control_objects):
                 parent = effector.parent
                 if parent is None:
                     raise RuntimeError("Semantic hand control must have a parent rig control")
-                start_world = effector.matrix_world.copy()
-                effector.matrix_world = start_world
-                effector.keyframe_insert(data_path="location", frame=start)
-                effector.location = parent.matrix_world.inverted() @ anchor_world
+                scene.frame_set(start)
                 bpy.context.view_layer.update()
+                effector.keyframe_insert(data_path="location", frame=start)
+                scene.frame_set(end)
+                bpy.context.view_layer.update()
+                depsgraph = bpy.context.evaluated_depsgraph_get()
+                target_world = target.evaluated_get(depsgraph).matrix_world
+                anchor_world = target_world @ Vector(anchor)
+                effector.location = parent.matrix_world.inverted() @ anchor_world
                 effector.keyframe_insert(data_path="location", frame=end)
                 effector.keyframe_insert(data_path="location", frame=end + 1)
-                scene.frame_set(end)
                 bpy.context.view_layer.update()
             elif action["type"] == "grasp":
                 scene.frame_set(start)
+                bpy.context.view_layer.update()
+                depsgraph = bpy.context.evaluated_depsgraph_get()
+                target_world = target.evaluated_get(depsgraph).matrix_world
+                anchor_world = target_world @ Vector(anchor)
                 parent = effector.parent
                 if parent is not None:
                     effector.location = parent.matrix_world.inverted() @ anchor_world
@@ -699,15 +718,15 @@ def apply_actions(spec, entity_roots, control_objects):
                 if attachment is None:
                     attachment = target.constraints.new("CHILD_OF")
                     attachment.name = "FILMIE Hand Attachment"
+                attachment.influence = 0.0
                 attachment.target = effector
-                attachment.inverse_matrix = effector.matrix_world.inverted() @ world_matrix
+                # Child Of evaluates target * inverse * owner; inverse only
+                # cancels the target transform (including parent/bone space).
+                attachment.inverse_matrix = effector.matrix_world.inverted()
                 bpy.context.view_layer.update()
                 attachment.influence = 0.0
                 attachment.keyframe_insert(data_path="influence", frame=start)
                 attachment.influence = 1.0
-                target.matrix_world = world_matrix
-                target.keyframe_insert(data_path="location", frame=end)
-                target.keyframe_insert(data_path="rotation_euler", frame=end)
                 attachment.keyframe_insert(data_path="influence", frame=end)
                 bpy.context.view_layer.update()
             elif action["type"] == "lift":
@@ -723,21 +742,76 @@ def apply_actions(spec, entity_roots, control_objects):
             else:
                 if target.get("filmie_attachment_state") == "Attached":
                     target["filmie_attachment_state"] = "Released"
-                target.keyframe_insert(data_path="location", frame=start)
-                target.location = tuple(float(action["targetPosition"][axis]) for axis in ("x", "y", "z"))
-                target.keyframe_insert(data_path="location", frame=end)
                 attachment = target.constraints.get("FILMIE Hand Attachment")
-                if attachment is not None:
-                    attachment.influence = 1.0
-                    attachment.keyframe_insert(data_path="influence", frame=start)
-                    attachment.influence = 0.0
-                    attachment.keyframe_insert(data_path="influence", frame=end)
+                if attachment is None or attachment.target != effector:
+                    raise RuntimeError("Place requires an object attached to the requested effector")
+                scene.frame_set(start)
                 bpy.context.view_layer.update()
-                target_anchor = target.matrix_world @ Vector(anchor)
                 parent = effector.parent
-                if parent is not None:
-                    effector.location = parent.matrix_world.inverted() @ target_anchor
-                    effector.keyframe_insert(data_path="location", frame=end)
+                if parent is None:
+                    raise RuntimeError("Semantic hand control must have a parent rig control")
+                depsgraph = bpy.context.evaluated_depsgraph_get()
+                current_hand = effector.evaluated_get(depsgraph).matrix_world.copy()
+                current_target = target.evaluated_get(depsgraph).matrix_world.copy()
+                relative_transform = current_hand.inverted() @ current_target
+                destination = Vector(tuple(
+                    float(action["targetPosition"][axis]) for axis in ("x", "y", "z")
+                ))
+                destination_rotation = (
+                    Euler(tuple(
+                        math.radians(float(action["targetRotationDegrees"][axis]))
+                        for axis in ("x", "y", "z")
+                    ))
+                    if action.get("targetRotationDegrees") is not None
+                    else current_target.to_euler()
+                )
+                destination_scale = current_target.to_scale()
+                destination_transform = (
+                    Matrix.Translation(destination)
+                    @ destination_rotation.to_matrix().to_4x4()
+                    @ Matrix.Diagonal((
+                        destination_scale.x,
+                        destination_scale.y,
+                        destination_scale.z,
+                        1.0,
+                    ))
+                )
+                destination_hand = destination_transform @ relative_transform.inverted()
+                local_hand = parent.matrix_world.inverted() @ destination_hand
+                hand_location, hand_rotation, _hand_scale = local_hand.decompose()
+                effector.keyframe_insert(data_path="location", frame=start)
+                effector.keyframe_insert(data_path="rotation_euler", frame=start)
+                effector.location = hand_location
+                effector.rotation_euler = hand_rotation.to_euler()
+                effector.keyframe_insert(data_path="location", frame=end)
+                effector.keyframe_insert(data_path="rotation_euler", frame=end)
+
+                target_parent = target.parent
+                local_target = (
+                    target_parent.matrix_world.inverted() @ destination_transform
+                    if target_parent is not None
+                    else destination_transform
+                )
+                target_location, target_rotation, target_scale = local_target.decompose()
+                target.keyframe_insert(data_path="location", frame=start)
+                target.keyframe_insert(data_path="rotation_euler", frame=start)
+                target.keyframe_insert(data_path="scale", frame=start)
+                if end - 1 > start:
+                    target.keyframe_insert(data_path="location", frame=end - 1)
+                    target.keyframe_insert(data_path="rotation_euler", frame=end - 1)
+                    target.keyframe_insert(data_path="scale", frame=end - 1)
+                target.location = target_location
+                target.rotation_euler = target_rotation.to_euler()
+                target.scale = target_scale
+                target.keyframe_insert(data_path="location", frame=end)
+                target.keyframe_insert(data_path="rotation_euler", frame=end)
+                target.keyframe_insert(data_path="scale", frame=end)
+                attachment.influence = 1.0
+                attachment.keyframe_insert(data_path="influence", frame=start)
+                if end - 1 > start:
+                    attachment.keyframe_insert(data_path="influence", frame=end - 1)
+                attachment.influence = 0.0
+                attachment.keyframe_insert(data_path="influence", frame=end)
         else:
             raise RuntimeError("Unsupported compiled character action: " + action["type"])
 
@@ -749,6 +823,18 @@ def apply_motion_curves(spec, control_objects, entity_roots):
         grouped.setdefault(key, []).append(curve)
     for key, curves in grouped.items():
         character_id, control_name, channel = key
+        blend_modes = {curve.get("blendMode", "replace") for curve in curves}
+        if len(blend_modes) > 1:
+            raise RuntimeError(
+                "Motion curves mix replacement and additive modes for %s/%s/%s"
+                % key
+            )
+        source_frames = [int(curve["frame"]) for curve in curves]
+        if len(source_frames) != len(set(source_frames)):
+            raise RuntimeError(
+                "Overlapping motion curves target the same frame for %s/%s/%s"
+                % key
+            )
         control = control_objects.get(character_id, {}).get(control_name)
         if control is None and control_name in ("root", "hips"):
             control = entity_roots.get(character_id)
@@ -817,9 +903,10 @@ def main():
         json.dump(result, stream, sort_keys=True)
 
 
-try:
-    main()
-except Exception as error:
-    print("FILMIE_WORKER_ERROR: " + str(error), file=sys.stderr)
-    traceback.print_exc(file=sys.stderr)
-    sys.exit(1)
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as error:
+        print("FILMIE_WORKER_ERROR: " + str(error), file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(1)

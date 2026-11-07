@@ -388,5 +388,21 @@ describe('procedural pre-production contracts', () => {
       { frame: 0, value: [0, 0, 0], blendMode: 'replace' },
       { frame: 29, value: [1.5, -0.25, 0], blendMode: 'replace' },
     ]);
+    actions.push({
+      id: 'overlapping-clip',
+      type: 'motion-clip',
+      startFrame: 10,
+      endFrame: 40,
+      library: { assetId: 'motion.father', version: '1.0.0' },
+      clipId: 'look-down',
+      playbackRate: 1,
+      blendMode: 'replace',
+    });
+    const overlappingManifest = parseProjectManifest(input);
+    const overlappingShot = overlappingManifest.shots[0];
+    if (!overlappingShot) throw new Error('Missing parsed overlap test shot.');
+    expect(() =>
+      compileScene(overlappingShot, manifest.video.frameRate, [library]),
+    ).toThrow(/Overlapping motion clips/);
   });
 });

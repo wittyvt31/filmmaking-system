@@ -1,5 +1,12 @@
 import { existsSync } from 'node:fs';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import {
+  copyFile,
+  mkdir,
+  mkdtemp,
+  readFile,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import {
@@ -261,6 +268,7 @@ describe.skipIf(!blenderAvailable)(
                   targetEntityId: 'target',
                   targetAnchorId: 'handle',
                   targetPosition: { x: 0.7, y: -1.0, z: 0.25 },
+                  targetRotationDegrees: { x: 0, y: 0, z: 45 },
                 },
               },
               {
@@ -325,11 +333,26 @@ describe.skipIf(!blenderAvailable)(
         ) as { status: string; blendPath: string; frameCount: number };
         expect(productionResult.status).toBe('success');
         expect(productionResult.frameCount).toBe(12);
+        const evidenceDirectory = process.env['FILMIE_RUNTIME_EVIDENCE_DIR'];
+        if (evidenceDirectory) {
+          await mkdir(evidenceDirectory, { recursive: true });
+          await copyFile(
+            productionResult.blendPath,
+            join(evidenceDirectory, 'scene.blend'),
+          );
+          for (const frame of [1, 4, 6, 8, 9, 12]) {
+            const frameName = `frame_${String(frame).padStart(6, '0')}.png`;
+            await copyFile(
+              join(temporary, 'render', 'frames', frameName),
+              join(evidenceDirectory, frameName),
+            );
+          }
+        }
         const checkScript = join(temporary, 'acceptance.py');
         await writeFile(
           checkScript,
           `
-import bpy
+import bpy, math
 from mathutils import Vector, Matrix
 from pathlib import Path
 blend_path = ${JSON.stringify(productionResult.blendPath).replaceAll('\\', '\\\\')}
@@ -343,6 +366,28 @@ assert armature.data.bones and len(armature.data.bones) >= 17
 assert len(weighted) > 0
 assert {'left-hand', 'right-hand', 'left-leg', 'right-leg', 'mouth'} <= set(controls)
 assert sum(o.name.startswith('IK_foot.') for o in bpy.context.scene.objects) == 2
+def measured_pose(frame):
+    bpy.context.scene.frame_set(frame)
+    bpy.context.view_layer.update()
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    rig_eval = armature.evaluated_get(depsgraph)
+    left_foot = armature.matrix_world @ rig_eval.pose.bones['foot.L'].matrix.translation
+    foot_target = next(o for o in bpy.context.scene.objects if o.name == 'IK_foot.L.Target').evaluated_get(depsgraph).matrix_world.translation
+    left_hand = armature.matrix_world @ rig_eval.pose.bones['hand.L'].matrix.translation
+    hand_target = next(o for o in bpy.context.scene.objects if o.name == 'IK_hand.L.Target').evaluated_get(depsgraph).matrix_world.translation
+    evaluated_mesh = weighted[0].evaluated_get(depsgraph)
+    mesh = evaluated_mesh.to_mesh()
+    sample = mesh.vertices[min(50, len(mesh.vertices) - 1)].co.copy()
+    evaluated_mesh.to_mesh_clear()
+    return left_foot.copy(), foot_target.copy(), left_hand.copy(), hand_target.copy(), sample
+pose4 = measured_pose(4)
+pose6 = measured_pose(6)
+assert (pose4[0] - pose4[1]).length < 0.04, 'Evaluated leg IK misses foot target'
+assert abs(pose4[1].z - 0.0) < 0.01, 'Left foot target is not grounded'
+assert (pose4[2] - pose4[3]).length < 0.03, 'Evaluated arm IK misses hand target'
+assert (pose6[0] - pose6[1]).length < 0.04, 'Leg IK misses target during locomotion'
+assert (pose6[2] - pose6[3]).length < 0.03, 'Arm IK misses target during locomotion'
+assert (pose4[4] - pose6[4]).length > 0.02, 'Skinned mesh did not deform with the evaluated pose'
 mouth = controls['mouth']
 bpy.context.view_layer.update()
 face_transform = mouth.matrix_world.copy().translation
@@ -386,17 +431,61 @@ bpy.context.view_layer.update()
 anchor = controls['left-hand'].matrix_world.translation
 bpy.context.scene.frame_set(9)
 bpy.context.view_layer.update()
-print('FILMIE_INSPECTION_FRAME', 9, tuple(round(v, 4) for v in controls['left-hand'].matrix_world.translation), prop.get('filmie_attachment_state'), tuple(round(v, 4) for v in prop.matrix_world.translation), flush=True)
 open_mouth = tuple(round(v, 4) for v in controls['mouth'].scale[:])
 attachment = prop.constraints.get('FILMIE Hand Attachment')
 print('FILMIE_ATTACHMENT', attachment.influence if attachment else None, tuple(round(v, 4) for v in prop.matrix_world.translation), flush=True)
-assert attachment is not None and attachment.influence > 0.5
+assert attachment is not None
+influences = {}
+for frame in (7, 8, 9, 10, 11, 12):
+    bpy.context.scene.frame_set(frame)
+    bpy.context.view_layer.update()
+    influences[frame] = attachment.influence
+expected = {7: 0.0, 8: 0.5, 9: 1.0, 10: 1.0, 11: 1.0, 12: 0.0}
+for frame, value in expected.items():
+    assert abs(influences[frame] - value) < 1e-4, (frame, influences[frame])
+print('FILMIE_INFLUENCE_BOUNDARIES', influences, flush=True)
+bpy.context.scene.frame_set(12)
+bpy.context.view_layer.update()
+final_world = prop.evaluated_get(bpy.context.evaluated_depsgraph_get()).matrix_world.copy()
+assert (final_world.translation - Vector((0.7, -1.0, 0.25))).length < 0.02, final_world.translation
+assert abs(final_world.to_euler().z - math.radians(45)) < 0.03, final_world.to_euler().z
+print('FILMIE_FINAL_TRANSFORM', tuple(round(v, 4) for v in final_world.translation), round(final_world.to_euler().z, 4), flush=True)
+# Verify physical attach/release behavior against evaluated world transforms.
+bpy.context.scene.frame_set(6); bpy.context.view_layer.update()
+before_attach = prop.evaluated_get(bpy.context.evaluated_depsgraph_get()).matrix_world.translation.copy()
+bpy.context.scene.frame_set(7); bpy.context.view_layer.update()
+after_attach = prop.evaluated_get(bpy.context.evaluated_depsgraph_get()).matrix_world.translation.copy()
+assert (after_attach - before_attach).length < 0.01, 'Object jumped at attachment start'
+bpy.context.scene.frame_set(9); bpy.context.view_layer.update()
+depsgraph = bpy.context.evaluated_depsgraph_get()
+anchor_data = __import__('json').loads(prop.get('filmie_anchors', '{}'))
+prop_world = prop.evaluated_get(depsgraph).matrix_world.copy()
+hand_world = controls['left-hand'].evaluated_get(depsgraph).matrix_world.copy()
+anchor_world = prop_world @ Vector(anchor_data['handle'])
+contact_distance = (hand_world.translation - anchor_world).length
+assert contact_distance < 0.18, ('Hand missed target anchor', contact_distance, tuple(hand_world.translation), tuple(anchor_world))
+relative_at_contact = hand_world.inverted() @ prop_world
+bpy.context.scene.frame_set(11); bpy.context.view_layer.update()
+depsgraph = bpy.context.evaluated_depsgraph_get()
+relative_during_carry = controls['left-hand'].evaluated_get(depsgraph).matrix_world.inverted() @ prop.evaluated_get(depsgraph).matrix_world
+assert (relative_during_carry.translation - relative_at_contact.translation).length < 0.05, 'Object-relative transform drifted during carry'
+bpy.context.scene.frame_set(9); bpy.context.view_layer.update()
+before_follow = prop.evaluated_get(bpy.context.evaluated_depsgraph_get()).matrix_world.translation.copy()
+controls['left-hand'].location.x += 0.1; bpy.context.view_layer.update()
+after_follow = prop.evaluated_get(bpy.context.evaluated_depsgraph_get()).matrix_world.translation.copy()
+assert (after_follow - before_follow).length > 0.05, 'Attached object did not follow hand'
+bpy.context.scene.frame_set(12); bpy.context.view_layer.update()
+before_release = prop.evaluated_get(bpy.context.evaluated_depsgraph_get()).matrix_world.translation.copy()
+controls['left-hand'].location.x += 0.1; bpy.context.view_layer.update()
+after_release = prop.evaluated_get(bpy.context.evaluated_depsgraph_get()).matrix_world.translation.copy()
+assert (after_release - before_release).length < 0.01, 'Released object still followed hand'
 bpy.context.scene.frame_set(1)
 bpy.context.view_layer.update()
 closed_mouth = tuple(round(v, 4) for v in controls['mouth'].scale[:])
 assert open_mouth != closed_mouth, (closed_mouth, open_mouth)
-assert prop.get('filmie_attachment_state') in ('Released', None)
+assert influences[12] == 0.0
 print('FILMIE_RUNTIME_ACCEPTANCE', len(armature.data.bones), len(weighted), tuple(round(v, 6) for v in face_transform), len(snapshot))
+print('FILMIE_RIG_MEASUREMENTS', round((pose4[0] - pose4[1]).length, 5), round((pose4[2] - pose4[3]).length, 5), round((pose4[4] - pose6[4]).length, 5), flush=True)
 `,
         );
         const proof = await runBlenderProcess(
@@ -405,7 +494,9 @@ print('FILMIE_RUNTIME_ACCEPTANCE', len(armature.data.bones), len(weighted), tupl
           { timeoutMs: 60_000 },
         );
         expect(proof.code, proof.stderr || proof.stdout).toBe(0);
-        expect(proof.stdout).toContain('FILMIE_RUNTIME_ACCEPTANCE');
+        expect(`${proof.stdout}\n${proof.stderr}`).toContain(
+          'FILMIE_RUNTIME_ACCEPTANCE',
+        );
       } finally {
         await rm(temporary, { recursive: true, force: true });
       }

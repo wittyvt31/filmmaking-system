@@ -646,6 +646,14 @@ export const CharacterActionSchema = z.discriminatedUnion('type', [
         z: z.number().finite(),
       })
       .strict(),
+    targetRotationDegrees: z
+      .object({
+        x: z.number().finite(),
+        y: z.number().finite(),
+        z: z.number().finite(),
+      })
+      .strict()
+      .optional(),
   }).strict(),
   SceneActionBaseSchema.extend({
     type: z.literal('interaction'),
