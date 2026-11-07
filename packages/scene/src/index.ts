@@ -158,6 +158,30 @@ export function compileScene(
             blendMode: action.blendMode,
           });
         }
+        if (clip.rootMotion) {
+          for (const axis of [0, 1, 2] as const) {
+            const value = clip.rootMotion.distance[axis];
+            if (value === 0) continue;
+            motionCurves.push({
+              characterId: character.id,
+              control: clip.rootMotion.control,
+              channel: clip.rootMotion.channel,
+              frame: action.startFrame,
+              value: [0, 0, 0].map((_, index) => (index === axis ? 0 : 0)),
+              blendMode: action.blendMode,
+            });
+            motionCurves.push({
+              characterId: character.id,
+              control: clip.rootMotion.control,
+              channel: clip.rootMotion.channel,
+              frame: action.endFrame - 1,
+              value: clip.rootMotion.distance.map((component, index) =>
+                index === axis ? component : 0,
+              ) as [number, number, number],
+              blendMode: action.blendMode,
+            });
+          }
+        }
       }
     }
   }

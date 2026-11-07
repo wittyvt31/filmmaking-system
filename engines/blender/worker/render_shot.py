@@ -362,10 +362,68 @@ def create_scene(spec):
     return scene, environment, entity_roots, control_objects
 
 
+def bind_authoritative_rig(control_objects):
+    bone_semantics = {
+        "chest": "chest",
+        "head": "head",
+        "left-arm": "upper_arm.L",
+        "right-arm": "upper_arm.R",
+        "left-leg": "thigh.L",
+        "right-leg": "thigh.R",
+        "left-hand": "hand.L",
+        "right-hand": "hand.R",
+    }
+    for character_id, controls in control_objects.items():
+        armatures = [
+            obj for obj in bpy.context.scene.objects
+            if obj.type == "ARMATURE" and obj.get("filmie_rig_type") == "humanoid-semantic-v1"
+        ]
+        armature = armatures[0] if armatures else None
+        # Collections can contain more than one character. Match by collection
+        # ownership instead of silently binding the first rig to every character.
+        for candidate in armatures:
+            roots = [obj for obj in candidate.users_collection[0].objects if obj.get("filmie_entity_id") == character_id]
+            if roots:
+                armature = candidate
+                break
+        if armature is None:
+            continue
+        for semantic, bone_name in bone_semantics.items():
+            control = controls.get(semantic)
+            if control is None or bone_name not in armature.pose.bones:
+                continue
+            bone = armature.pose.bones[bone_name]
+            while bone.constraints:
+                bone.constraints.remove(bone.constraints[-1])
+            constraint = bone.constraints.new("COPY_TRANSFORMS")
+            constraint.target = control
+            constraint.target_space = "WORLD"
+            constraint.owner_space = "WORLD"
+
+        collection = armature.users_collection[0]
+        for side, label in (("L", "left"), ("R", "right")):
+            hand_control = controls.get(label + "-hand")
+            target = next((obj for obj in collection.objects
+                           if obj.name == "IK_hand." + side + ".Target"), None)
+            if hand_control is not None and target is not None:
+                constraint = target.constraints.get("FILMIE Hand Target")
+                if constraint is None:
+                    constraint = target.constraints.new("COPY_TRANSFORMS")
+                    constraint.name = "FILMIE Hand Target"
+                    constraint.target = hand_control
+                    constraint.target_space = "WORLD"
+                    constraint.owner_space = "WORLD"
+            ik_target = next((obj for obj in collection.objects
+                              if obj.name == "IK_hand." + side + ".Target"), None)
+            if ik_target is not None and hand_control is not None:
+                ik_target["filmie_drives_from"] = hand_control.name
+
+
 def apply_actions(spec, entity_roots, control_objects):
     if spec.get("animationLibraryVersion") != "1.0.0":
         raise RuntimeError("Unsupported semantic animation library version: " + str(spec.get("animationLibraryVersion")))
     scene = bpy.context.scene
+    bind_authoritative_rig(control_objects)
     for instruction in sorted(
         spec["actions"],
         key=lambda item: (item["interval"]["startFrame"], item["characterId"], item["action"]["id"]),
@@ -459,6 +517,14 @@ def apply_actions(spec, entity_roots, control_objects):
                 for side, leg in enumerate(legs):
                     leg.rotation_euler[1] = math.sin(phase + side * math.pi) * min(0.55, stride)
                     leg.keyframe_insert(data_path="rotation_euler", index=1, frame=frame)
+                    foot_side = "L" if side == 0 else "R"
+                    foot_target = next((obj for obj in bpy.context.scene.objects
+                                        if obj.name == "IK_foot." + foot_side + ".Target"), None)
+                    if foot_target is not None:
+                        planted = 0.55 * (1.0 if math.sin(phase + side * math.pi) >= -0.05 else 0.0)
+                        foot_target.location.y = foot_target.location.y - planted * stride * 0.01
+                        foot_target.location.z = 0.0
+                        foot_target.keyframe_insert(data_path="location", frame=frame)
         elif action["type"] == "jump":
             character_root = entity_roots.get(character_id)
             if character_root is None:
@@ -554,6 +620,21 @@ def apply_actions(spec, entity_roots, control_objects):
                 effector.keyframe_insert(data_path="rotation_euler", frame=start)
                 effector.rotation_euler.y = -0.25
                 effector.keyframe_insert(data_path="rotation_euler", frame=end)
+                contact_distance = (effector.matrix_world.translation - anchor_world).length
+                if contact_distance > 0.18:
+                    raise RuntimeError(
+                        "Object grasp contact validation failed: hand is %.3f m from anchor"
+                        % contact_distance
+                    )
+                world_matrix = target.matrix_world.copy()
+                target["filmie_attachment_state"] = "Attached"
+                target["filmie_attached_character"] = character_id
+                target["filmie_attached_effector"] = action["effector"]
+                target["filmie_original_parent"] = target.parent.name if target.parent else ""
+                target.parent = effector
+                target.matrix_world = world_matrix
+                target.keyframe_insert(data_path="location", frame=end)
+                target.keyframe_insert(data_path="rotation_euler", frame=end)
             elif action["type"] == "lift":
                 target.keyframe_insert(data_path="location", frame=start)
                 target.location.z += float(action["verticalOffset"])
@@ -565,6 +646,11 @@ def apply_actions(spec, entity_roots, control_objects):
                     effector.location = parent.matrix_world.inverted() @ target_anchor
                     effector.keyframe_insert(data_path="location", frame=end)
             else:
+                if target.get("filmie_attachment_state") == "Attached":
+                    target_matrix = target.matrix_world.copy()
+                    target.parent = None
+                    target.matrix_world = target_matrix
+                    target["filmie_attachment_state"] = "Released"
                 target.keyframe_insert(data_path="location", frame=start)
                 target.location = tuple(float(action["targetPosition"][axis]) for axis in ("x", "y", "z"))
                 target.keyframe_insert(data_path="location", frame=end)
@@ -578,21 +664,41 @@ def apply_actions(spec, entity_roots, control_objects):
             raise RuntimeError("Unsupported compiled character action: " + action["type"])
 
 
-def apply_motion_curves(spec, control_objects):
-    original_values = {}
+def apply_motion_curves(spec, control_objects, entity_roots):
+    grouped = {}
     for curve in spec.get("motionCurves", []):
-        control = control_objects.get(curve["characterId"], {}).get(curve["control"])
+        key = (curve["characterId"], curve["control"], curve["channel"])
+        grouped.setdefault(key, []).append(curve)
+    for key, curves in grouped.items():
+        character_id, control_name, channel = key
+        control = control_objects.get(character_id, {}).get(control_name)
+        if control is None and control_name in ("root", "hips"):
+            control = entity_roots.get(character_id)
         if control is None:
-            raise RuntimeError("Motion clip requires missing semantic control " + curve["control"])
-        property_name = "rotation_euler" if curve["channel"] == "rotation" else curve["channel"]
-        key = (curve["characterId"], curve["control"], property_name)
-        if key not in original_values:
-            original_values[key] = tuple(getattr(control, property_name))
-        value = tuple(float(component) for component in curve["value"])
-        if curve["blendMode"] == "additive":
-            value = tuple(base + delta for base, delta in zip(original_values[key], value))
-        setattr(control, property_name, value)
-        control.keyframe_insert(data_path=property_name, frame=int(curve["frame"]) + 1)
+            raise RuntimeError("Motion clip requires missing semantic control " + control_name)
+        curves.sort(key=lambda curve: int(curve["frame"]))
+        property_name = "rotation_euler" if channel == "rotation" else channel
+        original = tuple(getattr(control, property_name))
+        frames = [int(curve["frame"]) + 1 for curve in curves]
+        start_frame = frames[0]
+        end_frame = frames[-1]
+        for frame in range(start_frame, end_frame + 1):
+            source_frame = frame - 1
+            right_index = next((index for index, curve in enumerate(curves)
+                                if int(curve["frame"]) >= source_frame), len(curves) - 1)
+            left_index = max(0, right_index - 1)
+            left = curves[left_index]
+            right = curves[right_index]
+            span = max(1, int(right["frame"]) - int(left["frame"]))
+            blend = (source_frame - int(left["frame"])) / span
+            blend = max(0.0, min(1.0, blend))
+            left_value = tuple(float(component) for component in left["value"])
+            right_value = tuple(float(component) for component in right["value"])
+            value = tuple(a + (b - a) * blend for a, b in zip(left_value, right_value))
+            if curves[0]["blendMode"] == "additive":
+                value = tuple(base + delta for base, delta in zip(original, value))
+            setattr(control, property_name, value)
+            control.keyframe_insert(data_path=property_name, frame=frame)
 
 
 def main():
@@ -600,7 +706,7 @@ def main():
     os.makedirs(os.path.join(spec["outputDirectory"], "frames"), exist_ok=True)
     scene, _environment, entity_roots, control_objects = create_scene(spec)
     apply_actions(spec, entity_roots, control_objects)
-    apply_motion_curves(spec, control_objects)
+    apply_motion_curves(spec, control_objects, entity_roots)
     blend_path = os.path.join(spec["outputDirectory"], "scene.blend")
     bpy.ops.wm.save_as_mainfile(filepath=blend_path)
     bpy.ops.render.render(animation=True)

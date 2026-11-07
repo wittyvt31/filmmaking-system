@@ -676,6 +676,8 @@ export const MotionClipLibrarySchema = z
                 z
                   .object({
                     control: z.enum([
+                      'root',
+                      'hips',
                       'chest',
                       'head',
                       'left-arm',

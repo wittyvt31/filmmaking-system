@@ -192,8 +192,9 @@ def controller(name, collection, parent, location, semantic_id=None):
 
 def assign_controller(obj, control):
     world_matrix = obj.matrix_world.copy()
-    obj.parent = control
-    obj.matrix_parent_inverse = control.matrix_world.inverted()
+    # Meshes are deformed through their Armature modifiers below. Parenting the
+    # same mesh to a rig Empty would compose the transform twice.
+    obj.parent = None
     obj.matrix_world = world_matrix
 
 
@@ -261,6 +262,36 @@ def create_character_skeleton(collection, root, height, build):
         constraint.target = ik_target
         constraint.subtarget = ""
         constraint.chain_count = 2
+        shin = armature.pose.bones["shin." + side_name]
+        foot_target = bpy.data.objects.new("IK_foot." + side_name + ".Target", None)
+        collection.objects.link(foot_target)
+        foot_target.empty_display_type = "CUBE"
+        foot_target.empty_display_size = 0.04
+        foot_target.parent = root
+        foot_target.location = (0.15 * build * (-1.0 if side_name == "L" else 1.0), -0.66, -0.27 * height)
+        foot_target["filmie_ik_chain"] = "foot." + side_name
+        foot_constraint = shin.constraints.new("IK")
+        foot_constraint.name = "FILMIE Foot IK"
+        foot_constraint.target = foot_target
+        foot_constraint.chain_count = 2
+
+    # Semantic controls created below drive pose bones. This is the only
+    # runtime deformation path: the visual Empty controls never transform
+    # deform meshes directly.
+    bone_semantics = {
+        "chest": "chest",
+        "head": "head",
+        "left-arm": "upper_arm.L",
+        "right-arm": "upper_arm.R",
+        "left-leg": "thigh.L",
+        "right-leg": "thigh.R",
+        "left-hand": "hand.L",
+        "right-hand": "hand.R",
+    }
+    for semantic_name, bone_name in bone_semantics.items():
+        if bone_name not in armature.pose.bones:
+            continue
+        armature.pose.bones[bone_name]["filmie_semantic_id"] = semantic_name
     bpy.ops.object.mode_set(mode="OBJECT")
     armature.select_set(False)
     return armature
@@ -271,23 +302,33 @@ def skin_character_meshes(collection, armature):
         if obj.type != "MESH":
             continue
         lower_name = obj.name.lower()
-        bone_name = None
+        candidates = []
         if "torso" in lower_name or "garment" in lower_name or "neck" in lower_name:
-            bone_name = "chest"
-        elif "hand.r" in lower_name or ("hand" in lower_name and "right" in lower_name):
-            bone_name = "hand.R"
-        elif "hand.l" in lower_name or ("hand" in lower_name and "left" in lower_name):
-            bone_name = "hand.L"
+            candidates = [("chest", 1.0), ("spine", 0.35)]
+        elif "sleeve" in lower_name or "arm" in lower_name:
+            side = "R" if "right" in lower_name or ".r" in lower_name else "L"
+            candidates = [("upper_arm." + side, 0.55), ("forearm." + side, 0.45)]
+        elif "hand" in lower_name:
+            side = "R" if ".r" in lower_name or "right" in lower_name else "L"
+            candidates = [("hand." + side, 0.75), ("forearm." + side, 0.25)]
         elif any(token in lower_name for token in ("face", "hair", "ear", "nose", "mouth", "brow", "eye")):
-            bone_name = "head"
-        elif "right" in lower_name or ".r" in lower_name:
-            bone_name = "thigh.R"
-        elif "left" in lower_name or ".l" in lower_name:
-            bone_name = "thigh.L"
-        if bone_name is None:
+            candidates = [("head", 0.85), ("chest", 0.15)]
+        elif "shin" in lower_name or "lower leg" in lower_name:
+            side = "R" if ".r" in lower_name or "right" in lower_name else "L"
+            candidates = [("shin." + side, 0.75), ("thigh." + side, 0.25)]
+        elif "thigh" in lower_name or "seated" in lower_name:
+            side = "R" if ".r" in lower_name or "right" in lower_name else "L"
+            candidates = [("thigh." + side, 0.75), ("shin." + side, 0.25)]
+        elif "foot" in lower_name or "sandal" in lower_name:
+            side = "R" if ".r" in lower_name or "right" in lower_name else "L"
+            candidates = [("foot." + side, 0.85), ("shin." + side, 0.15)]
+        if not candidates:
             continue
-        group = obj.vertex_groups.new(name=bone_name)
-        group.add(range(len(obj.data.vertices)), 1.0, "REPLACE")
+        for bone_name, weight in candidates:
+            if bone_name not in armature.data.bones:
+                continue
+            group = obj.vertex_groups.get(bone_name) or obj.vertex_groups.new(name=bone_name)
+            group.add(range(len(obj.data.vertices)), weight, "REPLACE")
         modifier = obj.modifiers.new("FILMIE Humanoid Skin", "ARMATURE")
         modifier.object = armature
 
