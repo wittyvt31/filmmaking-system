@@ -5,6 +5,7 @@ import json
 import os
 import sys
 import traceback
+from array import array
 
 import bpy
 
@@ -52,12 +53,153 @@ def charcoal_material(image, opacity, style, name):
     links.new(bw.outputs["Val"], ramp.inputs["Fac"])
     links.new(ramp.outputs["Color"], emission.inputs["Color"])
     links.new(texture.outputs["Alpha"], alpha.inputs[0])
+    manual_matte = image.get("filmie_matte_image")
+    if manual_matte:
+        matte = nodes.new("ShaderNodeTexImage")
+        matte.image = bpy.data.images.get(manual_matte)
+        if matte.image is None:
+            raise RuntimeError("Manual matte was not loaded: " + str(manual_matte))
+        matte.interpolation = "Linear"
+        matte_gray = nodes.new("ShaderNodeRGBToBW")
+        matte_alpha = nodes.new("ShaderNodeMath")
+        matte_alpha.operation = "MULTIPLY"
+        links.new(matte.outputs["Color"], matte_gray.inputs["Color"])
+        links.new(matte_gray.outputs["Val"], matte_alpha.inputs[0])
+        links.new(matte.outputs["Alpha"], matte_alpha.inputs[1])
+        links.new(matte_alpha.outputs["Value"], alpha.inputs[1])
     links.new(alpha.outputs["Value"], mix.inputs[0])
     links.new(transparent.outputs["BSDF"], mix.inputs[1])
     links.new(emission.outputs["Emission"], mix.inputs[2])
     links.new(mix.outputs["Shader"], output.inputs["Surface"])
     material.surface_render_method = "DITHERED"
     return material
+
+
+def box_blur(source, width, height, radius):
+    """Separable box blur for alpha, keeping preparation independent of Pillow/OpenCV."""
+    if radius <= 0:
+        return source
+    horizontal = array("f", [0.0]) * len(source)
+    vertical = array("f", [0.0]) * len(source)
+    span = radius * 2 + 1
+    for y in range(height):
+        row = y * width
+        for x in range(width):
+            total = 0.0
+            count = 0
+            for sample_x in range(max(0, x - radius), min(width, x + radius + 1)):
+                total += source[row + sample_x]
+                count += 1
+            horizontal[row + x] = total / count
+    for y in range(height):
+        for x in range(width):
+            total = 0.0
+            count = 0
+            for sample_y in range(max(0, y - radius), min(height, y + radius + 1)):
+                total += horizontal[sample_y * width + x]
+                count += 1
+            vertical[y * width + x] = total / count
+    return vertical
+
+
+def alpha_components(alpha, width, height, threshold):
+    """Connected components over thresholded alpha, using compact integer arrays."""
+    count = width * height
+    labels = array("i", [0]) * count
+    component_sizes = [0]
+    component_touches_border = [False]
+    label = 0
+    for start in range(count):
+        foreground = alpha[start] >= threshold
+        if labels[start] != 0 or not foreground:
+            continue
+        label += 1
+        queue = array("I", [start])
+        labels[start] = label
+        head = 0
+        size = 0
+        border = False
+        while head < len(queue):
+            index = queue[head]
+            head += 1
+            size += 1
+            x = index % width
+            y = index // width
+            border = border or x == 0 or y == 0 or x == width - 1 or y == height - 1
+            for neighbor in (index - 1 if x else -1, index + 1 if x + 1 < width else -1,
+                             index - width if y else -1, index + width if y + 1 < height else -1):
+                if neighbor >= 0 and labels[neighbor] == 0 and (alpha[neighbor] >= threshold) == foreground:
+                    labels[neighbor] = label
+                    queue.append(neighbor)
+        component_sizes.append(size)
+        component_touches_border.append(border)
+    return labels, component_sizes, component_touches_border
+
+
+def prepare_pixels(image, matte_path, processing):
+    width, height = int(image.size[0]), int(image.size[1])
+    pixels = array("f", [0.0]) * (width * height * 4)
+    image.pixels.foreach_get(pixels)
+    alpha = array("f", (pixels[index] for index in range(3, len(pixels), 4)))
+    if matte_path:
+        matte = bpy.data.images.load(matte_path, check_existing=False)
+        matte_pixels = array("f", [0.0]) * (int(matte.size[0]) * int(matte.size[1]) * 4)
+        matte.pixels.foreach_get(matte_pixels)
+        mw, mh = int(matte.size[0]), int(matte.size[1])
+        if (mw, mh) != (width, height):
+            bpy.data.images.remove(matte)
+            raise RuntimeError("Manual matte dimensions must match its source artwork")
+        for index in range(width * height):
+            m = index * 4
+            alpha[index] *= max(matte_pixels[m + 3], sum(matte_pixels[m:m + 3]) / 3.0)
+        bpy.data.images.remove(matte)
+    threshold = float(processing.get("alphaThreshold", 0.01))
+    remove_below = int(processing.get("removeIslandsBelowPixels", 0))
+    fill_below = int(processing.get("fillHolesBelowPixels", 0))
+    if remove_below or fill_below:
+        labels, sizes, borders = alpha_components(alpha, width, height, threshold)
+        for index, label in enumerate(labels):
+            if label == 0:
+                continue
+            size = sizes[label]
+            if alpha[index] >= threshold and remove_below and size < remove_below:
+                alpha[index] = 0.0
+            elif alpha[index] < threshold and fill_below and not borders[label] and size < fill_below:
+                alpha[index] = 1.0
+    smoothing = int(processing.get("smoothingPasses", 0))
+    for _ in range(smoothing):
+        alpha = box_blur(alpha, width, height, 1)
+    feather = int(processing.get("featherPixels", 0))
+    if feather:
+        alpha = box_blur(alpha, width, height, feather)
+    if processing.get("decontaminateEdges"):
+        original_alpha = array("f", alpha)
+        for y in range(height):
+            for x in range(width):
+                index = y * width + x
+                if not (threshold < alpha[index] < 0.98):
+                    continue
+                r = g = b = n = 0.0
+                for ny in range(max(0, y - 1), min(height, y + 2)):
+                    for nx in range(max(0, x - 1), min(width, x + 2)):
+                        neighbor = ny * width + nx
+                        if original_alpha[neighbor] >= 0.98:
+                            p = neighbor * 4
+                            r += pixels[p]; g += pixels[p + 1]; b += pixels[p + 2]; n += 1
+                if n:
+                    p = index * 4
+                    pixels[p] = r / n; pixels[p + 1] = g / n; pixels[p + 2] = b / n
+    nonzero = [index for index, value in enumerate(alpha) if value >= threshold]
+    if nonzero:
+        bounds = [min(i % width for i in nonzero), min(i // width for i in nonzero),
+                  max(i % width for i in nonzero) + 1, max(i // width for i in nonzero) + 1]
+    else:
+        bounds = [0, 0, 0, 0]
+    for index, value in enumerate(alpha):
+        pixels[index * 4 + 3] = max(0.0, min(1.0, value))
+    image.pixels.foreach_set(pixels)
+    image.update()
+    return {"width": width, "height": height, "alphaCoverage": len(nonzero) / max(1, width * height), "alphaBounds": bounds}
 
 
 def create_layer(layer, collection, parent, style, variant_values):

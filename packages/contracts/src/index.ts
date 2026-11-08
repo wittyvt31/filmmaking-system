@@ -745,6 +745,7 @@ export const MotionClipLibrarySchema = z
                       'mouth',
                     ]),
                     channel: z.enum(['location', 'rotation', 'scale']),
+                    region: z.enum(['root', 'torso', 'head', 'left-arm', 'right-arm', 'left-leg', 'right-leg', 'face']).optional(),
                     keyframes: z
                       .array(
                         z
@@ -755,6 +756,8 @@ export const MotionClipLibrarySchema = z
                               z.number().finite(),
                               z.number().finite(),
                             ]),
+                            interpolation: z.enum(['linear', 'ease-in', 'ease-out', 'ease-in-out', 'cubic-bezier', 'hold']).default('linear'),
+                            bezier: z.tuple([z.number().min(0).max(1), z.number().min(0).max(1), z.number().min(0).max(1), z.number().min(0).max(1)]).optional(),
                           })
                           .strict(),
                       )
@@ -1816,6 +1819,49 @@ const ArtworkTransformSchema = z
   })
   .strict();
 
+export const RigSemanticControlSchema = z.enum([
+  'root', 'hips', 'torso', 'chest', 'head',
+  'left-arm', 'right-arm', 'left-upper-arm', 'right-upper-arm',
+  'left-forearm', 'right-forearm', 'left-leg', 'right-leg',
+  'left-hand', 'right-hand', 'left-eye', 'right-eye',
+  'left-brow', 'right-brow', 'mouth', 'hair', 'cloth',
+]);
+
+export const CutoutRigDefinitionSchema = z.object({
+  schemaVersion: z.literal('1.0.0'),
+  rigId: StableIdSchema,
+  version: AssetVersionReferenceSchema.shape.version,
+  template: z.enum(['humanoid-cutout']),
+  minimumSeamOverlapPixels: z.number().nonnegative().max(512).default(4),
+  controls: z.array(z.object({
+    id: RigSemanticControlSchema,
+    parentId: RigSemanticControlSchema.optional(),
+    pivot: z.object({ x: z.number().finite(), y: z.number().finite() }).strict(),
+    zOrder: z.number().int().min(-1000).max(1000).default(0),
+    limitsDegrees: z.object({ min: z.number().finite().min(-360).max(360), max: z.number().finite().min(-360).max(360) }).strict().optional(),
+    seamOverlapPixels: z.number().nonnegative().max(512).optional(),
+  }).strict()).min(1),
+}).strict().superRefine((rig, context) => {
+  const ids = new Set<string>();
+  rig.controls.forEach((control, index) => {
+    if (ids.has(control.id)) context.addIssue({ code: 'custom', path: ['controls', index, 'id'], message: `Duplicate rig control "${control.id}"` });
+    ids.add(control.id);
+    if (control.parentId === control.id) context.addIssue({ code: 'custom', path: ['controls', index, 'parentId'], message: 'A rig control cannot parent itself' });
+    if (control.limitsDegrees && control.limitsDegrees.min > control.limitsDegrees.max) context.addIssue({ code: 'custom', path: ['controls', index, 'limitsDegrees'], message: 'Joint minimum must not exceed maximum' });
+    if (control.seamOverlapPixels !== undefined && control.seamOverlapPixels < rig.minimumSeamOverlapPixels) context.addIssue({ code: 'custom', path: ['controls', index, 'seamOverlapPixels'], message: `Seam overlap is below rig minimum (${rig.minimumSeamOverlapPixels}px)` });
+  });
+  for (const [index, control] of rig.controls.entries()) if (control.parentId && !ids.has(control.parentId)) context.addIssue({ code: 'custom', path: ['controls', index, 'parentId'], message: `Unknown parent control "${control.parentId}"` });
+});
+
+const ArtworkLayerProcessingSchema = z.object({
+  featherPixels: z.number().int().nonnegative().max(32).default(0),
+  smoothingPasses: z.number().int().nonnegative().max(8).default(0),
+  fillHolesBelowPixels: z.number().int().nonnegative().max(100000).default(0),
+  removeIslandsBelowPixels: z.number().int().nonnegative().max(100000).default(0),
+  decontaminateEdges: z.boolean().default(false),
+  alphaThreshold: z.number().min(0).max(1).default(0.01),
+}).strict();
+
 const ArtworkGroupSchema = z
   .object({
     id: StableIdSchema,
@@ -1828,6 +1874,8 @@ const ArtworkLayerSchema = z
   .object({
     id: StableIdSchema,
     source: AssetVersionReferenceSchema,
+    manualMatte: AssetVersionReferenceSchema.optional(),
+    processing: ArtworkLayerProcessingSchema.default({}),
     parentId: StableIdSchema.optional(),
     transform: ArtworkTransformSchema,
     size: z
@@ -1886,6 +1934,12 @@ const ArtworkAnchorSchema = z
   })
   .strict();
 
+const ArtworkComponentSchema = z.object({
+  id: StableIdSchema,
+  nodeId: StableIdSchema,
+  displayName: nonEmptyText,
+}).strict();
+
 const ArtworkPackageAssetSchema = z
   .object({
     assetId: StableIdSchema,
@@ -1896,6 +1950,12 @@ const ArtworkPackageAssetSchema = z
     layers: z.array(ArtworkLayerSchema).min(1).max(512),
     variantSlots: z.array(ArtworkVariantSlotSchema).max(64).default([]),
     anchors: z.array(ArtworkAnchorSchema).max(256).default([]),
+    components: z.array(ArtworkComponentSchema).max(128).default([]),
+    rigId: StableIdSchema.optional(),
+    resolutionValidation: z.object({
+      pixelsPerWorldUnit: z.number().positive().max(10000),
+      mode: z.enum(['warn', 'error']).default('warn'),
+    }).strict().optional(),
     semanticControls: z
       .partialRecord(
         z.enum([
@@ -1946,6 +2006,10 @@ const ArtworkPackageAssetSchema = z
         ...(node.parentId ? { parentId: node.parentId } : {}),
         path: node.path,
       });
+    }
+    for (const [componentIndex, component] of asset.components.entries()) {
+      if (!nodes.has(component.nodeId)) context.addIssue({ code: 'custom', path: ['components', componentIndex, 'nodeId'], message: `Component references unknown node "${component.nodeId}"` });
+      if (asset.components.slice(0, componentIndex).some((previous) => previous.id === component.id)) context.addIssue({ code: 'custom', path: ['components', componentIndex, 'id'], message: `Duplicate component ID "${component.id}"` });
     }
     for (const [control, nodeId] of Object.entries(
       asset.semanticControls ?? {},
@@ -2090,11 +2154,17 @@ export const ArtworkPreparationSpecificationSchema = z
         overrides: CharcoalStyleOverridesSchema.optional(),
       })
       .strict(),
+    rigs: z.array(CutoutRigDefinitionSchema).default([]),
     assets: z.array(ArtworkPackageAssetSchema).min(1),
   })
   .strict()
   .superRefine((specification, context) => {
     const ids = new Set<string>();
+    const rigIds = new Set<string>();
+    for (const [index, rig] of specification.rigs.entries()) {
+      if (rigIds.has(rig.rigId)) context.addIssue({ code: 'custom', path: ['rigs', index, 'rigId'], message: `Duplicate rig ID "${rig.rigId}"` });
+      rigIds.add(rig.rigId);
+    }
     for (const [index, asset] of specification.assets.entries()) {
       const key = `${asset.assetId}@${asset.version}`;
       if (ids.has(key))
@@ -2104,6 +2174,11 @@ export const ArtworkPreparationSpecificationSchema = z
           message: `Duplicate immutable artwork asset ${key}`,
         });
       ids.add(key);
+      if (asset.rigId) {
+        const rig = specification.rigs.find((candidate) => candidate.rigId === asset.rigId);
+        if (!rig) context.addIssue({ code: 'custom', path: ['assets', index, 'rigId'], message: `Unknown rig definition "${asset.rigId}"` });
+        else for (const control of rig.controls) if (!(control.id in (asset.semanticControls ?? {}))) context.addIssue({ code: 'custom', path: ['assets', index, 'semanticControls', control.id], message: `Rig binding is missing semantic control "${control.id}"` });
+      }
     }
   });
 
