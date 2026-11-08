@@ -1,7 +1,6 @@
 import { createReadStream, existsSync } from 'node:fs';
 import {
   mkdir,
-  mkdtemp,
   readFile,
   readdir,
   rename,
@@ -11,7 +10,7 @@ import {
 } from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
-import { dirname, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   AssetVersionReferenceSchema,
@@ -211,6 +210,33 @@ function pngSize(header: Buffer): { width: number; height: number } {
   return { width: header.readUInt32BE(16), height: header.readUInt32BE(20) };
 }
 
+function validatePngStructure(buffer: Buffer): void {
+  let offset = 8;
+  let hasImageData = false;
+  let hasEnd = false;
+  while (offset + 12 <= buffer.length) {
+    const length = buffer.readUInt32BE(offset);
+    const type = buffer.toString('ascii', offset + 4, offset + 8);
+    const end = offset + 12 + length;
+    if (end > buffer.length)
+      throw new BlenderFailure(
+        'INCOMPLETE_OUTPUT',
+        'PNG contains a truncated chunk',
+      );
+    if (type === 'IDAT') hasImageData = true;
+    if (type === 'IEND') {
+      hasEnd = length === 0 && end === buffer.length;
+      break;
+    }
+    offset = end;
+  }
+  if (!hasImageData || !hasEnd)
+    throw new BlenderFailure(
+      'INCOMPLETE_OUTPUT',
+      'PNG is missing image data or a complete end chunk',
+    );
+}
+
 async function validateSequence(
   directory: string,
   expected: { frames: number; width: number; height: number },
@@ -239,10 +265,9 @@ async function validateSequence(
     const info = await stat(path);
     if (!info.isFile() || info.size === 0)
       throw new BlenderFailure('INCOMPLETE_OUTPUT', `Frame is empty: ${path}`);
-    const header = await readFile(path).then((buffer) =>
-      buffer.subarray(0, 24),
-    );
-    const size = pngSize(header);
+    const png = await readFile(path);
+    validatePngStructure(png);
+    const size = pngSize(png.subarray(0, 24));
     if (size.width !== expected.width || size.height !== expected.height) {
       throw new BlenderFailure(
         'INCOMPLETE_OUTPUT',
@@ -341,7 +366,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
     version: EXPECTED_BLENDER_VERSION,
   };
   readonly executablePath: string;
-  readonly samples: number;
+  readonly defaultSamples: number | undefined;
   #versionPromise: Promise<string> | undefined;
 
   constructor(
@@ -351,7 +376,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
     } = {},
   ) {
     this.executablePath = config.executablePath ?? defaultBlenderExecutable();
-    this.samples = config.samples ?? 8;
+    this.defaultSamples = config.samples;
   }
 
   async #inspectVersion(timeoutMs = 15_000): Promise<string> {
@@ -462,6 +487,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
     );
     const metrics: Record<string, number | string | boolean> = {};
     let workDirectoryToClean: string | undefined;
+    let retainPartialWork = false;
     const finishFailure = async (error: unknown): Promise<RenderShotResult> => {
       const failure = errorInfo(error);
       const receipt: FailedRenderReceipt = {
@@ -496,6 +522,63 @@ export class BlenderRendererAdapter implements RendererAdapter {
           'UNSUPPORTED_SETTINGS',
           'Manifest render policy does not select Blender',
         );
+      const profileSamples = { draft: 4, preview: 16, final: 64 } as const;
+      const renderOverrides = {
+        ...settings.qualityOverrides,
+        ...shot.renderOverrides,
+      };
+      const finalScale = Math.max(
+        1,
+        1920 / settings.outputDimensions.width,
+        1080 / settings.outputDimensions.height,
+      );
+      const profileDimensions =
+        settings.qualityProfile === 'draft'
+          ? { width: 854, height: 480 }
+          : settings.qualityProfile === 'preview'
+            ? { width: 1280, height: 720 }
+            : settings.qualityProfile === 'final'
+              ? {
+                  width:
+                    Math.ceil(
+                      (settings.outputDimensions.width * finalScale) / 2,
+                    ) * 2,
+                  height:
+                    Math.ceil(
+                      (settings.outputDimensions.height * finalScale) / 2,
+                    ) * 2,
+                }
+              : settings.outputDimensions;
+      const scaleOverride = renderOverrides.width
+        ? renderOverrides.width / profileDimensions.width
+        : renderOverrides.height
+          ? renderOverrides.height / profileDimensions.height
+          : 1;
+      const renderDimensions = {
+        width:
+          renderOverrides.width ??
+          Math.ceil((profileDimensions.width * scaleOverride) / 2) * 2,
+        height:
+          renderOverrides.height ??
+          Math.ceil((profileDimensions.height * scaleOverride) / 2) * 2,
+      };
+      const renderConfig = {
+        engine: settings.renderer.config.engine,
+        device: settings.renderer.config.device,
+        samples:
+          renderOverrides.samples ??
+          settings.renderer.config.samples ??
+          this.defaultSamples ??
+          profileSamples[settings.qualityProfile ?? 'preview'],
+        denoising:
+          renderOverrides.denoising ?? settings.renderer.config.denoising,
+        shadows: renderOverrides.shadows ?? 'high',
+        textures: renderOverrides.textures ?? 'high',
+        compositing: renderOverrides.compositing ?? true,
+        frameRate: renderOverrides.frameRate ?? settings.frameRate,
+        width: renderDimensions.width,
+        height: renderDimensions.height,
+      };
       if (!shot.scene)
         throw new BlenderFailure(
           'INVALID_INSTRUCTIONS',
@@ -675,10 +758,13 @@ export class BlenderRendererAdapter implements RendererAdapter {
         renderer: { id: RENDERER_ID, version: await this.#inspectVersion() },
         dependenciesHash,
         renderSettings: {
-          outputDimensions: settings.outputDimensions,
+          outputDimensions: renderDimensions,
           frameRate: settings.frameRate,
           engine: settings.renderer.config.engine,
-          samples: settings.renderer.config.samples ?? this.samples,
+          qualityProfile: settings.qualityProfile,
+          qualityOverrides: settings.qualityOverrides,
+          shotOverrides: shot.renderOverrides,
+          renderConfig,
           randomSeed: request.randomSeed,
         },
         fonts: [],
@@ -692,9 +778,12 @@ export class BlenderRendererAdapter implements RendererAdapter {
       if (cached) {
         const checksums = await validateSequence(outputDirectory, {
           frames: shot.durationFrames,
-          width: settings.outputDimensions.width,
-          height: settings.outputDimensions.height,
+          width: renderDimensions.width,
+          height: renderDimensions.height,
         });
+        const cachedWorker = JSON.parse(
+          await readFile(join(outputDirectory, 'worker-result.json'), 'utf8'),
+        ) as { backend?: string; engine?: string; samples?: number };
         const receipt: SuccessfulRenderReceipt = {
           jobId: request.jobId,
           shotId: shot.id,
@@ -707,14 +796,33 @@ export class BlenderRendererAdapter implements RendererAdapter {
           outputPaths: checksums.map((item) => item.path),
           outputChecksums: checksums,
           logs: ['Blender PNG sequence cache hit'],
-          metrics: { cacheHit: true, frameCount: shot.durationFrames },
+          metrics: {
+            cacheHit: true,
+            frameCount: shot.durationFrames,
+            renderEngine: renderConfig.engine,
+            requestedBackend: renderConfig.device,
+            selectedBackend: cachedWorker.backend ?? 'unknown',
+            samples: renderConfig.samples,
+            denoising: renderConfig.denoising,
+            width: renderDimensions.width,
+            height: renderDimensions.height,
+            frameRate: `${renderConfig.frameRate.numerator}/${renderConfig.frameRate.denominator}`,
+            shadows: renderConfig.shadows,
+            textures: renderConfig.textures,
+            compositing: renderConfig.compositing,
+            qualityProfile: settings.qualityProfile ?? 'custom',
+          },
         };
         await writeReceipt(receiptPath, receipt);
         return { status: 'success', receipt, cacheHit: true };
       }
       const parent = dirname(outputDirectory);
       await mkdir(parent, { recursive: true });
-      const workDirectory = await mkdtemp(join(parent, '.blender-work-'));
+      const workDirectory = join(
+        parent,
+        `.${basename(outputDirectory)}.${fingerprint.slice(0, 16)}.partial`,
+      );
+      await mkdir(workDirectory, { recursive: true });
       workDirectoryToClean = workDirectory;
       const stagedDirectory = join(workDirectory, 'artifact');
       const frameDirectory = join(stagedDirectory, 'frames');
@@ -724,12 +832,15 @@ export class BlenderRendererAdapter implements RendererAdapter {
       const workerSpec = {
         durationFrames: shot.durationFrames,
         frameRate: settings.frameRate,
-        width: settings.outputDimensions.width,
-        height: settings.outputDimensions.height,
-        samples: settings.renderer.config.samples ?? this.samples,
+        width: renderDimensions.width,
+        height: renderDimensions.height,
+        samples: renderConfig.samples,
+        renderConfig,
         randomSeed: request.randomSeed,
+        chunkFrames: 12,
         outputDirectory: stagedDirectory,
         style: scene.style,
+        renderOverrides,
         animationLibraryVersion: scene.animationLibraryVersion,
         environment: resolveAsset(scene.environment),
         groups: scene.groups,
@@ -752,9 +863,10 @@ export class BlenderRendererAdapter implements RendererAdapter {
         actions: scene.actions,
         motionCurves: scene.motionCurves,
       };
-      await writeFile(specPath, JSON.stringify(workerSpec), { flag: 'wx' });
+      await writeFile(specPath, JSON.stringify(workerSpec));
+      retainPartialWork = true;
       const startedRender = Date.now();
-      const processResult = await spawnCapture(
+      let processResult = await spawnCapture(
         this.executablePath,
         [
           '--background',
@@ -786,24 +898,95 @@ export class BlenderRendererAdapter implements RendererAdapter {
           'Blender render was interrupted',
           true,
         );
+      if (
+        processResult.code !== 0 &&
+        settings.renderer.config.engine === 'CYCLES' &&
+        settings.renderer.config.device === 'AUTO'
+      ) {
+        logs.push(
+          `Automatic GPU attempt failed; retrying this shot on Cycles CPU. Exit ${String(processResult.code)}.`,
+        );
+        await rm(frameDirectory, { recursive: true, force: true });
+        await mkdir(frameDirectory, { recursive: true });
+        const fallbackSpec = {
+          ...workerSpec,
+          renderConfig: { ...renderConfig, device: 'CPU' },
+        };
+        await writeFile(specPath, JSON.stringify(fallbackSpec));
+        processResult = await spawnCapture(
+          this.executablePath,
+          [
+            '--background',
+            '--factory-startup',
+            '--python',
+            WORKER_PATH,
+            '--',
+            specPath,
+          ],
+          {
+            timeoutMs: request.timeoutMs ?? 600_000,
+            ...(request.signal ? { signal: request.signal } : {}),
+          },
+        );
+        if (processResult.stdout.trim())
+          logs.push(...processResult.stdout.trim().split(/\r?\n/).slice(-500));
+        if (processResult.stderr.trim())
+          logs.push(...processResult.stderr.trim().split(/\r?\n/).slice(-500));
+        if (processResult.timedOut)
+          throw new BlenderFailure(
+            'TIMEOUT',
+            'Blender CPU fallback timed out',
+            true,
+          );
+        if (processResult.interrupted)
+          throw new BlenderFailure(
+            'INTERRUPTED',
+            'Blender CPU fallback was interrupted',
+            true,
+          );
+      }
+      metrics['renderDurationMs'] = Date.now() - startedRender;
       if (processResult.code !== 0)
         throw new BlenderFailure(
           'RENDER_CRASHED',
           `Blender exited with code ${String(processResult.code)}${processResult.signal ? ` (${processResult.signal})` : ''}: ${processResult.stderr || processResult.stdout}`,
           true,
         );
+      const workerResultPath = join(stagedDirectory, 'worker-result.json');
+      const workerResult = JSON.parse(
+        await readFile(workerResultPath, 'utf8'),
+      ) as {
+        backend?: string;
+        engine?: string;
+        samples?: number;
+        renderedFrames?: number;
+      };
       const stagedChecksums = await validateSequence(stagedDirectory, {
         frames: shot.durationFrames,
-        width: settings.outputDimensions.width,
-        height: settings.outputDimensions.height,
+        width: renderDimensions.width,
+        height: renderDimensions.height,
       });
       await promoteDirectory(stagedDirectory, outputDirectory);
+      retainPartialWork = false;
       const checksums = stagedChecksums.map((item) => ({
         ...item,
         path: item.path.replace(stagedDirectory, outputDirectory),
       }));
       metrics['frameCount'] = shot.durationFrames;
+      metrics['renderedFrames'] =
+        workerResult.renderedFrames ?? shot.durationFrames;
       metrics['cacheHit'] = false;
+      metrics['renderEngine'] = workerResult.engine ?? renderConfig.engine;
+      metrics['selectedBackend'] = workerResult.backend ?? 'unknown';
+      metrics['samples'] = workerResult.samples ?? renderConfig.samples;
+      metrics['renderWidth'] = renderDimensions.width;
+      metrics['renderHeight'] = renderDimensions.height;
+      metrics['qualityProfile'] = settings.qualityProfile ?? 'custom';
+      metrics['frameRate'] =
+        `${renderConfig.frameRate.numerator}/${renderConfig.frameRate.denominator}`;
+      metrics['shadows'] = renderConfig.shadows;
+      metrics['textures'] = renderConfig.textures;
+      metrics['compositing'] = renderConfig.compositing;
       const receipt: SuccessfulRenderReceipt = {
         jobId: request.jobId,
         shotId: shot.id,
@@ -832,7 +1015,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
     } catch (error) {
       return await finishFailure(error);
     } finally {
-      if (workDirectoryToClean)
+      if (workDirectoryToClean && !retainPartialWork)
         await rm(workDirectoryToClean, { recursive: true, force: true }).catch(
           () => undefined,
         );

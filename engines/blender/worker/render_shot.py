@@ -1,8 +1,10 @@
 """Fixed Blender worker. It accepts JSON data and never evaluates manifest code."""
 
 import json
+import hashlib
 import math
 import os
+import random
 import sys
 import traceback
 
@@ -20,7 +22,7 @@ def read_spec():
         return json.load(stream)
 
 
-def color_material(image, style, name, opacity=1.0):
+def color_material(image, style, name, opacity=1.0, seed=0):
     material = bpy.data.materials.new(name)
     nodes = material.node_tree.nodes
     links = material.node_tree.links
@@ -35,6 +37,7 @@ def color_material(image, style, name, opacity=1.0):
 
     texture = nodes.new("ShaderNodeTexImage")
     texture.image = image
+    texture.interpolation = {"low": "Closest", "medium": "Linear", "high": "Cubic"}.get(style.get("textureQuality", "high"), "Cubic")
     bw = nodes.new("ShaderNodeRGBToBW")
     ramp = nodes.new("ShaderNodeValToRGB")
     palette = ramp.color_ramp
@@ -48,13 +51,32 @@ def color_material(image, style, name, opacity=1.0):
     noise = nodes.new("ShaderNodeTexNoise")
     noise.inputs["Scale"].default_value = float(style["grainScale"])
     noise.inputs["Detail"].default_value = 2.0
+    noise.noise_dimensions = "4D"
+    noise.inputs["W"].default_value = 0.0
     multiply = nodes.new("ShaderNodeMixRGB")
     multiply.blend_type = "MULTIPLY"
     multiply.inputs[0].default_value = float(style["grainStrength"])
 
     uv = nodes.new("ShaderNodeTexCoord")
     links.new(uv.outputs["UV"], texture.inputs["Vector"])
-    links.new(uv.outputs["UV"], noise.inputs["Vector"])
+    mapping = nodes.new("ShaderNodeMapping")
+    links.new(uv.outputs["UV"], mapping.inputs["Vector"])
+    links.new(mapping.outputs["Vector"], noise.inputs["Vector"])
+    rng = random.Random(int(seed))
+    mapping.inputs["Location"].default_value[0] = rng.uniform(-0.025, 0.025)
+    stable_offset = int(hashlib.sha256(name.encode("utf-8")).hexdigest()[:8], 16)
+    boil_rng = random.Random(int(seed) ^ stable_offset)
+    for frame in range(1, int(style.get("durationFrames", 1)) + 1, 2):
+        noise.inputs["W"].default_value = boil_rng.random() * 4.0 * float(style.get("lineBoilStrength", 0.12))
+        material.node_tree.keyframe_insert(
+            data_path='nodes["' + noise.name + '"].inputs["W"].default_value',
+            frame=frame,
+        )
+    animation = material.node_tree.animation_data
+    if animation and animation.action:
+        for curve in animation.action.fcurves:
+            for point in curve.keyframe_points:
+                point.interpolation = "CONSTANT"
     links.new(texture.outputs["Color"], bw.inputs["Color"])
     links.new(bw.outputs["Val"], ramp.inputs["Fac"])
     links.new(ramp.outputs["Color"], multiply.inputs[1])
@@ -137,7 +159,7 @@ def create_sprite_layer(layer, style):
     sprite = bpy.data.objects.new("ARTWORK__" + layer["id"], mesh)
     bpy.context.scene.collection.objects.link(sprite)
     sprite.data.materials.append(
-        color_material(image, style, "ArtworkMaterial__" + layer["id"], layer.get("opacity", 1.0))
+        color_material(image, style, "ArtworkMaterial__" + layer["id"], layer.get("opacity", 1.0), style.get("seed", 0))
     )
 
     root = bpy.data.objects.new("LAYER__" + layer["id"], None)
@@ -193,7 +215,7 @@ def make_image_plane(asset, transform, style, name, width=None, height=None):
         loop_index.uv = uv_coord
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.scene.collection.objects.link(obj)
-    obj.data.materials.append(color_material(image, style, name + "Charcoal"))
+    obj.data.materials.append(color_material(image, style, name + "Charcoal", seed=style.get("seed", 0)))
     return obj
 
 
@@ -318,17 +340,113 @@ def create_haze_plane(spec, camera_distance):
     return obj
 
 
+def create_screen_paper(scene, camera, style, width, height):
+    """Camera-parented procedural paper overlay; UV coordinates stay screen-fixed."""
+    distance = 0.2
+    lens = float(camera.data.lens)
+    plane_width = distance * 36.0 / lens
+    plane_height = plane_width * float(height) / float(width)
+    mesh = bpy.data.meshes.new("ScreenFixedPaperMesh")
+    mesh.from_pydata(
+        [(-plane_width / 2, -plane_height / 2, 0), (plane_width / 2, -plane_height / 2, 0),
+         (plane_width / 2, plane_height / 2, 0), (-plane_width / 2, plane_height / 2, 0)],
+        [], [(0, 1, 2, 3)],
+    )
+    mesh.uv_layers.new(name="UVMap")
+    for loop, uv in zip(mesh.uv_layers.active.data, [(0, 0), (1, 0), (1, 1), (0, 1)]):
+        loop.uv = uv
+    obj = bpy.data.objects.new("ScreenFixedPaper", mesh)
+    scene.collection.objects.link(obj)
+    obj.parent = camera
+    obj.location = (0, 0, -distance)
+    material = bpy.data.materials.new("ScreenFixedPaperMaterial")
+    material.use_nodes = True
+    nodes = material.node_tree.nodes
+    links = material.node_tree.links
+    nodes.clear()
+    output = nodes.new("ShaderNodeOutputMaterial")
+    transparent = nodes.new("ShaderNodeBsdfTransparent")
+    emission = nodes.new("ShaderNodeEmission")
+    texcoord = nodes.new("ShaderNodeTexCoord")
+    fibers = nodes.new("ShaderNodeTexNoise")
+    fibers.inputs["Scale"].default_value = float(style.get("paperFiberScale", 240.0))
+    fibers.inputs["Detail"].default_value = 2.0
+    ramp = nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].color = (0.2, 0.18, 0.15, 1)
+    ramp.color_ramp.elements[1].color = (0.72, 0.68, 0.59, 1)
+    mix = nodes.new("ShaderNodeMixShader")
+    mix.inputs[0].default_value = float(style.get("paperOpacity", 0.045))
+    links.new(texcoord.outputs["UV"], fibers.inputs["Vector"])
+    links.new(fibers.outputs["Fac"], ramp.inputs["Fac"])
+    links.new(ramp.outputs["Color"], emission.inputs["Color"])
+    links.new(transparent.outputs["BSDF"], mix.inputs[1])
+    links.new(emission.outputs["Emission"], mix.inputs[2])
+    links.new(mix.outputs["Shader"], output.inputs["Surface"])
+    material.surface_render_method = "DITHERED"
+    obj.data.materials.append(material)
+    return obj
+
+
 def create_scene(spec):
     scene = bpy.context.scene
+    spec["style"]["seed"] = int(spec.get("randomSeed", 0))
+    spec["style"]["durationFrames"] = int(spec["durationFrames"])
+    spec["style"]["textureQuality"] = spec["renderConfig"].get("textures", "high")
     for obj in list(scene.objects):
         bpy.data.objects.remove(obj, do_unlink=True)
-    scene.render.engine = "BLENDER_EEVEE"
-    scene.eevee.taa_render_samples = int(spec["samples"])
+    config = spec["renderConfig"]
+    engine = config["engine"]
+    if engine == "BLENDER_EEVEE":
+        engine = "BLENDER_EEVEE_NEXT" if hasattr(scene, "eevee_next") else "BLENDER_EEVEE"
+    scene.render.engine = engine
+    if engine.startswith("BLENDER_EEVEE"):
+        eevee = getattr(scene, "eevee_next", None) or getattr(scene, "eevee", None)
+        if eevee is not None and hasattr(eevee, "taa_render_samples"):
+            eevee.taa_render_samples = int(config["samples"])
+        spec["selectedBackend"] = "EEVEE"
+    elif engine == "CYCLES":
+        scene.cycles.samples = int(config["samples"])
+        scene.cycles.use_denoising = bool(config.get("denoising", False))
+        preferences = bpy.context.preferences.addons["cycles"].preferences
+        requested = config.get("device", "AUTO")
+        detected_types = set()
+        backends = [requested] if requested not in {"AUTO", "CPU"} else ["OPTIX", "CUDA", "HIP", "METAL", "ONEAPI"]
+        for backend in backends:
+            try:
+                preferences.compute_device_type = backend
+                preferences.get_devices()
+                if any(device.type == backend for device in preferences.devices):
+                    detected_types.add(backend)
+            except Exception:
+                continue
+        if requested not in {"AUTO", "CPU"} and requested not in detected_types:
+            raise RuntimeError("Requested Cycles backend is unavailable: " + requested)
+        if requested == "AUTO":
+            priority = ["OPTIX", "CUDA", "HIP", "METAL", "ONEAPI"]
+            requested = next((backend for backend in priority if backend in detected_types), "CPU")
+        device = None
+        if requested != "CPU":
+            preferences.compute_device_type = requested
+            preferences.get_devices()
+            device = next((candidate for candidate in preferences.devices if candidate.type == requested), None)
+        if requested != "CPU" and device is None:
+            raise RuntimeError("Blender detected backend but did not expose a usable device: " + requested)
+        scene.cycles.device = "GPU" if device else "CPU"
+        for candidate in preferences.devices:
+            candidate.use = bool(device is not None and candidate == device)
+        spec["selectedBackend"] = device.type if device else "CPU"
+    elif engine == "BLENDER_WORKBENCH":
+        scene.display.shading.light = "STUDIO"
+        scene.display.shading.color_type = "MATERIAL"
+        spec["selectedBackend"] = "WORKBENCH"
+    else:
+        raise RuntimeError("Unsupported Blender engine: " + engine)
     scene.render.resolution_x = int(spec["width"])
     scene.render.resolution_y = int(spec["height"])
     scene.render.resolution_percentage = 100
     scene.render.fps = int(spec["frameRate"]["numerator"])
-    scene.render.fps_base = float(spec["frameRate"]["denominator"])
+    scene.render.fps_base = float(spec["renderConfig"].get("frameRate", spec["frameRate"])["denominator"])
+    scene.render.fps = int(spec["renderConfig"].get("frameRate", spec["frameRate"])["numerator"])
     scene.frame_start = 1
     scene.frame_end = int(spec["durationFrames"])
     scene.render.image_settings.file_format = "PNG"
@@ -343,9 +461,21 @@ def create_scene(spec):
     scene.view_settings.gamma = 1.0
     scene.world = bpy.data.worlds.new("Charcoal Horror World")
     scene.world.color = (0.045, 0.04, 0.035)
+    scene.use_nodes = bool(config.get("compositing", True))
+    if scene.use_nodes:
+        scene.node_tree.nodes.clear()
+        layers = scene.node_tree.nodes.new("CompositorNodeRLayers")
+        glow = scene.node_tree.nodes.new("CompositorNodeGlare")
+        glow.glare_type = "FOG_GLOW"
+        glow.threshold = 1.3
+        composite = scene.node_tree.nodes.new("CompositorNodeComposite")
+        scene.node_tree.links.new(layers.outputs["Image"], glow.inputs["Image"])
+        scene.node_tree.links.new(glow.outputs["Image"], composite.inputs["Image"])
+    shadow_quality = spec.get("renderConfig", {}).get("shadows", "high")
 
     key_data = bpy.data.lights.new("Soft Sepia Key", type="AREA")
     key_data.energy = float(spec["style"]["lighting"]["keyEnergy"])
+    key_data.use_shadow = shadow_quality != "off"
     key_data.shape = "DISK"
     key_data.size = float(spec["style"]["lighting"]["keySize"])
     key_data.color = tuple(float(value) for value in spec["style"]["lighting"]["keyColor"])
@@ -354,9 +484,18 @@ def create_scene(spec):
     key_position = spec["style"]["lighting"]["keyPosition"]
     key.location = tuple(float(value) for value in key_position)
     key.rotation_euler = (Vector((0.0, 0.0, 0.0)) - key.location).to_track_quat("-Z", "Y").to_euler()
+    flicker = random.Random(int(spec.get("randomSeed", 0)) ^ 0x5F3759DF)
+    for frame in range(1, int(spec["durationFrames"]) + 1, 3):
+        key_data.energy = float(spec["style"]["lighting"]["keyEnergy"]) * (1.0 + flicker.uniform(-0.045, 0.045))
+        key_data.keyframe_insert(data_path="energy", frame=frame)
+    if key_data.animation_data and key_data.animation_data.action:
+        for curve in key_data.animation_data.action.fcurves:
+            for point in curve.keyframe_points:
+                point.interpolation = "CONSTANT"
 
     fill_data = bpy.data.lights.new("Graphite bounce fill", type="AREA")
     fill_data.energy = float(spec["style"]["lighting"]["keyEnergy"]) * 0.38
+    fill_data.use_shadow = shadow_quality == "high"
     fill_data.size = 5.0
     fill_data.color = (0.68, 0.65, 0.6)
     fill = bpy.data.objects.new("Graphite bounce fill", fill_data)
@@ -368,6 +507,7 @@ def create_scene(spec):
         light_type = light_spec["type"].upper()
         light_data = bpy.data.lights.new("Prepared Light | " + light_spec["id"], type=light_type)
         light_data.energy = float(light_spec["energy"])
+        light_data.use_shadow = shadow_quality != "off" and shadow_quality == "high"
         light_data.color = tuple(float(value) for value in light_spec["color"])
         if light_type == "AREA":
             light_data.shape = "DISK"
@@ -468,6 +608,12 @@ def create_scene(spec):
             camera.location = (target.x, target.y - distance, target.z)
         camera.rotation_euler = (target - camera.location).to_track_quat("-Z", "Y").to_euler()
         camera.keyframe_insert(data_path="location", frame=frame)
+    paper = create_screen_paper(scene, camera, spec["style"], spec["width"], spec["height"])
+    for keyframe in spec["cameraKeyframes"]:
+        frame = int(keyframe["frame"])
+        focal_length = float(keyframe.get("focalLength", initial_focal_length))
+        paper.scale = (initial_focal_length / focal_length,) * 3
+        paper.keyframe_insert(data_path="scale", frame=frame)
         camera.keyframe_insert(data_path="rotation_euler", frame=frame)
         if "focalLength" in keyframe:
             camera_data.lens = float(keyframe["focalLength"])
@@ -1094,13 +1240,40 @@ def main():
     apply_motion_curves(spec, control_objects, entity_roots)
     blend_path = os.path.join(spec["outputDirectory"], "scene.blend")
     bpy.ops.wm.save_as_mainfile(filepath=blend_path)
-    bpy.ops.render.render(animation=True)
+    frame_dir = os.path.join(spec["outputDirectory"], "frames")
+    chunk_size = max(1, int(spec.get("chunkFrames", 12)))
+    rendered = 0
+    for chunk_start in range(1, int(spec["durationFrames"]) + 1, chunk_size):
+        chunk_end = min(int(spec["durationFrames"]), chunk_start + chunk_size - 1)
+        for frame in range(chunk_start, chunk_end + 1):
+            frame_path = os.path.join(frame_dir, "frame_%06d.png" % frame)
+            valid = False
+            try:
+                if os.path.getsize(frame_path) > 24:
+                    cached_image = bpy.data.images.load(frame_path, check_existing=False)
+                    valid = tuple(cached_image.size) == (int(spec["width"]), int(spec["height"])) and len(cached_image.pixels) > 0
+                    bpy.data.images.remove(cached_image)
+            except (OSError, RuntimeError):
+                valid = False
+            if valid:
+                continue
+            if os.path.exists(frame_path):
+                os.remove(frame_path)
+            scene.frame_set(frame)
+            bpy.context.scene.render.filepath = os.path.join(frame_dir, "frame_%06d" % frame)
+            bpy.ops.render.render(write_still=True)
+            rendered += 1
     result = {
         "status": "success",
         "frameCount": int(spec["durationFrames"]),
         "width": int(spec["width"]),
         "height": int(spec["height"]),
         "blendPath": blend_path,
+        "engine": bpy.context.scene.render.engine,
+        "backend": spec.get("selectedBackend", "unknown"),
+        "samples": int(spec["renderConfig"]["samples"]),
+        "denoising": bool(spec["renderConfig"].get("denoising", False)),
+        "renderedFrames": rendered,
     }
     with open(os.path.join(spec["outputDirectory"], "worker-result.json"), "w", encoding="utf-8") as stream:
         json.dump(result, stream, sort_keys=True)

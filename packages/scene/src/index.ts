@@ -14,7 +14,7 @@ export const SEMANTIC_ANIMATION_LIBRARY_VERSION = '1.0.0';
 
 export const CHARCOAL_HORROR_STYLE = {
   id: 'charcoal_horror',
-  version: '1.1.0',
+  version: '1.2.0',
   palette: {
     shadow: [0.065, 0.057, 0.049],
     graphite: [0.31, 0.285, 0.255],
@@ -31,6 +31,9 @@ export const CHARCOAL_HORROR_STYLE = {
   grainStrength: 0.09,
   vignetteStrength: 0.2,
   hazeStrength: 0.025,
+  paperFiberScale: 240,
+  paperOpacity: 0.045,
+  lineBoilStrength: 0.12,
 } as const;
 
 export type CompiledScene = CompiledSceneInstruction;
@@ -68,6 +71,11 @@ export function resolveCharcoalHorrorStyle(
     vignetteStrength:
       overrides.vignetteStrength ?? CHARCOAL_HORROR_STYLE.vignetteStrength,
     hazeStrength: overrides.hazeStrength ?? CHARCOAL_HORROR_STYLE.hazeStrength,
+    paperFiberScale:
+      overrides.paperFiberScale ?? CHARCOAL_HORROR_STYLE.paperFiberScale,
+    paperOpacity: overrides.paperOpacity ?? CHARCOAL_HORROR_STYLE.paperOpacity,
+    lineBoilStrength:
+      overrides.lineBoilStrength ?? CHARCOAL_HORROR_STYLE.lineBoilStrength,
   };
 }
 
@@ -82,7 +90,7 @@ export function compileScene(
   }
   const scene = ShotSceneSchema.parse(shot.scene);
   const style = resolveCharcoalHorrorStyle(scene.styleOverrides);
-  if (scene.styleVersion !== CHARCOAL_HORROR_STYLE.version)
+  if (!['1.1.0', CHARCOAL_HORROR_STYLE.version].includes(scene.styleVersion))
     throw new TypeError(
       `Unsupported charcoal_horror style version "${scene.styleVersion}"; available version is "${CHARCOAL_HORROR_STYLE.version}"`,
     );

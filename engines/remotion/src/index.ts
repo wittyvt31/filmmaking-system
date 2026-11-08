@@ -322,6 +322,16 @@ function validateSettings(request: RenderShotRequest): void {
       'Remotion adapter only supports the PreparedShot composition',
     );
   }
+  if (
+    request.settings.qualityProfile !== undefined ||
+    request.settings.qualityOverrides !== undefined ||
+    request.shot.renderOverrides !== undefined
+  ) {
+    throw new RenderFailure(
+      'UNSUPPORTED_SETTINGS',
+      'Remotion does not implement Blender quality profiles or render overrides; use Blender or omit those settings.',
+    );
+  }
   const policy = request.settings;
   if (
     policy.outputDimensions.width !== 1920 ||

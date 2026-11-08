@@ -19,6 +19,7 @@ import {
   type ProductionPackage,
   type ArtifactInspectionRequest,
   type RendererAdapter,
+  type RendererIdentity,
 } from '@filmmaking/contracts';
 import {
   prepareProductionPlan,
@@ -448,6 +449,10 @@ export async function executeProduction(
       checksum: string;
       cacheHit: boolean;
       verifyWithMedia: boolean;
+      renderConfiguration: {
+        renderer: RendererIdentity;
+        metrics: Record<string, number | string | boolean>;
+      };
     }[] = [];
     for (const job of prepared.renderPlan.jobs.filter(asShotJob)) {
       const shot = prepared.manifest.shots.find(
@@ -610,6 +615,10 @@ export async function executeProduction(
         checksum: shotChecksum,
         cacheHit: result.cacheHit,
         verifyWithMedia: usesImageSequence,
+        renderConfiguration: {
+          renderer: result.receipt.renderer,
+          metrics: result.receipt.metrics,
+        },
       });
       await log(
         `Shot ${shot.id} ${result.cacheHit ? 'cache hit' : 'rendered'}; SHA-256 ${shotChecksum || 'missing'}.`,
@@ -791,6 +800,7 @@ export async function executeProduction(
       manifestSha256: prepared.renderPlan.manifestSha256,
       timelineSha256: prepared.timeline.sha256,
       renderPlanSha256: prepared.renderPlan.sha256,
+      renderPolicy: prepared.manifest.renderPolicy,
       assemblyFingerprint,
       masterPath,
       shotReceipts,

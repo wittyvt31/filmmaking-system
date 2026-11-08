@@ -1,5 +1,6 @@
 import { createCommand } from 'commander';
 import { spawnSync } from 'node:child_process';
+import { cpus, totalmem } from 'node:os';
 import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { RendererSelectionSchema } from '@filmmaking/contracts';
@@ -178,6 +179,74 @@ function availableOnPath(executable: string): boolean {
     }).status === 0
   );
 }
+
+cli
+  .command('doctor')
+  .description(
+    'Inspect local Blender, render devices, CPU, memory and media tools.',
+  )
+  .option(
+    '--blender <path>',
+    'Blender executable (defaults to FILMIE_BLENDER or PATH)',
+  )
+  .action(({ blender }) => {
+    const blenderPath = blender ?? process.env['FILMIE_BLENDER'] ?? 'blender';
+    const version = spawnSync(blenderPath, ['--version'], {
+      encoding: 'utf8',
+      windowsHide: true,
+      timeout: 20_000,
+    });
+    const expression =
+      "import bpy,json; p=bpy.context.preferences.addons.get('cycles'); d=[]; q=p.preferences if p else None; [(setattr(q,'compute_device_type',t),q.get_devices(),d.extend([{'name':x.name,'type':x.type,'use':x.use} for x in q.devices if x.type==t])) for t in ['OPTIX','CUDA','HIP','METAL','ONEAPI']] if q else None; print('FILMIE_CAPABILITIES='+json.dumps({'version':bpy.app.version_string,'engines':[e.identifier for e in bpy.types.RenderSettings.bl_rna.properties['engine'].enum_items],'cyclesDevices':d}))";
+    const capability =
+      version.status === 0
+        ? spawnSync(
+            blenderPath,
+            ['--background', '--factory-startup', '--python-expr', expression],
+            { encoding: 'utf8', windowsHide: true, timeout: 60_000 },
+          )
+        : null;
+    const marker = capability?.stdout.match(/FILMIE_CAPABILITIES=(\{.*\})/);
+    const bundled = getBundledMediaExecutables();
+    const ffmpeg =
+      process.env['FILMIE_FFMPEG'] ??
+      (availableOnPath('ffmpeg') ? 'ffmpeg' : bundled.ffmpegPath);
+    const ffprobe =
+      process.env['FILMIE_FFPROBE'] ??
+      (availableOnPath('ffprobe') ? 'ffprobe' : bundled.ffprobePath);
+    const report = {
+      blender: {
+        executable: blenderPath,
+        pathAccessible: version.status === 0,
+        exitCode: version.status,
+        output: version.stdout.trim(),
+        error: version.stderr.trim(),
+        capabilities: marker?.[1] ? (JSON.parse(marker[1]) as unknown) : null,
+        capabilityExitCode: capability?.status ?? null,
+        capabilityError: capability?.stderr.trim() ?? '',
+      },
+      hardware: {
+        platform: process.platform,
+        cpu: cpus()[0]?.model ?? 'unknown',
+        logicalCores: cpus().length,
+        ramBytes: totalmem(),
+      },
+      media: {
+        ffmpeg,
+        ffmpegAvailable: availableOnPath(ffmpeg),
+        ffprobe,
+        ffprobeAvailable: availableOnPath(ffprobe),
+      },
+    };
+    printJson(report);
+    if (
+      version.status !== 0 ||
+      capability?.status !== 0 ||
+      !report.media.ffmpegAvailable ||
+      !report.media.ffprobeAvailable
+    )
+      process.exitCode = 1;
+  });
 
 projectOptions(
   cli

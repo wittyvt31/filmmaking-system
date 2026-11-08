@@ -44,6 +44,9 @@ export const CharcoalStyleOverridesSchema = z
     grainStrength: z.number().min(0).max(1).optional(),
     vignetteStrength: z.number().min(0).max(1).optional(),
     hazeStrength: z.number().min(0).max(1).optional(),
+    paperFiberScale: z.number().positive().max(2000).optional(),
+    paperOpacity: z.number().min(0).max(0.35).optional(),
+    lineBoilStrength: z.number().min(0).max(1).optional(),
   })
   .strict();
 export type CharcoalStyleOverrides = z.infer<
@@ -383,8 +386,28 @@ const RemotionRendererConfigurationSchema = z
 const BlenderRendererConfigurationSchema = z
   .object({
     executablePath: z.string().min(1).optional(),
-    engine: z.literal('BLENDER_EEVEE').default('BLENDER_EEVEE'),
-    samples: z.number().int().positive().max(64).default(8),
+    engine: z
+      .enum(['BLENDER_EEVEE', 'CYCLES', 'BLENDER_WORKBENCH'])
+      .default('BLENDER_EEVEE'),
+    device: z
+      .enum(['AUTO', 'CPU', 'OPTIX', 'CUDA', 'HIP', 'METAL', 'ONEAPI'])
+      .default('AUTO'),
+    samples: z.number().int().positive().max(4096).optional(),
+    denoising: z.boolean().default(false),
+  })
+  .strict();
+
+export const RenderQualityProfileSchema = z.enum(['draft', 'preview', 'final']);
+export const RenderQualityOverridesSchema = z
+  .object({
+    width: z.number().int().positive().safe().optional(),
+    height: z.number().int().positive().safe().optional(),
+    frameRate: RationalSchema.optional(),
+    samples: z.number().int().positive().max(4096).optional(),
+    denoising: z.boolean().optional(),
+    shadows: z.enum(['off', 'low', 'high']).optional(),
+    textures: z.enum(['low', 'medium', 'high']).optional(),
+    compositing: z.boolean().optional(),
   })
   .strict();
 
@@ -417,6 +440,8 @@ export const RenderPolicySchema = z
     pixelFormat: z.enum(['yuv420p', 'yuv422p10le', 'yuv444p10le', 'rgb24']),
     colorProfile: z.enum(['bt709', 'display-p3', 'bt2020']),
     quality: QualitySettingsSchema,
+    qualityProfile: RenderQualityProfileSchema.optional(),
+    qualityOverrides: RenderQualityOverridesSchema.optional(),
     renderer: RendererSelectionSchema,
   })
   .strict()
@@ -902,7 +927,7 @@ const SceneLightSchema = z.discriminatedUnion('type', [
 export const ShotSceneSchema = z
   .object({
     stylePreset: z.literal('charcoal_horror'),
-    styleVersion: AssetVersionReferenceSchema.shape.version.default('1.1.0'),
+    styleVersion: AssetVersionReferenceSchema.shape.version.default('1.2.0'),
     animationLibraryVersion:
       AssetVersionReferenceSchema.shape.version.default('1.0.0'),
     styleOverrides: CharcoalStyleOverridesSchema.optional(),
@@ -1013,6 +1038,7 @@ export const ShotSchema = z
     id: StableIdSchema,
     durationFrames: z.number().int().positive().safe(),
     visualDescription: nonEmptyText,
+    renderOverrides: RenderQualityOverridesSchema.optional(),
     composition: z
       .object({
         framing: nonEmptyText,
@@ -2126,6 +2152,9 @@ export interface CompiledSceneInstruction {
     grainStrength: number;
     vignetteStrength: number;
     hazeStrength: number;
+    paperFiberScale: number;
+    paperOpacity: number;
+    lineBoilStrength: number;
   };
   environment: z.infer<typeof AssetVersionReferenceSchema>;
   groups: z.infer<typeof ShotSceneSchema>['groups'];
