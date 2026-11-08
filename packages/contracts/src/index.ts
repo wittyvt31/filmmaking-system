@@ -537,6 +537,11 @@ export const CharacterActionSchema = z.discriminatedUnion('type', [
     expressionId: z.enum(['neutral', 'worried', 'stern', 'fearful']),
   }).strict(),
   SceneActionBaseSchema.extend({
+    type: z.literal('facial-variant'),
+    slotId: StableIdSchema,
+    variantId: StableIdSchema,
+  }).strict(),
+  SceneActionBaseSchema.extend({
     type: z.literal('lip-sync'),
     visemes: z
       .array(
@@ -1865,6 +1870,28 @@ const ArtworkPackageAssetSchema = z
     layers: z.array(ArtworkLayerSchema).min(1).max(512),
     variantSlots: z.array(ArtworkVariantSlotSchema).max(64).default([]),
     anchors: z.array(ArtworkAnchorSchema).max(256).default([]),
+    semanticControls: z
+      .partialRecord(
+        z.enum([
+          'root',
+          'hips',
+          'chest',
+          'head',
+          'left-arm',
+          'right-arm',
+          'left-leg',
+          'right-leg',
+          'left-hand',
+          'right-hand',
+          'left-eye',
+          'right-eye',
+          'left-brow',
+          'right-brow',
+          'mouth',
+        ]),
+        StableIdSchema,
+      )
+      .optional(),
   })
   .strict()
   .superRefine((asset, context) => {
@@ -1893,6 +1920,16 @@ const ArtworkPackageAssetSchema = z
         ...(node.parentId ? { parentId: node.parentId } : {}),
         path: node.path,
       });
+    }
+    for (const [control, nodeId] of Object.entries(
+      asset.semanticControls ?? {},
+    )) {
+      if (!nodes.has(nodeId))
+        context.addIssue({
+          code: 'custom',
+          path: ['semanticControls', control],
+          message: `Semantic control "${control}" references unknown artwork node "${nodeId}"`,
+        });
     }
     for (const node of nodeList) {
       if (node.parentId && !nodes.has(node.parentId))

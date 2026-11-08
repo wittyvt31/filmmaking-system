@@ -125,6 +125,26 @@ export function compileScene(
         );
       }
     }
+    const facialVariants = character.actions
+      .filter((action) => action.type === 'facial-variant')
+      .sort(
+        (left, right) =>
+          left.startFrame - right.startFrame ||
+          compareStrings(left.id, right.id),
+      );
+    for (let index = 1; index < facialVariants.length; index += 1) {
+      const previous = facialVariants[index - 1];
+      const current = facialVariants[index];
+      if (
+        previous?.type === 'facial-variant' &&
+        current?.type === 'facial-variant' &&
+        previous.slotId === current.slotId &&
+        current.startFrame < previous.endFrame
+      )
+        throw new TypeError(
+          `Overlapping facial variants "${previous.id}" and "${current.id}" target slot "${current.slotId}" on character "${character.id}"`,
+        );
+    }
   }
   const libraryMap = new Map(
     motionClipLibraries.map((library) => [

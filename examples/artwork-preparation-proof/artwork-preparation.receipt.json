@@ -1,17 +1,16 @@
 {
   "projectId": "filmie.artwork-preparation-proof",
-  "specificationSha256": "6200885f0ce5a07c6ac87c22c3a250fa087c3b3557b9e183f21af712d151fcf1",
+  "specificationSha256": "5a35bf82bcb05ce8db0531244e856a4875aaf22011c69f99ac35149fc4898df1",
   "implementationVersion": "layered-artwork-preparation-v2",
   "blenderVersion": "5.2.3",
-  "workerHash": "772e30ed4b5e3aafd68486b68a192c51ab42f22854097750bd5acf0e2016d16e",
+  "workerHash": "3a59d56df852128552ac4b839126aa780c02c94dc13150800d4e038f75334e27",
   "status": "success",
-  "createdAssetIds": [],
+  "createdAssetIds": ["character.father-cutout"],
   "reusedAssetIds": [
     "environment.moonlit-room",
-    "character.father-cutout",
     "prop.wooden-chair",
     "prop.rotary-telephone-illustration",
     "prop.kerosene-lantern-illustration"
   ],
-  "completedAt": "2026-11-08T10:23:10.917Z"
+  "completedAt": "2026-11-08T12:11:12.649Z"
 }

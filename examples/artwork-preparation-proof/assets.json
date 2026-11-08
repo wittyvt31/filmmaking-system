@@ -529,5 +529,446 @@
     "provenance": {
       "source": "Filmie layered artwork preparation; inputs art.prop.chair.chair-legs@1.0.0, art.prop.chair.chair-back@1.0.0, art.prop.chair.chair-seat@1.0.0"
     }
+  },
+  {
+    "assetId": "character.father-cutout",
+    "version": "1.0.2",
+    "type": "other",
+    "sourceUri": "assets/generated/character.father-cutout/1.0.2/asset.blend",
+    "contentHash": "316185b7217a6bad36cfc04b469c02231aa03a759bfa0b901b16082b4325d12e",
+    "metadata": {
+      "generator": "layered-artwork-preparation-v2",
+      "generatorFingerprint": "27225e5467abae575e541e5b7e1147af8862579ddd819c752701e41cdc3462c9",
+      "assetKind": "character",
+      "displayName": "Father charcoal cutout rig",
+      "blenderCollection": "ASSET__character_father_cutout",
+      "artworkLayers": [
+        {
+          "assetId": "art.father.torso.graphite",
+          "version": "1.0.0",
+          "contentHash": "74db4be6547f734d368d64b29c4f59115b91cc3629c811659ecaf47050426493"
+        },
+        {
+          "assetId": "art.father.head",
+          "version": "1.0.0",
+          "contentHash": "d57307661f155fd3b40586b5802955c1136bdd0ac58269c8f97b7b214b2d8a2d"
+        },
+        {
+          "assetId": "art.father.hair",
+          "version": "1.0.0",
+          "contentHash": "5df62066222cd85fe58e271f08171714f2a6bc36a640d702e6f0089578102971"
+        },
+        {
+          "assetId": "art.father.arm-left",
+          "version": "1.0.0",
+          "contentHash": "d46b10a8feee93dae9ddb17d7cc59987c243a94728653ce7aa2df976b08b0891"
+        },
+        {
+          "assetId": "art.father.arm-right",
+          "version": "1.0.0",
+          "contentHash": "f418e3c4831d81551d357d24eec7a7f0838f96b7af3beb0d43cb57f25b6b3633"
+        },
+        {
+          "assetId": "art.father.eyes.calm",
+          "version": "1.0.0",
+          "contentHash": "12918429a8eb42d39d1deaad7c5867de107d3327ff1007e554427679f735d247"
+        },
+        {
+          "assetId": "art.father.eyes.alarmed",
+          "version": "1.0.0",
+          "contentHash": "007690c642a8067ddeb919b9d9f9213ee4443eea40d0606e13edab2efca1925c"
+        },
+        {
+          "assetId": "art.father.mouth.calm",
+          "version": "1.0.0",
+          "contentHash": "0881c1906f264b934aaa15eccec5d118e9593a76ffc2338b06800a3429a81b6f"
+        },
+        {
+          "assetId": "art.father.mouth.alarmed",
+          "version": "1.0.0",
+          "contentHash": "f2f8b501e47c15a4f37aa6a788564679e53bd7c167414fd27a978267cd5d98fa"
+        }
+      ],
+      "layerCount": 9,
+      "groupCount": 6,
+      "variantSlots": ["face.eyes", "face.mouth"],
+      "anchors": ["hand.left", "hand.right", "head.center"],
+      "semanticControls": {
+        "chest": "rig.chest",
+        "head": "rig.head",
+        "left-arm": "rig.arm.left",
+        "right-arm": "rig.arm.right",
+        "left-hand": "rig.arm.left",
+        "right-hand": "rig.arm.right",
+        "left-eye": "rig.eyes",
+        "right-eye": "rig.eyes"
+      },
+      "variantDefinitions": {
+        "face.eyes": {
+          "defaultVariant": "calm",
+          "variants": ["calm", "alarmed"]
+        },
+        "face.mouth": {
+          "defaultVariant": "calm",
+          "variants": ["calm", "alarmed"]
+        }
+      },
+      "stylePreset": "charcoal_horror",
+      "styleVersion": "1.1.0"
+    },
+    "license": {
+      "name": "Composite artwork package; source licenses apply",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "Filmie layered artwork preparation; inputs art.father.torso.graphite@1.0.0, art.father.head@1.0.0, art.father.hair@1.0.0, art.father.arm-left@1.0.0, art.father.arm-right@1.0.0, art.father.eyes.calm@1.0.0, art.father.eyes.alarmed@1.0.0, art.father.mouth.calm@1.0.0, art.father.mouth.alarmed@1.0.0"
+    }
+  },
+  {
+    "assetId": "environment.moonlit-room",
+    "version": "1.0.1",
+    "type": "other",
+    "sourceUri": "assets/generated/environment.moonlit-room/1.0.1/asset.blend",
+    "contentHash": "90dd7dd37961a4da0eb01d036a704573e3cc0d9f6a9959252be875809859d9a6",
+    "metadata": {
+      "generator": "layered-artwork-preparation-v2",
+      "generatorFingerprint": "390c052d1e10a6bba22e662ac9bead0bf352f9ee08af5942f483652ea82298db",
+      "assetKind": "environment",
+      "displayName": "Moonlit plaster room",
+      "blenderCollection": "ASSET__environment_moonlit_room",
+      "artworkLayers": [
+        {
+          "assetId": "art.room.back",
+          "version": "1.0.0",
+          "contentHash": "aa227f603d4aefbe7eb9962f09c00a45282d667271b7134d7ee30fa2e4a4c7f2"
+        },
+        {
+          "assetId": "art.room.floor",
+          "version": "1.0.0",
+          "contentHash": "6e06659e722ebb491cecc4173df5ce96b474099b48fdb1273f146b222d63c8d8"
+        }
+      ],
+      "layerCount": 2,
+      "groupCount": 2,
+      "variantSlots": [],
+      "anchors": [],
+      "semanticControls": {},
+      "variantDefinitions": {},
+      "stylePreset": "charcoal_horror",
+      "styleVersion": "1.1.0"
+    },
+    "license": {
+      "name": "Composite artwork package; source licenses apply",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "Filmie layered artwork preparation; inputs art.room.back@1.0.0, art.room.floor@1.0.0"
+    }
+  },
+  {
+    "assetId": "prop.kerosene-lantern-illustration",
+    "version": "1.0.1",
+    "type": "other",
+    "sourceUri": "assets/generated/prop.kerosene-lantern-illustration/1.0.1/asset.blend",
+    "contentHash": "d2d4cf8ee4b7bc70ca43320bf81f5fa6493f07ee8ac1e362ad87ac946279706e",
+    "metadata": {
+      "generator": "layered-artwork-preparation-v2",
+      "generatorFingerprint": "917ab30695734e8adcc645f3982ea2da53db0d64c38941ad26beace7160b5191",
+      "assetKind": "prop",
+      "displayName": "Kerosene lantern illustration",
+      "blenderCollection": "ASSET__prop_kerosene_lantern_illustration",
+      "artworkLayers": [
+        {
+          "assetId": "art.prop.lantern",
+          "version": "1.0.0",
+          "contentHash": "4de25e8bc144751d61ba69d9477bf779807b952dd4c34251b2482c88e18d683b"
+        }
+      ],
+      "layerCount": 1,
+      "groupCount": 1,
+      "variantSlots": [],
+      "anchors": ["handle.center"],
+      "semanticControls": {},
+      "variantDefinitions": {},
+      "stylePreset": "charcoal_horror",
+      "styleVersion": "1.1.0"
+    },
+    "license": {
+      "name": "Composite artwork package; source licenses apply",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "Filmie layered artwork preparation; inputs art.prop.lantern@1.0.0"
+    }
+  },
+  {
+    "assetId": "prop.rotary-telephone-illustration",
+    "version": "1.0.1",
+    "type": "other",
+    "sourceUri": "assets/generated/prop.rotary-telephone-illustration/1.0.1/asset.blend",
+    "contentHash": "a4de4795b131ef0a6c5ce795585776d12197032146aaa6dd7c4d96eb4e95c7be",
+    "metadata": {
+      "generator": "layered-artwork-preparation-v2",
+      "generatorFingerprint": "2adc6899e5a63a38831e58fa8617e320e19f009230a87df348bf8534b4980025",
+      "assetKind": "prop",
+      "displayName": "Rotary telephone illustration",
+      "blenderCollection": "ASSET__prop_rotary_telephone_illustration",
+      "artworkLayers": [
+        {
+          "assetId": "art.prop.telephone",
+          "version": "1.0.0",
+          "contentHash": "ce5cacc9bece7ae37048e306d5f075fa6bb39be0f6e419f8709246fcf0192100"
+        }
+      ],
+      "layerCount": 1,
+      "groupCount": 1,
+      "variantSlots": [],
+      "anchors": ["receiver.grip"],
+      "semanticControls": {},
+      "variantDefinitions": {},
+      "stylePreset": "charcoal_horror",
+      "styleVersion": "1.1.0"
+    },
+    "license": {
+      "name": "Composite artwork package; source licenses apply",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "Filmie layered artwork preparation; inputs art.prop.telephone@1.0.0"
+    }
+  },
+  {
+    "assetId": "prop.wooden-chair",
+    "version": "1.0.1",
+    "type": "other",
+    "sourceUri": "assets/generated/prop.wooden-chair/1.0.1/asset.blend",
+    "contentHash": "05e20bd3d7bd97d5bd7bfa22af0ee15bdbdf277d4bf302b251a1499cfe54a0cb",
+    "metadata": {
+      "generator": "layered-artwork-preparation-v2",
+      "generatorFingerprint": "2073e9e7839aa55d16e6b4c10432f9d98b6f72b106f7c179ad7cc944dbb75790",
+      "assetKind": "prop",
+      "displayName": "Worn wooden chair",
+      "blenderCollection": "ASSET__prop_wooden_chair",
+      "artworkLayers": [
+        {
+          "assetId": "art.prop.chair.chair-legs",
+          "version": "1.0.0",
+          "contentHash": "f4f11f41c8877fd882ee5c3ebe11b397395d7c6468f7533ca08524a73acb7d56"
+        },
+        {
+          "assetId": "art.prop.chair.chair-back",
+          "version": "1.0.0",
+          "contentHash": "4bc39ef1959705ca70049669abed8c6b4aa81a91ea31425f2e59431c4412c5e3"
+        },
+        {
+          "assetId": "art.prop.chair.chair-seat",
+          "version": "1.0.0",
+          "contentHash": "7c28ce7af9d6e92b13d952d5d6fb893c08b3a4948b0db7102734cfeafb9fafcb"
+        }
+      ],
+      "layerCount": 3,
+      "groupCount": 1,
+      "variantSlots": [],
+      "anchors": ["seat.center"],
+      "semanticControls": {},
+      "variantDefinitions": {},
+      "stylePreset": "charcoal_horror",
+      "styleVersion": "1.1.0"
+    },
+    "license": {
+      "name": "Composite artwork package; source licenses apply",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "Filmie layered artwork preparation; inputs art.prop.chair.chair-legs@1.0.0, art.prop.chair.chair-back@1.0.0, art.prop.chair.chair-seat@1.0.0"
+    }
+  },
+  {
+    "assetId": "character.father-cutout",
+    "version": "1.0.3",
+    "type": "other",
+    "sourceUri": "assets/generated/character.father-cutout/1.0.3/asset.blend",
+    "contentHash": "76faa06e462ecb130668e6f2ad1cf97f14fb57db1fd6cdcfbc92af035aabb82a",
+    "metadata": {
+      "generator": "layered-artwork-preparation-v2",
+      "generatorFingerprint": "41b386ca2832b1e64faf3b65de96ab423842616e6ae1ba5499752f36a96233cf",
+      "assetKind": "character",
+      "displayName": "Father charcoal cutout rig",
+      "blenderCollection": "ASSET__character_father_cutout",
+      "artworkLayers": [
+        {
+          "assetId": "art.father.torso.graphite",
+          "version": "1.0.0",
+          "contentHash": "74db4be6547f734d368d64b29c4f59115b91cc3629c811659ecaf47050426493"
+        },
+        {
+          "assetId": "art.father.head",
+          "version": "1.0.0",
+          "contentHash": "d57307661f155fd3b40586b5802955c1136bdd0ac58269c8f97b7b214b2d8a2d"
+        },
+        {
+          "assetId": "art.father.hair",
+          "version": "1.0.0",
+          "contentHash": "5df62066222cd85fe58e271f08171714f2a6bc36a640d702e6f0089578102971"
+        },
+        {
+          "assetId": "art.father.arm-left",
+          "version": "1.0.0",
+          "contentHash": "d46b10a8feee93dae9ddb17d7cc59987c243a94728653ce7aa2df976b08b0891"
+        },
+        {
+          "assetId": "art.father.arm-right",
+          "version": "1.0.0",
+          "contentHash": "f418e3c4831d81551d357d24eec7a7f0838f96b7af3beb0d43cb57f25b6b3633"
+        },
+        {
+          "assetId": "art.father.eyes.calm",
+          "version": "1.0.0",
+          "contentHash": "12918429a8eb42d39d1deaad7c5867de107d3327ff1007e554427679f735d247"
+        },
+        {
+          "assetId": "art.father.eyes.alarmed",
+          "version": "1.0.0",
+          "contentHash": "007690c642a8067ddeb919b9d9f9213ee4443eea40d0606e13edab2efca1925c"
+        },
+        {
+          "assetId": "art.father.mouth.calm",
+          "version": "1.0.0",
+          "contentHash": "0881c1906f264b934aaa15eccec5d118e9593a76ffc2338b06800a3429a81b6f"
+        },
+        {
+          "assetId": "art.father.mouth.alarmed",
+          "version": "1.0.0",
+          "contentHash": "f2f8b501e47c15a4f37aa6a788564679e53bd7c167414fd27a978267cd5d98fa"
+        }
+      ],
+      "layerCount": 9,
+      "groupCount": 6,
+      "variantSlots": ["face.eyes", "face.mouth"],
+      "anchors": ["hand.left", "hand.right", "head.center"],
+      "semanticControls": {
+        "chest": "rig.chest",
+        "head": "rig.head",
+        "left-arm": "rig.arm.left",
+        "right-arm": "rig.arm.right",
+        "left-hand": "rig.arm.left",
+        "right-hand": "rig.arm.right",
+        "left-eye": "rig.eyes",
+        "right-eye": "rig.eyes"
+      },
+      "variantDefinitions": {
+        "face.eyes": {
+          "defaultVariant": "calm",
+          "variants": ["calm", "alarmed"]
+        },
+        "face.mouth": {
+          "defaultVariant": "calm",
+          "variants": ["calm", "alarmed"]
+        }
+      },
+      "stylePreset": "charcoal_horror",
+      "styleVersion": "1.1.0"
+    },
+    "license": {
+      "name": "Composite artwork package; source licenses apply",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "Filmie layered artwork preparation; inputs art.father.torso.graphite@1.0.0, art.father.head@1.0.0, art.father.hair@1.0.0, art.father.arm-left@1.0.0, art.father.arm-right@1.0.0, art.father.eyes.calm@1.0.0, art.father.eyes.alarmed@1.0.0, art.father.mouth.calm@1.0.0, art.father.mouth.alarmed@1.0.0"
+    }
+  },
+  {
+    "assetId": "character.father-cutout",
+    "version": "1.0.4",
+    "type": "other",
+    "sourceUri": "assets/generated/character.father-cutout/1.0.4/asset.blend",
+    "contentHash": "377997116625f8bed2da751deec3be41618a01a4051f5284a7c92cb4abb18e4d",
+    "metadata": {
+      "generator": "layered-artwork-preparation-v2",
+      "generatorFingerprint": "cab31749d05582f81c0fe72a80cacbaee25d082b58d9c4d9e71a21cf2f362a3e",
+      "assetKind": "character",
+      "displayName": "Father charcoal cutout rig",
+      "blenderCollection": "ASSET__character_father_cutout",
+      "artworkLayers": [
+        {
+          "assetId": "art.father.torso.graphite",
+          "version": "1.0.0",
+          "contentHash": "74db4be6547f734d368d64b29c4f59115b91cc3629c811659ecaf47050426493"
+        },
+        {
+          "assetId": "art.father.head",
+          "version": "1.0.0",
+          "contentHash": "d57307661f155fd3b40586b5802955c1136bdd0ac58269c8f97b7b214b2d8a2d"
+        },
+        {
+          "assetId": "art.father.hair",
+          "version": "1.0.0",
+          "contentHash": "5df62066222cd85fe58e271f08171714f2a6bc36a640d702e6f0089578102971"
+        },
+        {
+          "assetId": "art.father.arm-left",
+          "version": "1.0.0",
+          "contentHash": "d46b10a8feee93dae9ddb17d7cc59987c243a94728653ce7aa2df976b08b0891"
+        },
+        {
+          "assetId": "art.father.arm-right",
+          "version": "1.0.0",
+          "contentHash": "f418e3c4831d81551d357d24eec7a7f0838f96b7af3beb0d43cb57f25b6b3633"
+        },
+        {
+          "assetId": "art.father.eyes.calm",
+          "version": "1.0.0",
+          "contentHash": "12918429a8eb42d39d1deaad7c5867de107d3327ff1007e554427679f735d247"
+        },
+        {
+          "assetId": "art.father.eyes.alarmed",
+          "version": "1.0.0",
+          "contentHash": "007690c642a8067ddeb919b9d9f9213ee4443eea40d0606e13edab2efca1925c"
+        },
+        {
+          "assetId": "art.father.mouth.calm",
+          "version": "1.0.0",
+          "contentHash": "0881c1906f264b934aaa15eccec5d118e9593a76ffc2338b06800a3429a81b6f"
+        },
+        {
+          "assetId": "art.father.mouth.alarmed",
+          "version": "1.0.0",
+          "contentHash": "f2f8b501e47c15a4f37aa6a788564679e53bd7c167414fd27a978267cd5d98fa"
+        }
+      ],
+      "layerCount": 9,
+      "groupCount": 6,
+      "variantSlots": ["face.eyes", "face.mouth"],
+      "anchors": ["hand.left", "hand.right", "head.center"],
+      "semanticControls": {
+        "chest": "rig.chest",
+        "head": "rig.head",
+        "left-arm": "rig.arm.left",
+        "right-arm": "rig.arm.right",
+        "left-hand": "rig.arm.left",
+        "right-hand": "rig.arm.right",
+        "left-eye": "rig.eyes",
+        "right-eye": "rig.eyes"
+      },
+      "variantDefinitions": {
+        "face.eyes": {
+          "defaultVariant": "calm",
+          "variants": ["calm", "alarmed"]
+        },
+        "face.mouth": {
+          "defaultVariant": "calm",
+          "variants": ["calm", "alarmed"]
+        }
+      },
+      "stylePreset": "charcoal_horror",
+      "styleVersion": "1.1.0"
+    },
+    "license": {
+      "name": "Composite artwork package; source licenses apply",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "Filmie layered artwork preparation; inputs art.father.torso.graphite@1.0.0, art.father.head@1.0.0, art.father.hair@1.0.0, art.father.arm-left@1.0.0, art.father.arm-right@1.0.0, art.father.eyes.calm@1.0.0, art.father.eyes.alarmed@1.0.0, art.father.mouth.calm@1.0.0, art.father.mouth.alarmed@1.0.0"
+    }
   }
 ]

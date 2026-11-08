@@ -14,6 +14,27 @@ async function proofManifest(): Promise<Record<string, unknown>> {
 }
 
 describe('renderer-independent scene compiler', () => {
+  it('compiles prepared cutout actions and time-addressed facial variants', async () => {
+    const manifest = parseProjectManifest(
+      JSON.parse(
+        await readFile(
+          resolve('examples/artwork-preparation-proof/manifest.json'),
+          'utf8',
+        ),
+      ) as unknown,
+    );
+    const shot = manifest.shots[0];
+    if (!shot) throw new Error('Missing animated cutout proof shot.');
+    const compiled = compileScene(shot, manifest.video.frameRate);
+    expect(compiled.actions.map(({ action }) => action.type)).toContain(
+      'facial-variant',
+    );
+    expect(compiled.actions.map(({ action }) => action.id)).toContain(
+      'father.lifts',
+    );
+    expect(compiled.durationFrames).toBe(150);
+  });
+
   it('produces identical frame instructions and hashes for an unchanged scene', async () => {
     const manifest = parseProjectManifest(await proofManifest());
     const shot = manifest.shots[0];

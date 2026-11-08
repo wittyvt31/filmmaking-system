@@ -527,6 +527,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
         'head-turn',
         'blink',
         'expression',
+        'facial-variant',
         'walk',
         'run',
         'jump',
@@ -570,6 +571,62 @@ export class BlenderRendererAdapter implements RendererAdapter {
           );
         assetMap.set(assetKey(reference), asset);
       }
+      const requiredControls: Record<string, readonly string[]> = {
+        breathing: ['chest'],
+        'head-turn': ['head'],
+        blink: ['left-eye', 'right-eye'],
+        expression: ['left-brow', 'right-brow'],
+        celebrate: ['chest', 'left-arm', 'right-arm'],
+        walk: ['left-leg', 'right-leg'],
+        run: ['left-leg', 'right-leg'],
+        kick: [],
+        reach: [],
+        grasp: [],
+        lift: [],
+        place: [],
+        interaction: ['head'],
+        'facial-variant': [],
+        'motion-clip': [],
+        jump: [],
+        'lip-sync': ['mouth'],
+        sit: ['chest', 'left-leg', 'right-leg'],
+        stand: ['chest', 'left-leg', 'right-leg'],
+      };
+      for (const { characterId, action } of compiledScene.actions) {
+        const character = compiledScene.characters.find(
+          (candidate) => candidate.id === characterId,
+        );
+        const rig = character
+          ? assetMap.get(assetKey(character.artwork))
+          : undefined;
+        if (!character || !rig)
+          throw new BlenderFailure(
+            'MISSING_ASSET',
+            `Character artwork could not be resolved for action "${action.id}"`,
+          );
+        const controls = (rig.metadata['semanticControls'] ?? {}) as Record<
+          string,
+          unknown
+        >;
+        for (const control of requiredControls[action.type] ?? []) {
+          if (typeof controls[control] !== 'string')
+            throw new BlenderFailure(
+              'INVALID_INSTRUCTIONS',
+              `Action "${action.id}" requires semantic rig control "${control}" on character "${characterId}"; map it in the prepared artwork specification.`,
+            );
+        }
+        if (action.type === 'facial-variant') {
+          const definitions = (rig.metadata['variantDefinitions'] ??
+            {}) as Record<string, { variants?: unknown } | undefined>;
+          const variants = definitions[action.slotId]?.variants;
+          if (!Array.isArray(variants) || !variants.includes(action.variantId))
+            throw new BlenderFailure(
+              'INVALID_INSTRUCTIONS',
+              `Action "${action.id}" requests undeclared facial variant ${action.slotId}=${action.variantId} on "${characterId}".`,
+            );
+        }
+      }
+
       const resolveAsset = (reference: {
         assetId: string;
         version: string;

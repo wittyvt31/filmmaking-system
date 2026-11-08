@@ -239,6 +239,20 @@ def instantiate_asset(asset, transform, style, entity_id):
         for obj in collection.objects
         if obj.get("filmie_control_id") or obj.name.startswith("RIG_")
     }
+    try:
+        semantic_controls = json.loads(root.get("filmie_semantic_controls", "{}"))
+    except (TypeError, json.JSONDecodeError) as error:
+        raise RuntimeError("Prepared asset has malformed semantic control metadata") from error
+    for semantic_id, node_id in semantic_controls.items():
+        control = next(
+            (obj for obj in collection.objects if obj.get("filmie_node_id") == node_id),
+            None,
+        )
+        if control is None:
+            raise RuntimeError(
+                "Prepared asset semantic control " + semantic_id + " references missing node " + node_id
+            )
+        controls[semantic_id] = control
     legacy_semantic_names = {
         "RIG_chest": "chest", "RIG_head": "head",
         "RIG_arm.L": "left-arm", "RIG_arm.R": "right-arm",
@@ -518,14 +532,102 @@ def bind_authoritative_rig(control_objects):
                 ik_target["filmie_drives_from"] = hand_control.name
 
 
+def apply_facial_variants(actions, scene, entity_roots):
+    """Drive declared artwork alternatives as frame-dependent visibility states."""
+    schedules = {}
+    for instruction in actions:
+        action = instruction["action"]
+        if action["type"] != "facial-variant":
+            continue
+        character_id = instruction["characterId"]
+        slot_id = action["slotId"]
+        root = entity_roots.get(character_id)
+        if root is None:
+            raise RuntimeError("Facial variant requires a valid character asset")
+        try:
+            variants = json.loads(root.get("filmie_variant_map_" + slot_id, "[]"))
+        except (TypeError, json.JSONDecodeError) as error:
+            raise RuntimeError("Character has malformed facial variant metadata") from error
+        if action["variantId"] not in variants:
+            raise RuntimeError(
+                "Character has no declared variant " + slot_id + "=" + action["variantId"]
+            )
+        default_index = int(root.get("filmie_variant_" + slot_id, -1))
+        if default_index < 0 or default_index >= len(variants):
+            raise RuntimeError("Character facial variant default is invalid for " + slot_id)
+        key = (character_id, slot_id)
+        schedules.setdefault(key, {"root": root, "default": variants[default_index], "events": []})["events"].append(
+            (int(action["startFrame"]) + 1, int(action["endFrame"]), action["variantId"])
+        )
+
+    for (character_id, slot_id), schedule in schedules.items():
+        events = sorted(schedule["events"])
+        root = schedule["root"]
+        descendants = []
+        for obj in scene.objects:
+            ancestor = obj
+            while ancestor is not None and ancestor != root:
+                ancestor = ancestor.parent
+            if ancestor == root and obj.get("filmie_variant_slot") == slot_id:
+                descendants.append(obj)
+        if not descendants:
+            raise RuntimeError("Character has no rendered artwork for variant slot " + slot_id)
+        for obj in descendants:
+            variant_id = obj.get("filmie_variant_id")
+            conditions = [
+                "((frame >= %d and frame <= %d) and %d)"
+                % (start, end, int(variant_id != selected))
+                for start, end, selected in events
+            ]
+            conditions.append(
+                "((%s) and %d)"
+                % (
+                    " and ".join("not (frame >= %d and frame <= %d)" % (start, end) for start, end, _selected in events),
+                    int(variant_id != schedule["default"]),
+                )
+            )
+            driver = obj.driver_add("hide_render").driver
+            driver.type = "SCRIPTED"
+            variable = driver.variables.new()
+            variable.name = "frame"
+            variable.type = "SINGLE_PROP"
+            variable.targets[0].id_type = "SCENE"
+            variable.targets[0].id = scene
+            variable.targets[0].data_path = "frame_current"
+            driver.expression = " or ".join(conditions)
+
+
+def resolve_asset_anchor(target, anchor_id):
+    """Resolve prepared child anchors in world space, with legacy metadata fallback."""
+    for candidate in bpy.context.scene.objects:
+        if candidate.get("filmie_anchor_id") != anchor_id:
+            continue
+        ancestor = candidate.parent
+        while ancestor is not None and ancestor != target:
+            ancestor = ancestor.parent
+        if ancestor == target:
+            bpy.context.view_layer.update()
+            return candidate.matrix_world.translation.copy()
+    try:
+        anchors = json.loads(target.get("filmie_anchors", "{}"))
+    except (TypeError, json.JSONDecodeError) as error:
+        raise RuntimeError("Target asset has malformed anchor metadata") from error
+    anchor = anchors.get(anchor_id)
+    if anchor is None:
+        raise RuntimeError("Target asset does not define anchor " + anchor_id)
+    return target.matrix_world @ Vector(anchor)
+
+
 def apply_actions(spec, entity_roots, control_objects):
     if spec.get("animationLibraryVersion") != "1.0.0":
         raise RuntimeError("Unsupported semantic animation library version: " + str(spec.get("animationLibraryVersion")))
     scene = bpy.context.scene
     bind_authoritative_rig(control_objects)
+    apply_facial_variants(spec["actions"], scene, entity_roots)
     action_priority = {
         "walk": 0, "run": 0, "jump": 0,
         "breathing": 1, "head-turn": 1, "blink": 1, "expression": 1,
+        "facial-variant": 1,
         "lip-sync": 1, "celebrate": 1, "sit": 1, "stand": 1,
         "interaction": 2, "kick": 2, "reach": 3, "grasp": 4,
         "lift": 5, "place": 6, "motion-clip": 7,
@@ -544,6 +646,10 @@ def apply_actions(spec, entity_roots, control_objects):
         if action["type"] == "motion-clip":
             continue
         controls = control_objects.get(character_id, {})
+        character_root = entity_roots.get(character_id)
+        is_cutout_rig = bool(
+            character_root and character_root.get("filmie_semantic_controls")
+        )
         start = int(action["startFrame"]) + 1
         end = int(action["endFrame"])
         if action["type"] == "breathing":
@@ -595,10 +701,13 @@ def apply_actions(spec, entity_roots, control_objects):
             expression = action["expressionId"]
             angle = {"neutral": 0.0, "worried": 0.14, "stern": -0.12, "fearful": 0.22}[expression]
             for brow in brows:
-                brow.rotation_euler.x = 0.0
-                brow.keyframe_insert(data_path="rotation_euler", index=0, frame=start)
-                brow.rotation_euler.x = angle
-                brow.keyframe_insert(data_path="rotation_euler", index=0, frame=end)
+                axis = 1 if is_cutout_rig else 0
+                brow.rotation_euler[axis] = 0.0
+                brow.keyframe_insert(data_path="rotation_euler", index=axis, frame=start)
+                brow.rotation_euler[axis] = angle
+                brow.keyframe_insert(data_path="rotation_euler", index=axis, frame=end)
+        elif action["type"] == "facial-variant":
+            continue
         elif action["type"] == "lip-sync":
             mouth = controls.get("mouth")
             if mouth is None:
@@ -674,13 +783,14 @@ def apply_actions(spec, entity_roots, control_objects):
             if target is None:
                 raise RuntimeError("Kick action requires targetEntityId to resolve a target object")
             angle = math.radians(float(action["angleDegrees"]))
-            leg.rotation_euler.x = 0.0
-            leg.keyframe_insert(data_path="rotation_euler", index=0, frame=start)
+            axis = 1 if is_cutout_rig else 0
+            leg.rotation_euler[axis] = 0.0
+            leg.keyframe_insert(data_path="rotation_euler", index=axis, frame=start)
             contact_frame = start + min(end - start, int(action["contactFrame"]))
-            leg.rotation_euler.x = angle
-            leg.keyframe_insert(data_path="rotation_euler", index=0, frame=contact_frame)
-            leg.rotation_euler.x = 0.0
-            leg.keyframe_insert(data_path="rotation_euler", index=0, frame=end)
+            leg.rotation_euler[axis] = angle
+            leg.keyframe_insert(data_path="rotation_euler", index=axis, frame=contact_frame)
+            leg.rotation_euler[axis] = 0.0
+            leg.keyframe_insert(data_path="rotation_euler", index=axis, frame=end)
             rig = next((obj for obj in bpy.context.scene.objects
                         if obj.type == "ARMATURE"
                         and obj.get("filmie_character_id") == character_id), None)
@@ -690,13 +800,11 @@ def apply_actions(spec, entity_roots, control_objects):
                                None) if collection is not None else None
             if foot_target is None:
                 raise RuntimeError("Kick action requires a mapped foot IK target")
-            anchor_world = target.matrix_world.translation
-            if action.get("targetAnchorId"):
-                anchors = json.loads(target.get("filmie_anchors", "{}"))
-                anchor = anchors.get(action["targetAnchorId"])
-                if anchor is None:
-                    raise RuntimeError("Kick target does not define targetAnchorId " + action["targetAnchorId"])
-                anchor_world = target.matrix_world @ Vector(anchor)
+            anchor_world = (
+                resolve_asset_anchor(target, action["targetAnchorId"])
+                if action.get("targetAnchorId")
+                else target.matrix_world.translation.copy()
+            )
             foot_target.location = (
                 foot_target.parent.matrix_world.inverted() @ anchor_world
                 if foot_target.parent is not None else anchor_world
@@ -725,11 +833,16 @@ def apply_actions(spec, entity_roots, control_objects):
             for frame in range(start, end + 1):
                 phase = 2.0 * math.pi * (frame - start) / max(2, end - start)
                 for side, arm in enumerate(arms):
-                    arm.rotation_euler.z = math.sin(phase) * intensity * (1 if side == 0 else -1)
-                    arm.rotation_euler.x = -intensity * 0.9
+                    if is_cutout_rig:
+                        arm.rotation_euler.y = math.sin(phase) * intensity * (1 if side == 0 else -1)
+                        arm.rotation_euler.z = 0.0
+                    else:
+                        arm.rotation_euler.z = math.sin(phase) * intensity * (1 if side == 0 else -1)
+                        arm.rotation_euler.x = -intensity * 0.9
                     arm.keyframe_insert(data_path="rotation_euler", frame=frame)
-                chest.rotation_euler.x = math.sin(phase * 2.0) * intensity * 0.08
-                chest.keyframe_insert(data_path="rotation_euler", index=0, frame=frame)
+                axis = 1 if is_cutout_rig else 0
+                chest.rotation_euler[axis] = math.sin(phase * 2.0) * intensity * 0.08
+                chest.keyframe_insert(data_path="rotation_euler", index=axis, frame=frame)
         elif action["type"] in ("sit", "stand"):
             chest = controls.get("chest")
             legs = [controls.get("left-leg"), controls.get("right-leg")]
@@ -763,14 +876,7 @@ def apply_actions(spec, entity_roots, control_objects):
             target = entity_roots.get(action["targetEntityId"])
             if effector is None or target is None:
                 raise RuntimeError("Interaction requires a mapped semantic effector and target entity")
-            try:
-                anchors = json.loads(target.get("filmie_anchors", "{}"))
-            except (TypeError, json.JSONDecodeError) as error:
-                raise RuntimeError("Target asset has malformed anchor metadata") from error
-            anchor = anchors.get(action["targetAnchorId"])
-            if anchor is None:
-                raise RuntimeError("Target asset does not define anchor " + action["targetAnchorId"])
-            anchor_world = target.matrix_world @ Vector(anchor)
+            anchor_world = resolve_asset_anchor(target, action["targetAnchorId"])
             if action["type"] == "reach":
                 parent = effector.parent
                 if parent is None:
@@ -782,7 +888,7 @@ def apply_actions(spec, entity_roots, control_objects):
                 bpy.context.view_layer.update()
                 depsgraph = bpy.context.evaluated_depsgraph_get()
                 target_world = target.evaluated_get(depsgraph).matrix_world
-                anchor_world = target_world @ Vector(anchor)
+                anchor_world = resolve_asset_anchor(target, action["targetAnchorId"])
                 effector.location = parent.matrix_world.inverted() @ anchor_world
                 effector.keyframe_insert(data_path="location", frame=end)
                 effector.keyframe_insert(data_path="location", frame=end + 1)
@@ -792,7 +898,7 @@ def apply_actions(spec, entity_roots, control_objects):
                 bpy.context.view_layer.update()
                 depsgraph = bpy.context.evaluated_depsgraph_get()
                 target_world = target.evaluated_get(depsgraph).matrix_world
-                anchor_world = target_world @ Vector(anchor)
+                anchor_world = resolve_asset_anchor(target, action["targetAnchorId"])
                 parent = effector.parent
                 if parent is not None:
                     effector.location = parent.matrix_world.inverted() @ anchor_world
@@ -831,7 +937,7 @@ def apply_actions(spec, entity_roots, control_objects):
                 target.location.z += float(action["verticalOffset"])
                 target.keyframe_insert(data_path="location", frame=end)
                 bpy.context.view_layer.update()
-                target_anchor = target.matrix_world @ Vector(anchor)
+                target_anchor = resolve_asset_anchor(target, action["targetAnchorId"])
                 parent = effector.parent
                 if parent is not None:
                     effector.location = parent.matrix_world.inverted() @ target_anchor

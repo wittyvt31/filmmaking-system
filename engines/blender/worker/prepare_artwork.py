@@ -125,6 +125,13 @@ def build_asset(asset, output_directory, style):
     root["filmie_asset_version"] = asset["version"]
     root["filmie_asset_kind"] = asset["kind"]
     root["filmie_display_name"] = asset["displayName"]
+    root["filmie_anchors"] = json.dumps({
+        anchor["id"]: [float(anchor["position"][axis]) for axis in ("x", "y", "z")]
+        for anchor in asset["anchors"]
+    }, separators=(",", ":"))
+    root["filmie_semantic_controls"] = json.dumps(
+        asset.get("semanticControls", {}), separators=(",", ":")
+    )
     nodes = {root.name: root}
     node_ids = {"$root": root}
     for group in asset["groups"]:
@@ -161,6 +168,10 @@ def build_asset(asset, output_directory, style):
         root["filmie_variant_map_" + slot["id"]] = json.dumps(variants, separators=(",", ":"))
     for layer in sorted(asset["layers"], key=lambda item: (item["order"], item["id"])):
         create_layer(layer, collection, node_ids[layer["id"]], style, variant_values)
+    for control, node_id in asset.get("semanticControls", {}).items():
+        control_object = node_ids[node_id]
+        control_object["filmie_control_id"] = control
+        control_object["filmie_semantic_id"] = control
     for anchor in asset["anchors"]:
         obj = bpy.data.objects.new("ANCHOR__" + anchor["id"], None)
         collection.objects.link(obj)

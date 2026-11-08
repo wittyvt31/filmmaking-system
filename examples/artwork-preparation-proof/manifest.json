@@ -1,27 +1,45 @@
 {
-  "projectId": "filmie.artwork-preparation-proof",
+  "projectId": "filmie.they-have-reached-animation-proof",
   "version": "1.0.0",
   "video": {
-    "resolution": { "width": 640, "height": 360 },
-    "frameRate": { "numerator": 30, "denominator": 1 }
+    "resolution": {
+      "width": 640,
+      "height": 360
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    }
   },
   "renderPolicy": {
-    "outputDimensions": { "width": 640, "height": 360 },
-    "frameRate": { "numerator": 30, "denominator": 1 },
+    "outputDimensions": {
+      "width": 640,
+      "height": 360
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
     "codec": "h264",
     "container": "mp4",
     "pixelFormat": "yuv420p",
     "colorProfile": "bt709",
-    "quality": { "mode": "crf", "value": 26 },
+    "quality": {
+      "mode": "crf",
+      "value": 26
+    },
     "renderer": {
       "id": "blender",
-      "config": { "engine": "BLENDER_EEVEE", "samples": 1 }
+      "config": {
+        "engine": "BLENDER_EEVEE",
+        "samples": 1
+      }
     }
   },
   "shots": [
     {
-      "id": "shot.prepared-art-assets",
-      "durationFrames": 30,
+      "id": "shot.the-silent-call",
+      "durationFrames": 150,
       "visualDescription": "An original charcoal drawing of a father in a moonlit room with independently packaged furniture and props.",
       "composition": {
         "framing": "Full-height layered 2.5D room composition.",
@@ -30,7 +48,7 @@
         "camera": {
           "type": "zoom",
           "startFrame": 0,
-          "durationFrames": 30,
+          "durationFrames": 150,
           "fromScale": 1,
           "toScale": 1.025
         },
@@ -39,41 +57,156 @@
         ]
       },
       "requiredAssets": [
-        { "assetId": "environment.moonlit-room", "version": "1.0.0" },
-        { "assetId": "character.father-cutout", "version": "1.0.1" },
-        { "assetId": "prop.wooden-chair", "version": "1.0.0" },
-        { "assetId": "prop.rotary-telephone-illustration", "version": "1.0.0" },
-        { "assetId": "prop.kerosene-lantern-illustration", "version": "1.0.0" }
+        {
+          "assetId": "environment.moonlit-room",
+          "version": "1.0.1"
+        },
+        {
+          "assetId": "character.father-cutout",
+          "version": "1.0.4"
+        },
+        {
+          "assetId": "prop.wooden-chair",
+          "version": "1.0.1"
+        },
+        {
+          "assetId": "prop.rotary-telephone-illustration",
+          "version": "1.0.1"
+        },
+        {
+          "assetId": "prop.kerosene-lantern-illustration",
+          "version": "1.0.1"
+        }
       ],
       "scene": {
         "stylePreset": "charcoal_horror",
         "styleVersion": "1.1.0",
         "environment": {
           "assetId": "environment.moonlit-room",
-          "version": "1.0.0"
+          "version": "1.0.1"
         },
         "characters": [
           {
             "id": "father",
             "artwork": {
               "assetId": "character.father-cutout",
-              "version": "1.0.1"
+              "version": "1.0.4"
+            },
+            "rig": {
+              "assetId": "character.father-cutout",
+              "version": "1.0.4"
             },
             "transform": {
-              "position": { "x": -0.25, "y": 0.05, "z": -0.25 },
-              "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+              "position": {
+                "x": -0.25,
+                "y": 0.05,
+                "z": 0.05
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
               "scale": 1
             },
-            "actions": []
+            "actions": [
+              {
+                "startFrame": 0,
+                "id": "father.breathes",
+                "amplitude": 0.018,
+                "cycleFrames": 48,
+                "type": "breathing",
+                "endFrame": 150
+              },
+              {
+                "startFrame": 15,
+                "id": "father.hears-phone",
+                "targetEntityId": "telephone",
+                "maxYawDegrees": 18,
+                "type": "head-turn",
+                "endFrame": 42
+              },
+              {
+                "startFrame": 0,
+                "id": "father.blinks",
+                "closureFrames": 4,
+                "intervalFrames": 45,
+                "type": "blink",
+                "endFrame": 150
+              },
+              {
+                "startFrame": 44,
+                "id": "father.eyes-alarmed",
+                "slotId": "face.eyes",
+                "variantId": "alarmed",
+                "type": "facial-variant",
+                "endFrame": 150
+              },
+              {
+                "startFrame": 44,
+                "id": "father.mouth-alarmed",
+                "slotId": "face.mouth",
+                "variantId": "alarmed",
+                "type": "facial-variant",
+                "endFrame": 150
+              },
+              {
+                "endFrame": 78,
+                "startFrame": 52,
+                "intensity": 0.16,
+                "id": "father.gesture",
+                "type": "celebrate"
+              },
+              {
+                "type": "reach",
+                "handPose": "open",
+                "id": "father.reaches",
+                "targetEntityId": "telephone",
+                "targetAnchorId": "receiver.grip",
+                "startFrame": 86,
+                "effector": "right-hand",
+                "endFrame": 108
+              },
+              {
+                "targetAnchorId": "receiver.grip",
+                "startFrame": 108,
+                "id": "father.grasps",
+                "targetEntityId": "telephone",
+                "type": "grasp",
+                "endFrame": 114,
+                "effector": "right-hand"
+              },
+              {
+                "type": "lift",
+                "verticalOffset": 0.12,
+                "id": "father.lifts",
+                "targetEntityId": "telephone",
+                "targetAnchorId": "receiver.grip",
+                "startFrame": 114,
+                "effector": "right-hand",
+                "endFrame": 145
+              }
+            ]
           }
         ],
         "props": [
           {
             "id": "chair",
-            "artwork": { "assetId": "prop.wooden-chair", "version": "1.0.0" },
+            "artwork": {
+              "assetId": "prop.wooden-chair",
+              "version": "1.0.1"
+            },
             "transform": {
-              "position": { "x": -0.22, "y": 0.01, "z": -0.85 },
-              "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+              "position": {
+                "x": -0.22,
+                "y": 0.01,
+                "z": -0.85
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
               "scale": 1.15
             }
           },
@@ -81,11 +214,19 @@
             "id": "telephone",
             "artwork": {
               "assetId": "prop.rotary-telephone-illustration",
-              "version": "1.0.0"
+              "version": "1.0.1"
             },
             "transform": {
-              "position": { "x": 1.25, "y": -0.12, "z": -1.05 },
-              "rotationDegrees": { "x": 0, "y": 0, "z": -5 },
+              "position": {
+                "x": 1.25,
+                "y": -0.12,
+                "z": -1.05
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": -5
+              },
               "scale": 0.9
             }
           },
@@ -93,11 +234,19 @@
             "id": "lantern",
             "artwork": {
               "assetId": "prop.kerosene-lantern-illustration",
-              "version": "1.0.0"
+              "version": "1.0.1"
             },
             "transform": {
-              "position": { "x": -1.45, "y": -0.1, "z": -0.65 },
-              "rotationDegrees": { "x": 0, "y": 0, "z": 2 },
+              "position": {
+                "x": -1.45,
+                "y": -0.1,
+                "z": -0.65
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": 2
+              },
               "scale": 0.88
             }
           }
@@ -105,20 +254,29 @@
         "camera": {
           "type": "push-in",
           "startFrame": 0,
-          "durationFrames": 30,
+          "durationFrames": 150,
           "fromDistance": 6.5,
-          "toDistance": 6.35,
-          "target": { "x": 0, "y": 0, "z": 0 }
+          "toDistance": 5.9,
+          "target": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
         }
       }
     }
   ],
   "timeline": {
-    "durationFrames": 30,
+    "durationFrames": 150,
     "videoTracks": [
       {
         "id": "video.main",
-        "clips": [{ "shotId": "shot.prepared-art-assets", "startFrame": 0 }]
+        "clips": [
+          {
+            "shotId": "shot.the-silent-call",
+            "startFrame": 0
+          }
+        ]
       }
     ],
     "audioTracks": [],

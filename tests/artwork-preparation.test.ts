@@ -74,6 +74,17 @@ describe('layered artwork preparation contracts', () => {
         ],
       }),
     ).toThrow(/default variant/i);
+    expect(() =>
+      ArtworkPreparationSpecificationSchema.parse({
+        ...parsed,
+        assets: [{ ...character, semanticControls: { head: 'rig.missing' } }],
+      }),
+    ).toThrow(/semantic control.*unknown artwork node/i);
+    expect(character?.semanticControls).toMatchObject({
+      chest: 'rig.chest',
+      head: 'rig.head',
+      'right-hand': 'rig.arm.right',
+    });
   });
 
   it.skipIf(!blenderAvailable)(

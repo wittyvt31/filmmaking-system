@@ -363,6 +363,16 @@ export async function prepareLayeredArtwork(options: {
               groupCount: asset.groups.length,
               variantSlots: asset.variantSlots.map((slot) => slot.id),
               anchors: asset.anchors.map((anchor) => anchor.id),
+              semanticControls: asset.semanticControls ?? {},
+              variantDefinitions: Object.fromEntries(
+                asset.variantSlots.map((slot) => [
+                  slot.id,
+                  {
+                    defaultVariant: slot.defaultVariant,
+                    variants: slot.variants.map((variant) => variant.id),
+                  },
+                ]),
+              ),
               stylePreset: specification.style.id,
               styleVersion: specification.style.version,
             },
