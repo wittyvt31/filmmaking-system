@@ -11,6 +11,10 @@
     "./authoring": {
       "types": "./dist/authoring.d.ts",
       "import": "./dist/authoring.js"
+    },
+    "./artwork": {
+      "types": "./dist/artwork.d.ts",
+      "import": "./dist/artwork.js"
     }
   },
   "scripts": {

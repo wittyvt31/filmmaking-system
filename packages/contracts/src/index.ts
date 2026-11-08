@@ -775,14 +775,90 @@ export const MotionClipLibrarySchema = z
     }
   });
 
+const NormalizedPivotSchema = z
+  .object({
+    x: z.number().finite().min(0).max(1).default(0.5),
+    y: z.number().finite().min(0).max(1).default(0.5),
+  })
+  .strict();
+
+const SceneGroupSchema = z
+  .object({
+    id: StableIdSchema,
+    parentId: StableIdSchema.optional(),
+    transform: SceneTransformSchema,
+  })
+  .strict();
+
 const SceneLayerSchema = z
   .object({
     id: StableIdSchema,
     asset: AssetVersionReferenceSchema,
     role: z.enum(['character', 'prop', 'foreground']),
+    parentId: StableIdSchema.optional(),
     transform: SceneTransformSchema,
+    pivot: NormalizedPivotSchema.default({ x: 0.5, y: 0.5 }),
+    size: z
+      .object({
+        width: z.number().positive().max(1000),
+        height: z.number().positive().max(1000),
+      })
+      .strict()
+      .optional(),
+    opacity: z.number().finite().min(0).max(1).default(1),
+    order: z.number().int().safe().min(-1000).max(1000).default(0),
   })
   .strict();
+
+const SceneCameraTargetSchema = z
+  .object({
+    x: z.number().finite(),
+    y: z.number().finite(),
+    z: z.number().finite(),
+  })
+  .strict();
+
+const SceneCameraSchema = z.discriminatedUnion('type', [
+  z
+    .object({
+      type: z.literal('push-in'),
+      startFrame: z.number().int().nonnegative().safe(),
+      durationFrames: z.number().int().positive().safe(),
+      fromDistance: z.number().positive(),
+      toDistance: z.number().positive(),
+      target: SceneCameraTargetSchema,
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal('pan'),
+      startFrame: z.number().int().nonnegative().safe(),
+      durationFrames: z.number().int().positive().safe(),
+      distance: z.number().positive(),
+      fromTarget: SceneCameraTargetSchema,
+      toTarget: SceneCameraTargetSchema,
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal('zoom'),
+      startFrame: z.number().int().nonnegative().safe(),
+      durationFrames: z.number().int().positive().safe(),
+      distance: z.number().positive(),
+      target: SceneCameraTargetSchema,
+      fromFocalLength: z.number().positive().min(10).max(300),
+      toFocalLength: z.number().positive().min(10).max(300),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal('static'),
+      distance: z.number().positive(),
+      target: SceneCameraTargetSchema,
+      focalLength: z.number().positive().min(10).max(300).default(50),
+    })
+    .strict(),
+]);
 
 const SceneLightBaseSchema = z.object({
   id: StableIdSchema,
@@ -827,6 +903,7 @@ export const ShotSceneSchema = z
     styleOverrides: CharcoalStyleOverridesSchema.optional(),
     motionLibraries: z.array(AssetVersionReferenceSchema).default([]),
     environment: AssetVersionReferenceSchema,
+    groups: z.array(SceneGroupSchema).default([]),
     layers: z.array(SceneLayerSchema).default([]),
     characters: z
       .array(
@@ -853,22 +930,7 @@ export const ShotSceneSchema = z
       )
       .default([]),
     lights: z.array(SceneLightSchema).default([]),
-    camera: z
-      .object({
-        type: z.literal('push-in'),
-        startFrame: z.number().int().nonnegative().safe(),
-        durationFrames: z.number().int().positive().safe(),
-        fromDistance: z.number().positive(),
-        toDistance: z.number().positive(),
-        target: z
-          .object({
-            x: z.number().finite(),
-            y: z.number().finite(),
-            z: z.number().finite(),
-          })
-          .strict(),
-      })
-      .strict(),
+    camera: SceneCameraSchema,
   })
   .strict()
   .superRefine((scene, context) => {
@@ -882,12 +944,62 @@ export const ShotSceneSchema = z
         });
       lightIds.add(light.id);
     });
-    if (scene.camera.toDistance >= scene.camera.fromDistance) {
+    if (
+      scene.camera.type === 'push-in' &&
+      scene.camera.toDistance >= scene.camera.fromDistance
+    ) {
       context.addIssue({
         code: 'custom',
         path: ['camera', 'toDistance'],
         message: 'A push-in must end closer to the subject than it begins',
       });
+    }
+    const nodes = [
+      ...scene.groups.map((node) => ({ ...node, kind: 'group' as const })),
+      ...scene.layers.map((node) => ({ ...node, kind: 'layer' as const })),
+    ];
+    const nodeIds = new Set<string>();
+    for (const [index, node] of nodes.entries()) {
+      if (nodeIds.has(node.id)) {
+        context.addIssue({
+          code: 'custom',
+          path: [node.kind === 'group' ? 'groups' : 'layers', index, 'id'],
+          message: `Duplicate artwork node ID "${node.id}"`,
+        });
+      }
+      nodeIds.add(node.id);
+    }
+    const nodeById = new Map(nodes.map((node) => [node.id, node]));
+    for (const [index, node] of nodes.entries()) {
+      if (node.parentId && !nodeById.has(node.parentId)) {
+        context.addIssue({
+          code: 'custom',
+          path: [
+            node.kind === 'group' ? 'groups' : 'layers',
+            index,
+            'parentId',
+          ],
+          message: `Artwork node "${node.id}" has unknown parent "${node.parentId}"`,
+        });
+      }
+      const ancestry = new Set([node.id]);
+      let parentId = node.parentId;
+      while (parentId) {
+        if (ancestry.has(parentId)) {
+          context.addIssue({
+            code: 'custom',
+            path: [
+              node.kind === 'group' ? 'groups' : 'layers',
+              index,
+              'parentId',
+            ],
+            message: `Artwork hierarchy contains a cycle at "${parentId}"`,
+          });
+          break;
+        }
+        ancestry.add(parentId);
+        parentId = nodeById.get(parentId)?.parentId;
+      }
     }
   });
 
@@ -1234,6 +1346,7 @@ export const ProjectManifestSchema = z
         }
         const entityIds = new Set<string>();
         for (const entityId of [
+          ...shot.scene.groups.map((group) => group.id),
           ...shot.scene.layers.map((layer) => layer.id),
           ...shot.scene.characters.map((character) => character.id),
           ...shot.scene.props.map((prop) => prop.id),
@@ -1246,8 +1359,9 @@ export const ProjectManifestSchema = z
           entityIds.add(entityId);
         }
         if (
+          shot.scene.camera.type !== 'static' &&
           shot.scene.camera.startFrame + shot.scene.camera.durationFrames >
-          shot.durationFrames
+            shot.durationFrames
         ) {
           issue(
             ['shots', shotIndex, 'scene', 'camera'],
@@ -1650,6 +1764,289 @@ export type ProceduralAssetSpecification = z.infer<
 export type AssetBuildSpecification = z.infer<
   typeof AssetBuildSpecificationSchema
 >;
+
+const ArtworkTransformSchema = z
+  .object({
+    position: z
+      .object({
+        x: z.number().finite(),
+        y: z.number().finite(),
+        z: z.number().finite(),
+      })
+      .strict(),
+    rotationDegrees: z
+      .object({
+        x: z.number().finite(),
+        y: z.number().finite(),
+        z: z.number().finite(),
+      })
+      .strict(),
+    scale: z.number().positive().max(100),
+  })
+  .strict();
+
+const ArtworkGroupSchema = z
+  .object({
+    id: StableIdSchema,
+    parentId: StableIdSchema.optional(),
+    transform: ArtworkTransformSchema,
+  })
+  .strict();
+
+const ArtworkLayerSchema = z
+  .object({
+    id: StableIdSchema,
+    source: AssetVersionReferenceSchema,
+    parentId: StableIdSchema.optional(),
+    transform: ArtworkTransformSchema,
+    size: z
+      .object({
+        width: z.number().positive().max(100),
+        height: z.number().positive().max(100),
+      })
+      .strict(),
+    pivot: z
+      .object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) })
+      .strict()
+      .default({ x: 0.5, y: 0.5 }),
+    opacity: z.number().min(0).max(1).default(1),
+    order: z.number().int().min(-1000).max(1000).default(0),
+    variantSlot: StableIdSchema.optional(),
+    variantId: StableIdSchema.optional(),
+  })
+  .strict()
+  .superRefine((layer, context) => {
+    if (Boolean(layer.variantSlot) !== Boolean(layer.variantId))
+      context.addIssue({
+        code: 'custom',
+        path: ['variantId'],
+        message: 'Artwork variants require both variantSlot and variantId',
+      });
+  });
+
+const ArtworkVariantSlotSchema = z
+  .object({
+    id: StableIdSchema,
+    defaultVariant: StableIdSchema,
+    variants: z
+      .array(
+        z
+          .object({
+            id: StableIdSchema,
+            layerIds: z.array(StableIdSchema).min(1),
+          })
+          .strict(),
+      )
+      .min(2),
+  })
+  .strict();
+
+const ArtworkAnchorSchema = z
+  .object({
+    id: StableIdSchema,
+    parentId: StableIdSchema,
+    position: z
+      .object({
+        x: z.number().finite(),
+        y: z.number().finite(),
+        z: z.number().finite(),
+      })
+      .strict(),
+  })
+  .strict();
+
+const ArtworkPackageAssetSchema = z
+  .object({
+    assetId: StableIdSchema,
+    version: AssetVersionReferenceSchema.shape.version,
+    kind: z.enum(['character', 'environment', 'prop']),
+    displayName: nonEmptyText,
+    groups: z.array(ArtworkGroupSchema).max(256).default([]),
+    layers: z.array(ArtworkLayerSchema).min(1).max(512),
+    variantSlots: z.array(ArtworkVariantSlotSchema).max(64).default([]),
+    anchors: z.array(ArtworkAnchorSchema).max(256).default([]),
+  })
+  .strict()
+  .superRefine((asset, context) => {
+    const nodes = new Map<
+      string,
+      { parentId?: string; path: (string | number)[] }
+    >();
+    const nodeList = [
+      ...asset.groups.map((node, index) => ({
+        ...node,
+        path: ['groups', index] as (string | number)[],
+      })),
+      ...asset.layers.map((node, index) => ({
+        ...node,
+        path: ['layers', index] as (string | number)[],
+      })),
+    ];
+    for (const node of nodeList) {
+      if (nodes.has(node.id))
+        context.addIssue({
+          code: 'custom',
+          path: [...node.path, 'id'],
+          message: `Duplicate artwork node ID "${node.id}"`,
+        });
+      nodes.set(node.id, {
+        ...(node.parentId ? { parentId: node.parentId } : {}),
+        path: node.path,
+      });
+    }
+    for (const node of nodeList) {
+      if (node.parentId && !nodes.has(node.parentId))
+        context.addIssue({
+          code: 'custom',
+          path: [...node.path, 'parentId'],
+          message: `Unknown artwork parent "${node.parentId}"`,
+        });
+      const visited = new Set<string>([node.id]);
+      let parentId = node.parentId;
+      while (parentId) {
+        if (visited.has(parentId)) {
+          context.addIssue({
+            code: 'custom',
+            path: [...node.path, 'parentId'],
+            message: `Artwork hierarchy contains a cycle through "${parentId}"`,
+          });
+          break;
+        }
+        visited.add(parentId);
+        parentId = nodes.get(parentId)?.parentId;
+      }
+    }
+    const slots = new Set<string>();
+    for (const [slotIndex, slot] of asset.variantSlots.entries()) {
+      if (slots.has(slot.id))
+        context.addIssue({
+          code: 'custom',
+          path: ['variantSlots', slotIndex, 'id'],
+          message: `Duplicate variant slot "${slot.id}"`,
+        });
+      slots.add(slot.id);
+      const variants = new Set<string>();
+      for (const [variantIndex, variant] of slot.variants.entries()) {
+        if (variants.has(variant.id))
+          context.addIssue({
+            code: 'custom',
+            path: ['variantSlots', slotIndex, 'variants', variantIndex, 'id'],
+            message: `Duplicate variant "${variant.id}"`,
+          });
+        variants.add(variant.id);
+        if (new Set(variant.layerIds).size !== variant.layerIds.length)
+          context.addIssue({
+            code: 'custom',
+            path: [
+              'variantSlots',
+              slotIndex,
+              'variants',
+              variantIndex,
+              'layerIds',
+            ],
+            message: 'Variant layer IDs must be unique',
+          });
+        for (const layerId of variant.layerIds) {
+          const layer = asset.layers.find(
+            (candidate) => candidate.id === layerId,
+          );
+          if (
+            !layer ||
+            layer.variantSlot !== slot.id ||
+            layer.variantId !== variant.id
+          )
+            context.addIssue({
+              code: 'custom',
+              path: [
+                'variantSlots',
+                slotIndex,
+                'variants',
+                variantIndex,
+                'layerIds',
+              ],
+              message: `Layer "${layerId}" must declare this exact variant slot and ID`,
+            });
+        }
+      }
+      if (!variants.has(slot.defaultVariant))
+        context.addIssue({
+          code: 'custom',
+          path: ['variantSlots', slotIndex, 'defaultVariant'],
+          message: 'Default variant must name a declared variant',
+        });
+    }
+    for (const [layerIndex, layer] of asset.layers.entries()) {
+      if (layer.variantSlot && !slots.has(layer.variantSlot))
+        context.addIssue({
+          code: 'custom',
+          path: ['layers', layerIndex, 'variantSlot'],
+          message: `Unknown variant slot "${layer.variantSlot}"`,
+        });
+      if (
+        layer.variantSlot &&
+        !asset.variantSlots
+          .find((slot) => slot.id === layer.variantSlot)
+          ?.variants.some(
+            (variant) =>
+              variant.id === layer.variantId &&
+              variant.layerIds.includes(layer.id),
+          )
+      )
+        context.addIssue({
+          code: 'custom',
+          path: ['layers', layerIndex, 'variantId'],
+          message: 'Variant layer must be listed by its declared slot variant',
+        });
+    }
+    const anchorIds = new Set<string>();
+    for (const [index, anchor] of asset.anchors.entries()) {
+      if (anchorIds.has(anchor.id))
+        context.addIssue({
+          code: 'custom',
+          path: ['anchors', index, 'id'],
+          message: `Duplicate anchor ID "${anchor.id}"`,
+        });
+      anchorIds.add(anchor.id);
+      if (!nodes.has(anchor.parentId))
+        context.addIssue({
+          code: 'custom',
+          path: ['anchors', index, 'parentId'],
+          message: `Unknown anchor parent "${anchor.parentId}"`,
+        });
+    }
+  });
+
+export const ArtworkPreparationSpecificationSchema = z
+  .object({
+    schemaVersion: z.literal('1.0.0'),
+    projectId: StableIdSchema,
+    style: z
+      .object({
+        id: z.literal('charcoal_horror'),
+        version: AssetVersionReferenceSchema.shape.version,
+        overrides: CharcoalStyleOverridesSchema.optional(),
+      })
+      .strict(),
+    assets: z.array(ArtworkPackageAssetSchema).min(1),
+  })
+  .strict()
+  .superRefine((specification, context) => {
+    const ids = new Set<string>();
+    for (const [index, asset] of specification.assets.entries()) {
+      const key = `${asset.assetId}@${asset.version}`;
+      if (ids.has(key))
+        context.addIssue({
+          code: 'custom',
+          path: ['assets', index],
+          message: `Duplicate immutable artwork asset ${key}`,
+        });
+      ids.add(key);
+    }
+  });
+
+export type ArtworkPreparationSpecification = z.infer<
+  typeof ArtworkPreparationSpecificationSchema
+>;
 export type Rational = z.infer<typeof RationalSchema>;
 export type VideoSettings = z.infer<typeof VideoSettingsSchema>;
 export type RenderPolicy = z.infer<typeof RenderPolicySchema>;
@@ -1694,12 +2091,19 @@ export interface CompiledSceneInstruction {
     hazeStrength: number;
   };
   environment: z.infer<typeof AssetVersionReferenceSchema>;
+  groups: z.infer<typeof ShotSceneSchema>['groups'];
   layers: z.infer<typeof ShotSceneSchema>['layers'];
   characters: z.infer<typeof ShotSceneSchema>['characters'];
   props: z.infer<typeof ShotSceneSchema>['props'];
   lights: z.infer<typeof ShotSceneSchema>['lights'];
   camera: z.infer<typeof ShotSceneSchema>['camera'];
-  cameraKeyframes: { frame: number; distance: number }[];
+  cameraKeyframes: {
+    frame: number;
+    distance: number;
+    position: { x: number; y: number; z: number };
+    target: { x: number; y: number; z: number };
+    focalLength: number;
+  }[];
   actions: {
     characterId: string;
     action: CharacterAction;

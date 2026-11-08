@@ -20,7 +20,7 @@ def read_spec():
         return json.load(stream)
 
 
-def color_material(image, style, name):
+def color_material(image, style, name, opacity=1.0):
     material = bpy.data.materials.new(name)
     nodes = material.node_tree.nodes
     links = material.node_tree.links
@@ -81,17 +81,90 @@ def color_material(image, style, name):
     links.new(multiply.outputs["Color"], shade.inputs[1])
     links.new(vignette.outputs["Result"], shade.inputs[2])
     transparent = nodes.new("ShaderNodeBsdfTransparent")
+    alpha_scale = nodes.new("ShaderNodeMath")
+    alpha_scale.operation = "MULTIPLY"
+    alpha_scale.inputs[1].default_value = float(opacity)
     mix_shader = nodes.new("ShaderNodeMixShader")
     links.new(shade.outputs["Color"], shader.inputs["Base Color"])
     links.new(shade.outputs["Color"], emission.inputs["Color"])
     links.new(shader.outputs["BSDF"], illumination_mix.inputs[1])
     links.new(emission.outputs["Emission"], illumination_mix.inputs[2])
-    links.new(texture.outputs["Alpha"], mix_shader.inputs[0])
+    links.new(texture.outputs["Alpha"], alpha_scale.inputs[0])
+    links.new(alpha_scale.outputs["Value"], mix_shader.inputs[0])
     links.new(transparent.outputs["BSDF"], mix_shader.inputs[1])
     links.new(illumination_mix.outputs["Shader"], mix_shader.inputs[2])
     links.new(mix_shader.outputs["Shader"], output.inputs["Surface"])
     material.surface_render_method = "DITHERED"
     return material
+
+
+def create_sprite_layer(layer, style):
+    """Build a pivoted, alpha-aware image plane under a transform root."""
+    asset = layer["asset"]
+    if asset.get("metadata", {}).get("blenderCollection"):
+        raise RuntimeError(
+            "Artwork layers must reference a raster image asset, not a Blender collection: "
+            + asset["assetId"]
+        )
+    image = bpy.data.images.load(asset["localPath"], check_existing=True)
+    if image.size[0] <= 0 or image.size[1] <= 0:
+        raise RuntimeError("Artwork image has invalid dimensions: " + asset["localPath"])
+    image.pack()
+    aspect = image.size[0] / image.size[1]
+    size = layer.get("size") or {"width": aspect * 2.0, "height": 2.0}
+    width = float(size["width"])
+    height = float(size["height"])
+    pivot = layer.get("pivot", {"x": 0.5, "y": 0.5})
+    pivot_x = float(pivot["x"])
+    pivot_y = float(pivot["y"])
+    mesh = bpy.data.meshes.new("ArtworkMesh__" + layer["id"])
+    mesh.from_pydata(
+        [
+            (-pivot_x * width, 0.0, -pivot_y * height),
+            ((1.0 - pivot_x) * width, 0.0, -pivot_y * height),
+            ((1.0 - pivot_x) * width, 0.0, (1.0 - pivot_y) * height),
+            (-pivot_x * width, 0.0, (1.0 - pivot_y) * height),
+        ],
+        [],
+        [(0, 1, 2, 3)],
+    )
+    mesh.update()
+    uv_layer = mesh.uv_layers.new(name="ArtworkUV")
+    for loop, uv_coord in zip(
+        uv_layer.data, ((0, 0), (1, 0), (1, 1), (0, 1))
+    ):
+        loop.uv = uv_coord
+    sprite = bpy.data.objects.new("ARTWORK__" + layer["id"], mesh)
+    bpy.context.scene.collection.objects.link(sprite)
+    sprite.data.materials.append(
+        color_material(image, style, "ArtworkMaterial__" + layer["id"], layer.get("opacity", 1.0))
+    )
+
+    root = bpy.data.objects.new("LAYER__" + layer["id"], None)
+    bpy.context.scene.collection.objects.link(root)
+    root.empty_display_type = "PLAIN_AXES"
+    root["filmie_entity_id"] = layer["id"]
+    root["filmie_asset_id"] = asset["assetId"]
+    root["filmie_asset_version"] = asset["version"]
+    root["filmie_order"] = int(layer.get("order", 0))
+    position = layer["transform"]["position"]
+    rotation = layer["transform"]["rotationDegrees"]
+    root.location = (
+        float(position["x"]),
+        float(position["y"]) - int(layer.get("order", 0)) * 0.001,
+        float(position["z"]),
+    )
+    root.rotation_euler = tuple(
+        math.radians(float(rotation[axis])) for axis in ("x", "y", "z")
+    )
+    root.scale = (float(layer["transform"]["scale"]),) * 3
+    sprite.parent = root
+    sprite.location = (0.0, 0.0, 0.0)
+    sprite.rotation_euler = (0.0, 0.0, 0.0)
+    sprite.scale = (1.0, 1.0, 1.0)
+    sprite["filmie_layer_id"] = layer["id"]
+    sprite["filmie_pivot_normalized"] = (pivot_x, pivot_y)
+    return root, sprite
 
 
 def make_image_plane(asset, transform, style, name, width=None, height=None):
@@ -303,33 +376,54 @@ def create_scene(spec):
         "Environment",
     )
     environment_collection = spec["environment"].get("metadata", {}).get("blenderCollection")
+    camera_distance = float(spec["cameraKeyframes"][0]["distance"])
+    initial_focal_length = float(spec["cameraKeyframes"][0].get("focalLength", 50.0))
     if not environment_collection:
         image = bpy.data.images.load(spec["environment"]["localPath"], check_existing=True)
         aspect = image.size[0] / image.size[1]
         view_height = (
-            float(spec["camera"]["fromDistance"])
+            camera_distance
             * 36.0
-            / float(camera_data_lens := 50.0)
+            / initial_focal_length
             * float(spec["height"])
             / float(spec["width"])
         )
         image.pack()
-        environment.scale = (view_height * 1.04 / 2.0, view_height * 1.04 / 2.0, 1.0)
-    else:
-        camera_data_lens = 50.0
-    create_haze_plane(spec, float(spec["camera"]["fromDistance"]))
+        frame_scale = view_height * 1.04 / 2.0
+        environment.scale = (frame_scale, 1.0, frame_scale)
+    create_haze_plane(spec, camera_distance)
     entity_roots = {}
     control_objects = {}
-    # Add authored scene layers as separate planes. Their depth controls parallax.
-    for layer in spec["layers"]:
-        root, controls = instantiate_asset(
-            layer["asset"],
-            layer["transform"],
-            spec["style"],
-            layer["id"],
+    node_roots = {}
+    for group in sorted(spec.get("groups", []), key=lambda item: item["id"]):
+        root = bpy.data.objects.new("GROUP__" + group["id"], None)
+        scene.collection.objects.link(root)
+        root.empty_display_type = "PLAIN_AXES"
+        position = group["transform"]["position"]
+        rotation = group["transform"]["rotationDegrees"]
+        root.location = tuple(float(position[axis]) for axis in ("x", "y", "z"))
+        root.rotation_euler = tuple(
+            math.radians(float(rotation[axis])) for axis in ("x", "y", "z")
         )
+        root.scale = (float(group["transform"]["scale"]),) * 3
+        root["filmie_group_id"] = group["id"]
+        node_roots[group["id"]] = root
+        entity_roots[group["id"]] = root
+    for layer in sorted(spec["layers"], key=lambda item: (item.get("order", 0), item["id"])):
+        root, sprite = create_sprite_layer(layer, spec["style"])
+        node_roots[layer["id"]] = root
         entity_roots[layer["id"]] = root
-        control_objects[layer["id"]] = controls
+        control_objects[layer["id"]] = {"sprite": sprite, "root": root}
+    for node in [*spec.get("groups", []), *spec["layers"]]:
+        parent_id = node.get("parentId")
+        if parent_id:
+            root = node_roots.get(node["id"])
+            parent = node_roots.get(parent_id)
+            if root is None or parent is None:
+                raise RuntimeError(
+                    "Artwork hierarchy references missing node " + str(parent_id)
+                )
+            root.parent = parent
     for character in spec["characters"]:
         root, controls = instantiate_asset(
             character["artwork"], character["transform"], spec["style"], character["id"]
@@ -345,22 +439,25 @@ def create_scene(spec):
 
     camera_data = bpy.data.cameras.new("Cinematic Camera")
     camera_data.type = "PERSP"
-    camera_data.lens = camera_data_lens
+    camera_data.lens = initial_focal_length
     camera = bpy.data.objects.new("Cinematic Camera", camera_data)
     scene.collection.objects.link(camera)
     scene.camera = camera
-    target = Vector((
-        float(spec["camera"]["target"]["x"]),
-        float(spec["camera"]["target"]["y"]),
-        float(spec["camera"]["target"]["z"]),
-    ))
     for keyframe in spec["cameraKeyframes"]:
         frame = int(keyframe["frame"])
-        distance = float(keyframe["distance"])
-        camera.location = (target.x, target.y - distance, target.z)
+        if "position" in keyframe and "target" in keyframe:
+            camera.location = tuple(float(keyframe["position"][axis]) for axis in ("x", "y", "z"))
+            target = Vector(tuple(float(keyframe["target"][axis]) for axis in ("x", "y", "z")))
+        else:
+            target = Vector(tuple(float(spec["camera"]["target"][axis]) for axis in ("x", "y", "z")))
+            distance = float(keyframe["distance"])
+            camera.location = (target.x, target.y - distance, target.z)
         camera.rotation_euler = (target - camera.location).to_track_quat("-Z", "Y").to_euler()
         camera.keyframe_insert(data_path="location", frame=frame)
         camera.keyframe_insert(data_path="rotation_euler", frame=frame)
+        if "focalLength" in keyframe:
+            camera_data.lens = float(keyframe["focalLength"])
+            camera_data.keyframe_insert(data_path="lens", frame=frame)
     scene.frame_set(1)
     return scene, environment, entity_roots, control_objects
 

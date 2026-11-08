@@ -17,6 +17,7 @@ import {
 import { FfmpegMediaEngine } from '@filmmaking/media';
 import { BlenderRendererAdapter } from '@filmmaking/engine-blender';
 import { buildProceduralAssets } from '@filmmaking/engine-blender/authoring';
+import { prepareLayeredArtwork } from '@filmmaking/engine-blender/artwork';
 import { compilePreparedScreenplay } from '@filmmaking/manifest';
 
 const cli = createCommand('filmie')
@@ -116,6 +117,36 @@ cli
     });
     process.stdout.write(
       `Prepared ${result.createdAssetIds.length} new assets; reused ${result.reusedAssetIds.length}.\n` +
+        `Registry: ${resolve(project, 'assets.json')}\nReceipt: ${result.receiptPath}\n`,
+    );
+  });
+
+cli
+  .command('artwork')
+  .description(
+    'Prepare layered 2.5D artwork into reusable Blender asset packages.',
+  )
+  .command('prepare')
+  .description(
+    'Build and register versioned character, environment, and prop packages from registered PNG artwork.',
+  )
+  .requiredOption(
+    '-p, --project <directory>',
+    'Project directory containing artwork-spec.json and assets.json',
+  )
+  .option(
+    '--timeout <milliseconds>',
+    'Blender preparation timeout',
+    (value: string) => Number.parseInt(value, 10),
+    600_000,
+  )
+  .action(async ({ project, timeout }) => {
+    const result = await prepareLayeredArtwork({
+      projectDirectory: project,
+      timeoutMs: timeout,
+    });
+    process.stdout.write(
+      `Prepared ${result.createdAssetIds.length} new artwork packages; reused ${result.reusedAssetIds.length}.\n` +
         `Registry: ${resolve(project, 'assets.json')}\nReceipt: ${result.receiptPath}\n`,
     );
   });

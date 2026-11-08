@@ -1,0 +1,124 @@
+{
+  "projectId": "filmie.2.5d-artwork-proof",
+  "version": "1.0.0",
+  "video": {
+    "resolution": { "width": 480, "height": 270 },
+    "frameRate": { "numerator": 30, "denominator": 1 }
+  },
+  "renderPolicy": {
+    "outputDimensions": { "width": 480, "height": 270 },
+    "frameRate": { "numerator": 30, "denominator": 1 },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": { "mode": "crf", "value": 24 },
+    "renderer": {
+      "id": "blender",
+      "config": { "engine": "BLENDER_EEVEE", "samples": 1 }
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.layered-room",
+      "durationFrames": 24,
+      "visualDescription": "Charcoal village-house interior with a separate daughter silhouette in the window and a foreground telephone.",
+      "composition": {
+        "framing": "Wide illustrated interior with distinct depth planes",
+        "subjectPlacement": "Keep the window figure on the right and foreground telephone below center.",
+        "cameraMovement": "Subtle cinematic push-in across the layered artwork.",
+        "camera": {
+          "type": "zoom",
+          "startFrame": 0,
+          "durationFrames": 24,
+          "fromScale": 1,
+          "toScale": 1.04
+        },
+        "instructions": [
+          "Preserve supplied charcoal artwork and alpha mattes.",
+          "Place the environment at the back, the daughter at window depth, and the telephone in the foreground."
+        ]
+      },
+      "requiredAssets": [
+        { "assetId": "background.interior-wide", "version": "1.0.0" },
+        { "assetId": "character.daughter-cutout", "version": "1.0.0" },
+        { "assetId": "prop.telephone-cutout", "version": "1.0.0" }
+      ],
+      "scene": {
+        "stylePreset": "charcoal_horror",
+        "styleVersion": "1.1.0",
+        "animationLibraryVersion": "1.0.0",
+        "environment": {
+          "assetId": "background.interior-wide",
+          "version": "1.0.0"
+        },
+        "groups": [
+          {
+            "id": "group.window-character",
+            "transform": {
+              "position": { "x": 1.43, "y": -0.28, "z": -0.2 },
+              "rotationDegrees": { "x": 0, "y": 0, "z": -2 },
+              "scale": 1
+            }
+          }
+        ],
+        "layers": [
+          {
+            "id": "layer.daughter",
+            "asset": {
+              "assetId": "character.daughter-cutout",
+              "version": "1.0.0"
+            },
+            "role": "character",
+            "parentId": "group.window-character",
+            "transform": {
+              "position": { "x": 0, "y": 0, "z": 0 },
+              "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+              "scale": 1
+            },
+            "pivot": { "x": 0.5, "y": 0 },
+            "size": { "width": 0.92, "height": 1.65 },
+            "opacity": 1,
+            "order": 10
+          },
+          {
+            "id": "layer.telephone",
+            "asset": { "assetId": "prop.telephone-cutout", "version": "1.0.0" },
+            "role": "prop",
+            "transform": {
+              "position": { "x": 0.35, "y": -0.62, "z": -0.62 },
+              "rotationDegrees": { "x": 0, "y": 0, "z": -2 },
+              "scale": 1
+            },
+            "pivot": { "x": 0.5, "y": 0.08 },
+            "size": { "width": 1.55, "height": 0.89 },
+            "opacity": 1,
+            "order": 20
+          }
+        ],
+        "characters": [],
+        "props": [],
+        "lights": [],
+        "camera": {
+          "type": "push-in",
+          "startFrame": 0,
+          "durationFrames": 24,
+          "fromDistance": 6,
+          "toDistance": 5.75,
+          "target": { "x": 0, "y": 0, "z": 0 }
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "durationFrames": 24,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [{ "shotId": "shot.layered-room", "startFrame": 0 }]
+      }
+    ],
+    "audioTracks": [],
+    "transitions": []
+  }
+}

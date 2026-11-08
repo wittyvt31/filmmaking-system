@@ -1,0 +1,423 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectId": "filmie.artwork-preparation-proof",
+  "style": { "id": "charcoal_horror", "version": "1.1.0" },
+  "assets": [
+    {
+      "assetId": "environment.moonlit-room",
+      "version": "1.0.0",
+      "kind": "environment",
+      "displayName": "Moonlit plaster room",
+      "groups": [
+        {
+          "id": "room.back",
+          "transform": {
+            "position": { "x": 0, "y": 0.55, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          }
+        },
+        {
+          "id": "room.floor",
+          "transform": {
+            "position": { "x": 0, "y": 0.3, "z": -2.8 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          }
+        }
+      ],
+      "layers": [
+        {
+          "id": "wall",
+          "source": { "assetId": "art.room.back", "version": "1.0.0" },
+          "parentId": "room.back",
+          "transform": {
+            "position": { "x": 0, "y": 0, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          },
+          "size": { "width": 8, "height": 8 },
+          "pivot": { "x": 0.5, "y": 0.5 },
+          "order": 0
+        },
+        {
+          "id": "floor",
+          "source": { "assetId": "art.room.floor", "version": "1.0.0" },
+          "parentId": "room.floor",
+          "transform": {
+            "position": { "x": 0, "y": 0, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          },
+          "size": { "width": 8, "height": 3.2 },
+          "pivot": { "x": 0.5, "y": 0.5 },
+          "opacity": 0.95,
+          "order": 10
+        }
+      ]
+    },
+    {
+      "assetId": "character.father-cutout",
+      "version": "1.0.1",
+      "kind": "character",
+      "displayName": "Father charcoal cutout rig",
+      "groups": [
+        {
+          "id": "rig.torso",
+          "transform": {
+            "position": { "x": 0, "y": 0, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          }
+        },
+        {
+          "id": "rig.head",
+          "parentId": "rig.torso",
+          "transform": {
+            "position": { "x": 0.05, "y": -0.025, "z": 0.63 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": -2 },
+            "scale": 1
+          }
+        },
+        {
+          "id": "rig.arm.left",
+          "parentId": "rig.torso",
+          "transform": {
+            "position": { "x": -0.43, "y": -0.02, "z": 0.27 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 5 },
+            "scale": 0.68
+          }
+        },
+        {
+          "id": "rig.arm.right",
+          "parentId": "rig.torso",
+          "transform": {
+            "position": { "x": 0.43, "y": -0.02, "z": 0.27 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": -5 },
+            "scale": 0.68
+          }
+        }
+      ],
+      "layers": [
+        {
+          "id": "torso",
+          "source": {
+            "assetId": "art.father.torso.graphite",
+            "version": "1.0.0"
+          },
+          "parentId": "rig.torso",
+          "transform": {
+            "position": { "x": 0, "y": 0, "z": -0.08 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          },
+          "size": { "width": 1.25, "height": 1.25 },
+          "pivot": { "x": 0.5, "y": 0.9 },
+          "order": 0
+        },
+        {
+          "id": "head",
+          "source": { "assetId": "art.father.head", "version": "1.0.0" },
+          "parentId": "rig.head",
+          "transform": {
+            "position": { "x": 0, "y": 0, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          },
+          "size": { "width": 0.9, "height": 0.9 },
+          "pivot": { "x": 0.5, "y": 0.45 },
+          "order": 5
+        },
+        {
+          "id": "hair",
+          "source": { "assetId": "art.father.hair", "version": "1.0.0" },
+          "parentId": "rig.head",
+          "transform": {
+            "position": { "x": 0, "y": -0.012, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          },
+          "size": { "width": 0.9, "height": 0.9 },
+          "pivot": { "x": 0.5, "y": 0.45 },
+          "order": 12
+        },
+        {
+          "id": "arm-left",
+          "source": { "assetId": "art.father.arm-left", "version": "1.0.0" },
+          "parentId": "rig.arm.left",
+          "transform": {
+            "position": { "x": 0, "y": -0.015, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          },
+          "size": { "width": 0.48, "height": 0.9 },
+          "pivot": { "x": 0.5, "y": 0.86 },
+          "order": 2
+        },
+        {
+          "id": "arm-right",
+          "source": { "assetId": "art.father.arm-right", "version": "1.0.0" },
+          "parentId": "rig.arm.right",
+          "transform": {
+            "position": { "x": 0, "y": -0.018, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          },
+          "size": { "width": 0.48, "height": 0.9 },
+          "pivot": { "x": 0.5, "y": 0.86 },
+          "order": 3
+        },
+        {
+          "id": "eyes-calm",
+          "source": { "assetId": "art.father.eyes.calm", "version": "1.0.0" },
+          "parentId": "rig.head",
+          "transform": {
+            "position": { "x": 0, "y": -0.02, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          },
+          "size": { "width": 0.9, "height": 0.9 },
+          "pivot": { "x": 0.5, "y": 0.45 },
+          "order": 20,
+          "variantSlot": "face.eyes",
+          "variantId": "calm"
+        },
+        {
+          "id": "eyes-alarmed",
+          "source": {
+            "assetId": "art.father.eyes.alarmed",
+            "version": "1.0.0"
+          },
+          "parentId": "rig.head",
+          "transform": {
+            "position": { "x": 0, "y": -0.021, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          },
+          "size": { "width": 0.9, "height": 0.9 },
+          "pivot": { "x": 0.5, "y": 0.45 },
+          "order": 21,
+          "variantSlot": "face.eyes",
+          "variantId": "alarmed"
+        },
+        {
+          "id": "mouth-calm",
+          "source": { "assetId": "art.father.mouth.calm", "version": "1.0.0" },
+          "parentId": "rig.head",
+          "transform": {
+            "position": { "x": 0, "y": -0.022, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          },
+          "size": { "width": 0.9, "height": 0.9 },
+          "pivot": { "x": 0.5, "y": 0.45 },
+          "order": 22,
+          "variantSlot": "face.mouth",
+          "variantId": "calm"
+        },
+        {
+          "id": "mouth-alarmed",
+          "source": {
+            "assetId": "art.father.mouth.alarmed",
+            "version": "1.0.0"
+          },
+          "parentId": "rig.head",
+          "transform": {
+            "position": { "x": 0, "y": -0.023, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          },
+          "size": { "width": 0.9, "height": 0.9 },
+          "pivot": { "x": 0.5, "y": 0.45 },
+          "order": 23,
+          "variantSlot": "face.mouth",
+          "variantId": "alarmed"
+        }
+      ],
+      "variantSlots": [
+        {
+          "id": "face.eyes",
+          "defaultVariant": "calm",
+          "variants": [
+            { "id": "calm", "layerIds": ["eyes-calm"] },
+            { "id": "alarmed", "layerIds": ["eyes-alarmed"] }
+          ]
+        },
+        {
+          "id": "face.mouth",
+          "defaultVariant": "calm",
+          "variants": [
+            { "id": "calm", "layerIds": ["mouth-calm"] },
+            { "id": "alarmed", "layerIds": ["mouth-alarmed"] }
+          ]
+        }
+      ],
+      "anchors": [
+        {
+          "id": "hand.left",
+          "parentId": "rig.arm.left",
+          "position": { "x": 0, "y": -0.03, "z": -0.48 }
+        },
+        {
+          "id": "hand.right",
+          "parentId": "rig.arm.right",
+          "position": { "x": 0, "y": -0.03, "z": -0.48 }
+        },
+        {
+          "id": "head.center",
+          "parentId": "rig.head",
+          "position": { "x": 0, "y": 0, "z": 0.03 }
+        }
+      ]
+    },
+    {
+      "assetId": "prop.wooden-chair",
+      "version": "1.0.0",
+      "kind": "prop",
+      "displayName": "Worn wooden chair",
+      "groups": [
+        {
+          "id": "chair.root",
+          "transform": {
+            "position": { "x": 0, "y": 0, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          }
+        }
+      ],
+      "layers": [
+        {
+          "id": "chair-legs",
+          "source": {
+            "assetId": "art.prop.chair.chair-legs",
+            "version": "1.0.0"
+          },
+          "parentId": "chair.root",
+          "transform": {
+            "position": { "x": 0, "y": 0.02, "z": -0.1 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          },
+          "size": { "width": 0.8, "height": 0.9 },
+          "pivot": { "x": 0.5, "y": 0.85 },
+          "order": 0
+        },
+        {
+          "id": "chair-back",
+          "source": {
+            "assetId": "art.prop.chair.chair-back",
+            "version": "1.0.0"
+          },
+          "parentId": "chair.root",
+          "transform": {
+            "position": { "x": 0, "y": -0.03, "z": 0.45 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          },
+          "size": { "width": 0.75, "height": 0.52 },
+          "pivot": { "x": 0.5, "y": 0.1 },
+          "order": 3
+        },
+        {
+          "id": "chair-seat",
+          "source": {
+            "assetId": "art.prop.chair.chair-seat",
+            "version": "1.0.0"
+          },
+          "parentId": "chair.root",
+          "transform": {
+            "position": { "x": 0, "y": -0.05, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          },
+          "size": { "width": 0.85, "height": 0.28 },
+          "pivot": { "x": 0.5, "y": 0.5 },
+          "order": 5
+        }
+      ],
+      "anchors": [
+        {
+          "id": "seat.center",
+          "parentId": "chair.root",
+          "position": { "x": 0, "y": -0.06, "z": 0.1 }
+        }
+      ]
+    },
+    {
+      "assetId": "prop.rotary-telephone-illustration",
+      "version": "1.0.0",
+      "kind": "prop",
+      "displayName": "Rotary telephone illustration",
+      "groups": [
+        {
+          "id": "phone.body",
+          "transform": {
+            "position": { "x": 0, "y": 0, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          }
+        }
+      ],
+      "layers": [
+        {
+          "id": "phone-art",
+          "source": { "assetId": "art.prop.telephone", "version": "1.0.0" },
+          "parentId": "phone.body",
+          "transform": {
+            "position": { "x": 0, "y": 0, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          },
+          "size": { "width": 0.82, "height": 0.82 },
+          "pivot": { "x": 0.5, "y": 0.16 },
+          "order": 0
+        }
+      ],
+      "anchors": [
+        {
+          "id": "receiver.grip",
+          "parentId": "phone.body",
+          "position": { "x": 0, "y": -0.03, "z": 0.4 }
+        }
+      ]
+    },
+    {
+      "assetId": "prop.kerosene-lantern-illustration",
+      "version": "1.0.0",
+      "kind": "prop",
+      "displayName": "Kerosene lantern illustration",
+      "groups": [
+        {
+          "id": "lantern.handle",
+          "transform": {
+            "position": { "x": 0, "y": 0, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          }
+        }
+      ],
+      "layers": [
+        {
+          "id": "lantern-art",
+          "source": { "assetId": "art.prop.lantern", "version": "1.0.0" },
+          "parentId": "lantern.handle",
+          "transform": {
+            "position": { "x": 0, "y": 0, "z": 0 },
+            "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+            "scale": 1
+          },
+          "size": { "width": 0.62, "height": 0.62 },
+          "pivot": { "x": 0.5, "y": 0.08 },
+          "order": 0
+        }
+      ],
+      "anchors": [
+        {
+          "id": "handle.center",
+          "parentId": "lantern.handle",
+          "position": { "x": 0, "y": 0, "z": 0.24 }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "projectId": "filmie.artwork-preparation-proof",
+  "version": "1.0.0",
+  "video": {
+    "resolution": { "width": 640, "height": 360 },
+    "frameRate": { "numerator": 30, "denominator": 1 }
+  },
+  "renderPolicy": {
+    "outputDimensions": { "width": 640, "height": 360 },
+    "frameRate": { "numerator": 30, "denominator": 1 },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": { "mode": "crf", "value": 26 },
+    "renderer": {
+      "id": "blender",
+      "config": { "engine": "BLENDER_EEVEE", "samples": 1 }
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.prepared-art-assets",
+      "durationFrames": 30,
+      "visualDescription": "An original charcoal drawing of a father in a moonlit room with independently packaged furniture and props.",
+      "composition": {
+        "framing": "Full-height layered 2.5D room composition.",
+        "subjectPlacement": "Father center-left; chair behind him; telephone and lantern in the foreground.",
+        "cameraMovement": "Gentle push-in across the prepared layered artwork.",
+        "camera": {
+          "type": "zoom",
+          "startFrame": 0,
+          "durationFrames": 30,
+          "fromScale": 1,
+          "toScale": 1.025
+        },
+        "instructions": [
+          "All visual layers are registered PNG artwork assembled into immutable Blender collection packages."
+        ]
+      },
+      "requiredAssets": [
+        { "assetId": "environment.moonlit-room", "version": "1.0.0" },
+        { "assetId": "character.father-cutout", "version": "1.0.1" },
+        { "assetId": "prop.wooden-chair", "version": "1.0.0" },
+        { "assetId": "prop.rotary-telephone-illustration", "version": "1.0.0" },
+        { "assetId": "prop.kerosene-lantern-illustration", "version": "1.0.0" }
+      ],
+      "scene": {
+        "stylePreset": "charcoal_horror",
+        "styleVersion": "1.1.0",
+        "environment": {
+          "assetId": "environment.moonlit-room",
+          "version": "1.0.0"
+        },
+        "characters": [
+          {
+            "id": "father",
+            "artwork": {
+              "assetId": "character.father-cutout",
+              "version": "1.0.1"
+            },
+            "transform": {
+              "position": { "x": -0.25, "y": 0.05, "z": -0.25 },
+              "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+              "scale": 1
+            },
+            "actions": []
+          }
+        ],
+        "props": [
+          {
+            "id": "chair",
+            "artwork": { "assetId": "prop.wooden-chair", "version": "1.0.0" },
+            "transform": {
+              "position": { "x": -0.22, "y": 0.01, "z": -0.85 },
+              "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+              "scale": 1.15
+            }
+          },
+          {
+            "id": "telephone",
+            "artwork": {
+              "assetId": "prop.rotary-telephone-illustration",
+              "version": "1.0.0"
+            },
+            "transform": {
+              "position": { "x": 1.25, "y": -0.12, "z": -1.05 },
+              "rotationDegrees": { "x": 0, "y": 0, "z": -5 },
+              "scale": 0.9
+            }
+          },
+          {
+            "id": "lantern",
+            "artwork": {
+              "assetId": "prop.kerosene-lantern-illustration",
+              "version": "1.0.0"
+            },
+            "transform": {
+              "position": { "x": -1.45, "y": -0.1, "z": -0.65 },
+              "rotationDegrees": { "x": 0, "y": 0, "z": 2 },
+              "scale": 0.88
+            }
+          }
+        ],
+        "camera": {
+          "type": "push-in",
+          "startFrame": 0,
+          "durationFrames": 30,
+          "fromDistance": 6.5,
+          "toDistance": 6.35,
+          "target": { "x": 0, "y": 0, "z": 0 }
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "durationFrames": 30,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [{ "shotId": "shot.prepared-art-assets", "startFrame": 0 }]
+      }
+    ],
+    "audioTracks": [],
+    "transitions": []
+  }
+}

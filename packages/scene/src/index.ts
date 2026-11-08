@@ -9,7 +9,7 @@ import {
   type Shot,
 } from '@filmmaking/contracts';
 
-export const SCENE_COMPILER_VERSION = 'scene-compiler-v3';
+export const SCENE_COMPILER_VERSION = 'scene-compiler-v4';
 export const SEMANTIC_ANIMATION_LIBRARY_VERSION = '1.0.0';
 
 export const CHARCOAL_HORROR_STYLE = {
@@ -200,9 +200,13 @@ export function compileScene(
     styleVersion: scene.styleVersion,
     style,
     environment: scene.environment,
+    groups: [...scene.groups].sort((left, right) =>
+      compareStrings(left.id, right.id),
+    ),
     layers: [...scene.layers].sort(
       (left, right) =>
-        left.transform.position.z - right.transform.position.z ||
+        left.order - right.order ||
+        left.transform.position.y - right.transform.position.y ||
         compareStrings(left.id, right.id),
     ),
     characters: [...scene.characters]
@@ -222,16 +226,78 @@ export function compileScene(
       compareStrings(left.id, right.id),
     ),
     camera: scene.camera,
-    cameraKeyframes: [
-      {
-        frame: scene.camera.startFrame + 1,
-        distance: scene.camera.fromDistance,
-      },
-      {
-        frame: scene.camera.startFrame + scene.camera.durationFrames,
-        distance: scene.camera.toDistance,
-      },
-    ],
+    cameraKeyframes: (() => {
+      const camera = scene.camera;
+      const keyframe = (
+        frame: number,
+        target: { x: number; y: number; z: number },
+        distance: number,
+        focalLength: number,
+      ) => ({
+        frame,
+        distance,
+        position: { x: target.x, y: target.y - distance, z: target.z },
+        target,
+        focalLength,
+      });
+      if (camera.type === 'push-in') {
+        return [
+          keyframe(
+            camera.startFrame + 1,
+            camera.target,
+            camera.fromDistance,
+            50,
+          ),
+          keyframe(
+            camera.startFrame + camera.durationFrames,
+            camera.target,
+            camera.toDistance,
+            50,
+          ),
+        ];
+      }
+      if (camera.type === 'pan') {
+        return [
+          keyframe(
+            camera.startFrame + 1,
+            camera.fromTarget,
+            camera.distance,
+            50,
+          ),
+          keyframe(
+            camera.startFrame + camera.durationFrames,
+            camera.toTarget,
+            camera.distance,
+            50,
+          ),
+        ];
+      }
+      if (camera.type === 'zoom') {
+        return [
+          keyframe(
+            camera.startFrame + 1,
+            camera.target,
+            camera.distance,
+            camera.fromFocalLength,
+          ),
+          keyframe(
+            camera.startFrame + camera.durationFrames,
+            camera.target,
+            camera.distance,
+            camera.toFocalLength,
+          ),
+        ];
+      }
+      return [
+        keyframe(1, camera.target, camera.distance, camera.focalLength),
+        keyframe(
+          shot.durationFrames,
+          camera.target,
+          camera.distance,
+          camera.focalLength,
+        ),
+      ];
+    })(),
     actions: scene.characters.flatMap((character) =>
       character.actions.map((action) => ({
         characterId: character.id,

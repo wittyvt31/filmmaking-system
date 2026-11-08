@@ -48,6 +48,11 @@ export const ASSET_WORKER_PATH = join(
   'worker',
   'build_assets.py',
 );
+export const ARTWORK_WORKER_PATH = join(
+  ENGINE_PACKAGE_DIRECTORY,
+  'worker',
+  'prepare_artwork.py',
+);
 const ROOT_LOCKFILE = resolve(
   ENGINE_PACKAGE_DIRECTORY,
   '..',
@@ -670,6 +675,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
         style: scene.style,
         animationLibraryVersion: scene.animationLibraryVersion,
         environment: resolveAsset(scene.environment),
+        groups: scene.groups,
         layers: scene.layers.map((layer) => ({
           ...layer,
           asset: resolveAsset(layer.asset),

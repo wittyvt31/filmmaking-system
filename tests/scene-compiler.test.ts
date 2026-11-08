@@ -38,4 +38,107 @@ describe('renderer-independent scene compiler', () => {
 
     expect(() => parseProjectManifest(manifest)).toThrow(/push-in/i);
   });
+
+  it('compiles pan and optical zoom as deterministic camera paths', async () => {
+    const input = await proofManifest();
+    const shots = input['shots'] as Record<string, unknown>[];
+    const shotInput = shots[0];
+    if (!shotInput) throw new Error('Missing camera proof shot.');
+    const scene = shotInput['scene'] as Record<string, unknown>;
+    scene['camera'] = {
+      type: 'pan',
+      startFrame: 0,
+      durationFrames: 150,
+      distance: 6,
+      fromTarget: { x: -0.5, y: 0, z: 0 },
+      toTarget: { x: 0.75, y: 0, z: 0.2 },
+    };
+    const panManifest = parseProjectManifest(input);
+    const shot = panManifest.shots[0];
+    if (!shot) throw new Error('Missing parsed camera proof shot.');
+    const pan = compileScene(shot, panManifest.video.frameRate);
+    expect(pan.cameraKeyframes.map((keyframe) => keyframe.target)).toEqual([
+      { x: -0.5, y: 0, z: 0 },
+      { x: 0.75, y: 0, z: 0.2 },
+    ]);
+
+    scene['camera'] = {
+      type: 'zoom',
+      startFrame: 0,
+      durationFrames: 150,
+      distance: 6,
+      target: { x: 0, y: 0, z: 0 },
+      fromFocalLength: 35,
+      toFocalLength: 60,
+    };
+    const zoomManifest = parseProjectManifest(input);
+    const zoomShot = zoomManifest.shots[0];
+    if (!zoomShot) throw new Error('Missing parsed zoom proof shot.');
+    expect(
+      compileScene(zoomShot, zoomManifest.video.frameRate).cameraKeyframes.map(
+        (keyframe) => keyframe.focalLength,
+      ),
+    ).toEqual([35, 60]);
+  });
+
+  it('validates artwork parents, pivots, opacity, and deterministic draw order', async () => {
+    const input = await proofManifest();
+    const shots = input['shots'] as Record<string, unknown>[];
+    const shotInput = shots[0];
+    if (!shotInput) throw new Error('Missing artwork proof shot.');
+    const scene = shotInput['scene'] as Record<string, unknown>;
+    scene['groups'] = [
+      {
+        id: 'group.character',
+        transform: {
+          position: { x: 0, y: 0, z: 0 },
+          rotationDegrees: { x: 0, y: 0, z: 0 },
+          scale: 1,
+        },
+      },
+    ];
+    scene['layers'] = [
+      {
+        id: 'layer.character',
+        asset: { assetId: 'background.interior-wide', version: '1.0.0' },
+        role: 'character',
+        parentId: 'group.character',
+        transform: {
+          position: { x: 0.4, y: -0.5, z: 0.3 },
+          rotationDegrees: { x: 0, y: 0, z: 0 },
+          scale: 1,
+        },
+        pivot: { x: 0.5, y: 0.12 },
+        opacity: 0.8,
+        order: 10,
+      },
+    ];
+    const parsed = parseProjectManifest(input);
+    const shot = parsed.shots[0];
+    if (!shot) throw new Error('Missing parsed artwork proof shot.');
+    const compiled = compileScene(shot, parsed.video.frameRate);
+    expect(compiled.groups.map((group) => group.id)).toEqual([
+      'group.character',
+    ]);
+    expect(compiled.layers[0]).toMatchObject({
+      id: 'layer.character',
+      parentId: 'group.character',
+      pivot: { x: 0.5, y: 0.12 },
+      opacity: 0.8,
+      order: 10,
+    });
+
+    scene['groups'] = [
+      {
+        id: 'group.character',
+        parentId: 'layer.character',
+        transform: {
+          position: { x: 0, y: 0, z: 0 },
+          rotationDegrees: { x: 0, y: 0, z: 0 },
+          scale: 1,
+        },
+      },
+    ];
+    expect(() => parseProjectManifest(input)).toThrow(/cycle/i);
+  });
 });
