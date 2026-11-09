@@ -1,0 +1,6 @@
+00:02.375  blend            | Read blend: "D:\filmmaking-system\renders\a2-closure\final-A\output\production\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\shots\shot.reference-layered-room.blender\scene.blend"
+<string>:1: DeprecationWarning: 'Scene.use_nodes' is expected to be removed in Blender 6.0
+FILMIE_COMPOSITOR True True False [] []
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit

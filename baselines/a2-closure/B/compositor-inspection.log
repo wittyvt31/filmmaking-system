@@ -1,0 +1,6 @@
+00:02.343  blend            | Read blend: "D:\filmmaking-system\renders\a2-closure\final-B\output\production\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\shots\shot.reference-layered-room.blender\scene.blend"
+<string>:1: DeprecationWarning: 'Scene.use_nodes' is expected to be removed in Blender 6.0
+FILMIE_COMPOSITOR True True True [('R_LAYERS', 'Render Layers'), ('GLARE', 'Glare'), ('GROUP_OUTPUT', 'Group Output')] [('R_LAYERS', 'GLARE', 'Image'), ('GLARE', 'GROUP_OUTPUT', 'Image')]
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit

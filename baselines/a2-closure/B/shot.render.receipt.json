@@ -1,0 +1,1117 @@
+{
+  "jobId": "render-shot:shot.reference-layered-room",
+  "shotId": "shot.reference-layered-room",
+  "renderer": {
+    "id": "blender",
+    "version": "5.2.3"
+  },
+  "fingerprint": "0e37f45747ad5cc0b0c001d23f8a6203ddd2db0ed7a6136ca29fac740b8822c3",
+  "startedAt": "2026-11-09T16:34:57.879Z",
+  "completedAt": "2026-11-09T16:38:26.746Z",
+  "status": "success",
+  "artifactType": "image-sequence/png",
+  "outputPaths": [
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000001.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000002.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000003.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000004.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000005.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000006.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000007.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000008.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000009.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000010.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000011.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000012.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000013.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000014.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000015.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000016.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000017.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000018.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000019.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000020.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000021.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000022.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000023.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000024.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000025.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000026.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000027.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000028.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000029.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000030.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000031.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000032.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000033.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000034.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000035.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000036.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000037.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000038.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000039.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000040.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000041.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000042.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000043.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000044.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000045.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000046.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000047.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000048.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000049.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000050.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000051.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000052.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000053.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000054.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000055.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000056.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000057.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000058.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000059.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000060.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000061.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000062.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000063.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000064.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000065.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000066.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000067.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000068.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000069.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000070.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000071.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000072.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000073.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000074.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000075.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000076.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000077.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000078.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000079.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000080.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000081.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000082.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000083.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000084.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000085.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000086.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000087.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000088.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000089.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000090.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000091.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000092.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000093.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000094.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000095.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000096.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000097.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000098.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000099.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000100.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000101.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000102.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000103.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000104.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000105.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000106.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000107.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000108.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000109.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000110.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000111.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000112.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000113.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000114.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000115.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000116.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000117.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000118.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000119.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000120.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000121.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000122.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000123.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000124.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000125.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000126.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000127.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000128.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000129.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000130.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000131.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000132.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000133.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000134.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000135.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000136.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000137.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000138.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000139.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000140.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000141.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000142.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000143.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000144.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000145.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000146.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000147.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000148.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000149.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000150.png",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\scene.blend",
+    "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\worker-result.json"
+  ],
+  "outputChecksums": [
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000001.png",
+      "sha256": "856270fd50138a90fbf05fcaa3cdb5d01ae380d7ca7939637f4d7087c1d8c95c",
+      "bytes": 703600
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000002.png",
+      "sha256": "05c0bd5eea4ccfc7694519a7e6ec42585f17081604d1cdfa03b48fdd0604fd42",
+      "bytes": 704060
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000003.png",
+      "sha256": "dec136233602ecdb2ddd2852b01f2adc08ff54ea256b134359264d13bf759feb",
+      "bytes": 703499
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000004.png",
+      "sha256": "a330ca7381770f825a8c784cd85f74552976e08bd29a0e1a16407132c26d612e",
+      "bytes": 704384
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000005.png",
+      "sha256": "cd19c3224754777b31e8038c6c4c6a8063351ce627d1063ca50335183ce99c3d",
+      "bytes": 704151
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000006.png",
+      "sha256": "583b9f190be573f50fc9dccc650fd8d52fbcf53fb6073ad89d0a9b76c05e703e",
+      "bytes": 703632
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000007.png",
+      "sha256": "8c354aca0ed83f16caa607fde4fcce3e58c5420d9ccc24802895db525b56da96",
+      "bytes": 704106
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000008.png",
+      "sha256": "443e214482ecacf49ccb5367529f2e103023df528a78f1d5922406b8a85c9dfa",
+      "bytes": 704589
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000009.png",
+      "sha256": "2914dea94548606b9c6f8c8c45f4764fd27259648a3f493daa9dcff185f70043",
+      "bytes": 704275
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000010.png",
+      "sha256": "d5076d6736864cfe245321b49064574fcc6fc4f184755ebc6dc07fa194fc779e",
+      "bytes": 703884
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000011.png",
+      "sha256": "e7481616d07aab8ea0c0897fd482ca9a3b73cf630bb6791f3b0992b1a3e6b653",
+      "bytes": 703012
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000012.png",
+      "sha256": "ecd27890e32f7a4558d70be042bfb927ee3448a04d309fc4d9311b2fc5824da8",
+      "bytes": 704663
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000013.png",
+      "sha256": "19d06a80b405486397b78f7af90fc6d438bc78d544f7121cee3ea457f7639d15",
+      "bytes": 704246
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000014.png",
+      "sha256": "b967c2bffa5e0fa9e7a5238138115202fb0482ff038aee4860d3fa78ad0a7017",
+      "bytes": 703752
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000015.png",
+      "sha256": "8ec152488223d5bfdc52a1256f129ab57782851cb3fea32c071e25b70675d3cb",
+      "bytes": 704571
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000016.png",
+      "sha256": "8b1f596c450d437c0157e742eca82f74582bbded460f7c468d777cfa59d3c174",
+      "bytes": 703999
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000017.png",
+      "sha256": "9e49edf36c0648d69096f8f547222509ce3a624c21e49c623d6b2770bc81d7db",
+      "bytes": 702649
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000018.png",
+      "sha256": "ce51bc703fa480d713ff609061870a73637bf28816da938d064fe81213621d0a",
+      "bytes": 703677
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000019.png",
+      "sha256": "909279bdb3c54c1165db45b6aca214c5931c608a91e05d6288937fd269608eab",
+      "bytes": 704731
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000020.png",
+      "sha256": "f48032e0e90bd05892e9b50fb60d9ba36d84f77d4fd47fd3b85c6250df455c45",
+      "bytes": 703899
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000021.png",
+      "sha256": "da33faef51be1312b66c48218c642004944893bb8260e865096459ee06604da3",
+      "bytes": 704070
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000022.png",
+      "sha256": "f09be3b126cee45418dfc746a0630709406adfb10cd6d9b5e553f35c06bdc221",
+      "bytes": 704118
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000023.png",
+      "sha256": "0042a0cff129e6a634367b652eda3d892d5f0939ea1f23b7399a0d54043dbe85",
+      "bytes": 704559
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000024.png",
+      "sha256": "0085d8ffc08aaa4e142f310138a3446e9c4d801980638786fd4f3892c1ee8edc",
+      "bytes": 704247
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000025.png",
+      "sha256": "f270ddfed0497c9d53f949274f1d9cfe6c3f88548b40c5e73a633da43bd6f6b1",
+      "bytes": 703731
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000026.png",
+      "sha256": "736af5c2f78ce97b2b5d170bcd8e8a08fccdac1d9b513547edbc071dac380c90",
+      "bytes": 704446
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000027.png",
+      "sha256": "c2c97b1c72c98e393ce75a286e7f88d6fbc9d7c5ed777984b82b1c67c98a83f8",
+      "bytes": 704129
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000028.png",
+      "sha256": "84b89338d25ffcabf5c7ee9f0908644677a43bf7930b42a59e7973660e70ecae",
+      "bytes": 703987
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000029.png",
+      "sha256": "1d16c78c34cc310b584e012fee66f323c1251a55524fe1f58c75fa96cbcbd069",
+      "bytes": 704668
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000030.png",
+      "sha256": "9d2329ae031f4787a0dae28324afb2ab870d5ac773eee597eef312e4a2558e02",
+      "bytes": 703477
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000031.png",
+      "sha256": "b664233a5e5f38adf0dece883eb67aa9fc603588c903467b3122115300cd414d",
+      "bytes": 703821
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000032.png",
+      "sha256": "a77b38f68b90fea757dd1a20f0010f5ecd79f82e3cfa74c9a42bfafbb80733fd",
+      "bytes": 703897
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000033.png",
+      "sha256": "355fd9ca049474dac8c5b37c5648ed5892f5bc6605bd617cfab481e99eae994d",
+      "bytes": 703678
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000034.png",
+      "sha256": "18e056161cbac748a3fea26b6f2d88a3b2d52ec4d77951d8f3059204bf7bf2f8",
+      "bytes": 702988
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000035.png",
+      "sha256": "444cbc165f625e2993dcf9359cc5d43f9f71a2866129652118d5207d6522f449",
+      "bytes": 704145
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000036.png",
+      "sha256": "49ea89fb083ec8ae7261407a135cc8a5659c759c486483d0c72513aeb2c88619",
+      "bytes": 704694
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000037.png",
+      "sha256": "8fd226c292ab66f99a77e4efbd71babca761f47a383af205652e89eefa53d3cd",
+      "bytes": 704121
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000038.png",
+      "sha256": "06f21e227600af1b4aded6979d8f1cbfe937103b33f03707cb3feb4a2e3a3b18",
+      "bytes": 704331
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000039.png",
+      "sha256": "c4515916633c90f3f3958248daca252bd6ca618575d6d5e78073dcde6bdf2210",
+      "bytes": 704166
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000040.png",
+      "sha256": "5f06ad4c5deaf28666ae4cbc8c03d51c00d3cdf2425bcfcf182863a127d01b3c",
+      "bytes": 704328
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000041.png",
+      "sha256": "a98a593f6fc0962b499b1a1d25893b88bb69cb80873ea54da9dbe7a9988722d9",
+      "bytes": 703427
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000042.png",
+      "sha256": "b45aa7b558967342f21296945d30ece10002afb6ae4c702af87d116b633f6e18",
+      "bytes": 704283
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000043.png",
+      "sha256": "52172ab85bb42d38eae300aa1aee3d6159d891fb9e1f984ed82db54f8d957380",
+      "bytes": 704080
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000044.png",
+      "sha256": "f29429b43987f075e5364fff46464e897732cbbe1e8ace69998baea38627ac10",
+      "bytes": 703128
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000045.png",
+      "sha256": "2270eac621e7992f5a622f93ebde0176ce48f6b923531f1f6c5e956b8ddf2131",
+      "bytes": 703777
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000046.png",
+      "sha256": "a1d399c6f8e65da1e3980db7084a8f766e5e19ed67994c3e62c21418d29dc31b",
+      "bytes": 703661
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000047.png",
+      "sha256": "ec25d78d7936dd8e9efe7a1d856147d396a1383cd0aaad95750e74c220a3c55f",
+      "bytes": 705110
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000048.png",
+      "sha256": "4813ffbcb9f41b5142843b9a025ba2dcd7e146e6c13b838b22421fd484831457",
+      "bytes": 703685
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000049.png",
+      "sha256": "7a45187c979549264e85eb5d69762708818262fbe931c3faadc3a0c06a9b3443",
+      "bytes": 703403
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000050.png",
+      "sha256": "e598d8933c43398b1f9999acfe1a5f36ddb2a0b194362ef33d9fbd4406f3143e",
+      "bytes": 703438
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000051.png",
+      "sha256": "de0cd4304ed7cb2def7c820ba591f5fb194f00affde7845cb3e2aeb6304a54e5",
+      "bytes": 703424
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000052.png",
+      "sha256": "56003964746926019e9f55ba37345d8907bab2055321f1939a9d6a77c11f1360",
+      "bytes": 702986
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000053.png",
+      "sha256": "56a66917ad9756f4fa7db94f759ec30cafa23000377f3c902d5c6229be618cdf",
+      "bytes": 704424
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000054.png",
+      "sha256": "a6886acebe0d405dbfe18f9fea8c4e18b5a35f48e268c19ad8ffef374066e83d",
+      "bytes": 702879
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000055.png",
+      "sha256": "4d5e89c12e43c3b431c0ac780566e8a1474681c9effd5878b61a93cd3a06aa9e",
+      "bytes": 704260
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000056.png",
+      "sha256": "57125de05adea65cc087b78efe0243e4b246271931129729f53f93d56ccd9c8d",
+      "bytes": 703780
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000057.png",
+      "sha256": "6a83dc916e0c0ff71842105f9e05c08c3c09fee3e191099585ad7353eee8f8f9",
+      "bytes": 704357
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000058.png",
+      "sha256": "d3befe9bf5a3b7228cff089979e9f617a3c19ac9eeff5adff373dc7f9d92db27",
+      "bytes": 704268
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000059.png",
+      "sha256": "5a77b6f709cc8349ee9a9ba76515e4260bef89cdd4271c18afcd9ae59c329413",
+      "bytes": 703977
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000060.png",
+      "sha256": "02ccf7ee095faf584ef76ff48a5a5bd7b4eb56f2da18c22dce7d49e66a4f0d19",
+      "bytes": 704076
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000061.png",
+      "sha256": "b196ed1172031c3018336dd52e5bb564fa4f9c5df7093db23a841e8a59efd1ab",
+      "bytes": 703271
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000062.png",
+      "sha256": "12d2a3020c004ed13199e9c715723d800ed058dc2b54664b18aca46ff0a961f6",
+      "bytes": 703856
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000063.png",
+      "sha256": "83df424c0b1222829a6c70b48766af1dcd5fe820a9ce985b4c2f440b1846cb13",
+      "bytes": 703773
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000064.png",
+      "sha256": "36f7d229d5b8cc6eeecfaf971384be409868eb9e4421e2a0206db424a0f5663f",
+      "bytes": 703189
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000065.png",
+      "sha256": "c80e92a2b4c49e62a5913c28de8931c19005b6a401b70dc08337644e3748ee1a",
+      "bytes": 703318
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000066.png",
+      "sha256": "8dc8332dfa6f8f8a0133b36dda6dfa4b6f5c08d79fe0e20733632e7b23ff4517",
+      "bytes": 703444
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000067.png",
+      "sha256": "7ae1c3cbbf78836427af009e93a68bba7224c1eb294ae6055bdca4e04839501e",
+      "bytes": 703946
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000068.png",
+      "sha256": "8b477373766cdf9ce6d789152a236c4bc0083943cc1cf51809d4e793c1ddce8d",
+      "bytes": 703305
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000069.png",
+      "sha256": "e9f3614642b061b34ceff3f1cdb6e3ea2699b29a61d1b0aa8a3f85c1cca6906e",
+      "bytes": 703847
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000070.png",
+      "sha256": "b6b5258610172e43756f2605a7a4138df5767e0078d8c740fcd43d893b97932d",
+      "bytes": 703988
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000071.png",
+      "sha256": "dde68eedec4b2b24b55954f524f751dd193cb12c169a70c93ef8442215d7a505",
+      "bytes": 704390
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000072.png",
+      "sha256": "dabcff1b093725bb65779b83ede541b6e23643a91f99dc21d2a67066bffb8365",
+      "bytes": 704182
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000073.png",
+      "sha256": "2300da8069c7c3fcf41e9548b629b5992cf4b494ade77b7d6fd8e0aef502c355",
+      "bytes": 703754
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000074.png",
+      "sha256": "f253fd9aa7a47bbd1bfeaba6db7ff6b471d07048259acc924c62199265d626d9",
+      "bytes": 703389
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000075.png",
+      "sha256": "b024922d703878180797e770f267b620495913edd70f6b614cf6ed65302ff3a6",
+      "bytes": 703895
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000076.png",
+      "sha256": "016f4f0bd3f5000c29605a5d0bdcf52e51c20464c8a1d72ee298ca3952b74a35",
+      "bytes": 703755
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000077.png",
+      "sha256": "9c22f933ab7c0339a564130b6a574fab15866e54ba22a2205913642b27f7f261",
+      "bytes": 703645
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000078.png",
+      "sha256": "abf552f7a48bff6a363f38ea9212c16d13fdef9bc69cbaef34ac2b14c7a37725",
+      "bytes": 703753
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000079.png",
+      "sha256": "2ceab5b94d359da1625f2ba43d45b73be867ac32623580e0369f11d455915ae5",
+      "bytes": 704227
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000080.png",
+      "sha256": "1e3369e3e2cd11abac817deaf410f43e6b35dd85a0c951185f005c971a719345",
+      "bytes": 703324
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000081.png",
+      "sha256": "aced9b9e2651f7c9ea050fc4712c06b3447ebde6237d5fc41ff070d4f91141d1",
+      "bytes": 703142
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000082.png",
+      "sha256": "e940a3798b842edce827785c73491850fe5803e1dabe0b06cfdf459d1cb735be",
+      "bytes": 704000
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000083.png",
+      "sha256": "4a1cdadc145e2438c31c8fdbf4b8a802da1ade4b25f07c28ee63d08e177cc61c",
+      "bytes": 703898
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000084.png",
+      "sha256": "64e3f1eade903b11039421dcd7c5aa1fe206faf8722955bb0cff6b78449985d7",
+      "bytes": 703814
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000085.png",
+      "sha256": "94eea92e07cc0efebb22fd2d9323a7ffe207dc99f38d3db36ea28e634bd3f30d",
+      "bytes": 704321
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000086.png",
+      "sha256": "7779949a485cc7e8bd449eaea3c6c5946a36552b4ddf2ba618b9ab6ffd803400",
+      "bytes": 704790
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000087.png",
+      "sha256": "3d9343cb5b6b86bc9ef6c26e0cdf403e7ce4fdfc91451d8c5caa91edad305a7e",
+      "bytes": 703906
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000088.png",
+      "sha256": "51c5b57db320930cf884570e451ce37c118c37756ef13a8b4255ced27f4ae839",
+      "bytes": 704220
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000089.png",
+      "sha256": "ab1b817255591fe1f7d31d1e88caf631d9497d5c527d6b2975c8de425f2ff78b",
+      "bytes": 703600
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000090.png",
+      "sha256": "3d7ee77da59cb3520c6b20dd4e0581973390c66a2a4ee6be9d08bda559b3ce21",
+      "bytes": 702910
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000091.png",
+      "sha256": "ab3433de125febad2b72405716e56da9d2cb82f808a418afc517002c4feb496e",
+      "bytes": 703910
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000092.png",
+      "sha256": "09fec5696c761971e7e4dfee40464a8f1526d70697308c45a13f7969b4d609d1",
+      "bytes": 703372
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000093.png",
+      "sha256": "e2e1a6caa2f6018a4e25490e5f76e87602de7e01eb1bbd1ecfd4ff6726a8db10",
+      "bytes": 703835
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000094.png",
+      "sha256": "a0ef833e703a8120a4c1a1f13c63370c50bc4a417e30dae97d052cf4430ca9e9",
+      "bytes": 703375
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000095.png",
+      "sha256": "d20a5f1ec2e6d5e8e64fdea0ad85b927be9e5e505ee13e2bca430d54fe2776d7",
+      "bytes": 703708
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000096.png",
+      "sha256": "9cff7843e9b17535985196aa0133cb04edeef9dc3b9dd26ef9af8e1baf8f3be1",
+      "bytes": 703623
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000097.png",
+      "sha256": "5247c4a15eb1605d7895e0bc58b907a2df51410a39bf3b19ace8fc2acda34924",
+      "bytes": 703866
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000098.png",
+      "sha256": "2082d8da5867c15f55aec11bb3c56c3ac25650e807e9d6a8e674ae7952cc58a9",
+      "bytes": 702987
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000099.png",
+      "sha256": "e77a2978694a6b224dc63148d45d02e68b6faa30c919413ab49155479a12e0cb",
+      "bytes": 703792
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000100.png",
+      "sha256": "b78006c39cca838d851c0753017a315fa24a90da9ff5379a1d50beba63ea3e56",
+      "bytes": 704271
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000101.png",
+      "sha256": "412b0bda1bb89a5a4b01a73f9bc2b6861ba68b69eabbc3f23dfc8d255ff790b6",
+      "bytes": 703780
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000102.png",
+      "sha256": "0c6b58baaf67c73621cb791fe78c3b42e775aa528f07f060ae21044dbb29d827",
+      "bytes": 703354
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000103.png",
+      "sha256": "39e1a412a7add337f9228f4c475a848d8988facc838441330e7cf942b07d4b1f",
+      "bytes": 703414
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000104.png",
+      "sha256": "2430655446a9f5f0191f4f150bcd6e116d350a7f1160a9d47f3d94cc779794df",
+      "bytes": 703415
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000105.png",
+      "sha256": "f06d0e2c4f5a4a7c5e2cb57881cb2bd3ff3c04bf3c554cc75f06d81d78e5e7f2",
+      "bytes": 703324
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000106.png",
+      "sha256": "8f7873c314966b77306bc2617d2505aff666e6b450074fd4e7be931312f611c0",
+      "bytes": 703257
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000107.png",
+      "sha256": "6ed41ea12c165955e09a45cd3baeb0e6cb5b4554fcbeaf4e8560cf40e7b8bac7",
+      "bytes": 702751
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000108.png",
+      "sha256": "d64c9ea242d81629139c88c12a0660242d94b3471f6b7322a6507d1c622a8731",
+      "bytes": 703407
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000109.png",
+      "sha256": "ccb887fa0b4e6f5cad89c11dc9d02206a9c0c6649e8662bb39f912e959ee2fc2",
+      "bytes": 702607
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000110.png",
+      "sha256": "e36474bac1afd58da88b30dd7ff8a5c026f42ce9b2074aa61d43309ae3f9964f",
+      "bytes": 703495
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000111.png",
+      "sha256": "6fd8d6c87743b75becc1ac7461a6acfcb1a7b03002595dbd03462b8c3a52bd73",
+      "bytes": 703166
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000112.png",
+      "sha256": "bcf8bf4c5c735a5d5587df0add444737abebfba05b5cb29d21ad60eac42d23e1",
+      "bytes": 703365
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000113.png",
+      "sha256": "08e44de7301a331053808ec694a7c8359665bf258b01c941c918716384b844d5",
+      "bytes": 703839
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000114.png",
+      "sha256": "08850086322d651ab2cd5b9f6c71230e8789a2d028dd4c68eeaee98b40ca463d",
+      "bytes": 703634
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000115.png",
+      "sha256": "000f8209dcac82b2b538b739fe42592cfa5ae8946a5bafa4fedcdaac0ce1b8a7",
+      "bytes": 703582
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000116.png",
+      "sha256": "eb2fbe66a3e8d0f51d850e5622bedacfee09a68d50843091460fc5243c7176fe",
+      "bytes": 703275
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000117.png",
+      "sha256": "cd503bf9b886673d9cd06df095a37981c3843fae7b632869668991d01b5f1242",
+      "bytes": 703841
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000118.png",
+      "sha256": "5537e06214b56ad88873409d0d9464073a494a88134f56c0a49dc8dbb39cbdf1",
+      "bytes": 703842
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000119.png",
+      "sha256": "3bf96f0837acf778036fe2b9cd0b503df39daeafe00fe8c87ead2eed67e38167",
+      "bytes": 703459
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000120.png",
+      "sha256": "a412e8686d19d51ce8a046c277a3328e24ba02139c1e4413f5a826fced654144",
+      "bytes": 703243
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000121.png",
+      "sha256": "8035e170abc7d0a01743fe1ad08ee27252f3e07c092c2309249cdd8673cbc3ae",
+      "bytes": 703671
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000122.png",
+      "sha256": "d3e509078aea7d458b3cc23f8bbfd634e433724b13f9d41c0222968ef0aaa7d4",
+      "bytes": 702630
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000123.png",
+      "sha256": "f863402aae3c3460e3927722d494217aaf3a72bf4e8f21864a597de53983d34a",
+      "bytes": 703109
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000124.png",
+      "sha256": "ff0707d207744807c277d7cd615314ed4744a2771d9b36860a3f7f84a26253a5",
+      "bytes": 704104
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000125.png",
+      "sha256": "879d26d9d8ae569dc3dad1015a5c6fe74cfb314fe3f2d26b8312b3202f550864",
+      "bytes": 704402
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000126.png",
+      "sha256": "3b5439334d2388dbe6b222e49112f4a65177e059b9d3ded7062c3beea3395015",
+      "bytes": 703597
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000127.png",
+      "sha256": "e3466ef27dc1f9ba1b563bfd7378a157b55646474c58f94f62020012dc827d28",
+      "bytes": 703898
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000128.png",
+      "sha256": "493d57cca733740feb87b6f91da4268c5c3e08fa71773a4796296ec2b39af767",
+      "bytes": 704014
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000129.png",
+      "sha256": "85667e171bcaa3007ef46e0f82fb7cbf309dc837b268107c9030778aa95fab29",
+      "bytes": 703195
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000130.png",
+      "sha256": "abbfa6deeda89ac7ab97abd342ec7deadba8c05e6425c44c430614158179d921",
+      "bytes": 703258
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000131.png",
+      "sha256": "92d3c5fc5123bd6e63c0a98a8d3be83e14c97144162de1c7f29b1f2f924afea1",
+      "bytes": 702838
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000132.png",
+      "sha256": "d0e3d5013d3ce5d8ac2446d37e9105b755daedceae0ba27ade163a2478b60225",
+      "bytes": 703238
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000133.png",
+      "sha256": "82a515a52f3e58839a630291938ae11bf45f1ac06bf8c88f6144f00bac1474c6",
+      "bytes": 702804
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000134.png",
+      "sha256": "5dba9f9e3c5a1eef8e2a72049273fbe48abee1261cdbbea6d6a9f20f1fe337d0",
+      "bytes": 703360
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000135.png",
+      "sha256": "bb9426007c86fae0d2c7c6c597cf252ba60663d954162a21398c34db5f43133d",
+      "bytes": 703656
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000136.png",
+      "sha256": "fc05f60e7e7668754090fefabb7191511636b9f974c94e6ff4ec87f6a0d6c1c3",
+      "bytes": 702994
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000137.png",
+      "sha256": "23105827c36c20baa9dacda8a574ec9c8976a49a4849a6368cecbb7fdfbc50a8",
+      "bytes": 702456
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000138.png",
+      "sha256": "928053e02799c8a861e9897795b1ec334a8ca35a639e52153ce729d15345bcc2",
+      "bytes": 703471
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000139.png",
+      "sha256": "2c45035250a850c1379db93b60db2cfd6550680a23ac1bf32d1a397cc08ada33",
+      "bytes": 703647
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000140.png",
+      "sha256": "c715e841c60cc62640a0432464b1ea5928069042e397d7d426b3e5ae2d5fc8cd",
+      "bytes": 702936
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000141.png",
+      "sha256": "e0eae5d93c88e4baf0f215c15329edae4f72e371381a09700d4a2a4b9cb8742f",
+      "bytes": 703260
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000142.png",
+      "sha256": "bf9e8bb46b230a170f99febaddd8d4d1e24ffdae362cad9664946bfabd466892",
+      "bytes": 703148
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000143.png",
+      "sha256": "72889e4be1e76c51a7677776b4b6ae68d839e5217391c798876fa4a40e63adf1",
+      "bytes": 703351
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000144.png",
+      "sha256": "27de1dbb8696e21a315956d053a91c20fcd2bac847840e65fe2ec35770ba28a0",
+      "bytes": 703473
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000145.png",
+      "sha256": "3b259cf7fd2e815b90e1112454da59910993b70bdcbbbd723abdfd3cdced872c",
+      "bytes": 702973
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000146.png",
+      "sha256": "81601bf5e52be7e8112e1b3bb549179a72f3835551d300b1b27572a757d795ac",
+      "bytes": 703088
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000147.png",
+      "sha256": "78a1ad377d9bd454ed5289e7184510921581cf8d071e80cf2938660b91bac6cf",
+      "bytes": 703363
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000148.png",
+      "sha256": "c0cc96546f611f3b02a6d60911b80f061bcdd4791e3809a53889d49dd014c430",
+      "bytes": 703247
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000149.png",
+      "sha256": "7501c27e95529201cb1bab4f2379383c9f22b44d054923875d3c67a5d89d208d",
+      "bytes": 702656
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\frames\\frame_000150.png",
+      "sha256": "5f7a83397b232af72b8d73b2d619c6a515a759ed6ea32679d91e7b88051cf52e",
+      "bytes": 703401
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\scene.blend",
+      "sha256": "7e2b8297022b4ea591f9556988429835e2cc58d2ed9c26b9d72535cdbbd4f75d",
+      "bytes": 679906
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\shot.reference-layered-room.blender\\worker-result.json",
+      "sha256": "19996c7fe8818a4640d67a065b3c809783aeff2ca0f92c157a714a9bbfdec526",
+      "bytes": 423
+    }
+  ],
+  "logs": [
+    "00:02.438  reports          | WARNING Path 'C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\datafiles\\assets\\brushes\\essentials_brushes-gp_draw.blend' cannot be made relative for Material 'Dots Stroke'",
+    "Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)",
+    "00:02.438  reports          | WARNING Path 'C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\datafiles\\assets\\brushes\\essentials_brushes-gp_draw.blend' cannot be made relative for Material 'Material'",
+    "00:02.438  image.write      | ERROR OpenImageIO write failed: Could not open file \"\\.thumbnails\\large\\blender_20500_0eb062a6fb40aace6707ee3fdf65f113.png.png\"",
+    "00:29.594  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000001.png'",
+    "00:30.891  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000002.png'",
+    "00:32.141  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000003.png'",
+    "00:33.329  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000004.png'",
+    "00:34.454  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000005.png'",
+    "00:35.625  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000006.png'",
+    "00:36.782  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000007.png'",
+    "00:38.000  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000008.png'",
+    "00:39.172  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000009.png'",
+    "00:40.344  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000010.png'",
+    "00:41.485  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000011.png'",
+    "00:42.719  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000012.png'",
+    "00:43.907  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000013.png'",
+    "00:45.094  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000014.png'",
+    "00:46.297  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000015.png'",
+    "00:47.469  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000016.png'",
+    "00:48.625  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000017.png'",
+    "00:49.782  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000018.png'",
+    "00:50.985  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000019.png'",
+    "00:52.110  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000020.png'",
+    "00:53.235  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000021.png'",
+    "00:54.469  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000022.png'",
+    "00:55.641  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000023.png'",
+    "00:56.844  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000024.png'",
+    "00:58.000  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000025.png'",
+    "00:59.141  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000026.png'",
+    "01:00.266  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000027.png'",
+    "01:01.407  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000028.png'",
+    "01:02.657  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000029.png'",
+    "01:03.860  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000030.png'",
+    "01:05.032  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000031.png'",
+    "01:06.125  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000032.png'",
+    "01:07.297  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000033.png'",
+    "01:08.422  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000034.png'",
+    "01:09.547  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000035.png'",
+    "01:10.704  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000036.png'",
+    "01:11.875  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000037.png'",
+    "01:13.016  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000038.png'",
+    "01:14.110  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000039.png'",
+    "01:15.297  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000040.png'",
+    "01:16.407  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000041.png'",
+    "01:17.532  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000042.png'",
+    "01:18.719  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000043.png'",
+    "01:19.907  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000044.png'",
+    "01:21.079  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000045.png'",
+    "01:22.250  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000046.png'",
+    "01:23.516  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000047.png'",
+    "01:24.641  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000048.png'",
+    "01:25.813  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000049.png'",
+    "01:26.985  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000050.png'",
+    "01:28.125  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000051.png'",
+    "01:29.282  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000052.png'",
+    "01:30.407  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000053.png'",
+    "01:31.563  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000054.png'",
+    "01:32.688  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000055.png'",
+    "01:33.829  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000056.png'",
+    "01:35.032  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000057.png'",
+    "01:36.125  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000058.png'",
+    "01:37.266  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000059.png'",
+    "01:38.407  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000060.png'",
+    "01:39.594  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000061.png'",
+    "01:40.782  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000062.png'",
+    "01:41.922  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000063.png'",
+    "01:43.172  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000064.png'",
+    "01:44.344  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000065.png'",
+    "01:45.422  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000066.png'",
+    "01:46.547  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000067.png'",
+    "01:47.672  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000068.png'",
+    "01:48.860  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000069.png'",
+    "01:50.016  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000070.png'",
+    "01:51.157  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000071.png'",
+    "01:52.422  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000072.png'",
+    "01:53.594  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000073.png'",
+    "01:55.047  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000074.png'",
+    "01:56.188  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000075.png'",
+    "01:57.422  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000076.png'",
+    "01:58.579  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000077.png'",
+    "01:59.735  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000078.png'",
+    "02:00.954  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000079.png'",
+    "02:02.094  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000080.png'",
+    "02:03.282  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000081.png'",
+    "02:04.438  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000082.png'",
+    "02:05.547  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000083.png'",
+    "02:06.750  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000084.png'",
+    "02:08.000  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000085.png'",
+    "02:09.079  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000086.png'",
+    "02:10.219  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000087.png'",
+    "02:11.422  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000088.png'",
+    "02:12.563  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000089.png'",
+    "02:13.688  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000090.png'",
+    "02:14.891  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000091.png'",
+    "02:16.079  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000092.png'",
+    "02:17.157  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000093.png'",
+    "02:18.266  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000094.png'",
+    "02:19.579  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000095.png'",
+    "02:20.735  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000096.png'",
+    "02:21.891  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000097.png'",
+    "02:23.188  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000098.png'",
+    "02:24.360  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000099.png'",
+    "02:25.532  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000100.png'",
+    "02:26.797  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000101.png'",
+    "02:28.079  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000102.png'",
+    "02:29.313  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000103.png'",
+    "02:31.532  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000104.png'",
+    "02:33.188  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000105.png'",
+    "02:34.485  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000106.png'",
+    "02:35.719  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000107.png'",
+    "02:37.079  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000108.png'",
+    "02:38.282  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000109.png'",
+    "02:39.391  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000110.png'",
+    "02:40.657  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000111.png'",
+    "02:41.907  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000112.png'",
+    "02:43.063  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000113.png'",
+    "02:44.172  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000114.png'",
+    "02:45.360  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000115.png'",
+    "02:46.485  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000116.png'",
+    "02:47.594  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000117.png'",
+    "02:48.860  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000118.png'",
+    "02:50.297  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000119.png'",
+    "02:51.547  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000120.png'",
+    "02:52.844  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000121.png'",
+    "02:54.047  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000122.png'",
+    "02:55.204  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000123.png'",
+    "02:56.579  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000124.png'",
+    "02:57.735  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000125.png'",
+    "02:58.969  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000126.png'",
+    "03:00.219  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000127.png'",
+    "03:01.532  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000128.png'",
+    "03:02.719  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000129.png'",
+    "03:03.891  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000130.png'",
+    "03:05.110  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000131.png'",
+    "03:06.250  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000132.png'",
+    "03:07.422  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000133.png'",
+    "03:08.657  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000134.png'",
+    "03:09.875  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000135.png'",
+    "03:11.016  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000136.png'",
+    "03:12.266  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000137.png'",
+    "03:13.485  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000138.png'",
+    "03:14.625  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000139.png'",
+    "03:15.766  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000140.png'",
+    "03:17.000  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000141.png'",
+    "03:18.110  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000142.png'",
+    "03:19.297  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000143.png'",
+    "03:20.454  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000144.png'",
+    "03:21.641  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000145.png'",
+    "03:22.813  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000146.png'",
+    "03:24.000  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000147.png'",
+    "03:25.157  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000148.png'",
+    "03:26.266  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000149.png'",
+    "03:27.438  render           | Saved: 'D:\\filmmaking-system\\renders\\a2-closure\\final-B\\output\\production\\ZmlsbWllLnJlZmVyZW5jZS1zaG90LWRyYWZ0\\shots\\.shot.reference-layered-room.blender.0e37f45747ad5cc0.partial\\artifact\\frames\\frame_000150.png'",
+    "Info: Saved as \"scene.blend\"",
+    "",
+    "Blender quit",
+    "D:\\filmmaking-system\\engines\\blender\\worker\\render_shot.py:50: DeprecationWarning: 'Scene.use_nodes' is expected to be removed in Blender 6.0",
+    "  scene.use_nodes = True",
+    "D:\\filmmaking-system\\engines\\blender\\worker\\render_shot.py:449: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0",
+    "  material.use_nodes = True"
+  ],
+  "metrics": {
+    "renderDurationMs": 208054,
+    "frameCount": 150,
+    "renderedFrames": 150,
+    "cacheHit": false,
+    "renderEngine": "BLENDER_EEVEE",
+    "selectedBackend": "EEVEE",
+    "samples": 4,
+    "renderWidth": 854,
+    "renderHeight": 480,
+    "qualityProfile": "draft",
+    "frameRate": "30/1",
+    "shadows": "high",
+    "textures": "high",
+    "compositing": true,
+    "blenderVersion": "5.2.3 LTS",
+    "exitCode": 0,
+    "completedWithWarning": false,
+    "fallbackUsed": false,
+    "degraded": false
+  },
+  "requestedRenderer": "BLENDER_EEVEE",
+  "actualRenderer": "BLENDER_EEVEE",
+  "fallbackUsed": false,
+  "degraded": false
+}

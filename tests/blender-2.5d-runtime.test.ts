@@ -94,6 +94,7 @@ describe.skipIf(!blenderAvailable)('Blender 2.5D artwork runtime', () => {
         { timeoutMs: 180_000 },
       );
       expect(worker.code, `${worker.stderr}\n${worker.stdout}`).toBe(0);
+      expect(worker.stderr).not.toContain('FILMIE_GLOW_SKIPPED');
       const workerResult = JSON.parse(
         await readFile(join(outputDirectory, 'worker-result.json'), 'utf8'),
       ) as { status: string; blendPath: string; frameCount: number };
@@ -128,6 +129,12 @@ bpy.context.scene.frame_set(24); bpy.context.view_layer.update()
 end_y = camera.matrix_world.translation.y
 assert start_y < end_y, (start_y, end_y)
 bpy.context.scene.frame_set(12)
+assert bpy.context.scene.use_nodes
+compositor = bpy.context.scene.compositing_node_group
+assert compositor is not None
+group_output = next(node for node in compositor.nodes if node.type == 'GROUP_OUTPUT')
+assert group_output.inputs['Image'].is_linked
+assert any(node.type == 'GLARE' for node in compositor.nodes)
 bpy.context.scene.render.filepath = ${JSON.stringify(join(temporary, 'reopened-frame.png'))}
 bpy.ops.render.render(write_still=True)
 print('FILMIE_2_5D_REOPENED', tuple(round(v, 4) for v in daughter.matrix_world.translation), round(start_y, 4), round(end_y, 4), flush=True)

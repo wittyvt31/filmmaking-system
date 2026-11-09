@@ -1,0 +1,10 @@
+[2026-11-09T16:34:57.867Z] Loaded project filmie.reference-shot-draft@1.0.0.
+[2026-11-09T16:34:57.869Z] Validated 1 shots and resolved 3 assets.
+[2026-11-09T16:34:57.869Z] Compiled timeline 02b54f995b845423044517152d0b33436e4ad8e0dd1c4f9078a6d9973326bf3a (150 frames).
+[2026-11-09T16:34:57.876Z] Rendering shot shot.reference-layered-room (150 frames).
+[2026-11-09T16:38:27.446Z] Encoding shot shot.reference-layered-room PNG sequence with FFmpeg.
+[2026-11-09T16:38:50.289Z] Shot shot.reference-layered-room video encoded; SHA-256 9d7574a3219f57a9b3b8389728621d5dd8530abbce92187dabd36324c545c60a.
+[2026-11-09T16:38:50.290Z] Shot shot.reference-layered-room rendered; SHA-256 9d7574a3219f57a9b3b8389728621d5dd8530abbce92187dabd36324c545c60a.
+[2026-11-09T16:38:53.200Z] Assembling 1 shots with FFmpeg.
+[2026-11-09T16:39:15.975Z] FFprobe verified master: 150 frames, 1920x1080, 30 FPS, h264, yuv420p, bt709.
+[2026-11-09T16:39:16.049Z] Production completed successfully: D:\filmmaking-system\renders\a2-closure\final-B\output\master.mp4.

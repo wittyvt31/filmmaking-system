@@ -1,0 +1,203 @@
+{
+  "projectId": "filmie.reference-shot-draft",
+  "version": "1.0.0",
+  "video": {
+    "resolution": {
+      "width": 1920,
+      "height": 1080
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    }
+  },
+  "renderPolicy": {
+    "outputDimensions": {
+      "width": 1920,
+      "height": 1080
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": {
+      "mode": "crf",
+      "value": 24
+    },
+    "qualityProfile": "draft",
+    "renderer": {
+      "id": "blender",
+      "config": {
+        "engine": "BLENDER_EEVEE"
+      }
+    },
+    "qualityOverrides": {
+      "compositing": true
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.reference-layered-room",
+      "durationFrames": 150,
+      "visualDescription": "The prepared charcoal village-house interior, daughter silhouette and telephone form a quiet 2.5D tableau.",
+      "composition": {
+        "framing": "Wide illustrated interior with distinct back, character and foreground planes.",
+        "subjectPlacement": "Keep the daughter in the right-side window and the telephone in the lower foreground.",
+        "cameraMovement": "Slow, continuous camera push-in across the layered illustration.",
+        "camera": {
+          "type": "zoom",
+          "startFrame": 0,
+          "durationFrames": 150,
+          "fromScale": 1,
+          "toScale": 1.06
+        },
+        "instructions": [
+          "Use only the prepared assets referenced by the manifest.",
+          "Preserve the supplied charcoal artwork and its antialiased alpha mattes.",
+          "Do not invent character articulation; this is a layered camera-motion reference shot."
+        ]
+      },
+      "requiredAssets": [
+        {
+          "assetId": "background.interior-wide",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "character.daughter-cutout",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "prop.telephone-cutout",
+          "version": "1.0.0"
+        }
+      ],
+      "scene": {
+        "stylePreset": "charcoal_horror",
+        "styleVersion": "1.1.0",
+        "animationLibraryVersion": "1.0.0",
+        "environment": {
+          "assetId": "background.interior-wide",
+          "version": "1.0.0"
+        },
+        "groups": [
+          {
+            "id": "group.window-character",
+            "transform": {
+              "position": {
+                "x": 1.43,
+                "y": -0.28,
+                "z": -0.2
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": -2
+              },
+              "scale": 1
+            }
+          }
+        ],
+        "layers": [
+          {
+            "id": "layer.daughter",
+            "asset": {
+              "assetId": "character.daughter-cutout",
+              "version": "1.0.0"
+            },
+            "role": "character",
+            "parentId": "group.window-character",
+            "transform": {
+              "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "scale": 1
+            },
+            "pivot": {
+              "x": 0.5,
+              "y": 0
+            },
+            "size": {
+              "width": 0.92,
+              "height": 1.65
+            },
+            "opacity": 1,
+            "order": 10
+          },
+          {
+            "id": "layer.telephone",
+            "asset": {
+              "assetId": "prop.telephone-cutout",
+              "version": "1.0.0"
+            },
+            "role": "prop",
+            "transform": {
+              "position": {
+                "x": 0.35,
+                "y": -0.62,
+                "z": -0.62
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": -2
+              },
+              "scale": 1
+            },
+            "pivot": {
+              "x": 0.5,
+              "y": 0.08
+            },
+            "size": {
+              "width": 1.55,
+              "height": 0.89
+            },
+            "opacity": 1,
+            "order": 20
+          }
+        ],
+        "characters": [],
+        "props": [],
+        "lights": [],
+        "camera": {
+          "type": "push-in",
+          "startFrame": 0,
+          "durationFrames": 150,
+          "fromDistance": 6,
+          "toDistance": 5.35,
+          "target": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "durationFrames": 150,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [
+          {
+            "shotId": "shot.reference-layered-room",
+            "startFrame": 0
+          }
+        ]
+      }
+    ],
+    "audioTracks": [],
+    "transitions": []
+  }
+}

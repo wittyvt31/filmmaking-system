@@ -59,6 +59,20 @@ def setup_compositor_glow(scene, config):
         nodes.clear()
         render_layers = nodes.new("CompositorNodeRLayers")
         glare = nodes.new("CompositorNodeGlare")
+        output = nodes.new("NodeGroupOutput")
+        image_interface = next(
+            (
+                item
+                for item in node_group.interface.items_tree
+                if getattr(item, "in_out", None) == "OUTPUT"
+                and getattr(item, "name", None) == "Image"
+            ),
+            None,
+        )
+        if image_interface is None:
+            node_group.interface.new_socket(
+                name="Image", in_out="OUTPUT", socket_type="NodeSocketColor"
+            )
         type_socket = glare.inputs.get("Type")
         if type_socket is not None and "FOG_GLOW" in (
             item.identifier for item in type_socket.rna_type.properties["default_value"].enum_items
@@ -68,12 +82,7 @@ def setup_compositor_glow(scene, config):
         if threshold is not None:
             threshold.default_value = 1.3
         links.new(render_layers.outputs["Image"], glare.inputs["Image"])
-        output = next((node for node in nodes if node.type == "GROUP_OUTPUT"), None)
-        image_socket = (
-            next((socket for socket in output.inputs if "Image" in socket.name), None)
-            if output is not None
-            else None
-        )
+        image_socket = output.inputs.get("Image")
         if output is None or image_socket is None:
             raise RuntimeError("Compositor node group exposes no image output socket")
         links.new(glare.outputs["Image"], image_socket)
