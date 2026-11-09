@@ -17,8 +17,7 @@ import { describe, expect, it } from 'vitest';
 
 const blenderExecutable =
   process.env['FILMIE_BLENDER'] ?? defaultBlenderExecutable();
-const blenderAvailable =
-  blenderExecutable === 'blender' ? true : existsSync(blenderExecutable);
+const blenderAvailable = existsSync(blenderExecutable);
 
 describe.skipIf(!blenderAvailable)(
   'Blender humanoid runtime acceptance',

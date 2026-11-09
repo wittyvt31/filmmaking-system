@@ -761,9 +761,9 @@ export class BlenderRendererAdapter implements RendererAdapter {
           outputDimensions: renderDimensions,
           frameRate: settings.frameRate,
           engine: settings.renderer.config.engine,
-          qualityProfile: settings.qualityProfile,
-          qualityOverrides: settings.qualityOverrides,
-          shotOverrides: shot.renderOverrides,
+          qualityProfile: settings.qualityProfile ?? null,
+          qualityOverrides: settings.qualityOverrides ?? null,
+          shotOverrides: shot.renderOverrides ?? null,
           renderConfig,
           randomSeed: request.randomSeed,
         },
@@ -839,7 +839,10 @@ export class BlenderRendererAdapter implements RendererAdapter {
         randomSeed: request.randomSeed,
         chunkFrames: 12,
         outputDirectory: stagedDirectory,
-        style: scene.style,
+        style: {
+          ...scene.style,
+          boilFps: shot.scene?.styleOverrides?.boilFps ?? 12,
+        },
         renderOverrides,
         animationLibraryVersion: scene.animationLibraryVersion,
         environment: resolveAsset(scene.environment),
@@ -865,55 +868,39 @@ export class BlenderRendererAdapter implements RendererAdapter {
       };
       await writeFile(specPath, JSON.stringify(workerSpec));
       retainPartialWork = true;
-      const startedRender = Date.now();
-      let processResult = await spawnCapture(
-        this.executablePath,
-        [
-          '--background',
-          '--factory-startup',
-          '--python',
-          WORKER_PATH,
-          '--',
-          specPath,
-        ],
-        {
-          timeoutMs: request.timeoutMs ?? 600_000,
-          ...(request.signal ? { signal: request.signal } : {}),
-        },
-      );
-      metrics['renderDurationMs'] = Date.now() - startedRender;
-      if (processResult.stdout.trim())
-        logs.push(...processResult.stdout.trim().split(/\r?\n/).slice(-500));
-      if (processResult.stderr.trim())
-        logs.push(...processResult.stderr.trim().split(/\r?\n/).slice(-500));
-      if (processResult.timedOut)
-        throw new BlenderFailure(
-          'TIMEOUT',
-          `Blender timed out after ${request.timeoutMs ?? 600_000} ms`,
-          true,
-        );
-      if (processResult.interrupted)
-        throw new BlenderFailure(
-          'INTERRUPTED',
-          'Blender render was interrupted',
-          true,
-        );
-      if (
-        processResult.code !== 0 &&
-        settings.renderer.config.engine === 'CYCLES' &&
-        settings.renderer.config.device === 'AUTO'
-      ) {
-        logs.push(
-          `Automatic GPU attempt failed; retrying this shot on Cycles CPU. Exit ${String(processResult.code)}.`,
-        );
-        await rm(frameDirectory, { recursive: true, force: true });
-        await mkdir(frameDirectory, { recursive: true });
-        const fallbackSpec = {
-          ...workerSpec,
-          renderConfig: { ...renderConfig, device: 'CPU' },
-        };
-        await writeFile(specPath, JSON.stringify(fallbackSpec));
-        processResult = await spawnCapture(
+      const warnings: string[] = [];
+      const workerResultPath = join(stagedDirectory, 'worker-result.json');
+      type WorkerResult = {
+        status?: unknown;
+        frameCount?: unknown;
+        backend?: string;
+        engine?: string;
+        samples?: number;
+        renderedFrames?: number;
+        blenderVersion?: string;
+      };
+      const readWorkerResult = async (): Promise<WorkerResult | null> => {
+        try {
+          return JSON.parse(
+            await readFile(workerResultPath, 'utf8'),
+          ) as WorkerResult;
+        } catch {
+          return null;
+        }
+      };
+      const validateStaged = async () => {
+        try {
+          return await validateSequence(stagedDirectory, {
+            frames: shot.durationFrames,
+            width: renderDimensions.width,
+            height: renderDimensions.height,
+          });
+        } catch {
+          return null;
+        }
+      };
+      const spawnWorker = async () => {
+        const result = await spawnCapture(
           this.executablePath,
           [
             '--background',
@@ -928,44 +915,80 @@ export class BlenderRendererAdapter implements RendererAdapter {
             ...(request.signal ? { signal: request.signal } : {}),
           },
         );
-        if (processResult.stdout.trim())
-          logs.push(...processResult.stdout.trim().split(/\r?\n/).slice(-500));
-        if (processResult.stderr.trim())
-          logs.push(...processResult.stderr.trim().split(/\r?\n/).slice(-500));
+        if (result.stdout.trim())
+          logs.push(...result.stdout.trim().split(/\r?\n/).slice(-500));
+        if (result.stderr.trim())
+          logs.push(...result.stderr.trim().split(/\r?\n/).slice(-500));
+        return result;
+      };
+      const startedRender = Date.now();
+      let processResult = await spawnWorker();
+      metrics['renderDurationMs'] = Date.now() - startedRender;
+      let workerResult = await readWorkerResult();
+      let stagedChecksums = await validateStaged();
+      if (processResult.timedOut)
+        throw new BlenderFailure(
+          'TIMEOUT',
+          `Blender timed out after ${request.timeoutMs ?? 600_000} ms`,
+          true,
+        );
+      if (processResult.interrupted)
+        throw new BlenderFailure(
+          'INTERRUPTED',
+          'Blender render was interrupted',
+          true,
+        );
+      if (stagedChecksums === null) {
+        const fallbackConfig =
+          renderConfig.engine === 'CYCLES'
+            ? { ...renderConfig, device: 'CPU' as const }
+            : { ...renderConfig, engine: 'BLENDER_WORKBENCH' as const };
+        logs.push(
+          `Blender produced no valid frame sequence (exit ${String(processResult.code)}); retrying once on ${fallbackConfig.engine}${fallbackConfig.engine === 'CYCLES' ? ' CPU' : ''}.`,
+        );
+        await rm(frameDirectory, { recursive: true, force: true });
+        await mkdir(frameDirectory, { recursive: true });
+        await writeFile(
+          specPath,
+          JSON.stringify({ ...workerSpec, renderConfig: fallbackConfig }),
+        );
+        processResult = await spawnWorker();
+        metrics['renderDurationMs'] = Date.now() - startedRender;
         if (processResult.timedOut)
           throw new BlenderFailure(
             'TIMEOUT',
-            'Blender CPU fallback timed out',
+            'Blender fallback render timed out',
             true,
           );
         if (processResult.interrupted)
           throw new BlenderFailure(
             'INTERRUPTED',
-            'Blender CPU fallback was interrupted',
+            'Blender fallback render was interrupted',
             true,
           );
+        workerResult = await readWorkerResult();
+        stagedChecksums = await validateStaged();
       }
-      metrics['renderDurationMs'] = Date.now() - startedRender;
-      if (processResult.code !== 0)
+      if (stagedChecksums === null) {
         throw new BlenderFailure(
           'RENDER_CRASHED',
-          `Blender exited with code ${String(processResult.code)}${processResult.signal ? ` (${processResult.signal})` : ''}: ${processResult.stderr || processResult.stdout}`,
-          true,
+          `Blender ${processResult.code !== 0 ? `exited with code ${String(processResult.code)}` : 'exited cleanly'} but produced no valid ${shot.durationFrames}-frame sequence${processResult.signal ? ` (${processResult.signal})` : ''}: ${(processResult.stderr || processResult.stdout).split(/\r?\n/).slice(-8).join(' | ')}`,
+          processResult.code !== 0,
         );
-      const workerResultPath = join(stagedDirectory, 'worker-result.json');
-      const workerResult = JSON.parse(
-        await readFile(workerResultPath, 'utf8'),
-      ) as {
-        backend?: string;
-        engine?: string;
-        samples?: number;
-        renderedFrames?: number;
-      };
-      const stagedChecksums = await validateSequence(stagedDirectory, {
-        frames: shot.durationFrames,
-        width: renderDimensions.width,
-        height: renderDimensions.height,
-      });
+      }
+      if (processResult.code !== 0) {
+        warnings.push(
+          `Blender exited non-zero (code ${String(processResult.code)}${processResult.signal ? `, signal ${processResult.signal}` : ''}) but produced a complete verified frame sequence; accepting the shot.`,
+        );
+        const faulting = (processResult.stderr || processResult.stdout)
+          .split(/\r?\n/)
+          .filter((line) => line.trim())
+          .slice(-12);
+        if (faulting.length > 0)
+          warnings.push(
+            `Faulting output (last ${faulting.length} lines): ${faulting.join(' | ')}`,
+          );
+      }
       await promoteDirectory(stagedDirectory, outputDirectory);
       retainPartialWork = false;
       const checksums = stagedChecksums.map((item) => ({
@@ -974,11 +997,11 @@ export class BlenderRendererAdapter implements RendererAdapter {
       }));
       metrics['frameCount'] = shot.durationFrames;
       metrics['renderedFrames'] =
-        workerResult.renderedFrames ?? shot.durationFrames;
+        workerResult?.renderedFrames ?? shot.durationFrames;
       metrics['cacheHit'] = false;
-      metrics['renderEngine'] = workerResult.engine ?? renderConfig.engine;
-      metrics['selectedBackend'] = workerResult.backend ?? 'unknown';
-      metrics['samples'] = workerResult.samples ?? renderConfig.samples;
+      metrics['renderEngine'] = workerResult?.engine ?? renderConfig.engine;
+      metrics['selectedBackend'] = workerResult?.backend ?? 'unknown';
+      metrics['samples'] = workerResult?.samples ?? renderConfig.samples;
       metrics['renderWidth'] = renderDimensions.width;
       metrics['renderHeight'] = renderDimensions.height;
       metrics['qualityProfile'] = settings.qualityProfile ?? 'custom';
@@ -987,6 +1010,10 @@ export class BlenderRendererAdapter implements RendererAdapter {
       metrics['shadows'] = renderConfig.shadows;
       metrics['textures'] = renderConfig.textures;
       metrics['compositing'] = renderConfig.compositing;
+      metrics['blenderVersion'] =
+        workerResult?.blenderVersion ?? this.identity.version;
+      metrics['exitCode'] = processResult.code ?? 0;
+      metrics['completedWithWarning'] = warnings.length > 0;
       const receipt: SuccessfulRenderReceipt = {
         jobId: request.jobId,
         shotId: shot.id,
@@ -1000,6 +1027,9 @@ export class BlenderRendererAdapter implements RendererAdapter {
         outputChecksums: checksums,
         logs,
         metrics,
+        ...(warnings.length > 0
+          ? { warnings, completedWithWarning: true }
+          : {}),
       };
       try {
         await cache.store(fingerprint, 'image-sequence/png', outputDirectory);

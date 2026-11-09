@@ -47,6 +47,7 @@ export const CharcoalStyleOverridesSchema = z
     paperFiberScale: z.number().positive().max(2000).optional(),
     paperOpacity: z.number().min(0).max(0.35).optional(),
     lineBoilStrength: z.number().min(0).max(1).optional(),
+    boilFps: z.number().positive().max(240).optional(),
   })
   .strict();
 export type CharcoalStyleOverrides = z.infer<
@@ -1875,7 +1876,9 @@ const ArtworkLayerSchema = z
     id: StableIdSchema,
     source: AssetVersionReferenceSchema,
     manualMatte: AssetVersionReferenceSchema.optional(),
-    processing: ArtworkLayerProcessingSchema.default({}),
+    processing: ArtworkLayerProcessingSchema.default(
+      ArtworkLayerProcessingSchema.parse({}),
+    ),
     parentId: StableIdSchema.optional(),
     transform: ArtworkTransformSchema,
     size: z
@@ -2230,6 +2233,7 @@ export interface CompiledSceneInstruction {
     paperFiberScale: number;
     paperOpacity: number;
     lineBoilStrength: number;
+    boilFps?: number;
   };
   environment: z.infer<typeof AssetVersionReferenceSchema>;
   groups: z.infer<typeof ShotSceneSchema>['groups'];
@@ -2323,6 +2327,8 @@ export interface RenderReceiptBase {
   outputChecksums: RenderOutputChecksum[];
   logs: string[];
   metrics: Record<string, number | string | boolean>;
+  warnings?: string[];
+  completedWithWarning?: boolean;
 }
 
 export interface SuccessfulRenderReceipt extends RenderReceiptBase {

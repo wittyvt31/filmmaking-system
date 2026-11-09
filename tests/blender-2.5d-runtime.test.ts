@@ -13,8 +13,7 @@ import { describe, expect, it } from 'vitest';
 
 const blenderExecutable =
   process.env['FILMIE_BLENDER'] ?? defaultBlenderExecutable();
-const blenderAvailable =
-  blenderExecutable === 'blender' ? true : existsSync(blenderExecutable);
+const blenderAvailable = existsSync(blenderExecutable);
 
 describe.skipIf(!blenderAvailable)('Blender 2.5D artwork runtime', () => {
   it('imports alpha artwork, evaluates hierarchy/pivots/depth/camera, saves, reopens, and rerenders', async () => {

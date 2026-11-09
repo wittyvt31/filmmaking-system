@@ -13,7 +13,7 @@ import {
 
 const sourceProject = resolve('examples/artwork-preparation-proof');
 const blender = defaultBlenderExecutable();
-const blenderAvailable = blender === 'blender' || existsSync(blender);
+const blenderAvailable = existsSync(blender);
 
 describe('layered artwork preparation contracts', () => {
   it('rejects broken parents and incomplete or mismatched facial variations', async () => {

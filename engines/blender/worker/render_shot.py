@@ -12,6 +12,81 @@ import bpy
 from mathutils import Euler, Matrix, Vector
 
 
+def action_fcurves(action):
+    """Return FCurves for a Blender 5.x layered action, with a legacy fallback."""
+    if hasattr(action, "fcurves"):
+        return list(action.fcurves)
+    curves = []
+    for layer in getattr(action, "layers", []):
+        for strip in getattr(layer, "strips", []):
+            for channel_bag in getattr(strip, "channelbags", []):
+                curves.extend(getattr(channel_bag, "fcurves", []))
+    return curves
+
+
+def set_constant_interpolation(owner, data_path=None):
+    """Set CONSTANT interpolation without relying on the removed Action.fcurves."""
+    animation = getattr(owner, "animation_data", None)
+    if animation is None or animation.action is None:
+        return
+    for curve in action_fcurves(animation.action):
+        if data_path is not None and curve.data_path != data_path:
+            continue
+        for point in curve.keyframe_points:
+            point.interpolation = "CONSTANT"
+
+
+def setup_compositor_glow(scene, config):
+    """Best-effort Blender 5.x compositor fog glow; never blocks frame output.
+
+    Blender 5.x replaced Scene.node_tree with Scene.compositing_node_group,
+    removed CompositorNodeComposite, and moved the Glare node's settings onto
+    input sockets. If any part of the 5.x API is unavailable, compositing is
+    disabled and a skip is logged so plain viewport rendering still proceeds.
+    """
+    if not bool(config.get("compositing", True)):
+        return False
+    try:
+        scene.use_nodes = True
+        node_group = getattr(scene, "compositing_node_group", None)
+        if node_group is None:
+            node_group = bpy.data.node_groups.new(
+                "Filmie Fog Glow", "CompositorNodeTree"
+            )
+            scene.compositing_node_group = node_group
+        nodes = node_group.nodes
+        links = node_group.links
+        nodes.clear()
+        render_layers = nodes.new("CompositorNodeRLayers")
+        glare = nodes.new("CompositorNodeGlare")
+        type_socket = glare.inputs.get("Type")
+        if type_socket is not None and "FOG_GLOW" in (
+            item.identifier for item in type_socket.rna_type.properties["default_value"].enum_items
+        ):
+            type_socket.default_value = "FOG_GLOW"
+        threshold = glare.inputs.get("Threshold")
+        if threshold is not None:
+            threshold.default_value = 1.3
+        links.new(render_layers.outputs["Image"], glare.inputs["Image"])
+        output = next((node for node in nodes if node.type == "GROUP_OUTPUT"), None)
+        image_socket = (
+            next((socket for socket in output.inputs if "Image" in socket.name), None)
+            if output is not None
+            else None
+        )
+        if output is None or image_socket is None:
+            raise RuntimeError("Compositor node group exposes no image output socket")
+        links.new(glare.outputs["Image"], image_socket)
+        return True
+    except Exception as error:  # noqa: BLE001 - guarded compositor is best effort
+        print("FILMIE_GLOW_SKIPPED: " + str(error), file=sys.stderr)
+        try:
+            scene.use_nodes = False
+        except Exception:
+            pass
+        return False
+
+
 def read_spec():
     try:
         separator = sys.argv.index("--")
@@ -66,17 +141,19 @@ def color_material(image, style, name, opacity=1.0, seed=0):
     mapping.inputs["Location"].default_value[0] = rng.uniform(-0.025, 0.025)
     stable_offset = int(hashlib.sha256(name.encode("utf-8")).hexdigest()[:8], 16)
     boil_rng = random.Random(int(seed) ^ stable_offset)
-    for frame in range(1, int(style.get("durationFrames", 1)) + 1, 2):
+    boil_fps = float(style.get("boilFps", 12))
+    frame_rate = float(style.get("frameRate", 24.0))
+    boil_interval = max(1, round(frame_rate / boil_fps)) if boil_fps > 0 else 2
+    for frame in range(1, int(style.get("durationFrames", 1)) + 1, boil_interval):
         noise.inputs["W"].default_value = boil_rng.random() * 4.0 * float(style.get("lineBoilStrength", 0.12))
         material.node_tree.keyframe_insert(
             data_path='nodes["' + noise.name + '"].inputs["W"].default_value',
             frame=frame,
         )
-    animation = material.node_tree.animation_data
-    if animation and animation.action:
-        for curve in animation.action.fcurves:
-            for point in curve.keyframe_points:
-                point.interpolation = "CONSTANT"
+    set_constant_interpolation(
+        material.node_tree,
+        'nodes["' + noise.name + '"].inputs["W"].default_value',
+    )
     links.new(texture.outputs["Color"], bw.inputs["Color"])
     links.new(bw.outputs["Val"], ramp.inputs["Fac"])
     links.new(ramp.outputs["Color"], multiply.inputs[1])
@@ -392,6 +469,10 @@ def create_scene(spec):
     spec["style"]["seed"] = int(spec.get("randomSeed", 0))
     spec["style"]["durationFrames"] = int(spec["durationFrames"])
     spec["style"]["textureQuality"] = spec["renderConfig"].get("textures", "high")
+    spec["style"]["frameRate"] = (
+        float(spec["frameRate"]["numerator"]) / float(spec["frameRate"]["denominator"])
+    )
+    spec["style"].setdefault("boilFps", 12.0)
     for obj in list(scene.objects):
         bpy.data.objects.remove(obj, do_unlink=True)
     config = spec["renderConfig"]
@@ -461,16 +542,7 @@ def create_scene(spec):
     scene.view_settings.gamma = 1.0
     scene.world = bpy.data.worlds.new("Charcoal Horror World")
     scene.world.color = (0.045, 0.04, 0.035)
-    scene.use_nodes = bool(config.get("compositing", True))
-    if scene.use_nodes:
-        scene.node_tree.nodes.clear()
-        layers = scene.node_tree.nodes.new("CompositorNodeRLayers")
-        glow = scene.node_tree.nodes.new("CompositorNodeGlare")
-        glow.glare_type = "FOG_GLOW"
-        glow.threshold = 1.3
-        composite = scene.node_tree.nodes.new("CompositorNodeComposite")
-        scene.node_tree.links.new(layers.outputs["Image"], glow.inputs["Image"])
-        scene.node_tree.links.new(glow.outputs["Image"], composite.inputs["Image"])
+    setup_compositor_glow(scene, config)
     shadow_quality = spec.get("renderConfig", {}).get("shadows", "high")
 
     key_data = bpy.data.lights.new("Soft Sepia Key", type="AREA")
@@ -488,10 +560,7 @@ def create_scene(spec):
     for frame in range(1, int(spec["durationFrames"]) + 1, 3):
         key_data.energy = float(spec["style"]["lighting"]["keyEnergy"]) * (1.0 + flicker.uniform(-0.045, 0.045))
         key_data.keyframe_insert(data_path="energy", frame=frame)
-    if key_data.animation_data and key_data.animation_data.action:
-        for curve in key_data.animation_data.action.fcurves:
-            for point in curve.keyframe_points:
-                point.interpolation = "CONSTANT"
+    set_constant_interpolation(key_data, "energy")
 
     fill_data = bpy.data.lights.new("Graphite bounce fill", type="AREA")
     fill_data.energy = float(spec["style"]["lighting"]["keyEnergy"]) * 0.38
@@ -608,16 +677,16 @@ def create_scene(spec):
             camera.location = (target.x, target.y - distance, target.z)
         camera.rotation_euler = (target - camera.location).to_track_quat("-Z", "Y").to_euler()
         camera.keyframe_insert(data_path="location", frame=frame)
+        camera.keyframe_insert(data_path="rotation_euler", frame=frame)
+        if "focalLength" in keyframe:
+            camera_data.lens = float(keyframe["focalLength"])
+            camera_data.keyframe_insert(data_path="lens", frame=frame)
     paper = create_screen_paper(scene, camera, spec["style"], spec["width"], spec["height"])
     for keyframe in spec["cameraKeyframes"]:
         frame = int(keyframe["frame"])
         focal_length = float(keyframe.get("focalLength", initial_focal_length))
         paper.scale = (initial_focal_length / focal_length,) * 3
         paper.keyframe_insert(data_path="scale", frame=frame)
-        camera.keyframe_insert(data_path="rotation_euler", frame=frame)
-        if "focalLength" in keyframe:
-            camera_data.lens = float(keyframe["focalLength"])
-            camera_data.keyframe_insert(data_path="lens", frame=frame)
     scene.frame_set(1)
     return scene, environment, entity_roots, control_objects
 
@@ -1265,6 +1334,7 @@ def main():
             rendered += 1
     result = {
         "status": "success",
+        "blenderVersion": bpy.app.version_string,
         "frameCount": int(spec["durationFrames"]),
         "width": int(spec["width"]),
         "height": int(spec["height"]),

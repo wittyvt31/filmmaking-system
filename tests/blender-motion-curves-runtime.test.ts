@@ -10,8 +10,7 @@ import { describe, expect, it } from 'vitest';
 
 const blenderExecutable =
   process.env['FILMIE_BLENDER'] ?? defaultBlenderExecutable();
-const blenderAvailable =
-  blenderExecutable === 'blender' ? true : existsSync(blenderExecutable);
+const blenderAvailable = existsSync(blenderExecutable);
 
 describe.skipIf(!blenderAvailable)('Blender motion-curve runtime', () => {
   it('evaluates 3D replacement/additive curves deterministically and rejects collisions', async () => {

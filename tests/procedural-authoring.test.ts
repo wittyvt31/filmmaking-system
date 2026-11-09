@@ -111,7 +111,7 @@ describe('procedural pre-production contracts', () => {
     const shot = manifest.shots[0];
     if (!shot) throw new Error('Proof project is missing its shot.');
     const scene = compileScene(shot, manifest.video.frameRate);
-    expect(scene.style.version).toBe('1.1.0');
+    expect(scene.style.version).toBe('1.2.0');
     expect(scene.actions.map(({ action }) => action.type)).toEqual([
       'breathing',
       'head-turn',
