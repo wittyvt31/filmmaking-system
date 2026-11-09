@@ -42,7 +42,7 @@ public static class FakeBlender {
                 Path.Combine(outputDirectory, "scene.blend"), "fake blend scene");
             File.WriteAllText(
                 Path.Combine(outputDirectory, "worker-result.json"),
-                "{\"status\":\"success\",\"frameCount\":" + durationFrames + "}");
+                "{\"status\":\"success\",\"frameCount\":" + durationFrames + (mode == "mismatch" ? ",\"engine\":\"BLENDER_WORKBENCH\"" : "") + "}");
             Console.Error.WriteLine(
                 "FILMIE_FAKE_CRASH: simulated access violation in ig11icd64.dll after writing frames");
             return 3;

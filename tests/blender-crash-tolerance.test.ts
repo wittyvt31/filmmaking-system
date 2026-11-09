@@ -82,7 +82,7 @@ describe.skipIf(!fakeBlenderPath)('Blender crash tolerance', () => {
     }
   }, 120_000);
 
-  it('retries once on a fallback engine and fails clearly when frames are missing', async () => {
+  it('does not invoke a fallback engine and preserves failed artifacts', async () => {
     const temporary = await mkdtemp(join(tmpdir(), 'filmie-crash-missing-'));
     temporaryDirectories.push(temporary);
     process.env['FILMIE_FAKE_BLENDER_MODE'] = 'missing';
@@ -95,8 +95,42 @@ describe.skipIf(!fakeBlenderPath)('Blender crash tolerance', () => {
       expect(result.status).toBe('failure');
       if (result.status !== 'failure') throw new Error('Expected failure');
       expect(result.error.code).toBe('RENDER_CRASHED');
-      expect(result.receipt.logs.join('\n')).toContain('retrying once on');
+      expect(result.receipt.logs.join('\n')).not.toContain('retrying once on');
+      expect(result.receipt.logs.join('\n')).toContain(
+        'Failed render artifacts preserved at',
+      );
+      expect(result.receipt.requestedRenderer).toBe('BLENDER_EEVEE');
+      expect(result.receipt.fallbackUsed).toBe(false);
+      expect(result.receipt.metrics['partialFrameCount']).toBe(0);
+      expect(result.receipt.metrics['exitCode']).toBe(3);
       expect(result.error.message).toMatch(/no valid 3-frame sequence/);
+    } finally {
+      delete process.env['FILMIE_FAKE_BLENDER_MODE'];
+      delete process.env['FILMIE_FAKE_DURATION_FRAMES'];
+      delete process.env['FILMIE_FAKE_WIDTH'];
+      delete process.env['FILMIE_FAKE_HEIGHT'];
+    }
+  }, 120_000);
+
+  it('rejects a renderer mismatch even when the frame sequence is structurally valid', async () => {
+    const temporary = await mkdtemp(
+      join(tmpdir(), 'filmie-renderer-mismatch-'),
+    );
+    temporaryDirectories.push(temporary);
+    process.env['FILMIE_FAKE_BLENDER_MODE'] = 'mismatch';
+    process.env['FILMIE_FAKE_DURATION_FRAMES'] = '3';
+    process.env['FILMIE_FAKE_WIDTH'] = '1280';
+    process.env['FILMIE_FAKE_HEIGHT'] = '720';
+    try {
+      const { adapter, request } = await buildRequest(temporary);
+      const result = await adapter.renderShot(request);
+      expect(result.status).toBe('failure');
+      if (result.status !== 'failure') throw new Error('Expected failure');
+      expect(result.error.message).toContain('Renderer mismatch');
+      expect(result.receipt.requestedRenderer).toBe('BLENDER_EEVEE');
+      expect(result.receipt.actualRenderer).toBe('BLENDER_WORKBENCH');
+      expect(result.receipt.fallbackUsed).toBe(true);
+      expect(result.receipt.degraded).toBe(true);
     } finally {
       delete process.env['FILMIE_FAKE_BLENDER_MODE'];
       delete process.env['FILMIE_FAKE_DURATION_FRAMES'];

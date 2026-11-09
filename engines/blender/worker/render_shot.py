@@ -1303,6 +1303,15 @@ def apply_motion_curves(spec, control_objects, entity_roots):
 
 def main():
     spec = read_spec()
+    spec.setdefault("renderConfig", {
+        "engine": "BLENDER_EEVEE",
+        "samples": 4,
+        "denoising": False,
+        "textures": "high",
+        "shadows": "high",
+        "compositing": True,
+        "frameRate": spec.get("frameRate", {"numerator": 30, "denominator": 1}),
+    })
     os.makedirs(os.path.join(spec["outputDirectory"], "frames"), exist_ok=True)
     scene, _environment, entity_roots, control_objects = create_scene(spec)
     apply_actions(spec, entity_roots, control_objects)

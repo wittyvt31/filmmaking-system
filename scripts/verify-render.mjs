@@ -23,9 +23,21 @@ function option(name, fallback) {
   args.splice(index, 2);
   return value;
 }
+function numberOption(name, fallback) {
+  const value = option(name, undefined);
+  return value === undefined ? fallback : Number(value);
+}
 const manifestOption = option('--manifest');
 const ffmpeg = option('--ffmpeg', process.env.FILMIE_FFMPEG ?? 'ffmpeg');
 const ffprobe = option('--ffprobe', process.env.FILMIE_FFPROBE ?? 'ffprobe');
+const expectMotion = args.includes('--expect-motion');
+if (expectMotion) args.splice(args.indexOf('--expect-motion'), 1);
+const staticOk = args.includes('--static-ok');
+if (staticOk) args.splice(args.indexOf('--static-ok'), 1);
+const uniformRange = numberOption('--uniform-range', 0.006);
+const entropyThreshold = numberOption('--entropy-threshold', 0.01);
+const identicalRatio = numberOption('--identical-ratio', 0.8);
+const motionDifference = numberOption('--motion-difference', 0.001);
 const input = resolve(inputArgument);
 
 function run(command, commandArgs, { allowFailure = false } = {}) {
@@ -64,7 +76,9 @@ async function locateManifest() {
     try {
       await readFile(candidate);
       return candidate;
-    } catch {}
+    } catch {
+      // Continue searching parent directories.
+    }
     const parent = dirname(current);
     if (parent === current) break;
     current = parent;
@@ -206,12 +220,20 @@ async function main() {
       `Decoded ${Math.floor(decoded.stdout.length / frameBytes)} frames; FFprobe counted ${info.frameCount}.`,
     );
   const lumas = [];
+  const frameRanges = [];
   const hashes = [];
   for (let offset = 0; offset < decoded.stdout.length; offset += frameBytes) {
     const frame = decoded.stdout.subarray(offset, offset + frameBytes);
     let sum = 0;
+    let min = 255;
+    let max = 0;
     for (const value of frame) sum += value;
+    for (const value of frame) {
+      min = Math.min(min, value);
+      max = Math.max(max, value);
+    }
     lumas.push(sum / frameBytes / 255);
+    frameRanges.push((max - min) / 255);
     hashes.push(createHash('sha256').update(frame).digest('hex'));
   }
   const differences = [];
@@ -243,6 +265,27 @@ async function main() {
   const identicalConsecutiveFrames = hashes
     .slice(1)
     .reduce((count, hash, index) => count + Number(hash === hashes[index]), 0);
+  const lowEntropyFrames = frameRanges.filter(
+    (range) => range < entropyThreshold,
+  ).length;
+  const nearUniformFrames = frameRanges.filter(
+    (range) => range < uniformRange,
+  ).length;
+  const identicalRatioValue =
+    identicalConsecutiveFrames / Math.max(1, hashes.length - 1);
+  const failureReasons = [];
+  if (nearUniformFrames > 0)
+    failureReasons.push(`near-uniform frames: ${nearUniformFrames}`);
+  if (lowEntropyFrames > 0)
+    failureReasons.push(`low-entropy frames: ${lowEntropyFrames}`);
+  if (expectMotion && !staticOk && identicalRatioValue > identicalRatio)
+    failureReasons.push(
+      `identical-frame ratio ${identicalRatioValue.toFixed(4)} exceeds ${identicalRatio}`,
+    );
+  if (expectMotion && !staticOk && meanFrameDifference < motionDifference)
+    failureReasons.push(
+      `mean frame difference ${meanFrameDifference.toFixed(6)} is below ${motionDifference}`,
+    );
   const temporaryDirectory = await mkdtemp(join(tmpdir(), 'filmie-verify-'));
   const sampleIndices = Array.from({ length: 6 }, (_, index) =>
     Math.round((index * (info.frameCount - 1)) / 5),
@@ -322,6 +365,18 @@ async function main() {
       minFrameDifference: Number((sortedDifferences[0] ?? 0).toFixed(8)),
       maxFrameDifference: Number((sortedDifferences.at(-1) ?? 0).toFixed(8)),
       identicalConsecutiveFrames,
+      identicalFrameRatio: Number(identicalRatioValue.toFixed(6)),
+      nearUniformFrames,
+      lowEntropyFrames,
+      thresholds: {
+        uniformRange,
+        entropyThreshold,
+        identicalRatio,
+        motionDifference,
+        expectMotion,
+        staticOk,
+      },
+      failureReasons,
       contactSheet,
       lumaSampling: `${FRAME_WIDTH}x${FRAME_HEIGHT} grayscale; exact-identity count uses the same decoded samples`,
     };
@@ -332,7 +387,11 @@ async function main() {
     await writeFile(reportPath, `${JSON.stringify(result, null, 2)}\n`);
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
     const blankFrames = nearBlackFrames + nearWhiteFrames;
-    if (info.frameCount !== expectedFrames || blankFrames > 0)
+    if (
+      info.frameCount !== expectedFrames ||
+      blankFrames > 0 ||
+      failureReasons.length > 0
+    )
       process.exitCode = 1;
   } finally {
     await rm(temporaryDirectory, { recursive: true, force: true });

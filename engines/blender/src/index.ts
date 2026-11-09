@@ -1,5 +1,6 @@
 import { createReadStream, existsSync } from 'node:fs';
 import {
+  copyFile,
   mkdir,
   readFile,
   readdir,
@@ -514,6 +515,12 @@ export class BlenderRendererAdapter implements RendererAdapter {
         degraded,
         error: failure,
       };
+      if (lastProcessResult) {
+        metrics['exitCode'] = lastProcessResult.code ?? -1;
+        metrics['signal'] = lastProcessResult.signal ?? '';
+        metrics['timedOut'] = lastProcessResult.timedOut;
+        metrics['interrupted'] = lastProcessResult.interrupted;
+      }
       await writeReceipt(receiptPath, receipt).catch((writeError: unknown) =>
         logs.push(`Failure receipt write failed: ${String(writeError)}`),
       );
@@ -901,10 +908,9 @@ export class BlenderRendererAdapter implements RendererAdapter {
         }
       };
       const preserveWorkerFailure = async () => {
-        const partialDirectory = `${outputDirectory}.failed-attempt`;
-        await rm(partialDirectory, { recursive: true, force: true });
+        const partialDirectory = `${outputDirectory}.failed-attempt-${randomUUID()}`;
         await mkdir(dirname(partialDirectory), { recursive: true });
-        await rename(stagedDirectory, partialDirectory).catch(() => undefined);
+        await rename(stagedDirectory, partialDirectory);
         retainPartialWork = false;
         const crashReport = lastProcessResult?.stderr
           .split(/\r?\n/)
@@ -912,13 +918,14 @@ export class BlenderRendererAdapter implements RendererAdapter {
         if (crashReport) {
           const source = crashReport.replace(/^.*Writing:\s*/, '').trim();
           if (existsSync(source))
-            await copyFile(source, join(partialDirectory, 'blender-crash.txt')).catch(() => undefined);
+            await copyFile(source, join(partialDirectory, 'blender-crash.txt'));
         }
         logs.push(`Failed render artifacts preserved at ${partialDirectory}`);
         if (lastWorkerResult)
           logs.push(`Worker result: ${JSON.stringify(lastWorkerResult)}`);
-        metrics['partialFrameCount'] = (await readdir(join(partialDirectory, 'frames')).catch(() => []))
-          .filter((name) => /^frame_\d{6}\.png$/.test(name)).length;
+        metrics['partialFrameCount'] = (
+          await readdir(join(partialDirectory, 'frames'))
+        ).filter((name) => /^frame_\d{6}\.png$/.test(name)).length;
       };
       const validateStaged = async () => {
         try {
@@ -954,30 +961,36 @@ export class BlenderRendererAdapter implements RendererAdapter {
         return result;
       };
       const startedRender = Date.now();
-      let processResult = await spawnWorker();
+      const processResult = await spawnWorker();
       lastProcessResult = processResult;
       metrics['renderDurationMs'] = Date.now() - startedRender;
-      let workerResult = await readWorkerResult();
+      const workerResult = await readWorkerResult();
       lastWorkerResult = workerResult;
-      let stagedChecksums = await validateStaged();
-      if (processResult.timedOut)
+      const stagedChecksums = await validateStaged();
+      if (processResult.timedOut || processResult.interrupted) {
+        await preserveWorkerFailure();
         throw new BlenderFailure(
-          'TIMEOUT',
-          `Blender timed out after ${request.timeoutMs ?? 600_000} ms`,
+          processResult.timedOut ? 'TIMEOUT' : 'INTERRUPTED',
+          processResult.timedOut
+            ? `Blender timed out after ${request.timeoutMs ?? 600_000} ms`
+            : 'Blender render was interrupted',
           true,
         );
-      if (processResult.interrupted)
-        throw new BlenderFailure(
-          'INTERRUPTED',
-          'Blender render was interrupted',
-          true,
-        );
+      }
       if (stagedChecksums === null) {
         await preserveWorkerFailure();
         if (processResult.timedOut)
-          throw new BlenderFailure('TIMEOUT', `Blender timed out after ${request.timeoutMs ?? 600_000} ms`, true);
+          throw new BlenderFailure(
+            'TIMEOUT',
+            `Blender timed out after ${request.timeoutMs ?? 600_000} ms`,
+            true,
+          );
         if (processResult.interrupted)
-          throw new BlenderFailure('INTERRUPTED', 'Blender render was interrupted', true);
+          throw new BlenderFailure(
+            'INTERRUPTED',
+            'Blender render was interrupted',
+            true,
+          );
       }
       if (stagedChecksums === null) {
         throw new BlenderFailure(
@@ -991,7 +1004,10 @@ export class BlenderRendererAdapter implements RendererAdapter {
         fallbackUsed = true;
         degraded = true;
         await preserveWorkerFailure();
-        throw new BlenderFailure('RENDER_CRASHED', `Renderer mismatch: requested ${requestedRenderer}, actual ${actualRenderer}; rejecting degraded output.`);
+        throw new BlenderFailure(
+          'RENDER_CRASHED',
+          `Renderer mismatch: requested ${requestedRenderer}, actual ${actualRenderer}; rejecting degraded output.`,
+        );
       }
       if (processResult.code !== 0) {
         warnings.push(
