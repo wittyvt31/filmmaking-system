@@ -3,6 +3,8 @@ dist/
 coverage/
 .cache/
 renders/
+__pycache__/
+*.pyc
 *.tsbuildinfo
 .DS_Store
 Thumbs.db

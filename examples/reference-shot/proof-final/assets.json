@@ -1,0 +1,56 @@
+[
+  {
+    "assetId": "background.interior-wide",
+    "version": "1.0.0",
+    "type": "graphic",
+    "sourceUri": "../../2.5d-proof/assets/backgrounds/interior-wide.png",
+    "contentHash": "1f77fa81ed56e6429a81fa723f0ec07cbd8c8f1ce696c47cfde4fab365c4652b",
+    "metadata": {
+      "role": "2.5d-artwork",
+      "description": "Supplied opaque charcoal interior panel used as the back plane."
+    },
+    "license": {
+      "name": "User-supplied approved storyboard artwork",
+      "restrictions": ["Use for project They Have Reached"]
+    },
+    "provenance": {
+      "source": "User-supplied storyboard asset pack; copied byte-for-byte from they-have-reached/assets/backgrounds/interior-wide.png"
+    }
+  },
+  {
+    "assetId": "character.daughter-cutout",
+    "version": "1.0.0",
+    "type": "graphic",
+    "sourceUri": "../../2.5d-proof/assets/foreground/daughter-cutout.png",
+    "contentHash": "32b6f7b4e9fd406c7a97c103460f088d3b22b1c06b9dc44abdbc52e89c6ae327",
+    "metadata": {
+      "role": "2.5d-artwork",
+      "description": "Supplied full-body daughter artwork with deterministic hand-authored alpha matte."
+    },
+    "license": {
+      "name": "User-supplied approved storyboard artwork",
+      "restrictions": ["Use for project They Have Reached"]
+    },
+    "provenance": {
+      "source": "User-supplied storyboard daughter-full-body.png; 4x antialiased polygon matte defined in prepare-artwork.py"
+    }
+  },
+  {
+    "assetId": "prop.telephone-cutout",
+    "version": "1.0.0",
+    "type": "graphic",
+    "sourceUri": "../../2.5d-proof/assets/foreground/telephone-cutout.png",
+    "contentHash": "3334a3127c32d10c6da59600580eb83f9c2356790e5b30c5e1bddcd99735475a",
+    "metadata": {
+      "role": "2.5d-artwork",
+      "description": "Supplied telephone drawing with deterministic hand-authored alpha matte."
+    },
+    "license": {
+      "name": "User-supplied approved storyboard artwork",
+      "restrictions": ["Use for project They Have Reached"]
+    },
+    "provenance": {
+      "source": "User-supplied telephone.png; 4x antialiased polygon matte defined in prepare-artwork.py"
+    }
+  }
+]
