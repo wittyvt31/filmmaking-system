@@ -7,11 +7,34 @@ import os
 import random
 import sys
 import traceback
+import struct
 
 import bpy
 from mathutils import Euler, Matrix, Vector
 
 RENDER_METRICS = {"constantInterpolationCurves": 0, "constantInterpolationFailures": 0}
+
+
+def remove_volatile_png_metadata(path):
+    """Keep encoded pixels intact; strip Blender's path/date/render-time stamps."""
+    with open(path, "rb") as stream:
+        source = stream.read()
+    if source[:8] != b"\x89PNG\r\n\x1a\n":
+        raise RuntimeError("Invalid rendered PNG signature: " + path)
+    chunks = [source[:8]]
+    offset = 8
+    while offset < len(source):
+        length = struct.unpack(">I", source[offset:offset + 4])[0]
+        end = offset + length + 12
+        if end > len(source):
+            raise RuntimeError("Truncated rendered PNG: " + path)
+        if source[offset + 4:offset + 8] not in (b"tEXt", b"zTXt", b"iTXt"):
+            chunks.append(source[offset:end])
+        offset = end
+    temporary = path + ".metadata-partial"
+    with open(temporary, "wb") as stream:
+        stream.write(b"".join(chunks))
+    os.replace(temporary, path)
 
 
 def action_fcurves(action):
@@ -1516,6 +1539,7 @@ def main():
             scene.frame_set(frame)
             bpy.context.scene.render.filepath = os.path.join(frame_dir, "frame_%06d" % frame)
             bpy.ops.render.render(write_still=True)
+            remove_volatile_png_metadata(frame_path)
             rendered += 1
     result = {
         "status": "success",
