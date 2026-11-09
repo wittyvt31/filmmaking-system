@@ -143,19 +143,27 @@ async function createSolidBitmap(path: string, color: string): Promise<void> {
 }
 
 async function createColorClip(path: string, color: string): Promise<void> {
-  const { ffmpegPath } = getBundledMediaExecutables();
-  const stillPath = path.replace(/\.mp4$/i, '.bmp');
+  const { ffmpegPath: bundledFfmpegPath } = getBundledMediaExecutables();
+  const ffmpegPath = process.env['FILMIE_FFMPEG'] ?? bundledFfmpegPath;
+  const rgb: Record<string, readonly [number, number, number]> = {
+    red: [255, 0, 0],
+    lime: [0, 255, 0],
+    blue: [0, 0, 255],
+    yellow: [255, 255, 0],
+    magenta: [255, 0, 255],
+  };
+  const components = rgb[color];
+  if (!components) throw new Error(`Unknown test color: ${color}`);
+  const stillPath = path.replace(/\.mp4$/i, '.png');
   await createSolidBitmap(stillPath, color);
   await run(ffmpegPath, [
     '-hide_banner',
     '-loglevel',
     'error',
-    '-loop',
-    '1',
-    '-framerate',
-    '30',
+    '-f',
+    'lavfi',
     '-i',
-    stillPath,
+    `nullsrc=s=64x64:r=30,geq=r=${components[0]}:g=${components[1]}:b=${components[2]}`,
     '-frames:v',
     '30',
     '-c:v',
@@ -175,7 +183,8 @@ async function createColorClip(path: string, color: string): Promise<void> {
 }
 
 async function centerPixel(path: string, seconds: number): Promise<Buffer> {
-  const { ffmpegPath } = getBundledMediaExecutables();
+  const { ffmpegPath: bundledFfmpegPath } = getBundledMediaExecutables();
+  const ffmpegPath = process.env['FILMIE_FFMPEG'] ?? bundledFfmpegPath;
   const { stdout: png } = await run(ffmpegPath, [
     '-hide_banner',
     '-loglevel',
@@ -190,6 +199,8 @@ async function centerPixel(path: string, seconds: number): Promise<Buffer> {
     'scale=1:1,format=rgb24',
     '-c:v',
     'png',
+    '-pred',
+    'none',
     '-f',
     'image2pipe',
     'pipe:1',
@@ -288,8 +299,11 @@ describe('FFmpeg timeline video assembly', () => {
       }
 
       const outputPath = join(root, 'assembled.mp4');
+      const { ffmpegPath: bundledFfmpegPath, ffprobePath: bundledFfprobePath } =
+        getBundledMediaExecutables();
       const result = await new FfmpegMediaEngine({
-        ...getBundledMediaExecutables(),
+        ffmpegPath: process.env['FILMIE_FFMPEG'] ?? bundledFfmpegPath,
+        ffprobePath: process.env['FILMIE_FFPROBE'] ?? bundledFfprobePath,
       }).assemble({
         manifest,
         timeline,

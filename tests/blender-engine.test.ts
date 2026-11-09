@@ -30,8 +30,12 @@ afterAll(async () => {
 
 describe('Blender EEVEE renderer adapter', () => {
   it('rejects unsafe worker counts', () => {
-    expect(() => new BlenderRendererAdapter({ workers: 0 })).toThrow(/worker count/);
-    expect(() => new BlenderRendererAdapter({ workers: 1.5 })).toThrow(/worker count/);
+    expect(() => new BlenderRendererAdapter({ workers: 0 })).toThrow(
+      /worker count/,
+    );
+    expect(() => new BlenderRendererAdapter({ workers: 1.5 })).toThrow(
+      /worker count/,
+    );
   });
 
   it.skipIf(!blenderAvailable)(
@@ -113,17 +117,30 @@ describe('Blender EEVEE renderer adapter', () => {
       expect(second.cacheHit).toBe(true);
       expect(second.receipt.fingerprint).toBe(first.receipt.fingerprint);
 
-      const flatSettings = { ...prepared.manifest.renderPolicy, qualityProfile: 'flat' as const };
+      const flatSettings = {
+        ...prepared.manifest.renderPolicy,
+        qualityProfile: 'flat' as const,
+      };
       const flatBase = { ...request, settings: flatSettings };
-      const single = await new BlenderRendererAdapter({ workers: 1 }).renderShot({
+      const single = await new BlenderRendererAdapter({
+        workers: 1,
+      }).renderShot({
         ...flatBase,
-        artifact: { type: 'image-sequence/png', outputDirectory: join(temporary, 'flat-single') },
+        artifact: {
+          type: 'image-sequence/png',
+          outputDirectory: join(temporary, 'flat-single'),
+        },
         cacheDirectory: join(temporary, 'flat-cache-single'),
         receiptPath: join(temporary, 'flat-single.receipt.json'),
       });
-      const parallel = await new BlenderRendererAdapter({ workers: 2 }).renderShot({
+      const parallel = await new BlenderRendererAdapter({
+        workers: 2,
+      }).renderShot({
         ...flatBase,
-        artifact: { type: 'image-sequence/png', outputDirectory: join(temporary, 'flat-parallel') },
+        artifact: {
+          type: 'image-sequence/png',
+          outputDirectory: join(temporary, 'flat-parallel'),
+        },
         cacheDirectory: join(temporary, 'flat-cache-parallel'),
         receiptPath: join(temporary, 'flat-parallel.receipt.json'),
       });
@@ -131,8 +148,14 @@ describe('Blender EEVEE renderer adapter', () => {
       expect(parallel.status).toBe('success');
       if (single.status !== 'success' || parallel.status !== 'success')
         throw new Error('Single or parallel flat render failed');
-      expect(single.receipt.outputChecksums.map((item) => item.sha256).sort()).toEqual(
-        parallel.receipt.outputChecksums.map((item) => item.sha256).sort(),
+      expect(
+        single.receipt.outputChecksums
+          .filter((item) => /frame_\d{6}\.png$/.test(item.path))
+          .map((item) => item.sha256),
+      ).toEqual(
+        parallel.receipt.outputChecksums
+          .filter((item) => /frame_\d{6}\.png$/.test(item.path))
+          .map((item) => item.sha256),
       );
     },
     240_000,

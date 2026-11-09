@@ -82,7 +82,7 @@ def color_material(image, style, name, opacity=1.0, seed=0, depth=0.0):
     contrast_curve = style.get("contrastCurve", (0.0, 1.0)) if style.get("version") == "2.0.0" else (0.0, 1.0)
     palette.elements[0].position = float(contrast_curve[0])
     palette.elements[0].color = (*style["palette"]["shadow"], 1.0)
-    palette.elements[1].position = float(style.get("paperWhitePoint", 1.0)) if style.get("version") == "2.0.0" else 1.0
+    palette.elements[1].position = float(contrast_curve[1])
     palette.elements[1].color = (*style["palette"]["paper"], 1.0)
     middle = palette.elements.new(0.48)
     middle.color = (*style["palette"]["graphite"], 1.0)
@@ -123,7 +123,16 @@ def color_material(image, style, name, opacity=1.0, seed=0, depth=0.0):
         material.node_tree,
         'nodes["' + noise.name + '"].inputs[' + str(noise.inputs.find("W")) + '].default_value',
     )
-    links.new(texture.outputs["Color"], bw.inputs["Color"])
+    if style.get("version") == "2.0.0":
+        # Image textures are scene-linear. The artistic contrast points describe
+        # perceptual tones; applying them directly crushed dark graphite detail.
+        perceptual = nodes.new("ShaderNodeGamma")
+        perceptual.name = "Graphite Perceptual Tone"
+        perceptual.inputs["Gamma"].default_value = 1.0 / 2.2
+        links.new(texture.outputs["Color"], perceptual.inputs["Color"])
+        links.new(perceptual.outputs["Color"], bw.inputs["Color"])
+    else:
+        links.new(texture.outputs["Color"], bw.inputs["Color"])
     links.new(bw.outputs["Val"], ramp.inputs["Fac"])
     links.new(ramp.outputs["Color"], multiply.inputs[1])
     links.new(noise.outputs["Fac"], multiply.inputs[2])
@@ -191,10 +200,12 @@ def color_material(image, style, name, opacity=1.0, seed=0, depth=0.0):
         links.new(texture.outputs["Alpha"], alpha_scale.inputs[0])
         links.new(edge_noise.outputs["Fac"], center_noise.inputs[0])
         links.new(center_noise.outputs["Value"], noise_amount.inputs[0])
-        links.new(alpha_scale.outputs["Value"], eroded_alpha.inputs[0])
+        links.new(texture.outputs["Alpha"], eroded_alpha.inputs[0])
         links.new(noise_amount.outputs["Value"], eroded_alpha.inputs[1])
         links.new(eroded_alpha.outputs["Value"], edge_map.inputs["Value"])
-        alpha_output = edge_map.outputs["Result"]
+        # Apply layer opacity after erosion so fades retain their intended alpha.
+        links.new(edge_map.outputs["Result"], alpha_scale.inputs[0])
+        alpha_output = alpha_scale.outputs["Value"]
         # A subdued texture modulation softens shadow masses into graphite smudge.
         if float(style.get("shadowSmudge", 0.0)) > 0:
             smudge_noise = nodes.new("ShaderNodeTexNoise")
@@ -214,7 +225,7 @@ def color_material(image, style, name, opacity=1.0, seed=0, depth=0.0):
     links.new(transparent.outputs["BSDF"], mix_shader.inputs[1])
     links.new(illumination_mix.outputs["Shader"], mix_shader.inputs[2])
     links.new(mix_shader.outputs["Shader"], output.inputs["Surface"])
-    material.surface_render_method = "DITHERED"
+    material.surface_render_method = "BLENDED" if style.get("version") == "2.0.0" else "DITHERED"
     return material
 
 
@@ -436,6 +447,7 @@ def instantiate_asset(asset, transform, style, entity_id):
 
 
 def create_haze_plane(spec, camera_distance):
+    style = spec["style"]
     """A subtle procedural foreground layer adds depth without altering artwork."""
     mesh = bpy.data.meshes.new("AtmosphereMesh")
     depth = -2.4
@@ -493,7 +505,7 @@ def create_haze_plane(spec, camera_distance):
     links.new(transparent.outputs["BSDF"], mix.inputs[1])
     links.new(emission.outputs["Emission"], mix.inputs[2])
     links.new(mix.outputs["Shader"], output.inputs["Surface"])
-    material.surface_render_method = "DITHERED"
+    material.surface_render_method = "BLENDED" if style.get("version") == "2.0.0" else "DITHERED"
     obj.data.materials.append(material)
     return obj
 
@@ -541,7 +553,7 @@ def create_screen_paper(scene, camera, style, width, height):
     links.new(transparent.outputs["BSDF"], mix.inputs[1])
     links.new(emission.outputs["Emission"], mix.inputs[2])
     links.new(mix.outputs["Shader"], output.inputs["Surface"])
-    material.surface_render_method = "DITHERED"
+    material.surface_render_method = "BLENDED" if style.get("version") == "2.0.0" else "DITHERED"
     obj.data.materials.append(material)
     return obj
 
@@ -577,7 +589,7 @@ def create_dust_motes(scene, camera, style, seed):
     links.new(transparent.outputs["BSDF"], mix.inputs[1])
     links.new(emission.outputs["Emission"], mix.inputs[2])
     links.new(mix.outputs["Shader"], output.inputs["Surface"])
-    material.surface_render_method = "DITHERED"
+    material.surface_render_method = "BLENDED" if style.get("version") == "2.0.0" else "DITHERED"
     forward = camera.matrix_world.to_quaternion() @ Vector((0.0, 0.0, -1.0))
     right = camera.matrix_world.to_quaternion() @ Vector((1.0, 0.0, 0.0))
     up = camera.matrix_world.to_quaternion() @ Vector((0.0, 1.0, 0.0))
