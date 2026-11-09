@@ -12,6 +12,25 @@ Deterministic pipeline: project manifest -> plan -> per-shot render (Blender or 
 ## Map (line counts approximate)
 
 - `packages/contracts` — every Zod schema and type: manifest, shots, scene, render policy and quality, artwork, rigs, receipts. Single source of truth. Large; use Grep.
+- `packages/contracts/src/style.ts` — charcoal style override contract.
+- `packages/contracts/src/identifiers.ts` — stable IDs and immutable asset-version references.
+- `packages/contracts/src/asset-specifications.ts` — procedural asset build specifications.
+- `packages/contracts/src/render-policy.ts` — rational/video settings, render quality, and renderer selection policy.
+- `packages/contracts/src/motion.ts` — transitions, audio cues, character actions, and motion-clip libraries.
+- `packages/contracts/src/scene.ts` — renderer-independent scene composition, camera, lights, layers, and props.
+- `packages/contracts/src/shots.ts` — shot, track, and timeline instruction schemas.
+- `packages/contracts/src/project-manifest.ts` — validated project-manifest schema and inferred type.
+- `packages/contracts/src/project-manifest-shape.ts` — internal base manifest schema and validation types.
+- `packages/contracts/src/manifest-timeline-validation.ts` — internal video/audio placement and transition validation.
+- `packages/contracts/src/manifest-scene-validation.ts` — internal shot and scene cross-reference validation.
+- `packages/contracts/src/production-package.ts` — prepared screenplay and production-package contracts.
+- `packages/contracts/src/rigs.ts` — semantic cutout rig definitions.
+- `packages/contracts/src/artwork.ts` — artwork package, preparation, hierarchy, and layer contracts.
+- `packages/contracts/src/compiled-scene.ts` — compiled scene instruction interface.
+- `packages/contracts/src/renderer.ts` — renderer adapter, request, capability, result, and receipt contracts.
+- `packages/contracts/src/serialization.ts` — manifest parsing, canonical JSON, hashing, and comparison utilities.
+- `packages/contracts/src/shared-internal.ts` — non-public schemas and helpers shared between contract modules.
+- `packages/contracts/src/index.ts` — public barrel re-exporting each topic module.
 - `packages/assets` — AssetRegistry; immutable versioned assets with SHA-256.
 - `packages/planner` — prepareProductionPlan: validate, resolve assets, compile timeline and scenes, return render plan.
 - `packages/scene` — compileScene: structured shot scene -> compiled instructions (style, actions, camera keyframes).
