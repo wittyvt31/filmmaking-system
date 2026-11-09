@@ -486,6 +486,12 @@ export class BlenderRendererAdapter implements RendererAdapter {
       request.receiptPath ?? `${outputDirectory}.receipt.json`,
     );
     const metrics: Record<string, number | string | boolean> = {};
+    let requestedRenderer = 'unknown';
+    let actualRenderer = 'unknown';
+    let fallbackUsed = false;
+    let degraded = false;
+    let lastProcessResult: Awaited<ReturnType<typeof spawnCapture>> | undefined;
+    let lastWorkerResult: Record<string, unknown> | null = null;
     let workDirectoryToClean: string | undefined;
     let retainPartialWork = false;
     const finishFailure = async (error: unknown): Promise<RenderShotResult> => {
@@ -502,6 +508,10 @@ export class BlenderRendererAdapter implements RendererAdapter {
         outputChecksums: [],
         logs,
         metrics,
+        requestedRenderer,
+        actualRenderer,
+        fallbackUsed,
+        degraded,
         error: failure,
       };
       await writeReceipt(receiptPath, receipt).catch((writeError: unknown) =>
@@ -579,6 +589,8 @@ export class BlenderRendererAdapter implements RendererAdapter {
         width: renderDimensions.width,
         height: renderDimensions.height,
       };
+      requestedRenderer = renderConfig.engine;
+      actualRenderer = renderConfig.engine;
       if (!shot.scene)
         throw new BlenderFailure(
           'INVALID_INSTRUCTIONS',
@@ -888,6 +900,26 @@ export class BlenderRendererAdapter implements RendererAdapter {
           return null;
         }
       };
+      const preserveWorkerFailure = async () => {
+        const partialDirectory = `${outputDirectory}.failed-attempt`;
+        await rm(partialDirectory, { recursive: true, force: true });
+        await mkdir(dirname(partialDirectory), { recursive: true });
+        await rename(stagedDirectory, partialDirectory).catch(() => undefined);
+        retainPartialWork = false;
+        const crashReport = lastProcessResult?.stderr
+          .split(/\r?\n/)
+          .find((line) => /crash\.txt|Writing:.*crash/i.test(line));
+        if (crashReport) {
+          const source = crashReport.replace(/^.*Writing:\s*/, '').trim();
+          if (existsSync(source))
+            await copyFile(source, join(partialDirectory, 'blender-crash.txt')).catch(() => undefined);
+        }
+        logs.push(`Failed render artifacts preserved at ${partialDirectory}`);
+        if (lastWorkerResult)
+          logs.push(`Worker result: ${JSON.stringify(lastWorkerResult)}`);
+        metrics['partialFrameCount'] = (await readdir(join(partialDirectory, 'frames')).catch(() => []))
+          .filter((name) => /^frame_\d{6}\.png$/.test(name)).length;
+      };
       const validateStaged = async () => {
         try {
           return await validateSequence(stagedDirectory, {
@@ -923,8 +955,10 @@ export class BlenderRendererAdapter implements RendererAdapter {
       };
       const startedRender = Date.now();
       let processResult = await spawnWorker();
+      lastProcessResult = processResult;
       metrics['renderDurationMs'] = Date.now() - startedRender;
       let workerResult = await readWorkerResult();
+      lastWorkerResult = workerResult;
       let stagedChecksums = await validateStaged();
       if (processResult.timedOut)
         throw new BlenderFailure(
@@ -939,35 +973,11 @@ export class BlenderRendererAdapter implements RendererAdapter {
           true,
         );
       if (stagedChecksums === null) {
-        const fallbackConfig =
-          renderConfig.engine === 'CYCLES'
-            ? { ...renderConfig, device: 'CPU' as const }
-            : { ...renderConfig, engine: 'BLENDER_WORKBENCH' as const };
-        logs.push(
-          `Blender produced no valid frame sequence (exit ${String(processResult.code)}); retrying once on ${fallbackConfig.engine}${fallbackConfig.engine === 'CYCLES' ? ' CPU' : ''}.`,
-        );
-        await rm(frameDirectory, { recursive: true, force: true });
-        await mkdir(frameDirectory, { recursive: true });
-        await writeFile(
-          specPath,
-          JSON.stringify({ ...workerSpec, renderConfig: fallbackConfig }),
-        );
-        processResult = await spawnWorker();
-        metrics['renderDurationMs'] = Date.now() - startedRender;
+        await preserveWorkerFailure();
         if (processResult.timedOut)
-          throw new BlenderFailure(
-            'TIMEOUT',
-            'Blender fallback render timed out',
-            true,
-          );
+          throw new BlenderFailure('TIMEOUT', `Blender timed out after ${request.timeoutMs ?? 600_000} ms`, true);
         if (processResult.interrupted)
-          throw new BlenderFailure(
-            'INTERRUPTED',
-            'Blender fallback render was interrupted',
-            true,
-          );
-        workerResult = await readWorkerResult();
-        stagedChecksums = await validateStaged();
+          throw new BlenderFailure('INTERRUPTED', 'Blender render was interrupted', true);
       }
       if (stagedChecksums === null) {
         throw new BlenderFailure(
@@ -975,6 +985,13 @@ export class BlenderRendererAdapter implements RendererAdapter {
           `Blender ${processResult.code !== 0 ? `exited with code ${String(processResult.code)}` : 'exited cleanly'} but produced no valid ${shot.durationFrames}-frame sequence${processResult.signal ? ` (${processResult.signal})` : ''}: ${(processResult.stderr || processResult.stdout).split(/\r?\n/).slice(-8).join(' | ')}`,
           processResult.code !== 0,
         );
+      }
+      actualRenderer = workerResult?.engine ?? renderConfig.engine;
+      if (actualRenderer !== requestedRenderer) {
+        fallbackUsed = true;
+        degraded = true;
+        await preserveWorkerFailure();
+        throw new BlenderFailure('RENDER_CRASHED', `Renderer mismatch: requested ${requestedRenderer}, actual ${actualRenderer}; rejecting degraded output.`);
       }
       if (processResult.code !== 0) {
         warnings.push(
@@ -1014,6 +1031,8 @@ export class BlenderRendererAdapter implements RendererAdapter {
         workerResult?.blenderVersion ?? this.identity.version;
       metrics['exitCode'] = processResult.code ?? 0;
       metrics['completedWithWarning'] = warnings.length > 0;
+      metrics['fallbackUsed'] = fallbackUsed;
+      metrics['degraded'] = degraded;
       const receipt: SuccessfulRenderReceipt = {
         jobId: request.jobId,
         shotId: shot.id,
@@ -1027,6 +1046,10 @@ export class BlenderRendererAdapter implements RendererAdapter {
         outputChecksums: checksums,
         logs,
         metrics,
+        requestedRenderer,
+        actualRenderer,
+        fallbackUsed,
+        degraded,
         ...(warnings.length > 0
           ? { warnings, completedWithWarning: true }
           : {}),

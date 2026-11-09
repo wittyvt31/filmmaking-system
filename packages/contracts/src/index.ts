@@ -2327,6 +2327,10 @@ export interface RenderReceiptBase {
   outputChecksums: RenderOutputChecksum[];
   logs: string[];
   metrics: Record<string, number | string | boolean>;
+  requestedRenderer?: string;
+  actualRenderer?: string;
+  fallbackUsed?: boolean;
+  degraded?: boolean;
   warnings?: string[];
   completedWithWarning?: boolean;
 }
