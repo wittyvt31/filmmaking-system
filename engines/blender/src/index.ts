@@ -240,7 +240,12 @@ function validatePngStructure(buffer: Buffer): void {
 
 async function validateSequence(
   directory: string,
-  expected: { frames: number; width: number; height: number },
+  expected: {
+    frames: number;
+    width: number;
+    height: number;
+    startFrame?: number;
+  },
 ) {
   const frameDirectory = join(directory, 'frames');
   const entries = await readdir(frameDirectory, { withFileTypes: true });
@@ -255,7 +260,7 @@ async function validateSequence(
   }
   for (let index = 0; index < pngs.length; index += 1) {
     const entry = pngs[index];
-    const expectedName = `frame_${String(index + 1).padStart(6, '0')}.png`;
+    const expectedName = `frame_${String(index + (expected.startFrame ?? 1)).padStart(6, '0')}.png`;
     if (!entry || entry.name !== expectedName) {
       throw new BlenderFailure(
         'INCOMPLETE_OUTPUT',
@@ -368,16 +373,27 @@ export class BlenderRendererAdapter implements RendererAdapter {
   };
   readonly executablePath: string;
   readonly defaultSamples: number | undefined;
+  readonly workers: number;
   #versionPromise: Promise<string> | undefined;
 
   constructor(
     config: {
       executablePath?: string | undefined;
       samples?: number | undefined;
+      workers?: number | undefined;
     } = {},
   ) {
     this.executablePath = config.executablePath ?? defaultBlenderExecutable();
     this.defaultSamples = config.samples;
+    this.workers = config.workers ?? 1;
+    if (
+      !Number.isSafeInteger(this.workers) ||
+      this.workers < 1 ||
+      this.workers > 16
+    )
+      throw new RangeError(
+        'Blender worker count must be an integer from 1 to 16',
+      );
   }
 
   async #inspectVersion(timeoutMs = 15_000): Promise<string> {
@@ -497,6 +513,19 @@ export class BlenderRendererAdapter implements RendererAdapter {
     let retainPartialWork = false;
     const finishFailure = async (error: unknown): Promise<RenderShotResult> => {
       const failure = errorInfo(error);
+      const workerMetrics = lastWorkerResult?.['metrics'];
+      if (workerMetrics && typeof workerMetrics === 'object') {
+        const recorded = workerMetrics as Record<string, unknown>;
+        metrics['constantInterpolationCurves'] = Number(recorded['constantInterpolationCurves'] ?? 0);
+        metrics['constantInterpolationFailures'] = Number(recorded['constantInterpolationFailures'] ?? 0);
+      }
+      if (lastWorkerResult?.['error']) metrics['workerFailure'] = String(lastWorkerResult['error']);
+      if (lastProcessResult) {
+        metrics['exitCode'] = lastProcessResult.code ?? -1;
+        metrics['signal'] = lastProcessResult.signal ?? '';
+        metrics['timedOut'] = lastProcessResult.timedOut;
+        metrics['interrupted'] = lastProcessResult.interrupted;
+      }
       const receipt: FailedRenderReceipt = {
         jobId: request.jobId,
         shotId: request.shot.id,
@@ -515,12 +544,6 @@ export class BlenderRendererAdapter implements RendererAdapter {
         degraded,
         error: failure,
       };
-      if (lastProcessResult) {
-        metrics['exitCode'] = lastProcessResult.code ?? -1;
-        metrics['signal'] = lastProcessResult.signal ?? '';
-        metrics['timedOut'] = lastProcessResult.timedOut;
-        metrics['interrupted'] = lastProcessResult.interrupted;
-      }
       await writeReceipt(receiptPath, receipt).catch((writeError: unknown) =>
         logs.push(`Failure receipt write failed: ${String(writeError)}`),
       );
@@ -539,7 +562,12 @@ export class BlenderRendererAdapter implements RendererAdapter {
           'UNSUPPORTED_SETTINGS',
           'Manifest render policy does not select Blender',
         );
-      const profileSamples = { draft: 4, preview: 16, final: 64 } as const;
+      const profileSamples = {
+        draft: 4,
+        preview: 16,
+        final: 64,
+        flat: 1,
+      } as const;
       const renderOverrides = {
         ...settings.qualityOverrides,
         ...shot.renderOverrides,
@@ -550,7 +578,8 @@ export class BlenderRendererAdapter implements RendererAdapter {
         1080 / settings.outputDimensions.height,
       );
       const profileDimensions =
-        settings.qualityProfile === 'draft'
+        settings.qualityProfile === 'draft' ||
+        settings.qualityProfile === 'flat'
           ? { width: 854, height: 480 }
           : settings.qualityProfile === 'preview'
             ? { width: 1280, height: 720 }
@@ -580,7 +609,10 @@ export class BlenderRendererAdapter implements RendererAdapter {
           Math.ceil((profileDimensions.height * scaleOverride) / 2) * 2,
       };
       const renderConfig = {
-        engine: settings.renderer.config.engine,
+        engine:
+          settings.qualityProfile === 'flat'
+            ? 'BLENDER_WORKBENCH'
+            : settings.renderer.config.engine,
         device: settings.renderer.config.device,
         samples:
           renderOverrides.samples ??
@@ -589,9 +621,17 @@ export class BlenderRendererAdapter implements RendererAdapter {
           profileSamples[settings.qualityProfile ?? 'preview'],
         denoising:
           renderOverrides.denoising ?? settings.renderer.config.denoising,
-        shadows: renderOverrides.shadows ?? 'high',
-        textures: renderOverrides.textures ?? 'high',
-        compositing: renderOverrides.compositing ?? true,
+        shadows:
+          settings.qualityProfile === 'flat' ||
+          (settings.qualityProfile === 'draft' &&
+            shot.scene?.styleVersion === '2.0.0')
+            ? 'off'
+            : (renderOverrides.shadows ?? 'high'),
+        textures:
+          settings.qualityProfile === 'flat'
+            ? 'low'
+            : (renderOverrides.textures ?? 'high'),
+        compositing: false,
         frameRate: renderOverrides.frameRate ?? settings.frameRate,
         width: renderDimensions.width,
         height: renderDimensions.height,
@@ -897,11 +937,17 @@ export class BlenderRendererAdapter implements RendererAdapter {
         samples?: number;
         renderedFrames?: number;
         blenderVersion?: string;
+        metrics?: {
+          constantInterpolationCurves?: number;
+          constantInterpolationFailures?: number;
+        };
       };
-      const readWorkerResult = async (): Promise<WorkerResult | null> => {
+      const readWorkerResult = async (
+        directory = stagedDirectory,
+      ): Promise<WorkerResult | null> => {
         try {
           return JSON.parse(
-            await readFile(workerResultPath, 'utf8'),
+            await readFile(join(directory, 'worker-result.json'), 'utf8'),
           ) as WorkerResult;
         } catch {
           return null;
@@ -938,7 +984,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
           return null;
         }
       };
-      const spawnWorker = async () => {
+      const spawnWorker = async (workerSpecPath = specPath) => {
         const result = await spawnCapture(
           this.executablePath,
           [
@@ -947,7 +993,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
             '--python',
             WORKER_PATH,
             '--',
-            specPath,
+            workerSpecPath,
           ],
           {
             timeoutMs: request.timeoutMs ?? 600_000,
@@ -961,10 +1007,126 @@ export class BlenderRendererAdapter implements RendererAdapter {
         return result;
       };
       const startedRender = Date.now();
-      const processResult = await spawnWorker();
+      let processResult: ProcessResult;
+      let workerResult: WorkerResult | null;
+      if (this.workers === 1) {
+        processResult = await spawnWorker();
+        workerResult = await readWorkerResult();
+      } else {
+        const rangeCount = Math.min(this.workers, shot.durationFrames);
+        const ranges = Array.from({ length: rangeCount }, (_, index) => {
+          const start =
+            Math.floor((index * shot.durationFrames) / rangeCount) + 1;
+          const end = Math.floor(
+            ((index + 1) * shot.durationFrames) / rangeCount,
+          );
+          return { index, start, end };
+        });
+        const results = await Promise.all(
+          ranges.map(async (range) => {
+            const rangeRoot = join(workDirectory, `range-${range.index}`);
+            const rangeDirectory = join(rangeRoot, 'artifact');
+            const rangeFrameDirectory = join(rangeDirectory, 'frames');
+            await mkdir(rangeFrameDirectory, { recursive: true });
+            const rangeSpecPath = join(rangeRoot, 'worker-spec.json');
+            await writeFile(
+              rangeSpecPath,
+              JSON.stringify({
+                ...workerSpec,
+                outputDirectory: rangeDirectory,
+                frameRange: { start: range.start, end: range.end },
+              }),
+            );
+            let rangeProcess: ProcessResult | undefined;
+            let rangeChecksums: Awaited<
+              ReturnType<typeof validateSequence>
+            > | null = null;
+            for (let attempt = 0; attempt < 2; attempt += 1) {
+              rangeProcess = await spawnWorker(rangeSpecPath);
+              try {
+                rangeChecksums = await validateSequence(rangeDirectory, {
+                  frames: range.end - range.start + 1,
+                  width: renderDimensions.width,
+                  height: renderDimensions.height,
+                  startFrame: range.start,
+                });
+              } catch {
+                rangeChecksums = null;
+              }
+              if (rangeChecksums) break;
+              if (attempt === 1)
+                throw new BlenderFailure(
+                  'RENDER_CRASHED',
+                  `Frame range ${range.start}-${range.end} failed twice: ${rangeProcess.stderr.split(/\r?\n/).slice(-6).join(' | ')}`,
+                  true,
+                );
+            }
+            const result = await readWorkerResult(rangeDirectory);
+            return {
+              range,
+              rangeDirectory,
+              rangeProcess: rangeProcess!,
+              checksums: rangeChecksums!,
+              workerResult: result,
+            };
+          }),
+        );
+        for (const item of results.sort(
+          (a, b) => a.range.start - b.range.start,
+        )) {
+          for (
+            let frame = item.range.start;
+            frame <= item.range.end;
+            frame += 1
+          )
+            await copyFile(
+              join(
+                item.rangeDirectory,
+                'frames',
+                `frame_${String(frame).padStart(6, '0')}.png`,
+              ),
+              join(
+                frameDirectory,
+                `frame_${String(frame).padStart(6, '0')}.png`,
+              ),
+            );
+        }
+        const firstRange = results[0];
+        if (!firstRange)
+          throw new BlenderFailure(
+            'RENDER_CRASHED',
+            'Parallel Blender rendering produced no ranges',
+          );
+        await copyFile(
+          join(firstRange.rangeDirectory, 'scene.blend'),
+          join(stagedDirectory, 'scene.blend'),
+        );
+        processResult = results.at(-1)!.rangeProcess;
+        workerResult = firstRange.workerResult
+          ? {
+              ...firstRange.workerResult,
+              frameCount: shot.durationFrames,
+              renderedFrames: results.reduce(
+                (sum, item) =>
+                  sum +
+                  (item.workerResult?.renderedFrames ??
+                    item.range.end - item.range.start + 1),
+                0,
+              ),
+            }
+          : null;
+        await writeFile(
+          workerResultPath,
+          JSON.stringify(
+            workerResult ?? {
+              status: 'success',
+              frameCount: shot.durationFrames,
+            },
+          ),
+        );
+      }
       lastProcessResult = processResult;
       metrics['renderDurationMs'] = Date.now() - startedRender;
-      const workerResult = await readWorkerResult();
       lastWorkerResult = workerResult;
       const stagedChecksums = await validateStaged();
       if (processResult.timedOut || processResult.interrupted) {
@@ -1047,6 +1209,10 @@ export class BlenderRendererAdapter implements RendererAdapter {
         workerResult?.blenderVersion ?? this.identity.version;
       metrics['exitCode'] = processResult.code ?? 0;
       metrics['completedWithWarning'] = warnings.length > 0;
+      metrics['constantInterpolationCurves'] =
+        workerResult?.metrics?.constantInterpolationCurves ?? 0;
+      metrics['constantInterpolationFailures'] =
+        workerResult?.metrics?.constantInterpolationFailures ?? 0;
       metrics['fallbackUsed'] = fallbackUsed;
       metrics['degraded'] = degraded;
       const receipt: SuccessfulRenderReceipt = {

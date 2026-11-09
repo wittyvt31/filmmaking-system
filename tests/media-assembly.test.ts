@@ -10,7 +10,10 @@ import {
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { inflateSync } from 'node:zlib';
-import { parseProjectManifest } from '@filmmaking/contracts';
+import {
+  canonicalJsonSha256,
+  parseProjectManifest,
+} from '@filmmaking/contracts';
 import {
   ASSEMBLY_IMPLEMENTATION_VERSION,
   createAssemblyFingerprint,
@@ -223,6 +226,25 @@ afterEach(async () => {
 });
 
 describe('FFmpeg timeline video assembly', () => {
+  it('invalidates image-sequence encoding cache when glow or grade changes', async () => {
+    const manifest = await projectForShotCount(1);
+    const frames = [{ path: 'frame_000001.png', sha256: 'a'.repeat(64) }];
+    const original = canonicalJsonSha256({
+      frames,
+      policy: manifest.renderPolicy,
+      implementationVersion: 'ffmpeg',
+    });
+    const changed = canonicalJsonSha256({
+      frames,
+      policy: {
+        ...manifest.renderPolicy,
+        qualityPostProcessing: { final: { glow: true } },
+      },
+      implementationVersion: 'ffmpeg',
+    });
+    expect(changed).not.toBe(original);
+  });
+
   it('invalidates assembly cache identity when the implementation version changes', async () => {
     const manifest = await projectForShotCount(2);
     const timeline = compileTimeline(manifest);
@@ -319,6 +341,10 @@ describe('FFmpeg timeline video assembly', () => {
       ) as unknown,
     );
     const outputPath = join(root, 'shot.mp4');
+    manifest.renderPolicy.qualityProfile = 'final';
+    manifest.renderPolicy.qualityPostProcessing = {
+      final: { glow: true, finalGrade: true },
+    };
     const result = await new FfmpegMediaEngine({
       ffmpegPath: 'ffmpeg',
       ffprobePath: 'ffprobe',

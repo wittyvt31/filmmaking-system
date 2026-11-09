@@ -33,6 +33,17 @@ export interface CompiledSceneInstruction {
     paperOpacity: number;
     lineBoilStrength: number;
     boilFps?: number;
+    edgeBreakup?: number;
+    edgeSoftness?: number;
+    shadowSmudge?: number;
+    graphiteSheen?: number;
+    contrastCurve?: readonly number[];
+    paperWhitePoint?: number;
+    hazeDrift?: number;
+    dustDensity?: number;
+    shadows?: 'off' | 'contact' | 'soft-cast';
+    glow?: boolean;
+    finalGrade?: boolean;
   };
   environment: z.infer<typeof AssetVersionReferenceSchema>;
   groups: z.infer<typeof ShotSceneSchema>['groups'];

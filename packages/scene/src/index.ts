@@ -2,6 +2,7 @@ import {
   canonicalJsonSha256,
   compareStrings,
   ShotSceneSchema,
+  STYLE_DEFINITION_REGISTRY,
   type CompiledSceneInstruction,
   type MotionClipLibrary,
   type CharcoalStyleOverrides,
@@ -34,6 +35,25 @@ export const CHARCOAL_HORROR_STYLE = {
   paperFiberScale: 240,
   paperOpacity: 0.045,
   lineBoilStrength: 0.12,
+} as const;
+
+export const CHARCOAL_HORROR_STYLE_2_0 = {
+  ...CHARCOAL_HORROR_STYLE,
+  version: '2.0.0',
+  edgeBreakup: 0.24,
+  edgeSoftness: 0.015,
+  shadowSmudge: 0.18,
+  graphiteSheen: 0.16,
+  contrastCurve: [0.12, 0.88] as const,
+  paperWhitePoint: 0.78,
+  hazeDrift: 0.12,
+  dustDensity: 0,
+  shadows: 'soft-cast' as const,
+} as const;
+
+export const STYLE_DEFINITIONS = {
+  'charcoal_horror@1.2.0': CHARCOAL_HORROR_STYLE,
+  'charcoal_horror@2.0.0': CHARCOAL_HORROR_STYLE_2_0,
 } as const;
 
 export type CompiledScene = CompiledSceneInstruction;
@@ -79,6 +99,43 @@ export function resolveCharcoalHorrorStyle(
   };
 }
 
+function resolveStyle(
+  preset: string,
+  version: string,
+  overrides: CharcoalStyleOverrides = {},
+) {
+  const normalizedVersion = version === '1.1.0' ? '1.2.0' : version;
+  const registryKey =
+    `${preset}@${normalizedVersion}` as keyof typeof STYLE_DEFINITIONS;
+  const definition = STYLE_DEFINITIONS[registryKey] as
+    typeof CHARCOAL_HORROR_STYLE_2_0 | undefined;
+  const registered = STYLE_DEFINITION_REGISTRY.some(
+    (item) => item.id === preset && item.version === normalizedVersion,
+  );
+  if (!definition || !registered)
+    throw new TypeError(
+      `Unknown style "${preset}@${version}". Registered styles: ${Object.keys(STYLE_DEFINITIONS).join(', ')}`,
+    );
+  const base = resolveCharcoalHorrorStyle(overrides);
+  if (version === '1.1.0' || version === '1.2.0') return base;
+  return {
+    ...base,
+    id: definition.id,
+    version: definition.version,
+    edgeBreakup: overrides.edgeBreakup ?? definition.edgeBreakup,
+    edgeSoftness: overrides.edgeSoftness ?? definition.edgeSoftness,
+    shadowSmudge: overrides.shadowSmudge ?? definition.shadowSmudge,
+    graphiteSheen: overrides.graphiteSheen ?? definition.graphiteSheen,
+    contrastCurve: overrides.contrastCurve ?? definition.contrastCurve,
+    paperWhitePoint: overrides.paperWhitePoint ?? definition.paperWhitePoint,
+    hazeDrift: overrides.hazeDrift ?? definition.hazeDrift,
+    dustDensity: overrides.dustDensity ?? definition.dustDensity,
+    shadows: overrides.shadows ?? definition.shadows,
+    glow: overrides.glow ?? true,
+    finalGrade: overrides.finalGrade ?? true,
+  };
+}
+
 export function compileScene(
   shotInput: Shot,
   frameRate: Rational,
@@ -89,11 +146,13 @@ export function compileScene(
     throw new TypeError(`Shot "${shot.id}" has no structured scene`);
   }
   const scene = ShotSceneSchema.parse(shot.scene);
-  const style = resolveCharcoalHorrorStyle(scene.styleOverrides);
-  if (!['1.1.0', CHARCOAL_HORROR_STYLE.version].includes(scene.styleVersion))
-    throw new TypeError(
-      `Unsupported charcoal_horror style version "${scene.styleVersion}"; available version is "${CHARCOAL_HORROR_STYLE.version}"`,
-    );
+  if (scene.stylePreset !== 'charcoal_horror')
+    throw new TypeError(`Unknown style "${scene.stylePreset}"`);
+  const style = resolveStyle(
+    scene.stylePreset,
+    scene.styleVersion,
+    scene.styleOverrides,
+  );
   if (scene.animationLibraryVersion !== SEMANTIC_ANIMATION_LIBRARY_VERSION)
     throw new TypeError(
       `Unsupported semantic animation library version "${scene.animationLibraryVersion}"; available version is "${SEMANTIC_ANIMATION_LIBRARY_VERSION}"`,

@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { AssetVersionReferenceSchema, StableIdSchema } from './identifiers.js';
-import { CharcoalStyleOverridesSchema } from './style.js';
+import {
+  CharcoalStyleOverridesSchema,
+  STYLE_DEFINITION_REGISTRY,
+} from './style.js';
 import { CharacterActionSchema } from './motion.js';
 import { SceneTransformSchema, UnitColorSchema } from './shared-internal.js';
 
@@ -125,7 +128,7 @@ const SceneLightSchema = z.discriminatedUnion('type', [
 
 export const ShotSceneSchema = z
   .object({
-    stylePreset: z.literal('charcoal_horror'),
+    stylePreset: z.string().min(1).max(64),
     styleVersion: AssetVersionReferenceSchema.shape.version.default('1.2.0'),
     animationLibraryVersion:
       AssetVersionReferenceSchema.shape.version.default('1.0.0'),
@@ -162,6 +165,21 @@ export const ShotSceneSchema = z
     camera: SceneCameraSchema,
   })
   .strict()
+  .superRefine((scene, context) => {
+    const legacy = scene.stylePreset === 'charcoal_horror' && scene.styleVersion === '1.1.0';
+    const registered = STYLE_DEFINITION_REGISTRY.some(
+      (definition) => definition.id === scene.stylePreset && definition.version === scene.styleVersion,
+    );
+    if (!legacy && !registered)
+      context.addIssue({ code: 'custom', path: ['stylePreset'], message: `Unknown style/version "${scene.stylePreset}@${scene.styleVersion}"` });
+    if (scene.styleVersion !== '2.0.0' && scene.styleOverrides) {
+      const versionTwoOnly = ['edgeBreakup', 'edgeSoftness', 'shadowSmudge', 'graphiteSheen', 'contrastCurve', 'paperWhitePoint', 'hazeDrift', 'dustDensity', 'glow', 'finalGrade', 'shadows'];
+      for (const field of versionTwoOnly) {
+        if (Object.hasOwn(scene.styleOverrides, field))
+          context.addIssue({ code: 'custom', path: ['styleOverrides', field], message: `${field} is only supported by charcoal_horror 2.0.0` });
+      }
+    }
+  })
   .superRefine((scene, context) => {
     const lightIds = new Set<string>();
     scene.lights.forEach((light, index) => {

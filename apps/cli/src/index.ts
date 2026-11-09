@@ -322,7 +322,13 @@ projectOptions(
     (value: string) => Number.parseInt(value, 10),
     600_000,
   )
-  .action(async ({ project, output, cache, seed, timeout }) => {
+  .option(
+    '--workers <count>',
+    'Parallel Blender frame-range processes',
+    (value: string) => Number.parseInt(value, 10),
+    1,
+  )
+  .action(async ({ project, output, cache, seed, timeout, workers }) => {
     const cancellation = new AbortController();
     const abort = () => cancellation.abort();
     process.once('SIGINT', abort);
@@ -344,7 +350,10 @@ projectOptions(
       const renderer =
         rendererSelection.id === 'remotion'
           ? new RemotionRendererAdapter()
-          : new BlenderRendererAdapter(rendererSelection.config);
+          : new BlenderRendererAdapter({
+              ...rendererSelection.config,
+              workers,
+            });
       const bundledExecutables = getBundledMediaExecutables();
       const ffmpegPath =
         process.env['FILMIE_FFMPEG'] ??

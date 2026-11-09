@@ -63,7 +63,12 @@ const BlenderRendererConfigurationSchema = z
   })
   .strict();
 
-export const RenderQualityProfileSchema = z.enum(['draft', 'preview', 'final']);
+export const RenderQualityProfileSchema = z.enum([
+  'draft',
+  'preview',
+  'final',
+  'flat',
+]);
 export const RenderQualityOverridesSchema = z
   .object({
     width: z.number().int().positive().safe().optional(),
@@ -74,6 +79,15 @@ export const RenderQualityOverridesSchema = z
     shadows: z.enum(['off', 'low', 'high']).optional(),
     textures: z.enum(['low', 'medium', 'high']).optional(),
     compositing: z.boolean().optional(),
+    glow: z.boolean().optional(),
+    finalGrade: z.boolean().optional(),
+  })
+  .strict();
+
+export const QualityProfilePostProcessingSchema = z
+  .object({
+    glow: z.boolean().optional(),
+    finalGrade: z.boolean().optional(),
   })
   .strict();
 
@@ -108,6 +122,15 @@ export const RenderPolicySchema = z
     quality: QualitySettingsSchema,
     qualityProfile: RenderQualityProfileSchema.optional(),
     qualityOverrides: RenderQualityOverridesSchema.optional(),
+    qualityPostProcessing: z
+      .object({
+        draft: QualityProfilePostProcessingSchema.optional(),
+        preview: QualityProfilePostProcessingSchema.optional(),
+        final: QualityProfilePostProcessingSchema.optional(),
+        flat: QualityProfilePostProcessingSchema.optional(),
+      })
+      .strict()
+      .optional(),
     renderer: RendererSelectionSchema,
   })
   .strict()

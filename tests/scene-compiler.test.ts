@@ -49,6 +49,33 @@ describe('renderer-independent scene compiler', () => {
     expect(first.style.id).toBe('charcoal_horror');
   });
 
+  it('resolves registered charcoal versions and rejects unknown style identifiers', async () => {
+    const input = await proofManifest();
+    const shots = input['shots'] as Record<string, unknown>[];
+    const scene = shots[0]?.['scene'] as Record<string, unknown>;
+    scene['styleVersion'] = '2.0.0';
+    const parsed = parseProjectManifest(input);
+    expect(
+      compileScene(parsed.shots[0]!, parsed.video.frameRate).style,
+    ).toMatchObject({
+      id: 'charcoal_horror',
+      version: '2.0.0',
+      edgeBreakup: 0.24,
+      shadowSmudge: 0.18,
+      paperWhitePoint: 0.78,
+    });
+    scene['stylePreset'] = 'unregistered_style';
+    expect(() =>
+      compileScene(
+        parseProjectManifest(input).shots[0]!,
+        parsed.video.frameRate,
+      ),
+    ).toThrow(/Unknown style/);
+    scene['stylePreset'] = 'charcoal_horror';
+    scene['styleOverrides'] = { unexpected: true };
+    expect(() => parseProjectManifest(input)).toThrow(/unexpected/i);
+  });
+
   it('rejects a push-in whose endpoint is not closer than its start', async () => {
     const manifest = await proofManifest();
     const shots = manifest['shots'] as Record<string, unknown>[];

@@ -38,6 +38,7 @@ export interface ImageSequenceEncodingRequest {
   outputPath: string;
   frameCount: number;
   policy: RenderPolicy;
+  postProcessing?: { glow: boolean; finalGrade: boolean };
   timeoutMs?: number;
   signal?: AbortSignal;
 }
@@ -725,6 +726,30 @@ export class FfmpegMediaEngine implements MediaEngine {
       }
       await mkdir(dirname(outputPath), { recursive: true });
       const inputPattern = join(inputDirectory, 'frame_%06d.png');
+      const profile = policy.qualityProfile ?? 'preview';
+      const post = request.postProcessing ??
+        policy.qualityPostProcessing?.[profile] ?? {
+          glow:
+            profile === 'flat'
+              ? false
+              : (policy.qualityOverrides?.compositing ?? true),
+          finalGrade: false,
+        };
+      const filters = [
+        `scale=w=${policy.outputDimensions.width}:h=${policy.outputDimensions.height}:force_original_aspect_ratio=increase`,
+        `crop=w=${policy.outputDimensions.width}:h=${policy.outputDimensions.height}`,
+        'colorspace=all=bt709:iall=bt709:iprimaries=bt709:itrc=iec61966-2-1:irange=pc:range=tv',
+      ];
+      const grade = 'eq=contrast=1.06:saturation=0.72:brightness=-0.008';
+      if (post.finalGrade && !post.glow) filters.push(grade);
+      const filterArgs = post.glow
+        ? [
+            '-filter_complex',
+            `[0:v]${filters.join(',')},split[base][bloom];[bloom]lutyuv=y='if(gte(val,200),val,0)',gblur=sigma=8:steps=2[blur];[base][blur]blend=all_mode=screen:all_opacity=0.12${post.finalGrade ? `,${grade}` : ''}[out]`,
+            '-map',
+            '[out]',
+          ]
+        : ['-vf', filters.join(',')];
       const args = [
         '-hide_banner',
         '-loglevel',
@@ -735,8 +760,7 @@ export class FfmpegMediaEngine implements MediaEngine {
         '1',
         '-i',
         inputPattern,
-        '-vf',
-        `scale=w=${policy.outputDimensions.width}:h=${policy.outputDimensions.height}:force_original_aspect_ratio=increase,crop=w=${policy.outputDimensions.width}:h=${policy.outputDimensions.height},colorspace=all=bt709:iall=bt709:iprimaries=bt709:itrc=iec61966-2-1:irange=pc:range=tv`,
+        ...filterArgs,
         '-frames:v',
         String(request.frameCount),
         '-c:v',
