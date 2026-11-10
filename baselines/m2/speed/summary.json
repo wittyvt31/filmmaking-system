@@ -1,0 +1,15 @@
+{
+  "baseline": {
+    "firstFrame": 52.22399010000004,
+    "allEightMean": 12.826158262500002,
+    "steadyMean": 7.197896571428568
+  },
+  "samples4": {
+    "firstFrame": 57.75894990000006,
+    "allEightMean": 9.193066587499999,
+    "steadyMean": 2.255083257142847
+  },
+  "ssim": 0.998193,
+  "onlyFactorChanged": "samples: 16 to 4",
+  "fullRunTargetPending": true
+}

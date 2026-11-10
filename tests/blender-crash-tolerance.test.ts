@@ -52,6 +52,36 @@ afterAll(async () => {
 });
 
 describe.skipIf(!fakeBlenderPath)('Blender crash tolerance', () => {
+  it('changes shot cache identity when samples or shadows change', async () => {
+    const temporary = await mkdtemp(join(tmpdir(), 'filmie-quality-cache-'));
+    temporaryDirectories.push(temporary);
+    process.env['FILMIE_FAKE_BLENDER_MODE'] = 'valid';
+    process.env['FILMIE_FAKE_DURATION_FRAMES'] = '3';
+    process.env['FILMIE_FAKE_WIDTH'] = '1280';
+    process.env['FILMIE_FAKE_HEIGHT'] = '720';
+    try {
+      const { adapter, request } = await buildRequest(temporary);
+      const fingerprints = [];
+      for (const overrides of [
+        { samples: 4, shadows: 'high' as const },
+        { samples: 8, shadows: 'high' as const },
+        { samples: 4, shadows: 'off' as const },
+      ]) {
+        request.settings.qualityOverrides = overrides;
+        const result = await adapter.renderShot(request);
+        expect(result.status).toBe('success');
+        if (result.status !== 'success') throw new Error(result.error.message);
+        fingerprints.push(result.receipt.fingerprint);
+      }
+      expect(new Set(fingerprints).size).toBe(3);
+    } finally {
+      delete process.env['FILMIE_FAKE_BLENDER_MODE'];
+      delete process.env['FILMIE_FAKE_DURATION_FRAMES'];
+      delete process.env['FILMIE_FAKE_WIDTH'];
+      delete process.env['FILMIE_FAKE_HEIGHT'];
+    }
+  }, 120_000);
+
   it('records and preserves recovered parallel crashes in fresh and cached receipts', async () => {
     const temporary = await mkdtemp(join(tmpdir(), 'filmie-parallel-retry-'));
     temporaryDirectories.push(temporary);

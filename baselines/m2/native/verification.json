@@ -1,0 +1,11 @@
+{
+  "exitCode": 0,
+  "signal": null,
+  "nativeRenderWidth": 1920,
+  "nativeRenderHeight": 1080,
+  "resolutionPercentage": 100,
+  "upscaled": false,
+  "samples": 16,
+  "secondsPerFrame": 126.23564169999986,
+  "includesFirstFrameSetup": true
+}
