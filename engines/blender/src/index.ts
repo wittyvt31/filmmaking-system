@@ -991,11 +991,15 @@ export class BlenderRendererAdapter implements RendererAdapter {
           return null;
         }
       };
-      const preserveWorkerFailure = async () => {
-        const partialDirectory = `${outputDirectory}.failed-attempt-${randomUUID()}`;
-        await mkdir(dirname(partialDirectory), { recursive: true });
-        await rename(stagedDirectory, partialDirectory);
-        retainPartialWork = false;
+      const preserveWorkerFailure = async (resumable = false) => {
+        const partialDirectory = resumable
+          ? stagedDirectory
+          : `${outputDirectory}.failed-attempt-${randomUUID()}`;
+        if (!resumable) {
+          await mkdir(dirname(partialDirectory), { recursive: true });
+          await rename(stagedDirectory, partialDirectory);
+          retainPartialWork = false;
+        }
         const crashReport = lastProcessResult?.stderr
           .split(/\r?\n/)
           .find((line) => /crash\.txt|Writing:.*crash/i.test(line));
@@ -1265,7 +1269,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
       lastWorkerResult = workerResult;
       const stagedChecksums = await validateStaged();
       if (processResult.timedOut || processResult.interrupted) {
-        await preserveWorkerFailure();
+        await preserveWorkerFailure(true);
         throw new BlenderFailure(
           processResult.timedOut ? 'TIMEOUT' : 'INTERRUPTED',
           processResult.timedOut
@@ -1328,6 +1332,8 @@ export class BlenderRendererAdapter implements RendererAdapter {
       metrics['frameCount'] = shot.durationFrames;
       metrics['renderedFrames'] =
         workerResult?.renderedFrames ?? shot.durationFrames;
+      metrics['resumedFrames'] =
+        shot.durationFrames - Number(metrics['renderedFrames']);
       Object.assign(metrics, workerResult?.sourceFraming);
       metrics['cacheHit'] = false;
       metrics['renderEngine'] = workerResult?.engine ?? renderConfig.engine;
