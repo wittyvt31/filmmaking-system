@@ -141,7 +141,11 @@ async function createSolidBitmap(path: string, color: string): Promise<void> {
   await writeFile(path, bitmap);
 }
 
-async function createColorClip(path: string, color: string): Promise<void> {
+async function createColorClip(
+  path: string,
+  color: string,
+  frames = 30,
+): Promise<void> {
   const ffmpegPath = process.env['FILMIE_FFMPEG'] ?? 'ffmpeg';
   const rgb: Record<string, readonly [number, number, number]> = {
     red: [255, 0, 0],
@@ -163,7 +167,7 @@ async function createColorClip(path: string, color: string): Promise<void> {
     '-i',
     `nullsrc=s=64x64:r=30,geq=r=${components[0]}:g=${components[1]}:b=${components[2]}`,
     '-frames:v',
-    '30',
+    String(frames),
     '-c:v',
     'libx264',
     '-pix_fmt',
@@ -275,9 +279,56 @@ describe('FFmpeg timeline video assembly', () => {
       implementationVersion: `${ASSEMBLY_IMPLEMENTATION_VERSION}-next`,
     });
 
-    expect(ASSEMBLY_IMPLEMENTATION_VERSION).toBe('ffmpeg-timeline-v5');
+    expect(ASSEMBLY_IMPLEMENTATION_VERSION).toBe('ffmpeg-timeline-v6');
     expect(changedFingerprint).not.toBe(fingerprint);
   });
+
+  it('keeps a hard cut and dissolves the adjacent overlapping clips', async () => {
+    const root = await temporaryDirectory();
+    const manifest = await projectForShotCount(3);
+    manifest.shots.forEach((shot) => {
+      shot.durationFrames = 8;
+    });
+    const track = manifest.timeline.videoTracks[0]!;
+    track.clips.forEach((clip, index) => {
+      clip.startFrame = [0, 8, 12][index]!;
+    });
+    manifest.timeline.durationFrames = 20;
+    manifest.timeline.transitions = [
+      {
+        type: 'crossfade',
+        trackId: track.id,
+        fromShotId: track.clips[1]!.shotId,
+        toShotId: track.clips[2]!.shotId,
+        durationFrames: 4,
+      },
+    ];
+    const shotArtifacts: Record<string, string> = {};
+    for (const [index, shot] of manifest.shots.entries()) {
+      const path = join(root, shot.id + '.mp4');
+      await createColorClip(path, colors[index]!, 8);
+      shotArtifacts[shot.id] = path;
+    }
+    const outputPath = join(root, 'crossfade.mp4');
+    const result = await new FfmpegMediaEngine().assemble({
+      manifest,
+      timeline: compileTimeline(manifest),
+      shotArtifacts,
+      assets: [],
+      outputPath,
+    });
+    if (result.status === 'failure') throw new Error(result.error.message);
+    expect(result.value.frameCount).toBe(20);
+    const beforeCut = await centerPixel(outputPath, 7 / 30);
+    const afterCut = await centerPixel(outputPath, 8 / 30);
+    const dissolve = await centerPixel(outputPath, 14 / 30);
+    const end = await centerPixel(outputPath, 18 / 30);
+    expect(beforeCut[0]).toBeGreaterThan(200);
+    expect(afterCut[1]).toBeGreaterThan(200);
+    expect(dissolve[1]).toBeGreaterThan(50);
+    expect(dissolve[2]).toBeGreaterThan(50);
+    expect(end[2]).toBeGreaterThan(200);
+  }, 30_000);
 
   it.each([2, 3, 5])(
     'assembles %i distinct inputs once each in compiled timeline order',

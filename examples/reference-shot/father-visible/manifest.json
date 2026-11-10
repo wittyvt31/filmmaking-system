@@ -460,8 +460,8 @@
             "version": "1.0.0"
           },
           "trackId": "audio.room-tone",
-          "offsetFrames": 0,
-          "durationFrames": 150,
+          "offsetFrames": 18,
+          "durationFrames": 132,
           "sourceOffsetFrames": 480,
           "category": "sound-effect"
         },
@@ -472,8 +472,8 @@
             "version": "1.0.0"
           },
           "trackId": "audio.heartbeat",
-          "offsetFrames": 0,
-          "durationFrames": 150,
+          "offsetFrames": 18,
+          "durationFrames": 132,
           "sourceOffsetFrames": 130,
           "category": "sound-effect"
         }
@@ -481,7 +481,7 @@
     }
   ],
   "timeline": {
-    "durationFrames": 630,
+    "durationFrames": 612,
     "videoTracks": [
       {
         "id": "video.main",
@@ -496,7 +496,7 @@
           },
           {
             "shotId": "shot.telephone-close",
-            "startFrame": 480
+            "startFrame": 462
           }
         ]
       }
@@ -512,6 +512,14 @@
         "id": "audio.heartbeat"
       }
     ],
-    "transitions": []
+    "transitions": [
+      {
+        "type": "crossfade",
+        "trackId": "video.main",
+        "fromShotId": "shot.father-medium",
+        "toShotId": "shot.telephone-close",
+        "durationFrames": 18
+      }
+    ]
   }
 }

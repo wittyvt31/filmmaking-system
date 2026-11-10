@@ -12,7 +12,7 @@ import {
 } from '@filmmaking/contracts';
 import type { CompiledTimeline } from '@filmmaking/timeline';
 
-export const ASSEMBLY_IMPLEMENTATION_VERSION = 'ffmpeg-timeline-v5';
+export const ASSEMBLY_IMPLEMENTATION_VERSION = 'ffmpeg-timeline-v6';
 
 export interface MediaAssetInput {
   assetId: string;
@@ -269,10 +269,12 @@ function validateTimeline(request: MediaAssemblyRequest): void {
       'INVALID_TIMELINE',
       'Compiled timeline has no video track.',
     );
-  if (track.overlaps.length || track.transitions.length) {
+  if (
+    track.overlaps.some((overlap) => overlap.transition?.type !== 'crossfade')
+  ) {
     throw new MediaEngineError(
       'UNSUPPORTED_TRANSITION',
-      'Timeline transitions and overlapping video clips are not implemented by this assembly engine. Remove them or use a renderer that supports transitions.',
+      'Overlapping video clips require a crossfade transition.',
     );
   }
   if (
@@ -286,7 +288,7 @@ function validateTimeline(request: MediaAssemblyRequest): void {
     );
   }
   for (const transition of request.manifest.timeline.transitions) {
-    if (!['crossfade', 'wipe', 'dip-to-color'].includes(transition.type)) {
+    if (transition.type !== 'crossfade') {
       throw new MediaEngineError(
         'UNSUPPORTED_TRANSITION',
         `Unsupported transition type: ${transition.type}`,
@@ -326,6 +328,8 @@ function buildAssemblyArgs(
   let inputIndex = 0;
   let cursor = 0;
   let segmentIndex = 0;
+  let previousClip: (typeof videoTrack.clips)[number] | undefined;
+  let chainStart = 0;
   const appendGap = (gapFrames: number) => {
     if (gapFrames <= 0) return;
     const gapPath = gapClipPaths.get(cursor);
@@ -343,11 +347,7 @@ function buildAssemblyArgs(
   };
 
   for (const clip of videoTrack.clips) {
-    if (clip.startFrame < cursor)
-      throw new MediaEngineError(
-        'UNSUPPORTED_TRANSITION',
-        `Clip ${clip.shotId} overlaps the preceding clip.`,
-      );
+    const overlap = cursor - clip.startFrame;
     appendGap(clip.startFrame - cursor);
     const artifact = request.shotArtifacts[clip.shotId];
     if (!artifact)
@@ -357,11 +357,42 @@ function buildAssemblyArgs(
       );
     inputArgs.push('-i', resolve(artifact));
     const label = `v${segmentIndex}`;
-    filterSegments.push(`[${inputIndex}:v]null[${label}]`);
-    orderedSegments.push(`[${label}]`);
+    filterSegments.push(
+      `[${inputIndex}:v]settb=AVTB,setpts=PTS-STARTPTS[${label}]`,
+    );
+    if (overlap > 0) {
+      const transition = videoTrack.transitions.find(
+        (item) =>
+          item.fromShotId === previousClip?.shotId &&
+          item.toShotId === clip.shotId,
+      );
+      const previous = orderedSegments.pop();
+      if (
+        !previous ||
+        transition?.type !== 'crossfade' ||
+        transition.durationFrames !== overlap ||
+        clip.endFrame <= cursor ||
+        videoTrack.overlaps.filter(
+          (item) => item.transition?.toShotId === clip.shotId,
+        ).length !== 1
+      )
+        throw new MediaEngineError(
+          'UNSUPPORTED_TRANSITION',
+          `Clip ${clip.shotId} requires one adjacent crossfade.`,
+        );
+      const mixed = `mix${segmentIndex}`;
+      filterSegments.push(
+        `${previous}[${label}]xfade=transition=fade:duration=${seconds(overlap, policy)}:offset=${seconds(clip.startFrame - chainStart, policy)}[${mixed}]`,
+      );
+      orderedSegments.push(`[${mixed}]`);
+    } else {
+      chainStart = clip.startFrame;
+      orderedSegments.push(`[${label}]`);
+    }
     inputIndex += 1;
     segmentIndex += 1;
     cursor = clip.endFrame;
+    previousClip = clip;
   }
   appendGap(timeline.durationFrames - cursor);
   if (!orderedSegments.length)
