@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import {
@@ -7,6 +7,11 @@ import {
   runBlenderProcess,
 } from '@filmmaking/engine-blender';
 import { describe, expect, it } from 'vitest';
+import {
+  MotionClipLibrarySchema,
+  parseProjectManifest,
+} from '@filmmaking/contracts';
+import { compileScene } from '@filmmaking/scene';
 
 const blenderExecutable =
   process.env['FILMIE_BLENDER'] ?? defaultBlenderExecutable();
@@ -16,6 +21,49 @@ describe.skipIf(!blenderAvailable)('Blender motion-curve runtime', () => {
   it('evaluates 3D replacement/additive curves deterministically and rejects collisions', async () => {
     const temporary = await mkdtemp(join(tmpdir(), 'filmie-motion-runtime-'));
     try {
+      const manifest = parseProjectManifest(
+        JSON.parse(
+          await readFile(
+            resolve('examples/reference-shot/father-motion/manifest.json'),
+            'utf8',
+          ),
+        ),
+      );
+      const shot = manifest.shots[0]!;
+      const library = MotionClipLibrarySchema.parse({
+        schemaVersion: '1.0.0',
+        libraryId: 'test.motion',
+        version: '1.0.0',
+        clips: [
+          {
+            id: 'test.ease',
+            durationFrames: 5,
+            tracks: [
+              {
+                control: 'head',
+                channel: 'rotation',
+                keyframes: [
+                  { frame: 0, value: [0, 0, 0], interpolation: 'ease-in-out' },
+                  { frame: 4, value: [0, 0.08, 0] },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      shot.scene!.characters[0]!.actions = [
+        {
+          id: 'test.action',
+          type: 'motion-clip',
+          startFrame: 0,
+          endFrame: 5,
+          library: { assetId: library.libraryId, version: library.version },
+          clipId: 'test.ease',
+          playbackRate: 1,
+          blendMode: 'replace',
+        },
+      ];
+      const compiled = compileScene(shot, manifest.video.frameRate, [library]);
       const script = join(temporary, 'motion-curves.py');
       await writeFile(
         script,
@@ -68,6 +116,13 @@ additive_end = tuple(round(v, 4) for v in root.matrix_world.translation)
 assert additive_start == (1.0, 2.0, 3.0), additive_start
 assert additive_mid == (1.5, 2.0, 2.5), additive_mid
 assert additive_end == (2.0, 2.0, 2.0), additive_end
+
+head = bpy.data.objects.new('head-pivot', None)
+scene.collection.objects.link(head)
+render_shot.apply_motion_curves({'motionCurves':${JSON.stringify(compiled.motionCurves)}}, {'father': {'head': head}}, {})
+for frame, expected in ((1, 0), (2, .0125), (3, .04), (4, .0675), (5, .08), (6, .08)):
+    scene.frame_set(frame)
+    assert abs(head.rotation_euler.y - expected) < 1e-6, (frame, head.rotation_euler.y)
 
 def must_reject(curves, expected):
     try:

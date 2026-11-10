@@ -71,6 +71,9 @@ export interface CompiledSceneInstruction {
     frame: number;
     value: readonly number[];
     blendMode: 'replace' | 'additive';
+    interpolation?:
+      'ease-in' | 'ease-out' | 'ease-in-out' | 'cubic-bezier' | 'hold';
+    bezier?: readonly [number, number, number, number];
   }[];
   sha256: string;
 }

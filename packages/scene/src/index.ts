@@ -255,6 +255,12 @@ export function compileScene(
               Math.round(keyframe.frame / action.playbackRate),
             value: keyframe.value,
             blendMode: action.blendMode,
+            ...(keyframe.interpolation !== 'linear'
+              ? { interpolation: keyframe.interpolation }
+              : {}),
+            ...(keyframe.interpolation === 'cubic-bezier' && keyframe.bezier
+              ? { bezier: keyframe.bezier }
+              : {}),
           });
         }
       }

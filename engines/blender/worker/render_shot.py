@@ -1438,6 +1438,35 @@ def apply_actions(spec, entity_roots, control_objects):
             raise RuntimeError("Unsupported compiled character action: " + action["type"])
 
 
+def motion_blend(keyframe, progress):
+    interpolation = keyframe.get("interpolation", "linear")
+    if interpolation == "linear":
+        return progress
+    if interpolation == "hold":
+        return 0.0
+    if interpolation == "ease-in":
+        return progress * progress
+    if interpolation == "ease-out":
+        return 1.0 - (1.0 - progress) ** 2
+    if interpolation == "ease-in-out":
+        return progress * progress * (3.0 - 2.0 * progress)
+    if interpolation == "cubic-bezier":
+        x1, y1, x2, y2 = keyframe.get("bezier", (0.42, 0.0, 0.58, 1.0))
+
+        def coordinate(t, first, second):
+            return 3 * (1 - t) ** 2 * t * first + 3 * (1 - t) * t ** 2 * second + t ** 3
+
+        low, high = 0.0, 1.0
+        for _ in range(24):
+            mid = (low + high) / 2
+            if coordinate(mid, x1, x2) < progress:
+                low = mid
+            else:
+                high = mid
+        return coordinate((low + high) / 2, y1, y2)
+    raise RuntimeError("Unsupported motion interpolation: " + interpolation)
+
+
 def apply_motion_curves(spec, control_objects, entity_roots):
     grouped = {}
     for curve in spec.get("motionCurves", []):
@@ -1488,7 +1517,7 @@ def apply_motion_curves(spec, control_objects, entity_roots):
                     left = prior[-1]
                     right = later[0]
                     span = max(1, int(right["frame"]) - int(left["frame"]))
-                    blend = (source_frame - int(left["frame"])) / span
+                    blend = motion_blend(left, (source_frame - int(left["frame"])) / span)
                     selected = left
                     left_value = tuple(float(component) for component in left["value"])
                     right_value = tuple(float(component) for component in right["value"])
