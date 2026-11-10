@@ -1,0 +1,42 @@
+{
+  "input": "D:\\filmmaking-system\\baselines\\m4\\master.mp4",
+  "manifest": "D:\\filmmaking-system\\examples\\reference-shot\\father-visible\\manifest.json",
+  "frameCount": 612,
+  "manifestFrameCount": 612,
+  "frameCountMatchesManifest": true,
+  "durationSeconds": 20.4,
+  "resolution": "640x360",
+  "frameRate": 30,
+  "nearBlackFrames": 0,
+  "nearWhiteFrames": 0,
+  "meanFrameDifference": 0.00060852,
+  "netFrameDifference": 0.04043267,
+  "minFrameDifference": 0.00002723,
+  "maxFrameDifference": 0.03706427,
+  "identicalConsecutiveFrames": 0,
+  "identicalFrameRatio": 0,
+  "nearUniformFrames": 0,
+  "lowEntropyFrames": 0,
+  "thresholds": {
+    "uniformRange": 0.006,
+    "entropyThreshold": 0.01,
+    "identicalRatio": 0.8,
+    "motionDifference": 0.001,
+    "netMotionDifference": 0.005,
+    "expectMotion": true,
+    "staticOk": false
+  },
+  "failureReasons": [],
+  "audio": {
+    "present": true,
+    "durationSeconds": 20.4,
+    "rmsDbfs": -48.186013,
+    "rmsByInterval": {
+      "room": -52.251486453539755,
+      "ring": -39.35308196698163,
+      "telephoneClose": -50.940351740017455
+    }
+  },
+  "contactSheet": "D:\\filmmaking-system\\baselines\\m4\\contact-sheet.png",
+  "lumaSampling": "64x36 grayscale; exact-identity count uses the same decoded samples"
+}

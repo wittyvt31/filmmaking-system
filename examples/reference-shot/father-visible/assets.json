@@ -133,7 +133,7 @@
     "version": "1.0.1",
     "type": "other",
     "sourceUri": "assets/father-motion.json",
-    "contentHash": "0ee327769ae1280e78fc9db73bb34c243912a5e875a00c22a2ec0a2d8a3519a2",
+    "contentHash": "8f11d31b744e3296bd9c7216c1afddd340e3359aced8fcc719bb5d3f8911a458",
     "metadata": {},
     "license": {
       "name": "Original project animation",
@@ -191,7 +191,7 @@
       "restrictions": []
     },
     "provenance": {
-      "source": "FFmpeg anoisesrc=color=brown:amplitude=0.2:sample_rate=48000:seed=413 \u2192 highpass=f=35,lowpass=f=320,volume=0.5"
+      "source": "FFmpeg anoisesrc=color=brown:amplitude=0.2:sample_rate=48000:seed=413 → highpass=f=35,lowpass=f=320,volume=0.5"
     }
   },
   {
@@ -206,7 +206,7 @@
       "restrictions": []
     },
     "provenance": {
-      "source": "FFmpeg sine=frequency=425:sample_rate=48000 \u2192 volume='0.85*lt(mod(t,1),0.55)':eval=frame,afade=t=out:st=1.85:d=0.15"
+      "source": "FFmpeg sine=frequency=425:sample_rate=48000 → volume='0.85*lt(mod(t,1),0.55)':eval=frame,afade=t=out:st=1.85:d=0.15"
     }
   },
   {
@@ -221,7 +221,7 @@
       "restrictions": []
     },
     "provenance": {
-      "source": "FFmpeg sine=frequency=58:sample_rate=48000 \u2192 volume='(0.22+0.62*min(t/10,1))*(exp(-22*mod(t,1.14))+0.5*gte(mod(t,1.14),0.17)*exp(-24*max(0,mod(t,1.14)-0.17)))':eval=frame"
+      "source": "FFmpeg sine=frequency=58:sample_rate=48000 → volume='(0.22+0.62*min(t/10,1))*(exp(-22*mod(t,1.14))+0.5*gte(mod(t,1.14),0.17)*exp(-24*max(0,mod(t,1.14)-0.17)))':eval=frame"
     }
   }
 ]

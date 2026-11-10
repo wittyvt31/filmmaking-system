@@ -13,38 +13,22 @@
           "keyframes": [
             {
               "frame": 0,
-              "value": [
-                1,
-                1,
-                1
-              ],
+              "value": [1, 1, 1],
               "interpolation": "ease-in-out"
             },
             {
               "frame": 60,
-              "value": [
-                1,
-                1,
-                1.015
-              ],
+              "value": [1, 1, 1.015],
               "interpolation": "ease-in-out"
             },
             {
               "frame": 120,
-              "value": [
-                1,
-                1,
-                1
-              ],
+              "value": [1, 1, 1],
               "interpolation": "ease-in-out"
             },
             {
               "frame": 149,
-              "value": [
-                1,
-                1,
-                1.0075
-              ],
+              "value": [1, 1, 1.0075],
               "interpolation": "ease-in-out"
             }
           ]
@@ -55,38 +39,22 @@
           "keyframes": [
             {
               "frame": 0,
-              "value": [
-                0,
-                0,
-                0
-              ],
+              "value": [0, 0, 0],
               "interpolation": "ease-in-out"
             },
             {
               "frame": 60,
-              "value": [
-                0,
-                0,
-                0
-              ],
+              "value": [0, 0, 0],
               "interpolation": "ease-in-out"
             },
             {
               "frame": 110,
-              "value": [
-                0,
-                0.13962634015954636,
-                0
-              ],
+              "value": [0, 0.13962634015954636, 0],
               "interpolation": "ease-in-out"
             },
             {
               "frame": 149,
-              "value": [
-                0,
-                0.13962634015954636,
-                0
-              ],
+              "value": [0, 0.13962634015954636, 0],
               "interpolation": "ease-in-out"
             }
           ]

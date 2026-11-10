@@ -1,0 +1,39 @@
+{
+  "path": "D:\\filmmaking-system\\baselines\\m4\\master.mp4",
+  "durationSeconds": 20.4,
+  "frameCount": 612,
+  "width": 640,
+  "height": 360,
+  "frameRate": 30,
+  "codec": "h264",
+  "pixelFormat": "yuv420p",
+  "colorProfile": "bt709",
+  "colorTransfer": "bt709",
+  "colorPrimaries": "bt709",
+  "audioStreamCount": 1,
+  "sha256": "13e72591c889913503b4167836547b5783553790f91c1f5938f212b87498ecdc",
+  "bytes": 733341,
+  "durationMs": 4179,
+  "elapsedMs": 13223,
+  "timelineSha256": "d968e59909a6c73fcc6c090ce6a3bbf58ec10342b24917b20d931136041c5129",
+  "transitions": [
+    {
+      "type": "crossfade",
+      "trackId": "video.main",
+      "fromShotId": "shot.father-medium",
+      "toShotId": "shot.telephone-close",
+      "durationFrames": 18,
+      "startFrame": 462,
+      "endFrame": 480
+    }
+  ],
+  "audioRemux": {
+    "videoStreamSha256": "SHA256=e04250f4cad187e879983a655d618ab7cc81e4fac4dde584e384f115e1a40b55",
+    "rmsByInterval": {
+      "room": -52.251486453539755,
+      "ring": -39.35308196698163,
+      "telephoneClose": -50.940351740017455
+    },
+    "reason": "Rebuilt audio timestamps after cue delay."
+  }
+}

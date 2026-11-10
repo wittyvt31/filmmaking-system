@@ -1,0 +1,1760 @@
+{
+  "jobId": "render-shot:shot.father-medium",
+  "shotId": "shot.father-medium",
+  "renderer": {
+    "id": "blender",
+    "version": "5.2.3"
+  },
+  "fingerprint": "7eca7430a9b15363a5ed07035c75a72a7eb5211aa568b9cb6b0d980e1154a856",
+  "startedAt": "2026-11-10T23:32:20.215Z",
+  "completedAt": "2026-11-10T23:42:36.434Z",
+  "status": "success",
+  "artifactType": "image-sequence/png",
+  "outputPaths": [
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000001.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000002.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000003.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000004.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000005.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000006.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000007.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000008.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000009.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000010.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000011.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000012.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000013.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000014.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000015.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000016.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000017.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000018.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000019.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000020.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000021.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000022.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000023.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000024.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000025.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000026.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000027.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000028.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000029.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000030.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000031.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000032.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000033.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000034.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000035.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000036.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000037.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000038.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000039.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000040.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000041.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000042.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000043.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000044.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000045.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000046.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000047.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000048.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000049.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000050.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000051.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000052.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000053.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000054.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000055.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000056.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000057.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000058.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000059.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000060.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000061.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000062.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000063.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000064.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000065.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000066.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000067.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000068.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000069.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000070.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000071.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000072.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000073.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000074.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000075.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000076.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000077.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000078.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000079.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000080.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000081.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000082.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000083.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000084.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000085.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000086.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000087.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000088.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000089.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000090.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000091.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000092.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000093.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000094.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000095.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000096.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000097.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000098.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000099.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000100.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000101.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000102.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000103.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000104.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000105.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000106.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000107.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000108.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000109.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000110.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000111.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000112.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000113.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000114.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000115.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000116.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000117.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000118.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000119.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000120.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000121.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000122.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000123.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000124.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000125.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000126.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000127.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000128.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000129.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000130.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000131.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000132.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000133.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000134.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000135.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000136.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000137.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000138.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000139.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000140.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000141.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000142.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000143.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000144.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000145.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000146.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000147.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000148.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000149.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000150.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000151.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000152.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000153.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000154.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000155.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000156.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000157.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000158.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000159.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000160.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000161.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000162.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000163.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000164.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000165.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000166.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000167.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000168.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000169.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000170.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000171.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000172.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000173.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000174.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000175.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000176.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000177.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000178.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000179.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000180.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000181.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000182.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000183.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000184.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000185.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000186.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000187.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000188.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000189.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000190.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000191.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000192.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000193.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000194.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000195.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000196.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000197.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000198.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000199.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000200.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000201.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000202.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000203.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000204.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000205.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000206.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000207.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000208.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000209.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000210.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000211.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000212.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000213.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000214.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000215.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000216.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000217.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000218.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000219.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000220.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000221.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000222.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000223.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000224.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000225.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000226.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000227.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000228.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000229.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000230.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000231.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000232.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000233.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000234.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000235.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000236.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000237.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000238.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000239.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000240.png",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\scene.blend",
+    "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\worker-result.json"
+  ],
+  "outputChecksums": [
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000001.png",
+      "sha256": "bf7f48590d9a53115a8404dc8d022dd533df207cffce6c622a5ae01c0583a7b9",
+      "bytes": 307559
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000002.png",
+      "sha256": "584518ff711190961c57aa7e28b93e90eb28d512d5800aa47738e9d6e27dba9d",
+      "bytes": 307512
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000003.png",
+      "sha256": "53e2b382a3fa8a31e66c881edce83dd3c4392b9d6ee1bb9fec96a1b5c143810b",
+      "bytes": 307379
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000004.png",
+      "sha256": "1a467d415dc88efba424380cc13b3f8391782403d35a0a7654ed5f053c65af88",
+      "bytes": 307345
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000005.png",
+      "sha256": "1f55107a1e8bdf8d4abd5d4919553b8e6af3b20e43be44e790bff103bf1658cf",
+      "bytes": 307580
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000006.png",
+      "sha256": "b38eb29acb5de0cb1e3551a7f5b58761d96ca836a83eb74750ae5f2c28c27beb",
+      "bytes": 307668
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000007.png",
+      "sha256": "ee80f6eae3b11c89b7f80cc287ef5fc6ab9314f49fcef7ff2ff5c5285d3770c2",
+      "bytes": 307587
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000008.png",
+      "sha256": "37993b5d715714c88467349c9a3a009331d7bf028a69f47c3a01d5c0dfbca657",
+      "bytes": 307658
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000009.png",
+      "sha256": "853ce169fbadbaf15ed32cb1c4430948559e3cd599a7e6d835b821f23bd965c8",
+      "bytes": 307627
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000010.png",
+      "sha256": "6c0818780bc824165c6f8eb0cf074c08bd22ea8c9d8c2db1eb933ced8f83b85f",
+      "bytes": 307361
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000011.png",
+      "sha256": "bfeea8188ddd30034bccf031e52689bf511ec41cf25a2046b52d395a761b60c2",
+      "bytes": 307697
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000012.png",
+      "sha256": "f84d9550aca426bd834bc819d3b8f986bef4569bc4b5c34c9bdeee913ab3c3f0",
+      "bytes": 307473
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000013.png",
+      "sha256": "7069b37454cc2f7ad22a6800d1f94822782e38abcc5cace4f54fbe97723b8d8e",
+      "bytes": 307828
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000014.png",
+      "sha256": "2beea2597b9bd861afcf07e48d8093582aa045271e133cb59792bfceabfe7dc9",
+      "bytes": 307804
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000015.png",
+      "sha256": "47c26dd30bc89fac643f7fbcca22df3ee4e5a6f4d796441b0d8697d7c446fda7",
+      "bytes": 307657
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000016.png",
+      "sha256": "9cc89171c55116561517ec927144ba82140aa834dd165b38aa6309a2bdc2ae99",
+      "bytes": 307698
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000017.png",
+      "sha256": "9906ba4f57f5f6ca58c0d786c5a644835767ac3ad9b5b466cd13b3ea4d5d77aa",
+      "bytes": 307536
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000018.png",
+      "sha256": "1731def865c15fdcd7cdadb20af06840e7dd5c7faa328fea0affc5294cd7b01b",
+      "bytes": 307844
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000019.png",
+      "sha256": "31ee50d80285bd5941b9f063f1c51bcba2b8b35106ad44a5ccaccbee17a46e60",
+      "bytes": 307501
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000020.png",
+      "sha256": "e87668e1a28c0b66466d5745e14aca5d0389eb2f097d266b10e33eadd5d3c4d3",
+      "bytes": 307672
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000021.png",
+      "sha256": "b89a48423c592b872b827753d121906163cb9e6017358779ad1d438c2eff0164",
+      "bytes": 307893
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000022.png",
+      "sha256": "0d1d0093b94489fc37439aa0f8988aad2cd00df94b4e39a907426a0b2764e5b4",
+      "bytes": 307690
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000023.png",
+      "sha256": "88fac1408e82c3eb631369f21cd150d21cd330c6e434f3a56382d28c7b20e9ea",
+      "bytes": 307804
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000024.png",
+      "sha256": "8bbd34249396bfd64d4d58cec9a8287cfd3df070f19aa9f0684f6a50fc33516e",
+      "bytes": 307259
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000025.png",
+      "sha256": "6e64e27f7ac29d3e3ac5784a31d1b6074afaede9fb1505c81649e35db82f6660",
+      "bytes": 307362
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000026.png",
+      "sha256": "5713a4f44e40d2a1e76e61eb5f3e9185baafecc5ae41d0dd35b38a9628ccec0d",
+      "bytes": 307469
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000027.png",
+      "sha256": "fabe48706569046c17355dc269676fcf3bcf1a1d843b34846b4f535470ecd877",
+      "bytes": 307627
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000028.png",
+      "sha256": "b1c3a92ebfc9719de6ccebfae4ebaea92db7a61bbf4f69f1955c9e8d1fb3594d",
+      "bytes": 307446
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000029.png",
+      "sha256": "8888e0aa2e163bd3ea3aace2e2095ed29548e080cb345d5aa66f152275217843",
+      "bytes": 307547
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000030.png",
+      "sha256": "04c1e012f8f18b4b166ec8b188aa3728a50cd859d30a58edd032b4a9a91682f6",
+      "bytes": 307507
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000031.png",
+      "sha256": "54056b770c82831d410b54a4facc52e51981c680d1fb5c39326a91d365872f88",
+      "bytes": 307703
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000032.png",
+      "sha256": "566f6190caa183570e4f82090284b8b4178a7f8216cd47db8ae371e24322fef0",
+      "bytes": 307784
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000033.png",
+      "sha256": "8dfe6e94aede4f85dd2e27516fa8f4fe8106eb16592d542bbbbe7fb4da435d4b",
+      "bytes": 307917
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000034.png",
+      "sha256": "a60c360b2efb851d10464c5e547352cdc583f6c97cb3acc8ce2910862858a2bf",
+      "bytes": 307944
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000035.png",
+      "sha256": "c8f99c0d795906233700355302fe827072708468ee7ac1a366e2b6f06b743d1d",
+      "bytes": 307761
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000036.png",
+      "sha256": "aabc806200877cfe3dcaafb0494bc88772d56707367c97026c74f69968a2a7bb",
+      "bytes": 307765
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000037.png",
+      "sha256": "34bf5e3bebbca631cf4d85664acafdd388239a103bb257a9d83e672bad586d04",
+      "bytes": 307178
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000038.png",
+      "sha256": "ab6539eb7a91a0cd4d581d9db91cef1af8981e4bb0d62b4a830cec981fa7d2e8",
+      "bytes": 307883
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000039.png",
+      "sha256": "d7e7019ec8c597185cd48c7c386cfac37593bf8c71f7c92433b5a4a4d09bb563",
+      "bytes": 307541
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000040.png",
+      "sha256": "0b026c7f7f62bcf8b9334656543790f0ed4a6127bc1f1c8008bc1471092b45b8",
+      "bytes": 307311
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000041.png",
+      "sha256": "0e025b267e6d9a18dc6b4d499da2827c499c01bf226705d0fb6dabb4364fac2f",
+      "bytes": 307711
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000042.png",
+      "sha256": "9f892edcb9c78838e3be24594d35b02c58065603cdd9c790b1f5177edc2ccc2c",
+      "bytes": 307282
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000043.png",
+      "sha256": "9b3d1272f4013d060af79365c72035e24e7a4dc0434b4b3425d787ddd66f4d02",
+      "bytes": 307705
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000044.png",
+      "sha256": "c8de8fbcce08c518bcba52445a6af211a538e4643ec2b90da5b68e45c399dad3",
+      "bytes": 307378
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000045.png",
+      "sha256": "6329623bec70241eea858a39eebefe5f2a8a50f29d4d6fb859b09d19e80d637a",
+      "bytes": 307795
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000046.png",
+      "sha256": "605bfa26c59e1c65e594323fa6dc85f9d6f249674298c0875c19d843b01639d5",
+      "bytes": 307596
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000047.png",
+      "sha256": "87797475d0f4b46be53e9d214304e18b7fad08d1aeff0424194f2437bde3ca65",
+      "bytes": 307581
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000048.png",
+      "sha256": "9d77c6539f9689d6a4edc42c38100fee0be1db18bfbaec660cb7f6581eb5d89c",
+      "bytes": 307672
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000049.png",
+      "sha256": "739c834963c43b84d13200064ca3ac6e8a29b103dfcf75e7fac3aa923137429e",
+      "bytes": 307525
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000050.png",
+      "sha256": "928b6a3179b448d54a96373904bf00d30e55fc62289d4f17856a76cad861a3bc",
+      "bytes": 307850
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000051.png",
+      "sha256": "c471566ed56f8f63b99f585d1de2d739893a024173960d2092fe96d647aeab06",
+      "bytes": 307588
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000052.png",
+      "sha256": "da6928298a67359fedd10a02bc98eff6bed3eb98671b28f83c19ba20407d0985",
+      "bytes": 307616
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000053.png",
+      "sha256": "a09bb0dd475d2cab58c3e64bb4219f42996a3aeb0fc689bc131bcba71b7c1ba2",
+      "bytes": 307665
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000054.png",
+      "sha256": "f36e76c50e5c794f028b116000c38e10b0e613e49266af88601f42663378f3f6",
+      "bytes": 307479
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000055.png",
+      "sha256": "1beb0bb11187f32b8362f68c76329e909796ea43aa7a75efbcbedb65a058dd62",
+      "bytes": 307400
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000056.png",
+      "sha256": "965602e0d965364987b4c8647d50f728f3ee7ef9b02099d44e32c5f9918f06c3",
+      "bytes": 307625
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000057.png",
+      "sha256": "6ad62670c264557e081a7cbddba21f178aa9830e567b45603589ab0e6345d3db",
+      "bytes": 307383
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000058.png",
+      "sha256": "5f3ef2789451d0382a426f6dc3f4b46eec4ad65b3f23128631c1664ac2c6afe8",
+      "bytes": 307225
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000059.png",
+      "sha256": "0a6b9d5e1ef48199f7ef14f26364d9be8695a7c1b390934807e09321ff7eab91",
+      "bytes": 306963
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000060.png",
+      "sha256": "60263a24b30bf39812854ea568a8d43ffb4f9613acad5a409686e9644e291f17",
+      "bytes": 307383
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000061.png",
+      "sha256": "080009407a73042418027d4c6734c84f31bd10698610ac0e205c2083373a3176",
+      "bytes": 307114
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000062.png",
+      "sha256": "3d2444981ce8b3ca1c511f618c5cf203290a470736872fa5bc810e2e20f68b70",
+      "bytes": 307398
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000063.png",
+      "sha256": "37419c1335aa97a38c88a38fe05e4b90d78e8c7bcd6735bf951338ddd48cbb29",
+      "bytes": 306968
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000064.png",
+      "sha256": "ba77b2c66b274577dd4e0765542f71dc5c87b8e168084ec550d12216376714f5",
+      "bytes": 307154
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000065.png",
+      "sha256": "94dc6f84301786e1f7ce6e6f2f61e1e851bf7c45a210af42dacb2c03f03e186a",
+      "bytes": 307010
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000066.png",
+      "sha256": "490dfb08737ded62737bbdd412748d5a78702c0d23792c24be0d745118ca3901",
+      "bytes": 306696
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000067.png",
+      "sha256": "13b8f51421d67ab05ff08d8b6b1aecadb994139d89c68688b1ea5648de70de2a",
+      "bytes": 307184
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000068.png",
+      "sha256": "b3dd13d43c6b6752676573c4594aedf485f9fad08081c806e74353da82c6031e",
+      "bytes": 307131
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000069.png",
+      "sha256": "0328c6a653d914bb73ab6eda21af0b719ce628f53c07f66fc689907ce7e9c953",
+      "bytes": 306894
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000070.png",
+      "sha256": "7a9a656f28e451082bba63df20b4d0e69a7aa02f5194b10a679bfc297e1cf9ee",
+      "bytes": 306565
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000071.png",
+      "sha256": "18285c0d8e1510c92026a80718e9b48cd3bc3c67c35620fa42a2012decf9ffaa",
+      "bytes": 307080
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000072.png",
+      "sha256": "d289e35f5f5cd202219e60b4e1dc854df95c5fa72621656e2538ee48b08bf5c9",
+      "bytes": 307330
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000073.png",
+      "sha256": "a3377cb2d9515b15993a0b02518c59112dc82f36419ae4a751d4ef90d9ade4dc",
+      "bytes": 307442
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000074.png",
+      "sha256": "c5195aa6da36881da21de00f258f2a559c4f086e9c4fd812a0a30bb6ab39b46f",
+      "bytes": 307322
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000075.png",
+      "sha256": "c70dfd98dc2eba7fbc3ed31969c8121c7e9892531de8023742fd0ce7b1426912",
+      "bytes": 307150
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000076.png",
+      "sha256": "ade7a01b6fd71889c9b7a47b054952c15e1b8c6f11632d6416bebcf74f4fecf0",
+      "bytes": 307075
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000077.png",
+      "sha256": "89f17691dd43576de40f6f1f3bc5ce34a1fa21b73e2d34e279a2118bf25a0f04",
+      "bytes": 307000
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000078.png",
+      "sha256": "14a584a9104584ae3f1f03c245c3601dcffda3ccc49a45308dc93bdf57482c71",
+      "bytes": 306964
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000079.png",
+      "sha256": "e3fd11571083b814c09641c793ca68d233c7302af636c3f56f90b3eaeec72f13",
+      "bytes": 307225
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000080.png",
+      "sha256": "cc1a657a3a62183c715c9f8660067b5cebdd722af0783671ccfab41b35050c83",
+      "bytes": 307146
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000081.png",
+      "sha256": "9ea9b7fa0f6ac5418f5c876e3f6daf054cfebcc0e7ec149d751cc47efbf4c6e0",
+      "bytes": 307180
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000082.png",
+      "sha256": "f1db529177da9deddbfd19f499bd2d196da5fa743dcca215dd467f0123554815",
+      "bytes": 307462
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000083.png",
+      "sha256": "36255e1d466395bbbaae38f9fc9e7bb5f048a60b9d56045165bff0a902708b6f",
+      "bytes": 307523
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000084.png",
+      "sha256": "ed240ca0cd4a7a84972ca2837c3b095f720407b3752b78d7d6d83b0480885403",
+      "bytes": 306988
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000085.png",
+      "sha256": "7e5432d51712cb01ac024087d070531cf11b312e97c271cca56a54e931d41d72",
+      "bytes": 306761
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000086.png",
+      "sha256": "fbbf2020a65f10a3db28f3bbb0824f2deebf5d49d8e2d2d53af47a2996f7b666",
+      "bytes": 306964
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000087.png",
+      "sha256": "d2230b3f1101f021b75a180b0b570820df1aea5c1def94b836c12f315b429ba3",
+      "bytes": 306952
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000088.png",
+      "sha256": "b6ceca25eb1bb934ade1baf3381b25df6820986022df925ed7335648dd99ca3d",
+      "bytes": 307404
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000089.png",
+      "sha256": "aaaeade54d8f9a3d03882f46f09d3d43cc7b9b07790442d6b58b90518dfa1ba2",
+      "bytes": 307244
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000090.png",
+      "sha256": "586e6efd6548e1f613f5f2ae051ad88b36ec02d2cfd601357a2eddf3df3c774d",
+      "bytes": 307069
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000091.png",
+      "sha256": "cd6f881e62960cb3bf4a082869f847bffeaba77edf636e4f7f103d4ab42eacb3",
+      "bytes": 307556
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000092.png",
+      "sha256": "3c52bb04daa92c17d971c6a20557054cfccc82bf0f425fad790a06a0667d2f8b",
+      "bytes": 307041
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000093.png",
+      "sha256": "db085ee524c876bf5378b68e78ca31e6eb26c445eabc09fd6986d0a8a0e663a5",
+      "bytes": 307221
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000094.png",
+      "sha256": "ad8dd97cc1c680b7d5b0f985445f834264fe5e08340a62601cbe88c82557f40f",
+      "bytes": 306985
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000095.png",
+      "sha256": "f593fda9f1c46c204b01cb293ccbf20f74dba1eb53955ded14233e5054c2ab16",
+      "bytes": 307151
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000096.png",
+      "sha256": "cc4e9237b2543286980f75d897bcb2225bfc0d047a1671c436129c7ea9504419",
+      "bytes": 306898
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000097.png",
+      "sha256": "97a28a86f66f8d2eabc5ac2f6d6295781bf56846fd104c6a8d9078478f4746ed",
+      "bytes": 307316
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000098.png",
+      "sha256": "462ac1bc9f54bece990205bfadb52febfe7e67f30f2307f67fc62b11b335020c",
+      "bytes": 307639
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000099.png",
+      "sha256": "ad8261e9d4ead4439175a94d3812a622937a281d2c3fdfc10727b34b5cababd5",
+      "bytes": 307254
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000100.png",
+      "sha256": "ac0d837286b602b2d9143e8daa4441e3a17a02d38acb591e7fc79f9f6768c062",
+      "bytes": 307023
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000101.png",
+      "sha256": "1a7b3968945e3baacc8761bbfac5b3e6c0f9c727b3520da7455e18228a7a04a3",
+      "bytes": 307189
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000102.png",
+      "sha256": "99abee1c87e413e18183bfc5bf3846b908bb41a892811bb58bfd3885105a42f8",
+      "bytes": 306880
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000103.png",
+      "sha256": "f081ea8f846e77c74e714d8d3e138208802be4e2cca5ef688fe28381d1d2a4d6",
+      "bytes": 307052
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000104.png",
+      "sha256": "0ce441e6f8f34b36da87f1f7c8ac7bbcdb8fc22d077f96dd82b8cb5c8ed038f8",
+      "bytes": 307093
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000105.png",
+      "sha256": "c863ad80b380ea893cc25da28028615266d7e7c895d01f32e9f5d7e62f0cc955",
+      "bytes": 306857
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000106.png",
+      "sha256": "6b31f61e6379917b728e9ffed4bf62ea7dd6b8f23a81783a19e2de50673686bd",
+      "bytes": 306961
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000107.png",
+      "sha256": "f7491aaee0acd9d21d74321674561e7874c6f594b7cbb0aede196d81f198f249",
+      "bytes": 307184
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000108.png",
+      "sha256": "05a0caee5b73695e4cf8eec0a7b27a4adb974821dd9bae8c2549fd8ca1c46897",
+      "bytes": 307139
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000109.png",
+      "sha256": "96cf9141286f8f9e7d1260fdbea6ee36b51a74313b85ff0c2a5b8b0c44842770",
+      "bytes": 307005
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000110.png",
+      "sha256": "52f3416dac5aeb9bdfb051bd79694a4aa0ce4e2d0236005e6e44780f36f39dff",
+      "bytes": 307655
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000111.png",
+      "sha256": "217b69f9fb7610466d1b69aaf8013370fcfe7bce7aeee5bf251f41ef62ceac84",
+      "bytes": 307083
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000112.png",
+      "sha256": "e0555e6cac6b7267b1bd45cf79a9d67602e2a84028ed68d9034533fbbf6a2454",
+      "bytes": 306640
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000113.png",
+      "sha256": "b238ff54b5708cc580b740233b162ba7c9821d638c03daa73bb12de1bb373416",
+      "bytes": 306715
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000114.png",
+      "sha256": "f4f179c8c0542c04517c11512f66d596939f39b1bbc34999ce2a3444d8acdcff",
+      "bytes": 306521
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000115.png",
+      "sha256": "307237505b581e8f7442317da5f89d465987e09475d29918eb8bf654729a2f97",
+      "bytes": 306598
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000116.png",
+      "sha256": "2484642478df3dbfab23f8943ae2e4f52bbb1a9936b7cb20f94df30900b4f36b",
+      "bytes": 306147
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000117.png",
+      "sha256": "52a3b3f66d0f8dfd84b6a8f5f77bced24a232bf6732f247c9252c7bbb283e689",
+      "bytes": 306864
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000118.png",
+      "sha256": "189a43abc428ccdba898b23723bcf67d2be8501055da7d074a1bfdf34ddc625f",
+      "bytes": 307090
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000119.png",
+      "sha256": "455bf790a43179101314ae1a26a24b46ac3c14cec906ea23b5a8d64dee053f32",
+      "bytes": 306963
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000120.png",
+      "sha256": "b0f93eea39d79a764d236e97e9edccf4b1d1fbafc94f2bce354b50a65b49863d",
+      "bytes": 307181
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000121.png",
+      "sha256": "618574b30ceab59d2e032c786742a07b3bb08bcc0ae1e2f4b3867717ff6f56cc",
+      "bytes": 306794
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000122.png",
+      "sha256": "f575d4dbf5c5d0d484bc8b3e03e758cf60066c94b888c74c805e293a944a1a2c",
+      "bytes": 306837
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000123.png",
+      "sha256": "fca782e763cf8afd71b24063930ac5047354af775d23f020152c25d32ac01f85",
+      "bytes": 307099
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000124.png",
+      "sha256": "6082867453002461a9f488b4018bf057f86fad07c8becf4d5d3b81d57b4fd66d",
+      "bytes": 306858
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000125.png",
+      "sha256": "3b515d887783fd7930a36a5298c172c86b828efe2fae27b0ce0c3c35c66b22ea",
+      "bytes": 306825
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000126.png",
+      "sha256": "dc5938c9913f211e121e75f269508c96252c9a5a2f297201bcead20815923986",
+      "bytes": 306872
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000127.png",
+      "sha256": "7402d16f4437a4083520ce8e965b91765095913e2a0f007087821303c66b6a5f",
+      "bytes": 306281
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000128.png",
+      "sha256": "1299b95d94aa23f802a36db625a0558ab1a7a23460b2faeac23adf123c4c933c",
+      "bytes": 306662
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000129.png",
+      "sha256": "cfb4477614cbe0bd360f126d969f0e2fb36d843ee2128fa8ea1ffb32cea64d7f",
+      "bytes": 306782
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000130.png",
+      "sha256": "b0f3295c3725ec137ec39b613959ac2e9376dcfefde3875bfb4bf7d3aeeee037",
+      "bytes": 306897
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000131.png",
+      "sha256": "169b5da78126a3f9ea4a285dc44b5fe7009d34ade2755c3188beb7fb666c8ab5",
+      "bytes": 307022
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000132.png",
+      "sha256": "b3bfa5a00449a3283540651bcf8b5f3e67e8959b905642400d04185ae4d88fb5",
+      "bytes": 306932
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000133.png",
+      "sha256": "70d1774be3570b87dc8a7438ae2ee72f470c22a4ba7782ce2c6039b761f7a3ac",
+      "bytes": 306791
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000134.png",
+      "sha256": "8cae8226e12a37c986f69fd150ac9adac9bd182ee2e525d8d672eb656442124f",
+      "bytes": 306827
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000135.png",
+      "sha256": "29a6b0545efc4e81ccdb36b06c7fdf499a1d767a3cdf6c8ef718a6470d521022",
+      "bytes": 307307
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000136.png",
+      "sha256": "849ade1f58306f2d25757adeba6d39a6feae78ed834fc422b553287da849b78d",
+      "bytes": 307020
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000137.png",
+      "sha256": "1fe60678b4cee41a29af05bcfc26e431d3402125d926b5df6d643271300f147c",
+      "bytes": 307133
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000138.png",
+      "sha256": "2d5004c36f1152587fced7025a7aa3a6b6823a8ef7b2a01b700ebca27a67dc71",
+      "bytes": 307045
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000139.png",
+      "sha256": "04487255e7c4377501d7eb82bd119290203dd429273fc529ccb99172916a5d6a",
+      "bytes": 306631
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000140.png",
+      "sha256": "4c0a7a310f514406ddbd40d8ec4ca2608fc0f93183f585815edd0e069bca7893",
+      "bytes": 306606
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000141.png",
+      "sha256": "3b7e8981c472489c2e1c28aa6b8867e484941bdfdcf8515a8856f727b86bcbfb",
+      "bytes": 306622
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000142.png",
+      "sha256": "f6ee0c4f256381dff33d0804ac4d38645c385a0d41ed7bc113ff54b6403aff2b",
+      "bytes": 306525
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000143.png",
+      "sha256": "a708513e2672f3b68d502cabd83591154e2a8562d61af926c0418359dd5c2690",
+      "bytes": 306693
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000144.png",
+      "sha256": "d66808aadff80685ae82bb8d7a2874a2dc3e4a73076fc58d60b9439bce93b13a",
+      "bytes": 306690
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000145.png",
+      "sha256": "460db287d2820bf79f36635a8ca30aa0659c5f8f9aec1564bd634aaab6bd54f6",
+      "bytes": 306752
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000146.png",
+      "sha256": "5fa5e6f4cfbc67ac4dba0ceaad8fa35bd5d5282d4e10c129839efd3c5f5a47e0",
+      "bytes": 306901
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000147.png",
+      "sha256": "efae3c987e4b35dab15bc10e3101351bf118570d8460c56fd84be95233f9bc99",
+      "bytes": 306400
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000148.png",
+      "sha256": "928c0cf7065d003165f85588bf0e5a1c618a38725ea57409acd6d087c4d65e66",
+      "bytes": 306470
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000149.png",
+      "sha256": "dd407807d6610bc126861c64b7acd6de8a706eda0c8d8c73f604289ac9a96bfd",
+      "bytes": 305857
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000150.png",
+      "sha256": "ad186641ebf0f34d758ebbcf46e736c2b133c75b69b8083a135c9d9fe5857d66",
+      "bytes": 306883
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000151.png",
+      "sha256": "e55093dc078eeff98ae69aa7a1ee3395a772762ded15e7dd586514d9de7dd47c",
+      "bytes": 306784
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000152.png",
+      "sha256": "f234662834d35e66748fc65c99772c1bdcf6e2b10c2a045b511c827cc5ce0d0f",
+      "bytes": 306541
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000153.png",
+      "sha256": "d85e6a1031c2106bcd303cf6282a4030f13e89f4fb8f7c47ab94d68d9a8533d4",
+      "bytes": 306520
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000154.png",
+      "sha256": "02a34e61f66a21093714b07d6467cf3268a9419a3cafc08b7d8159c4cae6aa17",
+      "bytes": 306358
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000155.png",
+      "sha256": "218e4be49e5a80c42097b3097bb59d831e3b43d07e5e3a1a232d8f85e7a21f0b",
+      "bytes": 306165
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000156.png",
+      "sha256": "6328ecf89b8f60131b2a77ac4285fa5dc00065b52e585e286dc2c6e46e0feffb",
+      "bytes": 305969
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000157.png",
+      "sha256": "eb2ff6f4fa765a9c9370a1a97bdb57a42ae7a9bf03f31420d95f65d9366a1f4a",
+      "bytes": 306199
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000158.png",
+      "sha256": "e2f9debedefa62f119989e868e58a4701305b014bb073efe7fef28ee9dfe5457",
+      "bytes": 306561
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000159.png",
+      "sha256": "b10dee016dc17df4d3827b83e42a9243abe6a4165d8aa79da4867856b058505d",
+      "bytes": 306417
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000160.png",
+      "sha256": "cdc696d3e75e05609cb4c35f6e7c44db2929cf6fda7fb2a53253f8bf612b0cca",
+      "bytes": 306609
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000161.png",
+      "sha256": "0b138936ea3b7415f3ad1867a90c0d35dfae4bee6acca55a5760d3913f5162e5",
+      "bytes": 306587
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000162.png",
+      "sha256": "850076e897dd6c906d994a787920d62974b3cbabaf9ad5a3d2c14c20977c05c6",
+      "bytes": 306350
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000163.png",
+      "sha256": "94f8be407ce7432132f0fd1f876c5772c3ae23f0da9cf089aadb525a89bdef37",
+      "bytes": 305967
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000164.png",
+      "sha256": "9ce316ba8a9be16ec14744c98ad20e4a9ac0837f3add658048af7d5abbd51880",
+      "bytes": 305873
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000165.png",
+      "sha256": "48f9d9a4435b1fe363300511a386dc534cf422c8ae520022f9b0be2141a1c38a",
+      "bytes": 306353
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000166.png",
+      "sha256": "b80bf536af4e3a25b2aea886c1d83204dde6c70e6b14cb86f443ac0e5bbbf1d7",
+      "bytes": 305832
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000167.png",
+      "sha256": "6a8895e9a1a1a4f057f5b653c957c55342cf9608cb3e30af3fecd267322374ba",
+      "bytes": 305693
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000168.png",
+      "sha256": "95725e3c1cc3f09328b9cd4ed602810eae68254b6922cfa43e3c9de6ee2e4a7d",
+      "bytes": 305608
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000169.png",
+      "sha256": "d23e867b1752c8182c04fa0f16139cf0cc5e3634cb9049267f4e686625804a41",
+      "bytes": 306393
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000170.png",
+      "sha256": "b9e1e12eefcdfca1625e3579b6308a509037984c2d938870c8c7996a70cf4636",
+      "bytes": 306474
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000171.png",
+      "sha256": "e8ffab62388a75927d96f3141b8c6603ef3f98ff2d97b8c5beed2b328f180f1e",
+      "bytes": 306384
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000172.png",
+      "sha256": "482465144229748750125247a392e2afcd9e8ab7ba39758e5189be3f364cb65b",
+      "bytes": 306468
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000173.png",
+      "sha256": "406403915586b1cf8a868ed2af5a28eedff5a976963c23dea4c1daeb970d3708",
+      "bytes": 306031
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000174.png",
+      "sha256": "b650ce1e805c7b849661d4415c128442bb23dc4c77d797d4f6530fde3906f176",
+      "bytes": 306370
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000175.png",
+      "sha256": "876d17b7b0bfd0f43efda88f02b67d9fd81c2d256a6ecd53b0ea1fcc545473bd",
+      "bytes": 306463
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000176.png",
+      "sha256": "b027e61f749107697f6d7ac08e02a2ca9ed504183f4353cd8e4ae82f87b70819",
+      "bytes": 306002
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000177.png",
+      "sha256": "cc9af20260c8b3bead0e4ab82771cf1614f9001b2a553dead5bf39b3e46d1a38",
+      "bytes": 306088
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000178.png",
+      "sha256": "aa2e2150280730b80c911a1cb3335a3c915d3542f0171769af5b768874edf8e6",
+      "bytes": 306541
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000179.png",
+      "sha256": "670bd20c9bc61bb28bc0aa1c77ef0749c9d1cc12cb67e5ac2bcea945626e11b0",
+      "bytes": 306266
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000180.png",
+      "sha256": "4a8999a7d265a7661db019e83a06eeb29a52d4ef65fc4c0b60a203545fc8102e",
+      "bytes": 306366
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000181.png",
+      "sha256": "0dfaec10337dc417cceb459e762a0954c05d17df932f7969335076b5b99c4507",
+      "bytes": 306043
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000182.png",
+      "sha256": "3ac29b6220785af9081d5eb81dd44c30a2d0cd2b5fbf8fc3775f308ff236eed1",
+      "bytes": 306165
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000183.png",
+      "sha256": "460e7b278236f959e3b4374ac4e0642aaaece2f5b9fc95d650891c7a1548a470",
+      "bytes": 306352
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000184.png",
+      "sha256": "1763e59bea87f95dc73490aba3e9ec04c4ed7ef5f2e7421b7e63e5649b047a3e",
+      "bytes": 305934
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000185.png",
+      "sha256": "b4e2f785e0b336f63a3455f146c5d36ad8e8eef2705e9c68424ce12a1d1a9507",
+      "bytes": 305835
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000186.png",
+      "sha256": "30e04a5f9b8225fa2926bf25afaa4759683e76f54f8c29bbdff5fac99e3ff8da",
+      "bytes": 305651
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000187.png",
+      "sha256": "c727163b56042da2023b2dfbe8b08e77f7da0db117cccb86d1632644d1ef4c41",
+      "bytes": 305584
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000188.png",
+      "sha256": "0bbc3594845d02e95dc16340532e0d79d335813a0c382d5955c11edda6b70c7c",
+      "bytes": 306087
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000189.png",
+      "sha256": "e7157f34aabfdb302fa56b4877981ab95a3e595655282060f08bb42dc4171aba",
+      "bytes": 305743
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000190.png",
+      "sha256": "1ac7051949b68168c6f86f1e0e0127c1f000e673bbb06e644427080d2534e365",
+      "bytes": 305953
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000191.png",
+      "sha256": "283b6476ce3c1d94a242ad1c095029b6a156f5146cf7df287e72fc1bb95f27b1",
+      "bytes": 305522
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000192.png",
+      "sha256": "1628134a6846e2c346d66ddedc09a9d3c8a84b1264221d4152754fa412d0c16c",
+      "bytes": 305374
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000193.png",
+      "sha256": "c28c1b13297d86db647e871ab075285948d0cbace4e3b12e930637947e61cbde",
+      "bytes": 305161
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000194.png",
+      "sha256": "f37ed4c301a32bb1e71e7b060dbf2ad5fb578dfc4b2ce173b42a75a308f3670f",
+      "bytes": 305084
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000195.png",
+      "sha256": "3e77d780b48b8845df3bfd3f4af96e42e94b833acb9fc666a586e2840bfad253",
+      "bytes": 305313
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000196.png",
+      "sha256": "a82f54ae996c5cc7aac24755d89390b032acd0f399f8be27f5b3aaca50319577",
+      "bytes": 305454
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000197.png",
+      "sha256": "8b901b9abf6ebc0213cce05335057e8638ce69acdaa85cc5dea14d02c000e6d7",
+      "bytes": 305753
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000198.png",
+      "sha256": "914d2c89b4c5bd6101c76e6b8f894f4f55b650e3954f86ad0e312ac30898ecc7",
+      "bytes": 305615
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000199.png",
+      "sha256": "49683a96f5066d3a8f3961ee9640b4352d9f753e2d7a956337209f769bd1cd3d",
+      "bytes": 305934
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000200.png",
+      "sha256": "9e3dacbed475c9152f4aeab9be4abe14434912048f9eb33353488f48bb531f75",
+      "bytes": 305847
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000201.png",
+      "sha256": "896213a6973f7bce2bc1f18b3e77868e16123fc854a1852aa50ab7ae143a0c30",
+      "bytes": 305950
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000202.png",
+      "sha256": "bc7e094c254e6e63d4a2d32732262a36885f1a098982142604fdf5ac5751a822",
+      "bytes": 305332
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000203.png",
+      "sha256": "fa7d1629e1d4c8c11f39309b39900ce97e3dacf22af2c55e4d34baa4f61b0336",
+      "bytes": 305555
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000204.png",
+      "sha256": "0d89bbdc4a8a44d1db163e9a9cd2a14a832127e96654d3dd3ce71a42aa981bba",
+      "bytes": 305011
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000205.png",
+      "sha256": "b1beb4dfb92bf91a151ad182275901b627c64410725ef575d3c5ba7509106f6f",
+      "bytes": 305705
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000206.png",
+      "sha256": "050ec1d9ed38a7a1bd8eb9e344fb25ab10ac1d9398e3f552f3304718e1da1a23",
+      "bytes": 305383
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000207.png",
+      "sha256": "45888b9dfbee54bcc9bf4199f2a7bf6d5faf49e91110ca2635399a5345756b40",
+      "bytes": 305449
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000208.png",
+      "sha256": "a634247214a20415f7ec71959c1e354537f3261dde93e29c967f8e6d53ce4f48",
+      "bytes": 305238
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000209.png",
+      "sha256": "97dca27aaf744b705e37f096d7f2027d3c1589bf4b2cdc58d80d1d5c0bddd1f4",
+      "bytes": 305476
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000210.png",
+      "sha256": "4083641ea4bf1a7b9345670d36267a3a59b99242995d2891fc72600d77fcaae3",
+      "bytes": 305148
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000211.png",
+      "sha256": "e86f615781786350b118dcea4fe224ff1241e8a25ebd630bcadc9aa496704935",
+      "bytes": 305681
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000212.png",
+      "sha256": "77316f83bbace4f884c2632f39b5600d6c096823094ef4aa5434df7eb13a03d3",
+      "bytes": 305473
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000213.png",
+      "sha256": "cdf80ec0953722cadbdd16a2b4162ed00729c262f69b74178e0ada626ab4bba0",
+      "bytes": 305672
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000214.png",
+      "sha256": "5a258f2cc9ddf3e285a6857a0bcd251771ee8b8a65fcf2bc4673be3a3da00dc9",
+      "bytes": 304919
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000215.png",
+      "sha256": "c37be442e9b5840c4410d89675d3ca1d032b0e585f5684800a8a3923fd49aa92",
+      "bytes": 305616
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000216.png",
+      "sha256": "6bdceea16ff1039994242d42c9187f43e34962eb73e5ad37250851da2e560b21",
+      "bytes": 305547
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000217.png",
+      "sha256": "9f15586747da6b9b82b203353edc03044cc9caaba0d09e76197cd7a8d90f5d70",
+      "bytes": 305644
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000218.png",
+      "sha256": "dea42aba0a51da72fefb91a811c752d7db88e9b0ea87675ce448dbb9d3ce1216",
+      "bytes": 305393
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000219.png",
+      "sha256": "6c8f288619b4750dea9c107a5c9738d39b939c374910258327cf2d9c045a30b1",
+      "bytes": 305305
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000220.png",
+      "sha256": "e5f9c871d20b3800db619b32eddb76e4414fb30b7730eada22f26ad49e69894d",
+      "bytes": 305096
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000221.png",
+      "sha256": "1b2ec0ade287e41af8b30794129d1fdceba4406c38cb4798618c4982c3da35a5",
+      "bytes": 304935
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000222.png",
+      "sha256": "2e9e55d2db9ccaf6313b7a7921d7b1c3ad2dbd0788cc363e24eeccec55c8ed20",
+      "bytes": 305026
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000223.png",
+      "sha256": "971a8545aab98081cdd397844d6c1caa272034cac35be1b89a62235e54ec151b",
+      "bytes": 305711
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000224.png",
+      "sha256": "65d75893a764b199e814bdb4f1545072be35db2494b92335bbb1b2cd9bd42431",
+      "bytes": 305491
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000225.png",
+      "sha256": "5df5e49b8dfd307fb6c6c18df7a2ce4f7d8e927311f06f7ee6ad5e512e869f2f",
+      "bytes": 305103
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000226.png",
+      "sha256": "b502dbe2dfe1928138e4c0850b35843097417adf7d44a28fe60cfda1bb1618f2",
+      "bytes": 305410
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000227.png",
+      "sha256": "2a6ea500f7d398f6414bb43ba0bb60bb8685b259e04668f8c36444f1e41f1490",
+      "bytes": 305333
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000228.png",
+      "sha256": "922f976ce5128cec344c68ccb83a331cda4f69e5a0a177fe99a8c92902f9a906",
+      "bytes": 305212
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000229.png",
+      "sha256": "05cef8000a51bb233924190be2bd4899ec14819593eaca8a04cf0f731bfb0650",
+      "bytes": 305437
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000230.png",
+      "sha256": "939b20d46fc21f9f1b7b0912595c0ce37681126d3cfc41d00eda2456edc2af23",
+      "bytes": 305278
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000231.png",
+      "sha256": "8485cce57a789fcf34003ddafcda75b50ac15b4a65f34591c7f60bfd33a6c591",
+      "bytes": 305407
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000232.png",
+      "sha256": "82d7131ac153d79b66343f14a6137d8033d09d1d103c0802894112815265fc8e",
+      "bytes": 305203
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000233.png",
+      "sha256": "4e6bc9c755070f1a30f0830cac5d31fa538dc8f2760e7c2542f49e6077d1651e",
+      "bytes": 305230
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000234.png",
+      "sha256": "bb09d1334015316276fad80820be77b69c055ed86a1b2752cb8b5309965f402e",
+      "bytes": 305144
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000235.png",
+      "sha256": "0e3170139084308f5f60358c6b23c6ec20e5502ecfaec409dde5d1e1699e8dd8",
+      "bytes": 305086
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000236.png",
+      "sha256": "ea42f9536627306be5d62ab7a29612712affad0831997a5322e6393e21aab92e",
+      "bytes": 305024
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000237.png",
+      "sha256": "bcd5a6baa8448372b5d2bf37007dacb0ca6422908b2451a0e5d1fd8b1d92c206",
+      "bytes": 304969
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000238.png",
+      "sha256": "926e5ab909b947b2ee7e6e1ed7d5cdba2eed6483a121d30bb3feb46ee0dc8112",
+      "bytes": 304800
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000239.png",
+      "sha256": "ed9be12ce3cd646813fc96570ab157c4b9c5a1bbc2216483ab6efe088ae19288",
+      "bytes": 304913
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\frames\\frame_000240.png",
+      "sha256": "8b0e88c60cb3ff9f5cceb1254631b7f4dfa2eaa36f5a068079da5530b71601bb",
+      "bytes": 305018
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\scene.blend",
+      "sha256": "b5758c7df4214fea9c7c397c3fe4e95f5ba2042357e3ebdd39ea815b97fddac1",
+      "bytes": 966372
+    },
+    {
+      "path": "D:\\filmmaking-system\\renders\\m4\\full-shots\\shot.father-medium.blender\\worker-result.json",
+      "sha256": "6fdbfdd9a1119a3bd392eb92da363ef87c60f88c7444efab885a9be20d613fdc",
+      "bytes": 629
+    }
+  ],
+  "logs": [
+    "00:03.032  reports          | WARNING Path 'C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\datafiles\\assets\\brushes\\essentials_brushes-gp_draw.blend' cannot be made relative for Material 'Dots Stroke'",
+    "Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)",
+    "00:03.032  reports          | WARNING Path 'C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\datafiles\\assets\\brushes\\essentials_brushes-gp_draw.blend' cannot be made relative for Material 'Material'",
+    "00:03.047  image.write      | ERROR OpenImageIO write failed: Could not open file \"\\.thumbnails\\large\\blender_9340_605dc87026695003b793add4a323b8bb.png.png\"",
+    "00:57.235  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000001.png'",
+    "00:59.860  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000002.png'",
+    "01:02.172  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000003.png'",
+    "01:04.625  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000004.png'",
+    "01:07.110  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000005.png'",
+    "01:09.766  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000006.png'",
+    "01:12.516  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000007.png'",
+    "01:14.985  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000008.png'",
+    "01:17.360  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000009.png'",
+    "01:19.829  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000010.png'",
+    "01:22.188  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000011.png'",
+    "01:24.547  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000012.png'",
+    "01:26.969  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000013.png'",
+    "01:29.282  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000014.png'",
+    "01:31.657  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000015.png'",
+    "01:34.125  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000016.png'",
+    "01:36.485  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000017.png'",
+    "01:38.891  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000018.png'",
+    "01:41.235  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000019.png'",
+    "01:43.579  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000020.png'",
+    "01:45.954  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000021.png'",
+    "01:48.297  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000022.png'",
+    "01:50.672  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000023.png'",
+    "01:53.000  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000024.png'",
+    "01:55.375  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000025.png'",
+    "01:57.719  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000026.png'",
+    "02:00.172  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000027.png'",
+    "02:02.563  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000028.png'",
+    "02:04.938  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000029.png'",
+    "02:07.360  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000030.png'",
+    "02:09.704  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000031.png'",
+    "02:12.172  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000032.png'",
+    "02:14.547  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000033.png'",
+    "02:16.954  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000034.png'",
+    "02:19.391  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000035.png'",
+    "02:21.766  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000036.png'",
+    "02:24.172  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000037.png'",
+    "02:26.594  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000038.png'",
+    "02:28.985  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000039.png'",
+    "02:31.719  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000040.png'",
+    "02:34.704  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000041.png'",
+    "02:37.204  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000042.png'",
+    "02:39.610  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000043.png'",
+    "02:41.969  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000044.png'",
+    "02:44.391  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000045.png'",
+    "02:46.844  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000046.png'",
+    "02:49.282  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000047.png'",
+    "02:51.688  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000048.png'",
+    "02:54.047  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000049.png'",
+    "02:56.422  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000050.png'",
+    "02:58.704  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000051.png'",
+    "03:01.313  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000052.png'",
+    "03:04.079  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000053.png'",
+    "03:06.579  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000054.png'",
+    "03:09.063  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000055.png'",
+    "03:11.438  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000056.png'",
+    "03:13.735  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000057.png'",
+    "03:15.922  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000058.png'",
+    "03:18.141  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000059.png'",
+    "03:20.563  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000060.png'",
+    "03:22.985  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000061.png'",
+    "03:25.360  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000062.png'",
+    "03:27.704  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000063.png'",
+    "03:30.032  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000064.png'",
+    "03:32.375  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000065.png'",
+    "03:34.782  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000066.png'",
+    "03:37.344  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000067.png'",
+    "03:39.860  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000068.png'",
+    "03:42.516  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000069.png'",
+    "03:44.938  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000070.png'",
+    "03:47.375  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000071.png'",
+    "03:49.672  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000072.png'",
+    "03:51.938  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000073.png'",
+    "03:54.188  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000074.png'",
+    "03:56.641  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000075.png'",
+    "03:59.579  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000076.png'",
+    "04:01.985  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000077.png'",
+    "04:04.329  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000078.png'",
+    "04:07.204  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000079.png'",
+    "04:09.688  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000080.png'",
+    "04:12.079  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000081.png'",
+    "04:14.344  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000082.png'",
+    "04:16.610  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000083.png'",
+    "04:18.891  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000084.png'",
+    "04:21.157  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000085.png'",
+    "04:23.532  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000086.png'",
+    "04:25.813  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000087.png'",
+    "04:28.141  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000088.png'",
+    "04:30.407  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000089.png'",
+    "04:32.750  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000090.png'",
+    "04:35.079  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000091.png'",
+    "04:37.282  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000092.png'",
+    "04:39.610  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000093.png'",
+    "04:41.875  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000094.png'",
+    "04:44.297  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000095.png'",
+    "04:46.579  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000096.png'",
+    "04:48.860  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000097.png'",
+    "04:51.141  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000098.png'",
+    "04:53.360  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000099.png'",
+    "04:55.657  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000100.png'",
+    "04:57.891  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000101.png'",
+    "05:00.219  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000102.png'",
+    "05:02.454  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000103.png'",
+    "05:04.704  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000104.png'",
+    "05:07.032  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000105.png'",
+    "05:09.313  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000106.png'",
+    "05:11.750  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000107.png'",
+    "05:14.375  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000108.png'",
+    "05:16.922  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000109.png'",
+    "05:19.235  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000110.png'",
+    "05:21.485  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000111.png'",
+    "05:23.782  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000112.png'",
+    "05:26.094  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000113.png'",
+    "05:28.454  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000114.png'",
+    "05:31.485  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000115.png'",
+    "05:34.110  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000116.png'",
+    "05:36.782  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000117.png'",
+    "05:39.438  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000118.png'",
+    "05:41.735  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000119.png'",
+    "05:44.063  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000120.png'",
+    "05:46.360  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000121.png'",
+    "05:48.672  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000122.png'",
+    "05:50.922  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000123.png'",
+    "05:53.204  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000124.png'",
+    "05:55.485  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000125.png'",
+    "05:57.672  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000126.png'",
+    "05:59.985  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000127.png'",
+    "06:02.344  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000128.png'",
+    "06:04.829  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000129.png'",
+    "06:07.250  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000130.png'",
+    "06:09.657  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000131.png'",
+    "06:12.204  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000132.png'",
+    "06:14.797  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000133.png'",
+    "06:19.032  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000134.png'",
+    "06:22.500  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000135.png'",
+    "06:25.329  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000136.png'",
+    "06:27.672  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000137.png'",
+    "06:29.829  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000138.png'",
+    "06:31.938  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000139.png'",
+    "06:34.547  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000140.png'",
+    "06:36.860  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000141.png'",
+    "06:39.219  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000142.png'",
+    "06:41.485  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000143.png'",
+    "06:43.782  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000144.png'",
+    "06:46.032  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000145.png'",
+    "06:48.329  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000146.png'",
+    "06:50.547  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000147.png'",
+    "06:52.782  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000148.png'",
+    "06:55.032  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000149.png'",
+    "06:57.266  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000150.png'",
+    "06:59.579  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000151.png'",
+    "07:01.782  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000152.png'",
+    "07:04.047  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000153.png'",
+    "07:06.250  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000154.png'",
+    "07:08.563  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000155.png'",
+    "07:10.844  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000156.png'",
+    "07:13.313  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000157.png'",
+    "07:15.813  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000158.png'",
+    "07:18.032  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000159.png'",
+    "07:20.344  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000160.png'",
+    "07:22.594  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000161.png'",
+    "07:24.844  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000162.png'",
+    "07:27.079  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000163.png'",
+    "07:29.297  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000164.png'",
+    "07:31.391  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000165.png'",
+    "07:33.329  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000166.png'",
+    "07:35.313  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000167.png'",
+    "07:37.219  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000168.png'",
+    "07:39.360  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000169.png'",
+    "07:41.422  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000170.png'",
+    "07:43.547  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000171.png'",
+    "07:45.641  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000172.png'",
+    "07:47.829  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000173.png'",
+    "07:49.922  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000174.png'",
+    "07:52.063  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000175.png'",
+    "07:54.219  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000176.png'",
+    "07:56.625  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000177.png'",
+    "07:58.969  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000178.png'",
+    "08:01.282  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000179.png'",
+    "08:03.579  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000180.png'",
+    "08:05.891  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000181.png'",
+    "08:08.250  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000182.png'",
+    "08:10.516  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000183.png'",
+    "08:12.875  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000184.png'",
+    "08:15.219  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000185.png'",
+    "08:17.563  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000186.png'",
+    "08:19.860  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000187.png'",
+    "08:22.235  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000188.png'",
+    "08:24.563  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000189.png'",
+    "08:26.844  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000190.png'",
+    "08:29.172  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000191.png'",
+    "08:31.485  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000192.png'",
+    "08:33.594  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000193.png'",
+    "08:35.688  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000194.png'",
+    "08:37.797  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000195.png'",
+    "08:40.125  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000196.png'",
+    "08:42.313  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000197.png'",
+    "08:44.297  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000198.png'",
+    "08:46.250  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000199.png'",
+    "08:48.250  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000200.png'",
+    "08:50.204  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000201.png'",
+    "08:52.250  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000202.png'",
+    "08:54.250  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000203.png'",
+    "08:56.219  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000204.png'",
+    "08:58.172  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000205.png'",
+    "09:00.219  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000206.png'",
+    "09:02.188  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000207.png'",
+    "09:04.204  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000208.png'",
+    "09:06.157  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000209.png'",
+    "09:08.172  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000210.png'",
+    "09:10.110  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000211.png'",
+    "09:12.079  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000212.png'",
+    "09:14.032  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000213.png'",
+    "09:16.032  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000214.png'",
+    "09:17.969  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000215.png'",
+    "09:19.954  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000216.png'",
+    "09:21.891  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000217.png'",
+    "09:23.860  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000218.png'",
+    "09:25.891  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000219.png'",
+    "09:27.907  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000220.png'",
+    "09:29.860  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000221.png'",
+    "09:31.844  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000222.png'",
+    "09:33.907  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000223.png'",
+    "09:36.235  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000224.png'",
+    "09:38.485  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000225.png'",
+    "09:40.766  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000226.png'",
+    "09:43.063  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000227.png'",
+    "09:45.375  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000228.png'",
+    "09:47.672  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000229.png'",
+    "09:49.969  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000230.png'",
+    "09:52.313  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000231.png'",
+    "09:54.688  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000232.png'",
+    "09:57.125  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000233.png'",
+    "09:59.485  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000234.png'",
+    "10:01.844  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000235.png'",
+    "10:04.172  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000236.png'",
+    "10:06.469  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000237.png'",
+    "10:08.813  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000238.png'",
+    "10:11.188  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000239.png'",
+    "10:13.563  render           | Saved: 'D:\\filmmaking-system\\renders\\m4\\full-shots\\.shot.father-medium.blender.7eca7430a9b15363.partial\\artifact\\frames\\frame_000240.png'",
+    "Info: Saved as \"scene.blend\"",
+    "",
+    "Blender quit",
+    "D:\\filmmaking-system\\engines\\blender\\worker\\render_shot.py:341: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0",
+    "  material.use_nodes = True",
+    "D:\\filmmaking-system\\engines\\blender\\worker\\render_shot.py:602: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0",
+    "  material.use_nodes = True",
+    "D:\\filmmaking-system\\engines\\blender\\worker\\render_shot.py:567: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0",
+    "  material.use_nodes = True"
+  ],
+  "metrics": {
+    "renderDurationMs": 614258,
+    "frameCount": 240,
+    "renderedFrames": 240,
+    "resumedFrames": 0,
+    "effectiveUpscale": 1.9193438140806562,
+    "sourceHeight": 266,
+    "sourceLimited": true,
+    "sourceWidth": 531,
+    "upscaleRelativeToFit": 1.4181818181818182,
+    "cacheHit": false,
+    "renderEngine": "BLENDER_EEVEE",
+    "selectedBackend": "EEVEE",
+    "samples": 2,
+    "renderWidth": 640,
+    "renderHeight": 360,
+    "nativeRenderWidth": 640,
+    "nativeRenderHeight": 360,
+    "upscaled": false,
+    "qualityProfile": "custom",
+    "frameRate": "30/1",
+    "shadows": "high",
+    "textures": "high",
+    "compositing": false,
+    "blenderVersion": "5.2.3 LTS",
+    "exitCode": 0,
+    "completedWithWarning": false,
+    "constantInterpolationCurves": 12,
+    "constantInterpolationFailures": 0,
+    "fallbackUsed": false,
+    "degraded": false
+  },
+  "requestedRenderer": "BLENDER_EEVEE",
+  "actualRenderer": "BLENDER_EEVEE",
+  "fallbackUsed": false,
+  "degraded": false
+}

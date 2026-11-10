@@ -1,0 +1,20 @@
+pnpm format:check
+Checking formatting...
+All matched files use Prettier code style!
+$ prettier --check .
+
+pnpm lint
+
+D:\filmmaking-system\renders\m4\assemble.mjs
+  61:11  error  'logs' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\filmmaking-system\renders\m4\render-shots.mjs
+  1:17  error  'readFile' is defined but never used    @typescript-eslint/no-unused-vars
+  1:38  error  'readdir' is defined but never used     @typescript-eslint/no-unused-vars
+  2:10  error  'existsSync' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 4 problems (4 errors, 0 warnings)
+
+$ eslint .
+[ELIFECYCLE] Command failed with exit code 1.
+

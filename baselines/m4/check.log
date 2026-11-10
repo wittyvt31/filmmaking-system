@@ -1,0 +1,7 @@
+Checking formatting...
+$ pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build
+$ prettier --check .
+[warn] examples/reference-shot/father-visible/assets/father-motion.json
+[warn] Code style issues found in the above file. Run Prettier with --write to fix.
+[ELIFECYCLE] Command failed with exit code 1.
+[ELIFECYCLE] Command failed with exit code 1.
