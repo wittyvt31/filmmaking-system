@@ -11,5 +11,7 @@
   },
   "ssim": 0.998193,
   "onlyFactorChanged": "samples: 16 to 4",
-  "fullRunTargetPending": true
+  "fullRunTargetPending": false,
+  "fullRunSecondsPerFrame": 2.6742199999999996,
+  "fullRunTargetMet": true
 }

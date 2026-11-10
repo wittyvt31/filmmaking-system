@@ -1,0 +1,1 @@
+PASS: frames 1, 75 and 150 match the render receipt SHA-256 checksums; README has 10 lines.
