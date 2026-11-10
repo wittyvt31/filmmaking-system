@@ -1,0 +1,9 @@
+- The father’s torso breathes on a four-second cycle at 0.8% peak scale.
+- His head eases toward the painted phone from frames 60 to 110 and holds.
+- The daughter holds her pose and the camera retains its push-in.
+- Two hand-traced manual mattes use smoothing and small-island removal over the intact background.
+- Embedded head and chest controls receive eased rotation and scale from the motion clip.
+- The crop strip shows zero-based frames 0, 60, 85, and 110 from left to right.
+- The eight-frame diagnostic freezes the camera, grain, and other scene animation.
+- Native output is 640×360 at 30 FPS with 150 frames.
+- Blender averaged 4.544 seconds per frame including setup.

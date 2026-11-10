@@ -1,0 +1,32 @@
+{
+  "input": "D:\\filmmaking-system\\renders\\m3\\full\\master.mp4",
+  "manifest": "D:\\filmmaking-system\\examples\\reference-shot\\father-motion\\manifest.json",
+  "frameCount": 150,
+  "manifestFrameCount": 150,
+  "frameCountMatchesManifest": true,
+  "durationSeconds": 5,
+  "resolution": "640x360",
+  "frameRate": 30,
+  "nearBlackFrames": 0,
+  "nearWhiteFrames": 0,
+  "meanFrameDifference": 0.0006118,
+  "netFrameDifference": 0.01662411,
+  "minFrameDifference": 0.00001702,
+  "maxFrameDifference": 0.00133612,
+  "identicalConsecutiveFrames": 0,
+  "identicalFrameRatio": 0,
+  "nearUniformFrames": 0,
+  "lowEntropyFrames": 0,
+  "thresholds": {
+    "uniformRange": 0.006,
+    "entropyThreshold": 0.01,
+    "identicalRatio": 0.8,
+    "motionDifference": 0.001,
+    "netMotionDifference": 0.005,
+    "expectMotion": true,
+    "staticOk": false
+  },
+  "failureReasons": [],
+  "contactSheet": "D:\\filmmaking-system\\renders\\m3\\full\\master.contact-sheet.png",
+  "lumaSampling": "64x36 grayscale; exact-identity count uses the same decoded samples"
+}
