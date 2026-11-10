@@ -436,6 +436,15 @@ def instantiate_asset(asset, transform, style, entity_id):
     for armature in collection.objects:
         if armature.type == "ARMATURE":
             armature["filmie_character_id"] = entity_id
+    for sprite in collection.objects:
+        if sprite.type != "MESH" or not sprite.get("filmie_prepared_matte"):
+            continue
+        source = next(node.image for node in sprite.data.materials[0].node_tree.nodes
+                      if node.type == "TEX_IMAGE" and node.image)
+        sprite.data.materials[0] = color_material(
+            source, style, "EnvironmentCharcoal",
+            opacity=float(sprite["filmie_opacity"]), seed=style["seed"],
+        )
     controls = {
         obj.get("filmie_semantic_id", obj.get("filmie_control_id", obj.name)): obj
         for obj in collection.objects

@@ -1,0 +1,96 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectId": "filmie.reference-shot-m3",
+  "style": {
+    "id": "charcoal_horror",
+    "version": "1.2.0"
+  },
+  "assets": [
+    {
+      "assetId": "character.father-interior",
+      "version": "1.0.0",
+      "kind": "character",
+      "displayName": "Father cut from interior artwork",
+      "layers": [
+        {
+          "id": "father.head",
+          "source": {
+            "assetId": "background.interior-wide",
+            "version": "1.0.0"
+          },
+          "manualMatte": {
+            "assetId": "matte.father-head",
+            "version": "1.0.0"
+          },
+          "processing": {
+            "smoothingPasses": 1,
+            "removeIslandsBelowPixels": 4
+          },
+          "transform": {
+            "position": {
+              "x": -0.9260145338345864,
+              "y": -0.002,
+              "z": -0.27542996390977453
+            },
+            "rotationDegrees": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": 1
+          },
+          "size": {
+            "width": 5.0432176150375945,
+            "height": 2.5263576000000003
+          },
+          "pivot": {
+            "x": 0.3163841807909605,
+            "y": 0.39097744360902253
+          },
+          "order": 0
+        },
+        {
+          "id": "father.torso",
+          "source": {
+            "assetId": "background.interior-wide",
+            "version": "1.0.0"
+          },
+          "manualMatte": {
+            "assetId": "matte.father-torso",
+            "version": "1.0.0"
+          },
+          "processing": {
+            "smoothingPasses": 1,
+            "removeIslandsBelowPixels": 4
+          },
+          "transform": {
+            "position": {
+              "x": -1.1541489631578947,
+              "y": -0.001,
+              "z": -0.6744409578947367
+            },
+            "rotationDegrees": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": 1
+          },
+          "size": {
+            "width": 5.044058431578947,
+            "height": 2.5267787999999998
+          },
+          "pivot": {
+            "x": 0.2711864406779661,
+            "y": 0.23308270676691734
+          },
+          "order": 0
+        }
+      ],
+      "semanticControls": {
+        "head": "father.head",
+        "chest": "father.torso"
+      }
+    }
+  ]
+}

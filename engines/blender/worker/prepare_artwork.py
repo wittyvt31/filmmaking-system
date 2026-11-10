@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import sys
+import tempfile
 import traceback
 from array import array
 
@@ -151,7 +152,7 @@ def prepare_pixels(image, matte_path, processing):
             raise RuntimeError("Manual matte dimensions must match its source artwork")
         for index in range(width * height):
             m = index * 4
-            alpha[index] *= max(matte_pixels[m + 3], sum(matte_pixels[m:m + 3]) / 3.0)
+            alpha[index] *= matte_pixels[m + 3] * (sum(matte_pixels[m:m + 3]) / 3.0)
         bpy.data.images.remove(matte)
     threshold = float(processing.get("alphaThreshold", 0.01))
     remove_below = int(processing.get("removeIslandsBelowPixels", 0))
@@ -211,11 +212,26 @@ def create_layer(layer, collection, parent, style, variant_values):
         raise RuntimeError("Artwork source has invalid dimensions: " + path)
     if image.size[0] > 8192 or image.size[1] > 8192:
         raise RuntimeError("Artwork source exceeds the 8192-pixel preparation limit: " + path)
-    if image.channels != 4:
+    if image.channels != 4 and not layer.get("manualMatte"):
         bpy.data.images.remove(image)
         raise RuntimeError("Artwork source must be RGBA PNG with transparency: " + path)
-    image.pack()
-    image.filepath = "//embedded/" + layer["source"]["contentHash"] + ".png"
+    matte = layer.get("manualMatte")
+    processing = layer.get("processing", {})
+    if matte or any(processing.get(key) for key in (
+        "featherPixels", "smoothingPasses", "fillHolesBelowPixels",
+        "removeIslandsBelowPixels", "decontaminateEdges",
+    )):
+        report = prepare_pixels(image, matte["localPath"] if matte else None, processing)
+        if report["alphaCoverage"] == 0:
+            raise RuntimeError("Prepared artwork layer is empty: " + layer["id"])
+        with tempfile.TemporaryDirectory() as temporary:
+            image.filepath_raw = os.path.join(temporary, "prepared.png")
+            image.file_format = "PNG"
+            image.save()
+            image.pack()
+    else:
+        image.pack()
+    image.filepath = "//embedded/" + layer["id"] + ".png" if matte else "//embedded/" + layer["source"]["contentHash"] + ".png"
     width = float(layer["size"]["width"])
     height = float(layer["size"]["height"])
     pivot = layer["pivot"]
@@ -240,6 +256,9 @@ def create_layer(layer, collection, parent, style, variant_values):
     sprite.parent = parent
     sprite["filmie_layer_id"] = layer["id"]
     sprite["filmie_order"] = int(layer["order"])
+    if matte:
+        sprite["filmie_prepared_matte"] = True
+        sprite["filmie_opacity"] = float(layer["opacity"])
     sprite["filmie_source_hash"] = layer["source"]["contentHash"]
     parent["filmie_pivot"] = json.dumps(pivot, sort_keys=True)
     parent["filmie_layer_id"] = layer["id"]

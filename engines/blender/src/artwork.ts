@@ -100,7 +100,9 @@ export async function prepareLayeredArtwork(options: {
     throw new Error('assets.json must contain an array.');
   const registry = new AssetRegistry(rawRegistry);
   const references = specification.assets.flatMap((asset) =>
-    asset.layers.map((layer) => layer.source),
+    asset.layers.flatMap((layer) =>
+      layer.manualMatte ? [layer.source, layer.manualMatte] : [layer.source],
+    ),
   );
   const resolvedSources = await resolveAssetFiles(
     references,
@@ -152,8 +154,24 @@ export async function prepareLayeredArtwork(options: {
         throw new Error(
           `Unresolved artwork layer source ${layer.source.assetId}@${layer.source.version}`,
         );
+      const matte = layer.manualMatte
+        ? sourceByKey.get(
+            versionKey(layer.manualMatte.assetId, layer.manualMatte.version),
+          )
+        : undefined;
+      if (layer.manualMatte && !matte)
+        throw new Error(`Unresolved manual matte ${layer.manualMatte.assetId}`);
       return {
         ...layer,
+        ...(matte
+          ? {
+              manualMatte: {
+                ...layer.manualMatte!,
+                localPath: matte.localPath,
+                contentHash: matte.contentHash,
+              },
+            }
+          : {}),
         source: {
           assetId: source.assetId,
           version: source.version,
@@ -174,6 +192,18 @@ export async function prepareLayeredArtwork(options: {
         ...asset,
         layers: asset.layers.map((layer) => ({
           ...layer,
+          ...(layer.manualMatte
+            ? {
+                manualMatte: {
+                  assetId: layer.manualMatte.assetId,
+                  version: layer.manualMatte.version,
+                  contentHash:
+                    'contentHash' in layer.manualMatte
+                      ? layer.manualMatte.contentHash
+                      : undefined,
+                },
+              }
+            : {}),
           source: {
             assetId: layer.source.assetId,
             version: layer.source.version,

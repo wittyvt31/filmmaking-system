@@ -1,0 +1,13 @@
+{
+  "projectId": "filmie.reference-shot-m3",
+  "specificationSha256": "584f5d6867d444d925e467a34abb3167eb41509294aa00e32463a24f2209a6b8",
+  "implementationVersion": "layered-artwork-preparation-v2",
+  "blenderVersion": "5.2.3",
+  "workerHash": "2c06de954963f59e610f16a42ca8ec57a09fcb9376edbc3b4b0df26236bcd9c9",
+  "status": "success",
+  "createdAssetIds": [
+    "character.father-interior"
+  ],
+  "reusedAssetIds": [],
+  "completedAt": "2026-11-10T22:16:19.764Z"
+}
