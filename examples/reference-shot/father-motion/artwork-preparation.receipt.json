@@ -5,9 +5,7 @@
   "blenderVersion": "5.2.3",
   "workerHash": "2c06de954963f59e610f16a42ca8ec57a09fcb9376edbc3b4b0df26236bcd9c9",
   "status": "success",
-  "createdAssetIds": [
-    "character.father-interior"
-  ],
+  "createdAssetIds": ["character.father-interior"],
   "reusedAssetIds": [],
   "completedAt": "2026-11-10T22:16:19.764Z"
 }

@@ -61,7 +61,7 @@
         "instructions": [
           "Use only the prepared assets referenced by the manifest.",
           "Preserve the supplied charcoal artwork and its antialiased alpha mattes.",
-          "Do not invent character articulation; this is a layered camera-motion reference shot."
+          "The father breathes and turns toward the painted telephone; the daughter holds her pose."
         ]
       },
       "requiredAssets": [
@@ -75,6 +75,10 @@
         },
         {
           "assetId": "character.father-interior",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "motion.father-interior",
           "version": "1.0.0"
         }
       ],
@@ -158,7 +162,25 @@
               },
               "scale": 1
             },
-            "actions": []
+            "actions": [
+              {
+                "id": "father.waits",
+                "type": "motion-clip",
+                "startFrame": 0,
+                "endFrame": 150,
+                "library": {
+                  "assetId": "motion.father-interior",
+                  "version": "1.0.0"
+                },
+                "clipId": "father.waits",
+                "playbackRate": 1,
+                "blendMode": "replace"
+              }
+            ],
+            "rig": {
+              "assetId": "character.father-interior",
+              "version": "1.0.0"
+            }
           }
         ],
         "props": [],
@@ -177,7 +199,13 @@
         },
         "styleOverrides": {
           "dustDensity": 12
-        }
+        },
+        "motionLibraries": [
+          {
+            "assetId": "motion.father-interior",
+            "version": "1.0.0"
+          }
+        ]
       }
     }
   ],

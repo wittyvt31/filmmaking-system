@@ -11,9 +11,7 @@
     },
     "license": {
       "name": "User-supplied approved storyboard artwork",
-      "restrictions": [
-        "Use for project They Have Reached"
-      ]
+      "restrictions": ["Use for project They Have Reached"]
     },
     "provenance": {
       "source": "Reused byte-for-byte from examples/2.5d-proof/assets/backgrounds/interior-wide.png."
@@ -31,9 +29,7 @@
     },
     "license": {
       "name": "User-supplied approved storyboard artwork",
-      "restrictions": [
-        "Use for project They Have Reached"
-      ]
+      "restrictions": ["Use for project They Have Reached"]
     },
     "provenance": {
       "source": "Reused byte-for-byte from examples/2.5d-proof/assets/foreground/daughter-cutout.png."
@@ -51,9 +47,7 @@
     },
     "license": {
       "name": "User-supplied approved storyboard artwork",
-      "restrictions": [
-        "Use for project They Have Reached"
-      ]
+      "restrictions": ["Use for project They Have Reached"]
     },
     "provenance": {
       "source": "Reused byte-for-byte from examples/2.5d-proof/assets/foreground/telephone-cutout.png."
@@ -68,9 +62,7 @@
     "metadata": {},
     "license": {
       "name": "User-supplied storyboard artwork",
-      "restrictions": [
-        "Use for project They Have Reached"
-      ]
+      "restrictions": ["Use for project They Have Reached"]
     },
     "provenance": {
       "source": "Hand-traced mask of the existing interior-wide artwork"
@@ -85,9 +77,7 @@
     "metadata": {},
     "license": {
       "name": "User-supplied storyboard artwork",
-      "restrictions": [
-        "Use for project They Have Reached"
-      ]
+      "restrictions": ["Use for project They Have Reached"]
     },
     "provenance": {
       "source": "Hand-traced mask of the existing interior-wide artwork"
@@ -131,12 +121,25 @@
     },
     "license": {
       "name": "Composite artwork package; source licenses apply",
-      "restrictions": [
-        "Use for project They Have Reached"
-      ]
+      "restrictions": ["Use for project They Have Reached"]
     },
     "provenance": {
       "source": "Filmie layered artwork preparation; inputs background.interior-wide@1.0.0, background.interior-wide@1.0.0"
+    }
+  },
+  {
+    "assetId": "motion.father-interior",
+    "version": "1.0.0",
+    "type": "other",
+    "sourceUri": "assets/father-motion.json",
+    "contentHash": "860377d7818cda068c1d7007ca0e4c83755560dd20b2c3ba523a50b3a31b9d15",
+    "metadata": {},
+    "license": {
+      "name": "Original project animation",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "Authored motion for the interior cutouts"
     }
   }
 ]
