@@ -49,7 +49,7 @@
       "visualDescription": "The prepared charcoal village-house interior, daughter silhouette and telephone form a quiet 2.5D tableau.",
       "composition": {
         "framing": "Wide illustrated interior with distinct back, character and foreground planes.",
-        "subjectPlacement": "Keep the daughter in the right-side window and the telephone in the lower foreground.",
+        "subjectPlacement": "The background telephone is the only telephone; the daughter stands within the right window with her feet on its sill.",
         "cameraMovement": "Slow, continuous camera push-in across the layered illustration.",
         "camera": {
           "type": "zoom",
@@ -72,10 +72,6 @@
         {
           "assetId": "character.daughter-cutout",
           "version": "1.0.0"
-        },
-        {
-          "assetId": "prop.telephone-cutout",
-          "version": "1.0.0"
         }
       ],
       "scene": {
@@ -91,14 +87,14 @@
             "id": "group.window-character",
             "transform": {
               "position": {
-                "x": 1.43,
-                "y": -0.28,
-                "z": -0.2
+                "x": 1.75,
+                "y": -0.002,
+                "z": -0.57
               },
               "rotationDegrees": {
                 "x": 0,
                 "y": 0,
-                "z": -2
+                "z": 0
               },
               "scale": 1
             }
@@ -131,42 +127,11 @@
               "y": 0
             },
             "size": {
-              "width": 0.92,
-              "height": 1.65
+              "width": 0.38,
+              "height": 0.85
             },
-            "opacity": 1,
+            "opacity": 0.85,
             "order": 10
-          },
-          {
-            "id": "layer.telephone",
-            "asset": {
-              "assetId": "prop.telephone-cutout",
-              "version": "1.0.0"
-            },
-            "role": "prop",
-            "transform": {
-              "position": {
-                "x": 0.35,
-                "y": -0.62,
-                "z": -0.62
-              },
-              "rotationDegrees": {
-                "x": 0,
-                "y": 0,
-                "z": -2
-              },
-              "scale": 1
-            },
-            "pivot": {
-              "x": 0.5,
-              "y": 0.08
-            },
-            "size": {
-              "width": 1.55,
-              "height": 0.89
-            },
-            "opacity": 1,
-            "order": 20
           }
         ],
         "characters": [],
