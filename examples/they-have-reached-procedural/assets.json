@@ -11,12 +11,7 @@
       "assetKind": "character",
       "displayName": "Father",
       "blenderCollection": "ASSET__character_father",
-      "blenderControls": [
-        "RIG_chest",
-        "RIG_head",
-        "RIG_arm.L",
-        "RIG_arm.R"
-      ],
+      "blenderControls": ["RIG_chest", "RIG_head", "RIG_arm.L", "RIG_arm.R"],
       "stylePreset": "charcoal_horror",
       "styleVersion": "1.0.0"
     },
@@ -160,12 +155,7 @@
       "assetKind": "character",
       "displayName": "Father",
       "blenderCollection": "ASSET__character_father",
-      "blenderControls": [
-        "RIG_chest",
-        "RIG_head",
-        "RIG_arm.L",
-        "RIG_arm.R"
-      ],
+      "blenderControls": ["RIG_chest", "RIG_head", "RIG_arm.L", "RIG_arm.R"],
       "stylePreset": "charcoal_horror",
       "styleVersion": "1.1.0"
     },

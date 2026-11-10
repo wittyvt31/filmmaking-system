@@ -1,0 +1,56 @@
+[
+  {
+    "assetId": "background.interior-wide",
+    "version": "1.0.0",
+    "type": "graphic",
+    "sourceUri": "D:\\filmmaking-system\\examples\\2.5d-proof\\assets\\backgrounds\\interior-wide.png",
+    "contentHash": "1f77fa81ed56e6429a81fa723f0ec07cbd8c8f1ce696c47cfde4fab365c4652b",
+    "metadata": {
+      "role": "2.5d-artwork",
+      "description": "Shared proof-project opaque charcoal interior panel."
+    },
+    "license": {
+      "name": "User-supplied approved storyboard artwork",
+      "restrictions": ["Use for project They Have Reached"]
+    },
+    "provenance": {
+      "source": "Reused byte-for-byte from examples/2.5d-proof/assets/backgrounds/interior-wide.png."
+    }
+  },
+  {
+    "assetId": "character.daughter-cutout",
+    "version": "1.0.0",
+    "type": "graphic",
+    "sourceUri": "D:\\filmmaking-system\\examples\\2.5d-proof\\assets\\foreground\\daughter-cutout.png",
+    "contentHash": "32b6f7b4e9fd406c7a97c103460f088d3b22b1c06b9dc44abdbc52e89c6ae327",
+    "metadata": {
+      "role": "2.5d-artwork",
+      "description": "Shared proof-project daughter cutout with antialiased alpha matte."
+    },
+    "license": {
+      "name": "User-supplied approved storyboard artwork",
+      "restrictions": ["Use for project They Have Reached"]
+    },
+    "provenance": {
+      "source": "Reused byte-for-byte from examples/2.5d-proof/assets/foreground/daughter-cutout.png."
+    }
+  },
+  {
+    "assetId": "prop.telephone-cutout",
+    "version": "1.0.0",
+    "type": "graphic",
+    "sourceUri": "D:\\filmmaking-system\\examples\\2.5d-proof\\assets\\foreground\\telephone-cutout.png",
+    "contentHash": "3334a3127c32d10c6da59600580eb83f9c2356790e5b30c5e1bddcd99735475a",
+    "metadata": {
+      "role": "2.5d-artwork",
+      "description": "Shared proof-project telephone drawing with antialiased alpha matte."
+    },
+    "license": {
+      "name": "User-supplied approved storyboard artwork",
+      "restrictions": ["Use for project They Have Reached"]
+    },
+    "provenance": {
+      "source": "Reused byte-for-byte from examples/2.5d-proof/assets/foreground/telephone-cutout.png."
+    }
+  }
+]

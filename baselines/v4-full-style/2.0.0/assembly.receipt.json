@@ -1,0 +1,44 @@
+{
+  "jobId": "assemble-project:filmie.full-controlled-2.0.0@1.0.0",
+  "projectId": "filmie.full-controlled-2.0.0",
+  "renderer": {
+    "id": "ffmpeg",
+    "version": "ffmpeg-timeline-v5"
+  },
+  "fingerprint": "ed2ddbd73c487d090724c70a62f64c678a9f2d338ad83530448b67977ba64fc3",
+  "startedAt": "2026-11-10T17:15:04.617Z",
+  "completedAt": "2026-11-10T17:15:10.710Z",
+  "status": "success",
+  "cacheHit": false,
+  "cacheStored": true,
+  "dependencies": [
+    {
+      "shotId": "shot.reference-layered-room",
+      "sha256": "268c261d23a94ccf8e981753a6c2c75d61b03e74bf15bf76e6c555521403e8e1"
+    }
+  ],
+  "outputPath": "D:\\filmmaking-system\\renders\\v4-acceptance\\full-controlled\\2.0.0\\output\\master.mp4",
+  "outputChecksum": "412518ea877be4ddd8263510b4ea69c41a6d5ebf3742539ba202a5c031d9c6c9",
+  "outputBytes": 689668,
+  "inspection": {
+    "path": "D:\\filmmaking-system\\renders\\v4-acceptance\\full-controlled\\2.0.0\\output\\.master-72d4516c-92e9-445d-9d16-5c5dd7a67c82.mp4",
+    "durationSeconds": 5,
+    "frameCount": 150,
+    "width": 1920,
+    "height": 1080,
+    "frameRate": 30,
+    "codec": "h264",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "colorTransfer": "bt709",
+    "colorPrimaries": "bt709",
+    "audioStreamCount": 0,
+    "sha256": "412518ea877be4ddd8263510b4ea69c41a6d5ebf3742539ba202a5c031d9c6c9",
+    "bytes": 689668
+  },
+  "logs": [],
+  "metrics": {
+    "durationMs": 5416,
+    "cacheHit": false
+  }
+}

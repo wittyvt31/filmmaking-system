@@ -1,0 +1,107 @@
+{
+  "projectId": "filmie.full-controlled-2.0.0",
+  "projectVersion": "1.0.0",
+  "startedAt": "2026-11-10T16:36:39.022Z",
+  "completedAt": "2026-11-10T17:15:10.712Z",
+  "status": "success",
+  "manifestSha256": "4837c4f9e6a18ca263fe2b9a71fe53a7508837b603e26a75b6bffb2b3beb63de",
+  "timelineSha256": "445e5bbf7fa2db031b82177998a43de8d95582ff5f0047a90ec0b9be44f6453b",
+  "renderPlanSha256": "d96f0de239d3bf1d07cc5f1562f9ac8865539fd50eee57f3ebbf1456036b519f",
+  "renderPolicy": {
+    "outputDimensions": {
+      "width": 1920,
+      "height": 1080
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": {
+      "mode": "crf",
+      "value": 24
+    },
+    "qualityProfile": "final",
+    "qualityOverrides": {
+      "width": 640,
+      "height": 360,
+      "samples": 16
+    },
+    "qualityPostProcessing": {
+      "final": {
+        "glow": false,
+        "finalGrade": false
+      }
+    },
+    "renderer": {
+      "id": "blender",
+      "config": {
+        "engine": "BLENDER_EEVEE",
+        "device": "AUTO",
+        "denoising": false
+      }
+    }
+  },
+  "assemblyFingerprint": "ed2ddbd73c487d090724c70a62f64c678a9f2d338ad83530448b67977ba64fc3",
+  "masterPath": "D:\\filmmaking-system\\renders\\v4-acceptance\\full-controlled\\2.0.0\\output\\master.mp4",
+  "shotReceipts": [
+    {
+      "shotId": "shot.reference-layered-room",
+      "fingerprint": "5a9f9d3e087e52464aa8c00ff33741aa9670882e20d398a1fe543187b591d32b",
+      "receiptPath": "D:\\filmmaking-system\\renders\\v4-acceptance\\full-controlled\\2.0.0\\output\\production\\ZmlsbWllLmZ1bGwtY29udHJvbGxlZC0yLjAuMA\\shots\\shot.reference-layered-room.mp4.render.receipt.json",
+      "outputPath": "D:\\filmmaking-system\\renders\\v4-acceptance\\full-controlled\\2.0.0\\output\\production\\ZmlsbWllLmZ1bGwtY29udHJvbGxlZC0yLjAuMA\\shots\\shot.reference-layered-room.mp4",
+      "checksum": "268c261d23a94ccf8e981753a6c2c75d61b03e74bf15bf76e6c555521403e8e1",
+      "cacheHit": false,
+      "verifyWithMedia": true,
+      "renderConfiguration": {
+        "renderer": {
+          "id": "blender",
+          "version": "5.2.3"
+        },
+        "metrics": {
+          "renderDurationMs": 2292311,
+          "frameCount": 150,
+          "renderedFrames": 9,
+          "cacheHit": false,
+          "renderEngine": "BLENDER_EEVEE",
+          "selectedBackend": "EEVEE",
+          "samples": 16,
+          "renderWidth": 640,
+          "renderHeight": 360,
+          "qualityProfile": "final",
+          "frameRate": "30/1",
+          "shadows": "high",
+          "textures": "high",
+          "compositing": false,
+          "blenderVersion": "5.2.3 LTS",
+          "exitCode": 0,
+          "completedWithWarning": false,
+          "constantInterpolationCurves": 10,
+          "constantInterpolationFailures": 0,
+          "fallbackUsed": false,
+          "degraded": false
+        }
+      }
+    }
+  ],
+  "assemblyReceiptPath": "D:\\filmmaking-system\\renders\\v4-acceptance\\full-controlled\\2.0.0\\output\\production\\ZmlsbWllLmZ1bGwtY29udHJvbGxlZC0yLjAuMA\\assembly.receipt.json",
+  "inspection": {
+    "path": "D:\\filmmaking-system\\renders\\v4-acceptance\\full-controlled\\2.0.0\\output\\.master-72d4516c-92e9-445d-9d16-5c5dd7a67c82.mp4",
+    "durationSeconds": 5,
+    "frameCount": 150,
+    "width": 1920,
+    "height": 1080,
+    "frameRate": 30,
+    "codec": "h264",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "colorTransfer": "bt709",
+    "colorPrimaries": "bt709",
+    "audioStreamCount": 0,
+    "sha256": "412518ea877be4ddd8263510b4ea69c41a6d5ebf3742539ba202a5c031d9c6c9",
+    "bytes": 689668
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "projectId": "filmie.full-controlled-1.2.0",
+  "projectVersion": "1.0.0",
+  "manifestSha256": "3e7b3cb06f46251c78d6326934af24c0cac92ef8e91232b7a106ba0d29544884",
+  "timelineSha256": "1fe313f47b8943afb190fcd7291e109352bf718dc14a78f021c1fd93386ec9e4",
+  "sceneCompilerVersion": "scene-compiler-v4",
+  "sceneHashes": {
+    "shot.reference-layered-room": "38d552832863d0c756e8e1bde230bc875f8bc62476158ec22b82bceb622f0d2f"
+  },
+  "renderPolicy": {
+    "outputDimensions": {
+      "width": 1920,
+      "height": 1080
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": {
+      "mode": "crf",
+      "value": 24
+    },
+    "qualityProfile": "final",
+    "qualityOverrides": {
+      "width": 640,
+      "height": 360,
+      "samples": 16
+    },
+    "qualityPostProcessing": {
+      "final": {
+        "glow": false,
+        "finalGrade": false
+      }
+    },
+    "renderer": {
+      "id": "blender",
+      "config": {
+        "engine": "BLENDER_EEVEE",
+        "device": "AUTO",
+        "denoising": false
+      }
+    }
+  },
+  "shotsToRender": ["shot.reference-layered-room"],
+  "jobs": [
+    {
+      "id": "render-shot:shot.reference-layered-room",
+      "kind": "render-shot",
+      "shotId": "shot.reference-layered-room",
+      "durationFrames": 150,
+      "renderer": {
+        "id": "blender",
+        "config": {
+          "engine": "BLENDER_EEVEE",
+          "device": "AUTO",
+          "denoising": false
+        }
+      },
+      "inputAssets": [
+        {
+          "assetId": "background.interior-wide",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "character.daughter-cutout",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "prop.telephone-cutout",
+          "version": "1.0.0"
+        }
+      ],
+      "output": {
+        "uri": "renders/shots/shot.reference-layered-room.mp4",
+        "mediaType": "video/mp4",
+        "role": "intermediate-shot"
+      },
+      "dependsOn": []
+    },
+    {
+      "id": "assemble-project:filmie.full-controlled-1.2.0@1.0.0",
+      "kind": "assemble-project",
+      "renderer": {
+        "id": "ffmpeg"
+      },
+      "inputAssets": [],
+      "output": {
+        "uri": "renders/filmie.full-controlled-1.2.0.mp4",
+        "mediaType": "video/mp4",
+        "role": "final-project"
+      },
+      "dependsOn": ["render-shot:shot.reference-layered-room"]
+    }
+  ],
+  "expectedArtifacts": [
+    {
+      "uri": "renders/shots/shot.reference-layered-room.mp4",
+      "mediaType": "video/mp4",
+      "role": "intermediate-shot"
+    },
+    {
+      "uri": "renders/filmie.full-controlled-1.2.0.mp4",
+      "mediaType": "video/mp4",
+      "role": "final-project"
+    }
+  ],
+  "sha256": "4874428fc380c2c4a4d99642473c35b90bc60164e635ea5ba9a523fe2b771289"
+}

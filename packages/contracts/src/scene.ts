@@ -166,17 +166,40 @@ export const ShotSceneSchema = z
   })
   .strict()
   .superRefine((scene, context) => {
-    const legacy = scene.stylePreset === 'charcoal_horror' && scene.styleVersion === '1.1.0';
+    const legacy =
+      scene.stylePreset === 'charcoal_horror' && scene.styleVersion === '1.1.0';
     const registered = STYLE_DEFINITION_REGISTRY.some(
-      (definition) => definition.id === scene.stylePreset && definition.version === scene.styleVersion,
+      (definition) =>
+        definition.id === scene.stylePreset &&
+        definition.version === scene.styleVersion,
     );
     if (!legacy && !registered)
-      context.addIssue({ code: 'custom', path: ['stylePreset'], message: `Unknown style/version "${scene.stylePreset}@${scene.styleVersion}"` });
+      context.addIssue({
+        code: 'custom',
+        path: ['stylePreset'],
+        message: `Unknown style/version "${scene.stylePreset}@${scene.styleVersion}"`,
+      });
     if (scene.styleVersion !== '2.0.0' && scene.styleOverrides) {
-      const versionTwoOnly = ['edgeBreakup', 'edgeSoftness', 'shadowSmudge', 'graphiteSheen', 'contrastCurve', 'paperWhitePoint', 'hazeDrift', 'dustDensity', 'glow', 'finalGrade', 'shadows'];
+      const versionTwoOnly = [
+        'edgeBreakup',
+        'edgeSoftness',
+        'shadowSmudge',
+        'graphiteSheen',
+        'contrastCurve',
+        'paperWhitePoint',
+        'hazeDrift',
+        'dustDensity',
+        'glow',
+        'finalGrade',
+        'shadows',
+      ];
       for (const field of versionTwoOnly) {
         if (Object.hasOwn(scene.styleOverrides, field))
-          context.addIssue({ code: 'custom', path: ['styleOverrides', field], message: `${field} is only supported by charcoal_horror 2.0.0` });
+          context.addIssue({
+            code: 'custom',
+            path: ['styleOverrides', field],
+            message: `${field} is only supported by charcoal_horror 2.0.0`,
+          });
       }
     }
   })

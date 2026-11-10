@@ -1,0 +1,25 @@
+{
+  "projectId": "filmie.full-controlled-1.2.0",
+  "frameRate": {
+    "numerator": 30,
+    "denominator": 1
+  },
+  "durationFrames": 150,
+  "videoTracks": [
+    {
+      "id": "video.main",
+      "clips": [
+        {
+          "shotId": "shot.reference-layered-room",
+          "startFrame": 0,
+          "endFrame": 150
+        }
+      ],
+      "gaps": [],
+      "overlaps": [],
+      "transitions": []
+    }
+  ],
+  "audioTracks": [],
+  "sha256": "1fe313f47b8943afb190fcd7291e109352bf718dc14a78f021c1fd93386ec9e4"
+}

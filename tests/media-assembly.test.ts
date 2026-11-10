@@ -19,7 +19,6 @@ import {
   createAssemblyFingerprint,
   FfmpegMediaEngine,
 } from '@filmmaking/media';
-import { getBundledMediaExecutables } from '@filmmaking/engine-remotion';
 import { compileTimeline } from '@filmmaking/timeline';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -143,8 +142,7 @@ async function createSolidBitmap(path: string, color: string): Promise<void> {
 }
 
 async function createColorClip(path: string, color: string): Promise<void> {
-  const { ffmpegPath: bundledFfmpegPath } = getBundledMediaExecutables();
-  const ffmpegPath = process.env['FILMIE_FFMPEG'] ?? bundledFfmpegPath;
+  const ffmpegPath = process.env['FILMIE_FFMPEG'] ?? 'ffmpeg';
   const rgb: Record<string, readonly [number, number, number]> = {
     red: [255, 0, 0],
     lime: [0, 255, 0],
@@ -183,8 +181,7 @@ async function createColorClip(path: string, color: string): Promise<void> {
 }
 
 async function centerPixel(path: string, seconds: number): Promise<Buffer> {
-  const { ffmpegPath: bundledFfmpegPath } = getBundledMediaExecutables();
-  const ffmpegPath = process.env['FILMIE_FFMPEG'] ?? bundledFfmpegPath;
+  const ffmpegPath = process.env['FILMIE_FFMPEG'] ?? 'ffmpeg';
   const { stdout: png } = await run(ffmpegPath, [
     '-hide_banner',
     '-loglevel',
@@ -299,11 +296,9 @@ describe('FFmpeg timeline video assembly', () => {
       }
 
       const outputPath = join(root, 'assembled.mp4');
-      const { ffmpegPath: bundledFfmpegPath, ffprobePath: bundledFfprobePath } =
-        getBundledMediaExecutables();
       const result = await new FfmpegMediaEngine({
-        ffmpegPath: process.env['FILMIE_FFMPEG'] ?? bundledFfmpegPath,
-        ffprobePath: process.env['FILMIE_FFPROBE'] ?? bundledFfprobePath,
+        ffmpegPath: process.env['FILMIE_FFMPEG'] ?? 'ffmpeg',
+        ffprobePath: process.env['FILMIE_FFPROBE'] ?? 'ffprobe',
       }).assemble({
         manifest,
         timeline,

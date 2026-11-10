@@ -247,6 +247,9 @@ importers:
       '@filmmaking/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@filmmaking/media':
+        specifier: workspace:*
+        version: link:../../packages/media
       '@remotion/bundler':
         specifier: 4.0.541
         version: 4.0.541(lightningcss@1.33.0)(postcss@8.5.32)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)

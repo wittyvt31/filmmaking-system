@@ -21,5 +21,7 @@ export default defineConfig({
     environment: 'node',
     include: ['tests/**/*.test.ts'],
     passWithNoTests: false,
+    fileParallelism: process.env['FILMIE_TEST_PARALLEL'] === '1',
+    testTimeout: 30_000,
   },
 });

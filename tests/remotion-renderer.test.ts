@@ -114,6 +114,34 @@ afterAll(async () => {
 });
 
 describe('Remotion renderer integration', () => {
+  it('renders a PNG sequence without the video compositor', async () => {
+    for (const shotId of [
+      'shot.establishing',
+      'shot.character-detail',
+      'shot.closing-landscape',
+    ]) {
+      const request = requestFor(shotId);
+      const result = await new RemotionRendererAdapter().renderShot({
+        ...request,
+        artifact: {
+          type: 'image-sequence/png',
+          outputDirectory: join(
+            outputDirectory,
+            `compositor-diagnostic-${shotId}`,
+          ),
+        },
+      });
+      expect(
+        result.status,
+        result.status === 'failure'
+          ? `${shotId}: ${result.error.message}`
+          : undefined,
+      ).toBe('success');
+      if (result.status === 'success')
+        expect(result.receipt.outputPaths).toHaveLength(30);
+    }
+  }, 120_000);
+
   it('rejects structured Blender scene instructions instead of silently ignoring them', async () => {
     const shot = structuredClone(sampleManifest.shots[0]);
     if (!shot) throw new Error('Expected a sample shot.');
@@ -157,7 +185,9 @@ describe('Remotion renderer integration', () => {
     for (const result of results) {
       expect(
         result.status,
-        result.status === 'failure' ? result.error.message : undefined,
+        result.status === 'failure'
+          ? `${result.receipt?.shotId ?? 'unknown shot'}: ${result.error.message}\n${result.receipt?.logs.join('\n') ?? ''}`
+          : undefined,
       ).toBe('success');
       if (result.status !== 'success') continue;
       expect(result.receipt.status).toBe('success');

@@ -38,6 +38,17 @@ const uniformRange = numberOption('--uniform-range', 0.006);
 const entropyThreshold = numberOption('--entropy-threshold', 0.01);
 const identicalRatio = numberOption('--identical-ratio', 0.8);
 const motionDifference = numberOption('--motion-difference', 0.001);
+const netMotionDifference = numberOption('--net-motion-difference', 0.005);
+for (const [name, value] of [
+  ['--uniform-range', uniformRange],
+  ['--entropy-threshold', entropyThreshold],
+  ['--identical-ratio', identicalRatio],
+  ['--motion-difference', motionDifference],
+  ['--net-motion-difference', netMotionDifference],
+]) {
+  if (!Number.isFinite(value) || value < 0 || value > 1)
+    throw new Error(`${name} must be a finite value between 0 and 1.`);
+}
 const input = resolve(inputArgument);
 
 function run(command, commandArgs, { allowFailure = false } = {}) {
@@ -262,6 +273,15 @@ async function main() {
   const meanFrameDifference =
     differences.reduce((sum, value) => sum + value, 0) /
     Math.max(1, differences.length);
+  let netFrameDifference = 0;
+  if (info.frameCount > 1) {
+    const lastOffset = (info.frameCount - 1) * frameBytes;
+    for (let pixel = 0; pixel < frameBytes; pixel += 1)
+      netFrameDifference += Math.abs(
+        decoded.stdout[lastOffset + pixel] - decoded.stdout[pixel],
+      );
+    netFrameDifference /= frameBytes * 255;
+  }
   const identicalConsecutiveFrames = hashes
     .slice(1)
     .reduce((count, hash, index) => count + Number(hash === hashes[index]), 0);
@@ -282,9 +302,14 @@ async function main() {
     failureReasons.push(
       `identical-frame ratio ${identicalRatioValue.toFixed(4)} exceeds ${identicalRatio}`,
     );
-  if (expectMotion && !staticOk && meanFrameDifference < motionDifference)
+  if (
+    expectMotion &&
+    !staticOk &&
+    meanFrameDifference < motionDifference &&
+    netFrameDifference < netMotionDifference
+  )
     failureReasons.push(
-      `mean frame difference ${meanFrameDifference.toFixed(6)} is below ${motionDifference}`,
+      `mean frame difference ${meanFrameDifference.toFixed(6)} is below ${motionDifference} and net frame difference ${netFrameDifference.toFixed(6)} is below ${netMotionDifference}`,
     );
   const temporaryDirectory = await mkdtemp(join(tmpdir(), 'filmie-verify-'));
   const sampleIndices = Array.from({ length: 6 }, (_, index) =>
@@ -362,6 +387,7 @@ async function main() {
       nearBlackFrames,
       nearWhiteFrames,
       meanFrameDifference: Number(meanFrameDifference.toFixed(8)),
+      netFrameDifference: Number(netFrameDifference.toFixed(8)),
       minFrameDifference: Number((sortedDifferences[0] ?? 0).toFixed(8)),
       maxFrameDifference: Number((sortedDifferences.at(-1) ?? 0).toFixed(8)),
       identicalConsecutiveFrames,
@@ -373,6 +399,7 @@ async function main() {
         entropyThreshold,
         identicalRatio,
         motionDifference,
+        netMotionDifference,
         expectMotion,
         staticOk,
       },

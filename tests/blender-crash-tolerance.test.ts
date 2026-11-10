@@ -52,6 +52,50 @@ afterAll(async () => {
 });
 
 describe.skipIf(!fakeBlenderPath)('Blender crash tolerance', () => {
+  it('records and preserves recovered parallel crashes in fresh and cached receipts', async () => {
+    const temporary = await mkdtemp(join(tmpdir(), 'filmie-parallel-retry-'));
+    temporaryDirectories.push(temporary);
+    process.env['FILMIE_FAKE_BLENDER_MODE'] = 'partial-retry';
+    process.env['FILMIE_FAKE_DURATION_FRAMES'] = '3';
+    process.env['FILMIE_FAKE_WIDTH'] = '1280';
+    process.env['FILMIE_FAKE_HEIGHT'] = '720';
+    try {
+      const { request } = await buildRequest(temporary);
+      const adapter = new BlenderRendererAdapter({
+        executablePath: fakeBlenderPath ?? undefined,
+        workers: 2,
+      });
+      const result = await adapter.renderShot(request);
+      expect(result.status).toBe('success');
+      if (result.status !== 'success') throw new Error(result.error.message);
+      expect(result.receipt.completedWithWarning).toBe(true);
+      expect(result.receipt.metrics['retryCount']).toBe(2);
+      expect(result.receipt.metrics['recoveredAttemptCount']).toBe(2);
+      expect(result.receipt.metrics['firstFailedExitCode']).toBe(3);
+      expect(result.receipt.fallbackUsed).toBe(false);
+      expect(result.receipt.degraded).toBe(false);
+      const diagnostics = join(temporary, 'shot-output', 'diagnostics');
+      expect(existsSync(join(diagnostics, 'range-attempts.json'))).toBe(true);
+      expect(
+        existsSync(join(diagnostics, 'range-1-1-attempt-1.crash.txt')),
+      ).toBe(true);
+      expect(
+        existsSync(join(diagnostics, 'range-2-3-attempt-1.crash.txt')),
+      ).toBe(true);
+      const cached = await adapter.renderShot(request);
+      expect(cached.status).toBe('success');
+      if (cached.status !== 'success') throw new Error(cached.error.message);
+      expect(cached.cacheHit).toBe(true);
+      expect(cached.receipt.completedWithWarning).toBe(true);
+      expect(cached.receipt.metrics['recoveredAttemptCount']).toBe(2);
+    } finally {
+      delete process.env['FILMIE_FAKE_BLENDER_MODE'];
+      delete process.env['FILMIE_FAKE_DURATION_FRAMES'];
+      delete process.env['FILMIE_FAKE_WIDTH'];
+      delete process.env['FILMIE_FAKE_HEIGHT'];
+    }
+  }, 120_000);
+
   it('accepts a non-zero exit when every frame validates and marks the receipt completedWithWarning', async () => {
     const temporary = await mkdtemp(join(tmpdir(), 'filmie-crash-valid-'));
     temporaryDirectories.push(temporary);

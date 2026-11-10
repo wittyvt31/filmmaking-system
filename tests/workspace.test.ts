@@ -88,6 +88,7 @@ describe('workspace foundation', () => {
         '@filmmaking/assets',
         '@filmmaking/cache',
         '@filmmaking/contracts',
+        '@filmmaking/media',
       ].sort(),
     );
     expect(blenderDependencies.sort()).toEqual(

@@ -17,6 +17,7 @@
     "@filmmaking/assets": "workspace:*",
     "@filmmaking/cache": "workspace:*",
     "@filmmaking/contracts": "workspace:*",
+    "@filmmaking/media": "workspace:*",
     "@remotion/bundler": "4.0.541",
     "@remotion/cli": "4.0.541",
     "@remotion/renderer": "4.0.541",

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 public static class FakeBlender {
     public static int Main(string[] args) {
@@ -31,9 +32,23 @@ public static class FakeBlender {
             int width = w == null ? 1280 : int.Parse(w);
             string h = Environment.GetEnvironmentVariable("FILMIE_FAKE_HEIGHT");
             int height = h == null ? 720 : int.Parse(h);
+            int startFrame = 1;
+            bool partialRetry = mode == "partial-retry";
+            bool firstAttempt = false;
+            if (partialRetry) {
+                Match range = Regex.Match(File.ReadAllText(specPath),
+                    @"""frameRange""\s*:\s*\{\s*""start""\s*:\s*(\d+)\s*,\s*""end""\s*:\s*(\d+)");
+                if (!range.Success) throw new Exception("missing frameRange");
+                startFrame = int.Parse(range.Groups[1].Value);
+                durationFrames = int.Parse(range.Groups[2].Value) - startFrame + 1;
+                string marker = Path.Combine(Path.GetDirectoryName(specPath), "first-attempt.marker");
+                firstAttempt = !File.Exists(marker);
+                if (firstAttempt) File.WriteAllText(marker, "first attempt started");
+            }
             string framesDir = Path.Combine(outputDirectory, "frames");
             Directory.CreateDirectory(framesDir);
-            for (int f = 1; f <= durationFrames; f++) {
+            int endFrame = startFrame + durationFrames - (firstAttempt ? 1 : 0);
+            for (int f = startFrame; f < endFrame; f++) {
                 string path = Path.Combine(
                     framesDir, "frame_" + f.ToString("D6") + ".png");
                 File.WriteAllBytes(path, MakePng(width, height));
@@ -43,6 +58,15 @@ public static class FakeBlender {
             File.WriteAllText(
                 Path.Combine(outputDirectory, "worker-result.json"),
                 "{\"status\":\"success\",\"frameCount\":" + durationFrames + (mode == "mismatch" ? ",\"engine\":\"BLENDER_WORKBENCH\"" : "") + "}");
+            if (partialRetry) {
+                if (firstAttempt) {
+                    string crashPath = Path.Combine(Path.GetDirectoryName(specPath), "blender.crash.txt");
+                    File.WriteAllText(crashPath, "Simulated first-attempt Blender crash");
+                    Console.Error.WriteLine("Writing: " + crashPath);
+                    return 3;
+                }
+                return 0;
+            }
             Console.Error.WriteLine(
                 "FILMIE_FAKE_CRASH: simulated access violation in ig11icd64.dll after writing frames");
             return 3;

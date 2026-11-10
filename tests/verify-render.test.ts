@@ -98,4 +98,33 @@ describe('render visual verification', () => {
     const staticAllowed = verify(video, manifest, ['--static-ok']);
     expect(staticAllowed.status).toBe(0);
   }, 30_000);
+
+  it('accepts cumulative image change when adjacent-frame motion is below its configured threshold', async () => {
+    const directory = await mkdtemp(
+      join(tmpdir(), 'filmie-verify-cumulative-'),
+    );
+    temporary.push(directory);
+    const manifest = join(directory, 'manifest.json');
+    await writeFile(
+      manifest,
+      JSON.stringify({
+        timeline: { durationFrames: 3 },
+        video: { frameRate: { numerator: 30, denominator: 1 } },
+      }),
+    );
+    const result = verify(
+      makeVideo(directory, 'testsrc2=s=320x180:r=30', 'moving'),
+      manifest,
+      [
+        '--expect-motion',
+        '--motion-difference',
+        '1',
+        '--net-motion-difference',
+        '0.005',
+      ],
+    );
+    expect(result.status, result.stdout + result.stderr).toBe(0);
+    const report = JSON.parse(result.stdout) as { netFrameDifference: number };
+    expect(report.netFrameDifference).toBeGreaterThan(0.005);
+  }, 30_000);
 });

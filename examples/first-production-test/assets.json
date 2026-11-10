@@ -10,9 +10,7 @@
     },
     "license": {
       "name": "Original project fixture",
-      "restrictions": [
-        "test production"
-      ]
+      "restrictions": ["test production"]
     },
     "provenance": {
       "source": "first-production-test prepared local fixture"
@@ -29,9 +27,7 @@
     },
     "license": {
       "name": "Original project fixture",
-      "restrictions": [
-        "test production"
-      ]
+      "restrictions": ["test production"]
     },
     "provenance": {
       "source": "first-production-test prepared local fixture"
@@ -49,9 +45,7 @@
     },
     "license": {
       "name": "Original project fixture",
-      "restrictions": [
-        "test production"
-      ]
+      "restrictions": ["test production"]
     },
     "provenance": {
       "source": "first-production-test prepared local fixture"

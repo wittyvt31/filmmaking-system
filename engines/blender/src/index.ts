@@ -516,10 +516,15 @@ export class BlenderRendererAdapter implements RendererAdapter {
       const workerMetrics = lastWorkerResult?.['metrics'];
       if (workerMetrics && typeof workerMetrics === 'object') {
         const recorded = workerMetrics as Record<string, unknown>;
-        metrics['constantInterpolationCurves'] = Number(recorded['constantInterpolationCurves'] ?? 0);
-        metrics['constantInterpolationFailures'] = Number(recorded['constantInterpolationFailures'] ?? 0);
+        metrics['constantInterpolationCurves'] = Number(
+          recorded['constantInterpolationCurves'] ?? 0,
+        );
+        metrics['constantInterpolationFailures'] = Number(
+          recorded['constantInterpolationFailures'] ?? 0,
+        );
       }
-      if (lastWorkerResult?.['error']) metrics['workerFailure'] = String(lastWorkerResult['error']);
+      if (lastWorkerResult?.['error'])
+        metrics['workerFailure'] = String(lastWorkerResult['error']);
       if (lastProcessResult) {
         metrics['exitCode'] = lastProcessResult.code ?? -1;
         metrics['signal'] = lastProcessResult.signal ?? '';
@@ -843,6 +848,23 @@ export class BlenderRendererAdapter implements RendererAdapter {
         const cachedWorker = JSON.parse(
           await readFile(join(outputDirectory, 'worker-result.json'), 'utf8'),
         ) as { backend?: string; engine?: string; samples?: number };
+        const recoveryPath = join(
+          outputDirectory,
+          'diagnostics',
+          'range-attempts.json',
+        );
+        const recoveredAttempts = existsSync(recoveryPath)
+          ? (
+              JSON.parse(await readFile(recoveryPath, 'utf8')) as {
+                recoveredAttemptCount: number;
+              }
+            ).recoveredAttemptCount
+          : 0;
+        const cacheWarnings = recoveredAttempts
+          ? [
+              `Cached artifact originated from a render that recovered ${recoveredAttempts} failed or incomplete Blender attempt(s); see diagnostics/range-attempts.json.`,
+            ]
+          : [];
         const receipt: SuccessfulRenderReceipt = {
           jobId: request.jobId,
           shotId: shot.id,
@@ -870,7 +892,11 @@ export class BlenderRendererAdapter implements RendererAdapter {
             textures: renderConfig.textures,
             compositing: renderConfig.compositing,
             qualityProfile: settings.qualityProfile ?? 'custom',
+            recoveredAttemptCount: recoveredAttempts,
           },
+          ...(cacheWarnings.length > 0
+            ? { warnings: cacheWarnings, completedWithWarning: true }
+            : {}),
         };
         await writeReceipt(receiptPath, receipt);
         return { status: 'success', receipt, cacheHit: true };
@@ -1041,8 +1067,36 @@ export class BlenderRendererAdapter implements RendererAdapter {
             let rangeChecksums: Awaited<
               ReturnType<typeof validateSequence>
             > | null = null;
+            const attempts: {
+              rangeStart: number;
+              rangeEnd: number;
+              attempt: number;
+              exitCode: number | null;
+              signal: string | null;
+              timedOut: boolean;
+              interrupted: boolean;
+              partialFrameCount: number;
+              complete: boolean;
+              crashReport: string | null;
+            }[] = [];
             for (let attempt = 0; attempt < 2; attempt += 1) {
               rangeProcess = await spawnWorker(rangeSpecPath);
+              const crashLine = rangeProcess.stderr
+                .split(/\r?\n/)
+                .find((line) => /Writing:\s*.*crash\.txt/i.test(line));
+              let crashReport: string | null = null;
+              if (crashLine) {
+                const source = crashLine.replace(/^.*Writing:\s*/, '').trim();
+                if (existsSync(source)) {
+                  crashReport = join(
+                    rangeRoot,
+                    `crash-attempt-${attempt + 1}.txt`,
+                  );
+                  await copyFile(source, crashReport);
+                } else {
+                  logs.push(`Blender crash report was unavailable: ${source}`);
+                }
+              }
               try {
                 rangeChecksums = await validateSequence(rangeDirectory, {
                   frames: range.end - range.start + 1,
@@ -1053,13 +1107,33 @@ export class BlenderRendererAdapter implements RendererAdapter {
               } catch {
                 rangeChecksums = null;
               }
+              const partialFrameCount = (
+                await readdir(rangeFrameDirectory)
+              ).filter((name) => /^frame_\d{6}\.png$/.test(name)).length;
+              attempts.push({
+                rangeStart: range.start,
+                rangeEnd: range.end,
+                attempt: attempt + 1,
+                exitCode: rangeProcess.code,
+                signal: rangeProcess.signal,
+                timedOut: rangeProcess.timedOut,
+                interrupted: rangeProcess.interrupted,
+                partialFrameCount,
+                complete: rangeChecksums !== null,
+                crashReport,
+              });
               if (rangeChecksums) break;
-              if (attempt === 1)
+              if (attempt === 1) {
+                lastProcessResult = rangeProcess;
+                lastWorkerResult = await readWorkerResult(rangeDirectory);
+                metrics['partialFrameCount'] = partialFrameCount;
+                logs.push(`Failed range artifacts preserved at ${rangeRoot}`);
                 throw new BlenderFailure(
                   'RENDER_CRASHED',
                   `Frame range ${range.start}-${range.end} failed twice: ${rangeProcess.stderr.split(/\r?\n/).slice(-6).join(' | ')}`,
                   true,
                 );
+              }
             }
             const result = await readWorkerResult(rangeDirectory);
             return {
@@ -1068,6 +1142,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
               rangeProcess: rangeProcess!,
               checksums: rangeChecksums!,
               workerResult: result,
+              attempts,
             };
           }),
         );
@@ -1101,6 +1176,54 @@ export class BlenderRendererAdapter implements RendererAdapter {
           join(firstRange.rangeDirectory, 'scene.blend'),
           join(stagedDirectory, 'scene.blend'),
         );
+        const allAttempts = results.flatMap((item) => item.attempts);
+        const recoveredAttempts = allAttempts.filter(
+          (item) =>
+            item.exitCode !== 0 ||
+            item.signal !== null ||
+            item.timedOut ||
+            item.interrupted ||
+            !item.complete,
+        );
+        metrics['retryCount'] = results.reduce(
+          (count, item) => count + item.attempts.length - 1,
+          0,
+        );
+        metrics['recoveredAttemptCount'] = recoveredAttempts.length;
+        if (recoveredAttempts.length > 0) {
+          const diagnosticsDirectory = join(stagedDirectory, 'diagnostics');
+          await mkdir(diagnosticsDirectory, { recursive: true });
+          for (const item of allAttempts) {
+            if (!item.crashReport) continue;
+            await copyFile(
+              item.crashReport,
+              join(
+                diagnosticsDirectory,
+                `range-${item.rangeStart}-${item.rangeEnd}-attempt-${item.attempt}.crash.txt`,
+              ),
+            );
+          }
+          await writeFile(
+            join(diagnosticsDirectory, 'range-attempts.json'),
+            JSON.stringify({
+              recoveredAttemptCount: recoveredAttempts.length,
+              attempts: allAttempts.map(({ crashReport, ...item }) => ({
+                ...item,
+                crashReportPreserved: crashReport !== null,
+              })),
+            }),
+          );
+          for (const item of recoveredAttempts)
+            warnings.push(
+              `Blender range ${item.rangeStart}-${item.rangeEnd} attempt ${item.attempt} exited ${String(item.exitCode)} with ${item.partialFrameCount} frame(s) and ${item.complete ? 'a valid' : 'an incomplete'} sequence; recovered with the same renderer.`,
+            );
+          metrics['partialFrameCountAtRetry'] = Math.max(
+            ...recoveredAttempts.map((item) => item.partialFrameCount),
+          );
+          const firstAbnormal = recoveredAttempts[0];
+          if (firstAbnormal)
+            metrics['firstFailedExitCode'] = firstAbnormal.exitCode ?? -1;
+        }
         processResult = results.at(-1)!.rangeProcess;
         workerResult = firstRange.workerResult
           ? {

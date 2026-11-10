@@ -58,9 +58,7 @@
             "y": 0.5
           }
         },
-        "instructions": [
-          "Wide shot; Mira left of center; slow pan right."
-        ]
+        "instructions": ["Wide shot; Mira left of center; slow pan right."]
       },
       "requiredAssets": [
         {
@@ -141,9 +139,7 @@
           "fromScale": 1,
           "toScale": 1.08
         },
-        "instructions": [
-          "Medium shot; Mira centered; gentle push-in."
-        ]
+        "instructions": ["Medium shot; Mira centered; gentle push-in."]
       },
       "requiredAssets": [
         {

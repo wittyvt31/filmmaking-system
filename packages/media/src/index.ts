@@ -86,7 +86,7 @@ export interface MediaEngine {
   >;
   inspect(
     path: string,
-    expected: { frames: number; policy: RenderPolicy },
+    expected?: { frames: number; policy: RenderPolicy },
     binaries?: { ffprobePath?: string },
   ): Promise<MediaOperationResult<MediaInspection>>;
 }
@@ -575,7 +575,7 @@ export class FfmpegMediaEngine implements MediaEngine {
 
   async inspect(
     pathInput: string,
-    expected: { frames: number; policy: RenderPolicy },
+    expected?: { frames: number; policy: RenderPolicy },
     binaries: { ffprobePath?: string } = {},
   ): Promise<MediaOperationResult<MediaInspection>> {
     const path = resolve(pathInput);
@@ -642,49 +642,55 @@ export class FfmpegMediaEngine implements MediaEngine {
         ).length,
         ...fileHash,
       };
-      const policy = expected.policy;
-      const failures: string[] = [];
-      if (info.frameCount !== expected.frames)
-        failures.push(
-          `expected ${expected.frames} frames, found ${info.frameCount}`,
-        );
-      if (
-        info.width !== policy.outputDimensions.width ||
-        info.height !== policy.outputDimensions.height
-      )
-        failures.push(
-          `expected ${policy.outputDimensions.width}x${policy.outputDimensions.height}, found ${info.width}x${info.height}`,
-        );
-      if (
-        Math.abs(
-          info.frameRate -
-            policy.frameRate.numerator / policy.frameRate.denominator,
-        ) > 0.0001
-      )
-        failures.push(`expected ${rate(policy)} FPS, found ${info.frameRate}`);
-      if (info.codec !== 'h264')
-        failures.push(`expected H.264, found ${info.codec}`);
-      if (info.pixelFormat !== policy.pixelFormat)
-        failures.push(
-          `expected ${policy.pixelFormat}, found ${info.pixelFormat}`,
-        );
-      if (info.colorProfile !== policy.colorProfile)
-        failures.push(
-          `expected ${policy.colorProfile}, found ${info.colorProfile}`,
-        );
-      if (policy.colorProfile === 'bt709') {
-        if (info.colorTransfer !== 'bt709')
-          failures.push(`expected bt709 transfer, found ${info.colorTransfer}`);
-        if (info.colorPrimaries !== 'bt709')
+      if (expected) {
+        const policy = expected.policy;
+        const failures: string[] = [];
+        if (info.frameCount !== expected.frames)
           failures.push(
-            `expected bt709 primaries, found ${info.colorPrimaries}`,
+            `expected ${expected.frames} frames, found ${info.frameCount}`,
+          );
+        if (
+          info.width !== policy.outputDimensions.width ||
+          info.height !== policy.outputDimensions.height
+        )
+          failures.push(
+            `expected ${policy.outputDimensions.width}x${policy.outputDimensions.height}, found ${info.width}x${info.height}`,
+          );
+        if (
+          Math.abs(
+            info.frameRate -
+              policy.frameRate.numerator / policy.frameRate.denominator,
+          ) > 0.0001
+        )
+          failures.push(
+            `expected ${rate(policy)} FPS, found ${info.frameRate}`,
+          );
+        if (info.codec !== 'h264')
+          failures.push(`expected H.264, found ${info.codec}`);
+        if (info.pixelFormat !== policy.pixelFormat)
+          failures.push(
+            `expected ${policy.pixelFormat}, found ${info.pixelFormat}`,
+          );
+        if (info.colorProfile !== policy.colorProfile)
+          failures.push(
+            `expected ${policy.colorProfile}, found ${info.colorProfile}`,
+          );
+        if (policy.colorProfile === 'bt709') {
+          if (info.colorTransfer !== 'bt709')
+            failures.push(
+              `expected bt709 transfer, found ${info.colorTransfer}`,
+            );
+          if (info.colorPrimaries !== 'bt709')
+            failures.push(
+              `expected bt709 primaries, found ${info.colorPrimaries}`,
+            );
+        }
+        if (failures.length)
+          throw new MediaEngineError(
+            'MEDIA_VALIDATION_FAILED',
+            failures.join('; '),
           );
       }
-      if (failures.length)
-        throw new MediaEngineError(
-          'MEDIA_VALIDATION_FAILED',
-          failures.join('; '),
-        );
       return { status: 'success', value: info };
     } catch (error) {
       return { status: 'failure', error: toFailure(error), logs: [] };

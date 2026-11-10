@@ -18,13 +18,12 @@ import { fileURLToPath } from 'node:url';
 import { bundle } from '@remotion/bundler';
 import {
   RenderInternals,
-  getVideoMetadata,
   makeCancelSignal,
   renderFrames,
-  renderMedia,
   renderStill,
   selectComposition,
 } from '@remotion/renderer';
+import { FfmpegMediaEngine } from '@filmmaking/media';
 import {
   AssetVersionReferenceSchema,
   canonicalJsonSha256,
@@ -485,12 +484,6 @@ async function buildBundle(
   return { serveUrl, inputProps };
 }
 
-function mapRemotionCodec(codec: string): string {
-  if (codec === 'h264') return 'h264';
-  if (codec === 'h265') return 'hevc';
-  return codec;
-}
-
 async function readPngDimensions(
   path: string,
 ): Promise<{ width: number; height: number }> {
@@ -560,16 +553,12 @@ export class RemotionRendererAdapter implements RendererAdapter {
     try {
       const path = resolve(request.path);
       if (request.artifactType === 'video/mp4') {
-        const metadata = await getVideoMetadata(path);
-        if (metadata.durationInSeconds === null) {
-          throw new RenderFailure(
-            'INCOMPLETE_OUTPUT',
-            'Video duration could not be inspected',
-          );
+        const probed = await new FfmpegMediaEngine().inspect(path);
+        if (probed.status === 'failure') {
+          throw new RenderFailure('INCOMPLETE_OUTPUT', probed.error.message);
         }
-        const frameCount = Math.round(
-          metadata.durationInSeconds * metadata.fps,
-        );
+        const metadata = probed.value;
+        const frameCount = metadata.frameCount;
         const checksums = await checksumsFor(path, false);
         const inspection: ArtifactInspection = {
           artifactType: request.artifactType,
@@ -577,14 +566,11 @@ export class RemotionRendererAdapter implements RendererAdapter {
           frameCount,
           width: metadata.width,
           height: metadata.height,
-          frameRate: metadata.fps,
+          frameRate: metadata.frameRate,
+          codec: metadata.codec,
+          pixelFormat: metadata.pixelFormat,
+          colorProfile: metadata.colorProfile,
         };
-        if (typeof metadata.codec === 'string')
-          inspection.codec = mapRemotionCodec(metadata.codec);
-        if (typeof metadata.pixelFormat === 'string')
-          inspection.pixelFormat = metadata.pixelFormat;
-        if (typeof metadata.colorSpace === 'string')
-          inspection.colorProfile = metadata.colorSpace;
         if (
           request.expectedFrameCount !== undefined &&
           frameCount !== request.expectedFrameCount
@@ -615,20 +601,17 @@ export class RemotionRendererAdapter implements RendererAdapter {
         if (
           request.expectedFrameRate &&
           Math.abs(
-            metadata.fps -
+            metadata.frameRate -
               request.expectedFrameRate.numerator /
                 request.expectedFrameRate.denominator,
           ) > 0.0001
         ) {
           throw new RenderFailure(
             'INCOMPLETE_OUTPUT',
-            `Unexpected frame rate ${metadata.fps}`,
+            `Unexpected frame rate ${metadata.frameRate}`,
           );
         }
-        if (
-          request.expectedCodec &&
-          mapRemotionCodec(metadata.codec) !== request.expectedCodec
-        ) {
+        if (request.expectedCodec && metadata.codec !== request.expectedCodec) {
           throw new RenderFailure(
             'INCOMPLETE_OUTPUT',
             `Expected codec ${request.expectedCodec} but inspected ${metadata.codec}`,
@@ -645,11 +628,11 @@ export class RemotionRendererAdapter implements RendererAdapter {
         }
         if (
           request.expectedColorProfile &&
-          metadata.colorSpace !== request.expectedColorProfile
+          metadata.colorProfile !== request.expectedColorProfile
         ) {
           throw new RenderFailure(
             'INCOMPLETE_OUTPUT',
-            `Expected color profile ${request.expectedColorProfile} but inspected ${metadata.colorSpace}`,
+            `Expected color profile ${request.expectedColorProfile} but inspected ${metadata.colorProfile}`,
           );
         }
         return { status: 'success', value: inspection };
@@ -964,51 +947,89 @@ export class RemotionRendererAdapter implements RendererAdapter {
       }
 
       const cancellation = makeCancelSignal();
+      const processAbort = new AbortController();
       const timeoutMs = request.timeoutMs ?? 5 * 60 * 1000;
       const timer = setTimeout(() => {
         timeoutReached = true;
         cancellation.cancel();
+        processAbort.abort();
       }, timeoutMs);
       const onAbort = () => {
         wasInterrupted = true;
         cancellation.cancel();
+        processAbort.abort();
       };
       request.signal?.addEventListener('abort', onAbort, { once: true });
       const startedRenderingAt = Date.now();
       try {
         if (request.artifact.type === 'video/mp4') {
-          const qualityOptions =
-            settings.quality.mode === 'crf'
-              ? { crf: settings.quality.value }
-              : settings.quality.mode === 'lossless'
-                ? { crf: 0, preferLossless: true }
-                : { videoBitrate: `${settings.quality.bitsPerSecond}b` };
-          await renderMedia({
+          const frameOutput = join(workDirectory, 'frames');
+          await mkdir(frameOutput);
+          await renderFrames({
             composition,
             serveUrl,
-            codec: 'h264',
-            outputLocation: temporaryOutput,
             inputProps: props as unknown as Record<string, unknown>,
-            pixelFormat: 'yuv420p',
+            outputDir: frameOutput,
             imageFormat: 'png',
-            colorSpace: 'bt709',
-            ...qualityOptions,
+            imageSequencePattern: 'frame_[frame].png',
             ...(settings.renderer.config.concurrency !== undefined
               ? { concurrency: settings.renderer.config.concurrency }
               : {}),
-            timeoutInMilliseconds: timeoutMs,
             cancelSignal: cancellation.cancelSignal,
-            onProgress: (progress) => {
-              metrics['renderedFrames'] = progress.renderedFrames;
-              metrics['renderProgress'] = progress.progress;
+            onStart: () => undefined,
+            onFrameUpdate: (renderedFrames) => {
+              metrics['renderedFrames'] = renderedFrames;
             },
             onBrowserLog: (entry) => {
               if (logs.length < 200) logs.push(`${entry.type}: ${entry.text}`);
             },
             logLevel: 'error',
             ...(browserExecutable ? { browserExecutable } : {}),
-            overwrite: true,
           });
+          const frameFiles = (await readdir(frameOutput))
+            .filter((name) => /^frame_\d+\.png$/.test(name))
+            .sort((a, b) => Number(a.slice(6, -4)) - Number(b.slice(6, -4)));
+          if (frameFiles.length !== shot.durationFrames)
+            throw new RenderFailure(
+              'INCOMPLETE_OUTPUT',
+              `Remotion wrote ${frameFiles.length} frames; expected ${shot.durationFrames}.`,
+              true,
+            );
+          for (const [index, file] of frameFiles.entries()) {
+            if (Number(file.slice(6, -4)) !== index)
+              throw new RenderFailure(
+                'INCOMPLETE_OUTPUT',
+                `Remotion frame ${index} is missing or misnumbered.`,
+                true,
+              );
+            await rename(
+              join(frameOutput, file),
+              join(
+                frameOutput,
+                `frame_${String(index + 1).padStart(6, '0')}.png`,
+              ),
+            );
+          }
+          const media = new FfmpegMediaEngine({
+            ffmpegPath: process.env['FILMIE_FFMPEG'] ?? 'ffmpeg',
+            ffprobePath: process.env['FILMIE_FFPROBE'] ?? 'ffprobe',
+          });
+          const encoded = await media.encodeImageSequence({
+            inputDirectory: frameOutput,
+            outputPath: temporaryOutput,
+            frameCount: shot.durationFrames,
+            policy: settings,
+            postProcessing: { glow: false, finalGrade: false },
+            timeoutMs,
+            signal: processAbort.signal,
+          });
+          if (encoded.status === 'failure')
+            throw new RenderFailure(
+              encoded.error.code === 'TIMEOUT' ? 'TIMEOUT' : 'RENDER_CRASHED',
+              `FFmpeg shot encoding failed: ${encoded.error.message}`,
+              encoded.error.retryable,
+            );
+          logs.push(...encoded.value.logs);
         } else if (request.artifact.type === 'image-sequence/png') {
           await renderFrames({
             composition,
