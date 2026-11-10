@@ -68,7 +68,7 @@ describe.skipIf(!blenderAvailable)('Blender motion-curve runtime', () => {
       await writeFile(
         script,
         `
-import bpy, sys
+import bpy, json, runpy, sys
 from pathlib import Path
 sys.path.insert(0, ${JSON.stringify(resolve('engines/blender/worker'))})
 import render_shot
@@ -123,6 +123,44 @@ render_shot.apply_motion_curves({'motionCurves':${JSON.stringify(compiled.motion
 for frame, expected in ((1, 0), (2, .0125), (3, .04), (4, .0675), (5, .08), (6, .08)):
     scene.frame_set(frame)
     assert abs(head.rotation_euler.y - expected) < 1e-6, (frame, head.rotation_euler.y)
+
+def png(name, pixels):
+    image = bpy.data.images.new(name, width=12, height=12, alpha=True)
+    image.pixels.foreach_set(pixels)
+    image.filepath_raw = str(Path(${JSON.stringify(temporary)}) / (name + '.png'))
+    image.file_format = 'PNG'
+    image.save()
+    return image.filepath_raw
+
+source_path = png('source', [1.0] * (12 * 12 * 4))
+matte_pixels = []
+for y in range(12):
+    for x in range(12):
+        white = float((4 <= x <= 7 and 4 <= y <= 7) or (x == 0 and y == 0))
+        matte_pixels.extend((white, white, white, 1.0))
+matte_path = png('matte', matte_pixels)
+matte_layer = {
+    'id':'test.matte', 'source':{'localPath':source_path,'assetId':'source','version':'1.0.0','contentHash':'source'},
+    'manualMatte':{'localPath':matte_path},
+    'processing':{'smoothingPasses':1,'removeIslandsBelowPixels':4},
+    'size':{'width':1,'height':1},'pivot':{'x':.5,'y':.5},'opacity':1,'order':0,
+    'transform':{'position':{'x':0,'y':0,'z':0},'rotationDegrees':{'x':0,'y':0,'z':0},'scale':1},
+}
+matte_spec = Path(${JSON.stringify(temporary)}) / 'matte-spec.json'
+matte_spec.write_text(json.dumps({
+    'assets':[{'assetId':'test.matte','version':'1.0.0','kind':'character','displayName':'Matte fixture',
+               'groups':[],'layers':[matte_layer],'anchors':[],'variantSlots':[]}],
+    'style':{'palette':{'shadow':[0,0,0],'paper':[1,1,1],'graphite':[.5,.5,.5]}},
+    'outputDirectory':str(matte_spec.parent / 'prepared'),
+}), encoding='utf-8')
+sys.argv.extend(['--', str(matte_spec)])
+runpy.run_path(str(Path(sys.path[0]) / 'prepare_artwork.py'), run_name='__main__')
+sprite = bpy.data.objects['SPRITE__test.matte']
+image = next(node.image for node in sprite.data.materials[0].node_tree.nodes if node.type == 'TEX_IMAGE')
+assert sprite['filmie_prepared_matte'] and image.packed_file
+assert image.pixels[3] == 0, 'Isolated matte pixel survived processing'
+assert 0.25 < image.pixels[(5 * 12 + 3) * 4 + 3] < 0.4, 'Expected a smoothed matte edge'
+assert image.pixels[(5 * 12 + 5) * 4 + 3] == 1, 'Matte erased solid interior'
 
 def must_reject(curves, expected):
     try:

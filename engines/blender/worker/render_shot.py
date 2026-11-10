@@ -399,7 +399,7 @@ def make_image_plane(asset, transform, style, name, width=None, height=None):
     return obj
 
 
-def instantiate_asset(asset, transform, style, entity_id):
+def instantiate_asset(asset, transform, style, entity_id, rig=None):
     """Append one immutable generated Blender collection or load a prepared image."""
     collection_name = asset.get("metadata", {}).get("blenderCollection")
     if not collection_name:
@@ -439,6 +439,8 @@ def instantiate_asset(asset, transform, style, entity_id):
     for sprite in collection.objects:
         if sprite.type != "MESH" or not sprite.get("filmie_prepared_matte"):
             continue
+        if rig is not None and rig["contentHash"] != asset["contentHash"]:
+            raise RuntimeError("Matte cutout rig must reference the prepared artwork package: " + entity_id)
         source = next(node.image for node in sprite.data.materials[0].node_tree.nodes
                       if node.type == "TEX_IMAGE" and node.image)
         sprite.data.materials[0] = color_material(
@@ -848,7 +850,8 @@ def create_scene(spec):
             root.parent = parent
     for character in spec["characters"]:
         root, controls = instantiate_asset(
-            character["artwork"], character["transform"], spec["style"], character["id"]
+            character["artwork"], character["transform"], spec["style"],
+            character["id"], character.get("rig"),
         )
         entity_roots[character["id"]] = root
         control_objects[character["id"]] = controls
