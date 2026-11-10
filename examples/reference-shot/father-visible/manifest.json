@@ -70,6 +70,10 @@
         {
           "assetId": "background.interior-wide",
           "version": "1.0.0"
+        },
+        {
+          "assetId": "audio.room-tone",
+          "version": "1.0.0"
         }
       ],
       "scene": {
@@ -151,7 +155,21 @@
           "dustDensity": 12
         },
         "motionLibraries": []
-      }
+      },
+      "audioCues": [
+        {
+          "id": "shot.room-wide.room-tone",
+          "asset": {
+            "assetId": "audio.room-tone",
+            "version": "1.0.0"
+          },
+          "trackId": "audio.room-tone",
+          "offsetFrames": 0,
+          "durationFrames": 240,
+          "sourceOffsetFrames": 0,
+          "category": "sound-effect"
+        }
+      ]
     },
     {
       "id": "shot.father-medium",
@@ -190,6 +208,18 @@
         {
           "assetId": "motion.father-interior",
           "version": "1.0.1"
+        },
+        {
+          "assetId": "audio.room-tone",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "audio.phone-ring",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "audio.heartbeat",
+          "version": "1.0.0"
         }
       ],
       "scene": {
@@ -319,7 +349,45 @@
       },
       "renderOverrides": {
         "samples": 2
-      }
+      },
+      "audioCues": [
+        {
+          "id": "shot.father-medium.room-tone",
+          "asset": {
+            "assetId": "audio.room-tone",
+            "version": "1.0.0"
+          },
+          "trackId": "audio.room-tone",
+          "offsetFrames": 0,
+          "durationFrames": 240,
+          "sourceOffsetFrames": 240,
+          "category": "sound-effect"
+        },
+        {
+          "id": "shot.father-medium.phone-ring",
+          "asset": {
+            "assetId": "audio.phone-ring",
+            "version": "1.0.0"
+          },
+          "trackId": "audio.phone-ring",
+          "offsetFrames": 54,
+          "durationFrames": 60,
+          "sourceOffsetFrames": 0,
+          "category": "sound-effect"
+        },
+        {
+          "id": "shot.father-medium.heartbeat",
+          "asset": {
+            "assetId": "audio.heartbeat",
+            "version": "1.0.0"
+          },
+          "trackId": "audio.heartbeat",
+          "offsetFrames": 110,
+          "durationFrames": 130,
+          "sourceOffsetFrames": 0,
+          "category": "sound-effect"
+        }
+      ]
     },
     {
       "id": "shot.telephone-close",
@@ -343,6 +411,14 @@
       "requiredAssets": [
         {
           "assetId": "background.telephone",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "audio.room-tone",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "audio.heartbeat",
           "version": "1.0.0"
         }
       ],
@@ -375,7 +451,33 @@
           "dustDensity": 12
         },
         "motionLibraries": []
-      }
+      },
+      "audioCues": [
+        {
+          "id": "shot.telephone-close.room-tone",
+          "asset": {
+            "assetId": "audio.room-tone",
+            "version": "1.0.0"
+          },
+          "trackId": "audio.room-tone",
+          "offsetFrames": 0,
+          "durationFrames": 150,
+          "sourceOffsetFrames": 480,
+          "category": "sound-effect"
+        },
+        {
+          "id": "shot.telephone-close.heartbeat",
+          "asset": {
+            "assetId": "audio.heartbeat",
+            "version": "1.0.0"
+          },
+          "trackId": "audio.heartbeat",
+          "offsetFrames": 0,
+          "durationFrames": 150,
+          "sourceOffsetFrames": 130,
+          "category": "sound-effect"
+        }
+      ]
     }
   ],
   "timeline": {
@@ -399,7 +501,17 @@
         ]
       }
     ],
-    "audioTracks": [],
+    "audioTracks": [
+      {
+        "id": "audio.room-tone"
+      },
+      {
+        "id": "audio.phone-ring"
+      },
+      {
+        "id": "audio.heartbeat"
+      }
+    ],
     "transitions": []
   }
 }

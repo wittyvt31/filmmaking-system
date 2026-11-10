@@ -178,5 +178,50 @@
     "provenance": {
       "source": "Existing telephone storyboard panel"
     }
+  },
+  {
+    "assetId": "audio.room-tone",
+    "version": "1.0.0",
+    "type": "audio",
+    "sourceUri": "assets/room-tone.wav",
+    "contentHash": "5526857488a551cb9a5096c2be769db880c389be94b10bd5f687b7ab3952f274",
+    "metadata": {},
+    "license": {
+      "name": "Original synthesized audio",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "FFmpeg anoisesrc=color=brown:amplitude=0.2:sample_rate=48000:seed=413 \u2192 highpass=f=35,lowpass=f=320,volume=0.5"
+    }
+  },
+  {
+    "assetId": "audio.phone-ring",
+    "version": "1.0.0",
+    "type": "audio",
+    "sourceUri": "assets/phone-ring.wav",
+    "contentHash": "bc208709ac12668f3e60b99e5d8be9123bc5da4dfa03f3027dd8808ace440fb8",
+    "metadata": {},
+    "license": {
+      "name": "Original synthesized audio",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "FFmpeg sine=frequency=425:sample_rate=48000 \u2192 volume='0.85*lt(mod(t,1),0.55)':eval=frame,afade=t=out:st=1.85:d=0.15"
+    }
+  },
+  {
+    "assetId": "audio.heartbeat",
+    "version": "1.0.0",
+    "type": "audio",
+    "sourceUri": "assets/heartbeat.wav",
+    "contentHash": "5cccac8053c7925aa163c97d47c6ef9e122142f58a3a418e416be6230287680e",
+    "metadata": {},
+    "license": {
+      "name": "Original synthesized audio",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "FFmpeg sine=frequency=58:sample_rate=48000 \u2192 volume='(0.22+0.62*min(t/10,1))*(exp(-22*mod(t,1.14))+0.5*gte(mod(t,1.14),0.17)*exp(-24*max(0,mod(t,1.14)-0.17)))':eval=frame"
+    }
   }
 ]

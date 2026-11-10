@@ -13,7 +13,12 @@ afterEach(async () => {
   );
 });
 
-function makeVideo(directory: string, source: string, label: string) {
+function makeVideo(
+  directory: string,
+  source: string,
+  label: string,
+  audio?: string,
+) {
   const output = join(directory, `${label}.mp4`);
   const result = spawnSync(
     'ffmpeg',
@@ -24,6 +29,7 @@ function makeVideo(directory: string, source: string, label: string) {
       'lavfi',
       '-i',
       source,
+      ...(audio ? ['-f', 'lavfi', '-i', audio, '-c:a', 'aac'] : []),
       '-t',
       '0.1',
       '-r',
@@ -54,6 +60,39 @@ function verify(video: string, manifest: string, extra: string[] = []) {
 }
 
 describe('render visual verification', () => {
+  it('requires audible audio of the timeline duration when cues are authored', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'filmie-verify-audio-'));
+    temporary.push(directory);
+    const manifest = join(directory, 'manifest.json');
+    await writeFile(
+      manifest,
+      JSON.stringify({
+        timeline: { durationFrames: 3 },
+        video: { frameRate: { numerator: 30, denominator: 1 } },
+        shots: [{ audioCues: [{ id: 'room-tone' }] }],
+      }),
+    );
+    const source = 'testsrc2=s=320x180:r=30';
+    for (const [name, audio, failure] of [
+      ['missing', undefined, 'Missing audio stream'],
+      ['silent', 'anullsrc=r=48000', 'Audio RMS is below'],
+      [
+        'short',
+        'sine=frequency=440:sample_rate=48000:duration=0.03',
+        'Audio duration differs',
+      ],
+      ['audible', 'sine=frequency=440:sample_rate=48000', undefined],
+    ] as const) {
+      const result = verify(
+        makeVideo(directory, source, name, audio),
+        manifest,
+      );
+      if (failure) {
+        expect(result.status).not.toBe(0);
+        expect(result.stdout).toContain(failure);
+      } else expect(result.status, result.stderr || result.stdout).toBe(0);
+    }
+  }, 30_000);
   it('rejects uniform gray output', async () => {
     const directory = await mkdtemp(join(tmpdir(), 'filmie-verify-gray-'));
     temporary.push(directory);

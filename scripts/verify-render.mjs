@@ -294,6 +294,61 @@ async function main() {
   const identicalRatioValue =
     identicalConsecutiveFrames / Math.max(1, hashes.length - 1);
   const failureReasons = [];
+  let audio;
+  if (manifest.shots?.some((shot) => shot.audioCues?.length)) {
+    audio = { present: false, durationSeconds: null, rmsDbfs: null };
+    if (info.source.kind === 'video') {
+      const probe = await run(ffprobe, [
+        '-v',
+        'error',
+        '-select_streams',
+        'a:0',
+        '-show_entries',
+        'stream=duration',
+        '-of',
+        'json',
+        input,
+      ]);
+      const stream = JSON.parse(probe.stdout.toString()).streams?.[0];
+      if (stream) {
+        const stats = await run(ffmpeg, [
+          '-hide_banner',
+          '-nostats',
+          '-i',
+          input,
+          '-map',
+          '0:a:0',
+          '-af',
+          'astats=measure_perchannel=none:measure_overall=RMS_level',
+          '-f',
+          'null',
+          '-',
+        ]);
+        const match = /RMS level dB:\s*(-?(?:\d+(?:\.\d+)?|inf))/i.exec(
+          stats.stderr.toString(),
+        );
+        const rms = Number(match?.[1]);
+        audio = {
+          present: true,
+          durationSeconds: Number(stream.duration),
+          rmsDbfs: Number.isFinite(rms) ? rms : null,
+        };
+      }
+    }
+    if (!audio.present)
+      failureReasons.push('Missing audio stream for manifest cues.');
+    else {
+      if (
+        !Number.isFinite(audio.durationSeconds) ||
+        Math.abs(audio.durationSeconds - expectedFrames / fps) > 1 / fps
+      )
+        failureReasons.push(
+          'Audio duration differs from the timeline by more than one frame.',
+        );
+      if (audio.rmsDbfs === null || audio.rmsDbfs < -55)
+        failureReasons.push('Audio RMS is below -55 dBFS.');
+    }
+  }
   if (nearUniformFrames > 0)
     failureReasons.push(`near-uniform frames: ${nearUniformFrames}`);
   if (lowEntropyFrames > 0)
@@ -404,6 +459,7 @@ async function main() {
         staticOk,
       },
       failureReasons,
+      ...(audio ? { audio } : {}),
       contactSheet,
       lumaSampling: `${FRAME_WIDTH}x${FRAME_HEIGHT} grayscale; exact-identity count uses the same decoded samples`,
     };
