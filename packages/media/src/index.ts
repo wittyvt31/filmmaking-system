@@ -12,7 +12,7 @@ import {
 } from '@filmmaking/contracts';
 import type { CompiledTimeline } from '@filmmaking/timeline';
 
-export const ASSEMBLY_IMPLEMENTATION_VERSION = 'ffmpeg-timeline-v6';
+export const ASSEMBLY_IMPLEMENTATION_VERSION = 'ffmpeg-timeline-v7';
 
 export interface MediaAssetInput {
   assetId: string;
@@ -423,7 +423,7 @@ function buildAssemblyArgs(
           policy.frameRate.numerator,
       );
       filterSegments.push(
-        `[${audioInputIndex}:a]atrim=start=${start}:duration=${duration},asetpts=PTS-STARTPTS,adelay=${delayMs}:all=1,apad,atrim=duration=${seconds(timeline.durationFrames, policy)}[${label}]`,
+        `[${audioInputIndex}:a]atrim=start=${start}:duration=${duration},asetpts=PTS-STARTPTS,adelay=${delayMs}:all=1,asetpts=N/SR/TB,apad,atrim=duration=${seconds(timeline.durationFrames, policy)}[${label}]`,
       );
       audioLabels.push(`[${label}]`);
       audioInputIndex += 1;

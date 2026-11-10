@@ -279,7 +279,7 @@ describe('FFmpeg timeline video assembly', () => {
       implementationVersion: `${ASSEMBLY_IMPLEMENTATION_VERSION}-next`,
     });
 
-    expect(ASSEMBLY_IMPLEMENTATION_VERSION).toBe('ffmpeg-timeline-v6');
+    expect(ASSEMBLY_IMPLEMENTATION_VERSION).toBe('ffmpeg-timeline-v7');
     expect(changedFingerprint).not.toBe(fingerprint);
   });
 
@@ -310,11 +310,35 @@ describe('FFmpeg timeline video assembly', () => {
       shotArtifacts[shot.id] = path;
     }
     const outputPath = join(root, 'crossfade.mp4');
+    const cuePath = join(root, 'cue.wav');
+    await run(process.env['FILMIE_FFMPEG'] ?? 'ffmpeg', [
+      '-v',
+      'error',
+      '-f',
+      'lavfi',
+      '-i',
+      'sine=frequency=440:sample_rate=48000:duration=1',
+      '-af',
+      'afade=t=in:st=0.79:d=0.01',
+      cuePath,
+    ]);
+    const cueAsset = { assetId: 'audio.test-tone', version: '1.0.0' };
+    manifest.timeline.audioTracks = [{ id: 'audio.test' }];
+    manifest.shots[2]!.audioCues = [
+      {
+        id: 'audio.late-cue',
+        asset: cueAsset,
+        trackId: 'audio.test',
+        offsetFrames: 4,
+        durationFrames: 4,
+        sourceOffsetFrames: 24,
+      },
+    ];
     const result = await new FfmpegMediaEngine().assemble({
       manifest,
       timeline: compileTimeline(manifest),
       shotArtifacts,
-      assets: [],
+      assets: [{ ...cueAsset, localPath: cuePath, contentHash: 'test' }],
       outputPath,
     });
     if (result.status === 'failure') throw new Error(result.error.message);
@@ -328,6 +352,28 @@ describe('FFmpeg timeline video assembly', () => {
     expect(dissolve[1]).toBeGreaterThan(50);
     expect(dissolve[2]).toBeGreaterThan(50);
     expect(end[2]).toBeGreaterThan(200);
+    const { stdout: audio } = await run(
+      process.env['FILMIE_FFMPEG'] ?? 'ffmpeg',
+      [
+        '-v',
+        'error',
+        '-i',
+        outputPath,
+        '-map',
+        '0:a:0',
+        '-f',
+        'f32le',
+        'pipe:1',
+      ],
+    );
+    const maximum = (start: number, end: number) => {
+      let peak = 0;
+      for (let sample = start; sample < end; sample += 1)
+        peak = Math.max(peak, Math.abs(audio.readFloatLE(sample * 4)));
+      return peak;
+    };
+    expect(maximum(0, 24_000)).toBeLessThan(0.005);
+    expect(maximum(27_000, 30_000)).toBeGreaterThan(0.05);
   }, 30_000);
 
   it.each([2, 3, 5])(
