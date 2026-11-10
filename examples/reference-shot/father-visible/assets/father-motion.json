@@ -1,0 +1,97 @@
+{
+  "schemaVersion": "1.0.0",
+  "libraryId": "motion.father-interior",
+  "version": "1.0.1",
+  "clips": [
+    {
+      "id": "father.waits",
+      "durationFrames": 150,
+      "tracks": [
+        {
+          "control": "chest",
+          "channel": "scale",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": [
+                1,
+                1,
+                1
+              ],
+              "interpolation": "ease-in-out"
+            },
+            {
+              "frame": 60,
+              "value": [
+                1,
+                1,
+                1.015
+              ],
+              "interpolation": "ease-in-out"
+            },
+            {
+              "frame": 120,
+              "value": [
+                1,
+                1,
+                1
+              ],
+              "interpolation": "ease-in-out"
+            },
+            {
+              "frame": 149,
+              "value": [
+                1,
+                1,
+                1.0075
+              ],
+              "interpolation": "ease-in-out"
+            }
+          ]
+        },
+        {
+          "control": "head",
+          "channel": "rotation",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": [
+                0,
+                0,
+                0
+              ],
+              "interpolation": "ease-in-out"
+            },
+            {
+              "frame": 60,
+              "value": [
+                0,
+                0,
+                0
+              ],
+              "interpolation": "ease-in-out"
+            },
+            {
+              "frame": 110,
+              "value": [
+                0,
+                0.13962634015954636,
+                0
+              ],
+              "interpolation": "ease-in-out"
+            },
+            {
+              "frame": 149,
+              "value": [
+                0,
+                0.13962634015954636,
+                0
+              ],
+              "interpolation": "ease-in-out"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "framesZeroBased": [60, 110],
+  "headBoxXyxy": [154, 171, 216, 234],
+  "angleDegrees": 7.999999938029066,
+  "insideMean": 0.011118809692561626,
+  "outsideMax": 0.0,
+  "cameraGrainAndBreathingFrozen": true,
+  "passed": true
+}

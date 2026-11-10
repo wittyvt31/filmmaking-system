@@ -1,0 +1,163 @@
+[
+  {
+    "assetId": "background.interior-wide",
+    "version": "1.0.0",
+    "type": "graphic",
+    "sourceUri": "../../2.5d-proof/assets/backgrounds/interior-wide.png",
+    "contentHash": "1f77fa81ed56e6429a81fa723f0ec07cbd8c8f1ce696c47cfde4fab365c4652b",
+    "metadata": {
+      "role": "2.5d-artwork",
+      "description": "Shared proof-project opaque charcoal interior panel."
+    },
+    "license": {
+      "name": "User-supplied approved storyboard artwork",
+      "restrictions": ["Use for project They Have Reached"]
+    },
+    "provenance": {
+      "source": "Reused byte-for-byte from examples/2.5d-proof/assets/backgrounds/interior-wide.png."
+    }
+  },
+  {
+    "assetId": "character.daughter-cutout",
+    "version": "1.0.0",
+    "type": "graphic",
+    "sourceUri": "../../2.5d-proof/assets/foreground/daughter-cutout.png",
+    "contentHash": "32b6f7b4e9fd406c7a97c103460f088d3b22b1c06b9dc44abdbc52e89c6ae327",
+    "metadata": {
+      "role": "2.5d-artwork",
+      "description": "Shared proof-project daughter cutout with antialiased alpha matte."
+    },
+    "license": {
+      "name": "User-supplied approved storyboard artwork",
+      "restrictions": ["Use for project They Have Reached"]
+    },
+    "provenance": {
+      "source": "Reused byte-for-byte from examples/2.5d-proof/assets/foreground/daughter-cutout.png."
+    }
+  },
+  {
+    "assetId": "prop.telephone-cutout",
+    "version": "1.0.0",
+    "type": "graphic",
+    "sourceUri": "../../2.5d-proof/assets/foreground/telephone-cutout.png",
+    "contentHash": "3334a3127c32d10c6da59600580eb83f9c2356790e5b30c5e1bddcd99735475a",
+    "metadata": {
+      "role": "2.5d-artwork",
+      "description": "Shared proof-project telephone drawing with antialiased alpha matte."
+    },
+    "license": {
+      "name": "User-supplied approved storyboard artwork",
+      "restrictions": ["Use for project They Have Reached"]
+    },
+    "provenance": {
+      "source": "Reused byte-for-byte from examples/2.5d-proof/assets/foreground/telephone-cutout.png."
+    }
+  },
+  {
+    "assetId": "matte.father-head",
+    "version": "1.0.0",
+    "type": "graphic",
+    "sourceUri": "../father-motion/assets/head-matte.png",
+    "contentHash": "5a003cb807e1bf907adf66500ec5467717864d787ca3dfb76629ad7d6ddaf624",
+    "metadata": {},
+    "license": {
+      "name": "User-supplied storyboard artwork",
+      "restrictions": ["Use for project They Have Reached"]
+    },
+    "provenance": {
+      "source": "Hand-traced mask of the existing interior-wide artwork"
+    }
+  },
+  {
+    "assetId": "matte.father-torso",
+    "version": "1.0.0",
+    "type": "graphic",
+    "sourceUri": "../father-motion/assets/torso-matte.png",
+    "contentHash": "df70f87d5ffae5f7316c82549a4b15afcb7e304c3f8c25f70970d60616f0c127",
+    "metadata": {},
+    "license": {
+      "name": "User-supplied storyboard artwork",
+      "restrictions": ["Use for project They Have Reached"]
+    },
+    "provenance": {
+      "source": "Hand-traced mask of the existing interior-wide artwork"
+    }
+  },
+  {
+    "assetId": "character.father-interior",
+    "version": "1.0.0",
+    "type": "other",
+    "sourceUri": "../father-motion/assets/generated/character.father-interior/1.0.0/asset.blend",
+    "contentHash": "b2d197d59c66bfd094e435a31f1b7c83b8e57c00ed58bc23a1b18278bc3b8100",
+    "metadata": {
+      "generator": "layered-artwork-preparation-v2",
+      "generatorFingerprint": "2aaa7077ef80b5f7c479b2e4219bf291a3b591301fe96d8a7d11c19d65c72b46",
+      "assetKind": "character",
+      "displayName": "Father cut from interior artwork",
+      "blenderCollection": "ASSET__character_father_interior",
+      "artworkLayers": [
+        {
+          "assetId": "background.interior-wide",
+          "version": "1.0.0",
+          "contentHash": "1f77fa81ed56e6429a81fa723f0ec07cbd8c8f1ce696c47cfde4fab365c4652b"
+        },
+        {
+          "assetId": "background.interior-wide",
+          "version": "1.0.0",
+          "contentHash": "1f77fa81ed56e6429a81fa723f0ec07cbd8c8f1ce696c47cfde4fab365c4652b"
+        }
+      ],
+      "layerCount": 2,
+      "groupCount": 0,
+      "variantSlots": [],
+      "anchors": [],
+      "semanticControls": {
+        "head": "father.head",
+        "chest": "father.torso"
+      },
+      "variantDefinitions": {},
+      "stylePreset": "charcoal_horror",
+      "styleVersion": "1.2.0"
+    },
+    "license": {
+      "name": "Composite artwork package; source licenses apply",
+      "restrictions": ["Use for project They Have Reached"]
+    },
+    "provenance": {
+      "source": "Filmie layered artwork preparation; inputs background.interior-wide@1.0.0, background.interior-wide@1.0.0"
+    }
+  },
+  {
+    "assetId": "motion.father-interior",
+    "version": "1.0.1",
+    "type": "other",
+    "sourceUri": "assets/father-motion.json",
+    "contentHash": "0ee327769ae1280e78fc9db73bb34c243912a5e875a00c22a2ec0a2d8a3519a2",
+    "metadata": {},
+    "license": {
+      "name": "Original project animation",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "Authored motion for the interior cutouts"
+    }
+  },
+  {
+    "assetId": "background.interior-head-clean",
+    "version": "1.0.0",
+    "type": "graphic",
+    "sourceUri": "assets/interior-head-clean.png",
+    "contentHash": "12be6d9991ac49fd4fc8a02feab0585592d1c9fe92ae734d95a679995598cd0a",
+    "metadata": {
+      "role": "2.5d-artwork",
+      "description": "Shared proof-project opaque charcoal interior panel."
+    },
+    "license": {
+      "name": "User-supplied approved storyboard artwork",
+      "restrictions": ["Use for project They Have Reached"]
+    },
+    "provenance": {
+      "source": "Interior-wide artwork, with diffusion inpainting under the original head and grain sampled from the adjacent wall."
+    }
+  }
+]
