@@ -1,0 +1,174 @@
+{
+  "projectId": "filmie.reference-shot-charcoal-2.0-preview",
+  "version": "1.0.0",
+  "video": {
+    "resolution": {
+      "width": 1280,
+      "height": 720
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    }
+  },
+  "renderPolicy": {
+    "outputDimensions": {
+      "width": 1280,
+      "height": 720
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": {
+      "mode": "crf",
+      "value": 24
+    },
+    "qualityProfile": "preview",
+    "renderer": {
+      "id": "blender",
+      "config": {
+        "engine": "BLENDER_EEVEE"
+      }
+    },
+    "qualityPostProcessing": {
+      "final": {
+        "glow": true,
+        "finalGrade": true
+      }
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.reference-layered-room",
+      "durationFrames": 150,
+      "visualDescription": "The prepared charcoal village-house interior, daughter silhouette and telephone form a quiet 2.5D tableau.",
+      "composition": {
+        "framing": "Wide illustrated interior with distinct back, character and foreground planes.",
+        "subjectPlacement": "The background telephone is the only telephone; the daughter stands within the right window with her feet on its sill.",
+        "cameraMovement": "Slow, continuous camera push-in across the layered illustration.",
+        "camera": {
+          "type": "zoom",
+          "startFrame": 0,
+          "durationFrames": 150,
+          "fromScale": 1,
+          "toScale": 1.06
+        },
+        "instructions": [
+          "Use only the prepared assets referenced by the manifest.",
+          "Preserve the supplied charcoal artwork and its antialiased alpha mattes.",
+          "Do not invent character articulation; this is a layered camera-motion reference shot."
+        ]
+      },
+      "requiredAssets": [
+        {
+          "assetId": "background.interior-wide",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "character.daughter-cutout",
+          "version": "1.0.0"
+        }
+      ],
+      "scene": {
+        "stylePreset": "charcoal_horror",
+        "styleVersion": "2.0.0",
+        "animationLibraryVersion": "1.0.0",
+        "environment": {
+          "assetId": "background.interior-wide",
+          "version": "1.0.0"
+        },
+        "groups": [
+          {
+            "id": "group.window-character",
+            "transform": {
+              "position": {
+                "x": 1.75,
+                "y": -0.002,
+                "z": -0.57
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "scale": 1
+            }
+          }
+        ],
+        "layers": [
+          {
+            "id": "layer.daughter",
+            "asset": {
+              "assetId": "character.daughter-cutout",
+              "version": "1.0.0"
+            },
+            "role": "character",
+            "parentId": "group.window-character",
+            "transform": {
+              "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "scale": 1
+            },
+            "pivot": {
+              "x": 0.5,
+              "y": 0
+            },
+            "size": {
+              "width": 0.38,
+              "height": 0.85
+            },
+            "opacity": 0.85,
+            "order": 10
+          }
+        ],
+        "characters": [],
+        "props": [],
+        "lights": [],
+        "camera": {
+          "type": "push-in",
+          "startFrame": 0,
+          "durationFrames": 150,
+          "fromDistance": 6,
+          "toDistance": 5.35,
+          "target": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "styleOverrides": {
+          "dustDensity": 12
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "durationFrames": 150,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [
+          {
+            "shotId": "shot.reference-layered-room",
+            "startFrame": 0
+          }
+        ]
+      }
+    ],
+    "audioTracks": [],
+    "transitions": []
+  }
+}

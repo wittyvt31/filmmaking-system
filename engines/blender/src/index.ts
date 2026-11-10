@@ -887,6 +887,11 @@ export class BlenderRendererAdapter implements RendererAdapter {
             denoising: renderConfig.denoising,
             width: renderDimensions.width,
             height: renderDimensions.height,
+            nativeRenderWidth: renderDimensions.width,
+            nativeRenderHeight: renderDimensions.height,
+            upscaled:
+              settings.outputDimensions.width > renderDimensions.width ||
+              settings.outputDimensions.height > renderDimensions.height,
             frameRate: `${renderConfig.frameRate.numerator}/${renderConfig.frameRate.denominator}`,
             shadows: renderConfig.shadows,
             textures: renderConfig.textures,
@@ -1322,6 +1327,11 @@ export class BlenderRendererAdapter implements RendererAdapter {
       metrics['samples'] = workerResult?.samples ?? renderConfig.samples;
       metrics['renderWidth'] = renderDimensions.width;
       metrics['renderHeight'] = renderDimensions.height;
+      metrics['nativeRenderWidth'] = renderDimensions.width;
+      metrics['nativeRenderHeight'] = renderDimensions.height;
+      metrics['upscaled'] =
+        settings.outputDimensions.width > renderDimensions.width ||
+        settings.outputDimensions.height > renderDimensions.height;
       metrics['qualityProfile'] = settings.qualityProfile ?? 'custom';
       metrics['frameRate'] =
         `${renderConfig.frameRate.numerator}/${renderConfig.frameRate.denominator}`;

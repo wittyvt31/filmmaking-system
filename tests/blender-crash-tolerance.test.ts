@@ -70,6 +70,9 @@ describe.skipIf(!fakeBlenderPath)('Blender crash tolerance', () => {
       if (result.status !== 'success') throw new Error(result.error.message);
       expect(result.receipt.completedWithWarning).toBe(true);
       expect(result.receipt.metrics['retryCount']).toBe(2);
+      expect(result.receipt.metrics['nativeRenderWidth']).toBe(1280);
+      expect(result.receipt.metrics['nativeRenderHeight']).toBe(720);
+      expect(result.receipt.metrics['upscaled']).toBe(false);
       expect(result.receipt.metrics['recoveredAttemptCount']).toBe(2);
       expect(result.receipt.metrics['firstFailedExitCode']).toBe(3);
       expect(result.receipt.fallbackUsed).toBe(false);
@@ -105,11 +108,14 @@ describe.skipIf(!fakeBlenderPath)('Blender crash tolerance', () => {
     process.env['FILMIE_FAKE_HEIGHT'] = '720';
     try {
       const { adapter, request } = await buildRequest(temporary);
+      request.settings.outputDimensions = { width: 1920, height: 1080 };
+      request.settings.qualityProfile = 'preview';
       const result = await adapter.renderShot(request);
       expect(result.status).toBe('success');
       if (result.status !== 'success') throw new Error(result.error.message);
       expect(result.receipt.completedWithWarning).toBe(true);
       expect(result.receipt.metrics['exitCode']).toBe(3);
+      expect(result.receipt.metrics['upscaled']).toBe(true);
       expect(result.receipt.warnings?.join('\n')).toContain(
         'exited non-zero (code 3)',
       );
