@@ -810,7 +810,11 @@ def create_scene(spec):
             / float(spec["width"])
         )
         image.pack()
-        frame_scale = view_height * 1.04 / 2.0
+        fit_distance = spec["environment"].get("metadata", {}).get("filmieFitDistance")
+        if fit_distance is not None:
+            frame_scale = source_framing(spec, image.size, fit_distance)
+        else:
+            frame_scale = view_height * 1.04 / 2.0
         environment.scale = (frame_scale, 1.0, frame_scale)
     if engine != "BLENDER_WORKBENCH":
         create_haze_plane(spec, camera_distance)
@@ -896,6 +900,31 @@ def create_scene(spec):
             paper.keyframe_insert(data_path="scale", frame=frame)
     scene.frame_set(1)
     return scene, environment, entity_roots, control_objects
+
+
+def source_framing(spec, image_size, fit_distance):
+    """Keep the artwork plane fixed across shots and measure its peak projection."""
+    if not isinstance(fit_distance, (int, float)) or not math.isfinite(fit_distance) or fit_distance <= 0:
+        raise RuntimeError("filmieFitDistance must be a positive finite distance")
+    width, height = image_size
+    output_width, output_height = spec["width"], spec["height"]
+    plain_fit = max(output_width / width, output_height / height)
+    frame_scale = fit_distance * 36 / 50 * output_height / output_width * 1.04 / 2
+    effective = max(
+        frame_scale * 2 * output_width * key["focalLength"] / (36 * key["distance"] * height)
+        for key in spec["cameraKeyframes"]
+    )
+    relative = effective / plain_fit
+    if relative > 2:
+        raise RuntimeError("Source framing exceeds twice the plain full-frame fit")
+    spec["sourceFraming"] = {
+        "sourceLimited": width < output_width or height < output_height,
+        "sourceWidth": int(width),
+        "sourceHeight": int(height),
+        "effectiveUpscale": effective,
+        "upscaleRelativeToFit": relative,
+    }
+    return frame_scale
 
 
 def bind_authoritative_rig(control_objects):
@@ -1596,6 +1625,7 @@ def main():
         "samples": int(spec["renderConfig"]["samples"]),
         "denoising": bool(spec["renderConfig"].get("denoising", False)),
         "renderedFrames": rendered,
+        "sourceFraming": spec.get("sourceFraming"),
         "metrics": RENDER_METRICS,
     }
     with open(os.path.join(spec["outputDirectory"], "worker-result.json"), "w", encoding="utf-8") as stream:

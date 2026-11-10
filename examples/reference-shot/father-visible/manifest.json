@@ -44,17 +44,127 @@
   },
   "shots": [
     {
-      "id": "shot.reference-layered-room",
-      "durationFrames": 150,
-      "visualDescription": "The prepared charcoal village-house interior, daughter silhouette and telephone form a quiet 2.5D tableau.",
+      "id": "shot.room-wide",
+      "durationFrames": 240,
+      "visualDescription": "Wide room with one telephone and a still figure in the window.",
       "composition": {
-        "framing": "Wide illustrated interior with distinct back, character and foreground planes.",
-        "subjectPlacement": "The background telephone is the only telephone; the daughter stands within the right window with her feet on its sill.",
+        "framing": "Wide room with one telephone and a still figure in the window.",
+        "subjectPlacement": "Wide room with one telephone and a still figure in the window.",
         "cameraMovement": "Slow, continuous camera push-in across the layered illustration.",
         "camera": {
           "type": "zoom",
           "startFrame": 0,
-          "durationFrames": 150,
+          "durationFrames": 240,
+          "fromScale": 1,
+          "toScale": 1.06
+        },
+        "instructions": [
+          "Hold the artwork layers and push slowly into the room."
+        ]
+      },
+      "requiredAssets": [
+        {
+          "assetId": "character.daughter-cutout",
+          "version": "1.0.0"
+        },
+        {
+          "assetId": "background.interior-wide",
+          "version": "1.0.0"
+        }
+      ],
+      "scene": {
+        "stylePreset": "charcoal_horror",
+        "styleVersion": "2.0.0",
+        "animationLibraryVersion": "1.0.0",
+        "environment": {
+          "assetId": "background.interior-wide",
+          "version": "1.0.0"
+        },
+        "groups": [
+          {
+            "id": "group.window-character",
+            "transform": {
+              "position": {
+                "x": 1.75,
+                "y": -0.002,
+                "z": -0.57
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "scale": 1
+            }
+          }
+        ],
+        "layers": [
+          {
+            "id": "layer.daughter",
+            "asset": {
+              "assetId": "character.daughter-cutout",
+              "version": "1.0.0"
+            },
+            "role": "character",
+            "parentId": "group.window-character",
+            "transform": {
+              "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "scale": 1
+            },
+            "pivot": {
+              "x": 0.5,
+              "y": 0
+            },
+            "size": {
+              "width": 0.38,
+              "height": 0.85
+            },
+            "opacity": 0.85,
+            "order": 10
+          }
+        ],
+        "characters": [],
+        "props": [],
+        "lights": [],
+        "camera": {
+          "type": "push-in",
+          "startFrame": 0,
+          "durationFrames": 240,
+          "fromDistance": 6,
+          "toDistance": 5.65,
+          "target": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "styleOverrides": {
+          "dustDensity": 12
+        },
+        "motionLibraries": []
+      }
+    },
+    {
+      "id": "shot.father-medium",
+      "durationFrames": 240,
+      "visualDescription": "Medium framing on the seated father as he turns toward the telephone.",
+      "composition": {
+        "framing": "Medium framing on the seated father as he turns toward the telephone.",
+        "subjectPlacement": "Medium framing on the seated father as he turns toward the telephone.",
+        "cameraMovement": "Slow, continuous camera push-in across the layered illustration.",
+        "camera": {
+          "type": "zoom",
+          "startFrame": 0,
+          "durationFrames": 240,
           "fromScale": 1,
           "toScale": 1.06
         },
@@ -188,13 +298,13 @@
         "camera": {
           "type": "push-in",
           "startFrame": 0,
-          "durationFrames": 150,
-          "fromDistance": 6,
-          "toDistance": 5.35,
+          "durationFrames": 240,
+          "fromDistance": 4.8,
+          "toDistance": 4.4,
           "target": {
-            "x": 0,
+            "x": -0.64,
             "y": 0,
-            "z": 0
+            "z": -0.25
           }
         },
         "styleOverrides": {
@@ -206,18 +316,85 @@
             "version": "1.0.1"
           }
         ]
+      },
+      "renderOverrides": {
+        "samples": 2
+      }
+    },
+    {
+      "id": "shot.telephone-close",
+      "durationFrames": 150,
+      "visualDescription": "The existing telephone close-up panel with a slow push.",
+      "composition": {
+        "framing": "The existing telephone close-up panel with a slow push.",
+        "subjectPlacement": "The existing telephone close-up panel with a slow push.",
+        "cameraMovement": "Slow, continuous camera push-in across the layered illustration.",
+        "camera": {
+          "type": "zoom",
+          "startFrame": 0,
+          "durationFrames": 150,
+          "fromScale": 1,
+          "toScale": 1.06
+        },
+        "instructions": [
+          "Use the existing telephone panel and retain its framing."
+        ]
+      },
+      "requiredAssets": [
+        {
+          "assetId": "background.telephone",
+          "version": "1.0.0"
+        }
+      ],
+      "scene": {
+        "stylePreset": "charcoal_horror",
+        "styleVersion": "2.0.0",
+        "animationLibraryVersion": "1.0.0",
+        "environment": {
+          "assetId": "background.telephone",
+          "version": "1.0.0"
+        },
+        "groups": [],
+        "layers": [],
+        "characters": [],
+        "props": [],
+        "lights": [],
+        "camera": {
+          "type": "push-in",
+          "startFrame": 0,
+          "durationFrames": 150,
+          "fromDistance": 6,
+          "toDistance": 5.88,
+          "target": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "styleOverrides": {
+          "dustDensity": 12
+        },
+        "motionLibraries": []
       }
     }
   ],
   "timeline": {
-    "durationFrames": 150,
+    "durationFrames": 630,
     "videoTracks": [
       {
         "id": "video.main",
         "clips": [
           {
-            "shotId": "shot.reference-layered-room",
+            "shotId": "shot.room-wide",
             "startFrame": 0
+          },
+          {
+            "shotId": "shot.father-medium",
+            "startFrame": 240
+          },
+          {
+            "shotId": "shot.telephone-close",
+            "startFrame": 480
           }
         ]
       }

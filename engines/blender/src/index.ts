@@ -847,7 +847,12 @@ export class BlenderRendererAdapter implements RendererAdapter {
         });
         const cachedWorker = JSON.parse(
           await readFile(join(outputDirectory, 'worker-result.json'), 'utf8'),
-        ) as { backend?: string; engine?: string; samples?: number };
+        ) as {
+          backend?: string;
+          engine?: string;
+          samples?: number;
+          sourceFraming?: Record<string, number | boolean>;
+        };
         const recoveryPath = join(
           outputDirectory,
           'diagnostics',
@@ -898,6 +903,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
             compositing: renderConfig.compositing,
             qualityProfile: settings.qualityProfile ?? 'custom',
             recoveredAttemptCount: recoveredAttempts,
+            ...cachedWorker.sourceFraming,
           },
           ...(cacheWarnings.length > 0
             ? { warnings: cacheWarnings, completedWithWarning: true }
@@ -967,6 +973,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
         engine?: string;
         samples?: number;
         renderedFrames?: number;
+        sourceFraming?: Record<string, number | boolean>;
         blenderVersion?: string;
         metrics?: {
           constantInterpolationCurves?: number;
@@ -1321,6 +1328,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
       metrics['frameCount'] = shot.durationFrames;
       metrics['renderedFrames'] =
         workerResult?.renderedFrames ?? shot.durationFrames;
+      Object.assign(metrics, workerResult?.sourceFraming);
       metrics['cacheHit'] = false;
       metrics['renderEngine'] = workerResult?.engine ?? renderConfig.engine;
       metrics['selectedBackend'] = workerResult?.backend ?? 'unknown';

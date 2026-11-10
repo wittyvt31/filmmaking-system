@@ -73,6 +73,19 @@ from pathlib import Path
 sys.path.insert(0, ${JSON.stringify(resolve('engines/blender/worker'))})
 import render_shot
 
+framing = {'width':640,'height':360,'cameraKeyframes':[{'focalLength':50,'distance':6},{'focalLength':50,'distance':4.4}]}
+plane_scale = render_shot.source_framing(framing, (531, 266), 6)
+assert abs(plane_scale - 1.2636) < 1e-8
+assert framing['sourceFraming']['sourceLimited']
+assert abs(framing['sourceFraming']['upscaleRelativeToFit'] - 1.04 * 6 / 4.4) < 1e-8
+framing['cameraKeyframes'][-1]['distance'] = 2
+try:
+    render_shot.source_framing(framing, (531, 266), 6)
+except RuntimeError as error:
+    assert 'twice' in str(error)
+else:
+    raise AssertionError('Source zoom cap was ignored')
+
 scene = bpy.context.scene
 root = bpy.data.objects.new('motion-root', None)
 scene.collection.objects.link(root)

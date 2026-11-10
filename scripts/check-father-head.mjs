@@ -11,7 +11,7 @@ const project = resolve('examples/reference-shot/father-visible');
 const outputDirectory = resolve(process.argv[2] ?? 'renders/m4/head-check');
 await mkdir(outputDirectory, { recursive: true });
 const manifest = JSON.parse(
-  await readFile(join(project, 'manifest.json'), 'utf8'),
+  await readFile(join(project, 'head-check.manifest.json'), 'utf8'),
 );
 const registry = new AssetRegistry(
   JSON.parse(await readFile(join(project, 'assets.json'), 'utf8')),

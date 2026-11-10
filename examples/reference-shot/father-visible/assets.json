@@ -7,7 +7,8 @@
     "contentHash": "1f77fa81ed56e6429a81fa723f0ec07cbd8c8f1ce696c47cfde4fab365c4652b",
     "metadata": {
       "role": "2.5d-artwork",
-      "description": "Shared proof-project opaque charcoal interior panel."
+      "description": "Shared proof-project opaque charcoal interior panel.",
+      "filmieFitDistance": 6
     },
     "license": {
       "name": "User-supplied approved storyboard artwork",
@@ -150,7 +151,8 @@
     "contentHash": "12be6d9991ac49fd4fc8a02feab0585592d1c9fe92ae734d95a679995598cd0a",
     "metadata": {
       "role": "2.5d-artwork",
-      "description": "Shared proof-project opaque charcoal interior panel."
+      "description": "Shared proof-project opaque charcoal interior panel.",
+      "filmieFitDistance": 6
     },
     "license": {
       "name": "User-supplied approved storyboard artwork",
@@ -158,6 +160,23 @@
     },
     "provenance": {
       "source": "Interior-wide artwork, with diffusion inpainting under the original head and grain sampled from the adjacent wall."
+    }
+  },
+  {
+    "assetId": "background.telephone",
+    "version": "1.0.0",
+    "type": "graphic",
+    "sourceUri": "../../they-have-reached/assets/props/telephone.png",
+    "contentHash": "8bf14b50a08261e8d21f0077e090d839fe6075d2b0ce6b4cc6e8f8a24e5b88e3",
+    "metadata": {
+      "filmieFitDistance": 6
+    },
+    "license": {
+      "name": "User-supplied storyboard artwork",
+      "restrictions": ["Use for project They Have Reached"]
+    },
+    "provenance": {
+      "source": "Existing telephone storyboard panel"
     }
   }
 ]
