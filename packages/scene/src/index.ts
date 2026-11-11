@@ -8,12 +8,14 @@ import {
   type CharcoalStyleOverrides,
   type Rational,
   type Shot,
+  type SpatialConstraint,
 } from '@filmmaking/contracts';
 import { compileWorld } from './world.js';
 import { prepareCharacter } from './character.js';
 import { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
 import { constrainMotion } from './spatial-constraints.js';
 import { compileInteractions } from './compile-interactions.js';
+import { compileContacts } from './compile-contacts.js';
 import { compilePhysics } from './physics.js';
 export * from './collision.js';
 export { compilePhysics } from './physics.js';
@@ -289,6 +291,61 @@ export function compileScene(
     scene.interactions,
     shot.durationFrames,
   );
+  const protectedConstraints = new Map<string, SpatialConstraint[]>();
+  const characters = [...scene.characters]
+    .map((character) =>
+      'source' in character
+        ? (() => {
+            const prepared = prepareCharacter(character, shot.durationFrames);
+            const locomotion = sampleLocomotion(
+              prepared,
+              character.locomotion,
+              sampleCharacterMotion(
+                prepared,
+                character.motion,
+                skeletalClips,
+                shot.durationFrames,
+                frameRate,
+              ),
+              shot.durationFrames,
+              frameRate,
+              world,
+            );
+            const constraints = [
+              ...character.constraints,
+              ...locomotion.contacts,
+            ];
+            if (scene.contactGraph)
+              protectedConstraints.set(character.id, constraints);
+            const sampledMotion = constrainMotion(
+              prepared,
+              locomotion.motion,
+              constraints,
+              shot.durationFrames,
+              world,
+              interactions.get(character.id),
+              new Set(locomotion.contacts.map((contact) => contact.id)),
+            );
+            return sampledMotion ? { ...prepared, sampledMotion } : prepared;
+          })()
+        : {
+            ...character,
+            actions: [...character.actions].sort(
+              (left, right) =>
+                left.startFrame - right.startFrame ||
+                compareStrings(left.id, right.id),
+            ),
+          },
+    )
+    .sort((left, right) => compareStrings(left.id, right.id));
+  compileContacts(
+    scene,
+    shot.durationFrames,
+    characters,
+    protectedConstraints,
+    world,
+    physics,
+  );
   const withoutHash = {
     version: SCENE_COMPILER_VERSION,
     shotId: shot.id,
@@ -300,46 +357,7 @@ export function compileScene(
     ...(scene.environment ? { environment: scene.environment } : {}),
     ...(world ? { world } : {}),
     ...(physics ? { physics } : {}),
-    characters: [...scene.characters]
-      .map((character) =>
-        'source' in character
-          ? (() => {
-              const prepared = prepareCharacter(character, shot.durationFrames);
-              const locomotion = sampleLocomotion(
-                prepared,
-                character.locomotion,
-                sampleCharacterMotion(
-                  prepared,
-                  character.motion,
-                  skeletalClips,
-                  shot.durationFrames,
-                  frameRate,
-                ),
-                shot.durationFrames,
-                frameRate,
-                world,
-              );
-              const sampledMotion = constrainMotion(
-                prepared,
-                locomotion.motion,
-                [...character.constraints, ...locomotion.contacts],
-                shot.durationFrames,
-                world,
-                interactions.get(character.id),
-                new Set(locomotion.contacts.map((contact) => contact.id)),
-              );
-              return sampledMotion ? { ...prepared, sampledMotion } : prepared;
-            })()
-          : {
-              ...character,
-              actions: [...character.actions].sort(
-                (left, right) =>
-                  left.startFrame - right.startFrame ||
-                  compareStrings(left.id, right.id),
-              ),
-            },
-      )
-      .sort((left, right) => compareStrings(left.id, right.id)),
+    characters,
     ...(interactions.size
       ? {
           objectMotion: [...interactions.values()]

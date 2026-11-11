@@ -301,12 +301,87 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
   225_000,
 );
 
+it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
+  'renders coordinated partner contacts and reuses the Studio cache',
+  async () => {
+    const { path, revision, text } = await createProject('humanoid-animation');
+    const input = JSON.parse(text);
+    const shot = input.shots.at(-1);
+    input.shots = [shot];
+    input.timeline.durationFrames = shot.durationFrames;
+    input.timeline.videoTracks[0].clips = [{ shotId: shot.id, startFrame: 0 }];
+    input.video.resolution = { width: 160, height: 90 };
+    input.renderPolicy.outputDimensions = input.video.resolution;
+    input.renderPolicy.renderer.config.samples = 1;
+    const saved = (await request(
+      path + '/revisions',
+      {
+        text: JSON.stringify(input),
+        baseRevisionId: revision,
+      },
+      201,
+    )) as ProjectSummary;
+    const queue = async () =>
+      (await request(
+        path + '/runs',
+        {
+          revisionId: saved.revisions[0]!.id,
+        },
+        202,
+      )) as Run;
+    const { run, outputs } = await waitForRun((await queue()).id, 180_000);
+    expect(run.status, run.error).toBe('succeeded');
+    expect(outputs.some((output) => output.name === 'master.mp4')).toBe(true);
+    const blend = outputs.find((output) =>
+      output.name.endsWith('/scene.blend'),
+    );
+    expect(blend).toBeDefined();
+    await promisify(execFile)(
+      defaultBlenderExecutable(),
+      [
+        '--background',
+        join(root, 'outputs', run.id, blend!.name),
+        '--python-exit-code',
+        '1',
+        '--python-expr',
+        [
+          'import bpy',
+          'from mathutils import Vector',
+          'scene = bpy.context.scene',
+          'def rig(id):\n    return next(o for o in scene.objects if o.type == "ARMATURE" and o.get("filmie_character_id") == id)',
+          'a, b = rig("partner-a"), rig("partner-b")',
+          'def anchor(rig, name, offset=(0,0,0)):\n    bone = rig.pose.bones[name]\n    return rig.matrix_world @ (bone.tail + bone.matrix.to_3x3() @ Vector(offset))',
+          'def hands(frame):\n    scene.frame_set(frame + 1)\n    return anchor(a, "hand.R"), anchor(b, "hand.R")',
+          'start = hands(0)',
+          'high = hands(35)',
+          'low = hands(37)',
+          'assert (start[0] - start[1]).length > 0.5',
+          'assert (high[0] - high[1]).length < 0.018, (high[0], high[1])',
+          'assert (low[0] - low[1]).length < 0.018',
+          'assert abs(high[0].z - low[0].z) > 0.03',
+          'scene.frame_set(61)',
+          'error = (anchor(a, "hand.R") - anchor(b, "chest", (-0.13,-0.15,0.15))).length',
+          'assert error < 0.022, error',
+          'end = hands(95)',
+          'assert (end[0] - end[1]).length > 0.5',
+          'assert (hands(35)[0] - high[0]).length < 1e-6',
+        ].join('\n'),
+      ],
+      { timeout: 20_000, windowsHide: true },
+    );
+    const cached = (await waitForRun((await queue()).id, 30_000)).run;
+    expect(cached.status, cached.error).toBe('succeeded');
+    expect(cached.cacheHits).toEqual({ shots: 1, assembly: true });
+  },
+  225_000,
+);
+
 it('validates the humanoid animation catalog and reports incompatible motion edits', async () => {
   const { path, text } = await createProject('humanoid-animation');
   expect(await request(path + '/validate', { text })).toEqual({
     issues: [],
-    frames: 474,
-    shots: 5,
+    frames: 570,
+    shots: 6,
   });
   const draft = JSON.parse(text);
   draft.shots[0].scene.characters[0].motion.at(-1).source.clipId =
@@ -322,6 +397,15 @@ it('validates the humanoid animation catalog and reports incompatible motion edi
   })) as Validation;
   expect(invalidInteraction.issues[0]?.message).toMatch(
     /cup-transfer.*missing-cup/,
+  );
+  const brokenContact = JSON.parse(text);
+  brokenContact.shots.at(-1).scene.contactGraph.contacts[0].b.entityId =
+    'missing-partner';
+  const invalidContact = (await request(path + '/validate', {
+    text: JSON.stringify(brokenContact),
+  })) as Validation;
+  expect(invalidContact.issues[0]?.message).toMatch(
+    /contact graph.*missing-partner/i,
   );
 });
 

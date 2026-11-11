@@ -9,7 +9,7 @@ import {
   type PreparedCharacter,
   type RigidTransform,
 } from '@filmmaking/contracts';
-import { forwardKinematics } from './spatial-constraints.js';
+import { prepareKinematics } from './spatial-constraints.js';
 import { identity, multiply, quaternion, withinLimits } from './motion-math.js';
 import {
   angularDistance,
@@ -68,6 +68,9 @@ export function solveContactFrame(
   if (byId.size !== participants.length)
     throw new TypeError('Duplicate contact participant');
   const poses = new Map<string, Map<string, MotionQuaternion>>();
+  const evaluators = new Map(
+    participants.map((p) => [p.character.id, prepareKinematics(p.character)]),
+  );
   for (const p of participants) {
     RigidTransformSchema.parse(p.root);
     if (!Number.isFinite(p.scale) || p.scale <= 0)
@@ -87,7 +90,7 @@ export function solveContactFrame(
       p.character.id,
       new Map([...p.rotations].map(([id, q]) => [id, [...q]])),
     );
-    forwardKinematics(p.character, p.rotations);
+    evaluators.get(p.character.id)!(p.rotations);
   }
   const chain = (e: ContactEndpoint) => {
     const p = byId.get(e.entityId);
@@ -115,11 +118,17 @@ export function solveContactFrame(
   const active = graph.contacts
     .filter((c) => frame >= c.startFrame && frame <= c.endFrame)
     .sort((a, b) => b.priority - a.priority || compareStrings(a.id, b.id));
-  const endpoint = (e: ContactEndpoint): RigidTransform => {
+  const endpoint = (
+    e: ContactEndpoint,
+    evaluated: Map<string, ReturnType<ReturnType<typeof prepareKinematics>>>,
+  ): RigidTransform => {
     const p = byId.get(e.entityId)!;
-    const bone = forwardKinematics(p.character, poses.get(e.entityId)!).get(
-      e.boneId,
-    )!;
+    let skeleton = evaluated.get(e.entityId);
+    if (!skeleton) {
+      skeleton = evaluators.get(e.entityId)!(poses.get(e.entityId)!);
+      evaluated.set(e.entityId, skeleton);
+    }
+    const bone = skeleton.get(e.boneId)!;
     const local = composeTransform(
       { position: bone.tail, rotation: bone.rotation },
       e.anchor,
@@ -129,8 +138,17 @@ export function solveContactFrame(
       position: local.position.map((v) => v * p.scale) as MotionVector,
     });
   };
-  const relative = (a: ContactEndpoint, b: ContactEndpoint) =>
-    composeTransform(inverseTransform(endpoint(a)), endpoint(b));
+  type Evaluated = Parameters<typeof endpoint>[1];
+  const relative = (
+    a: ContactEndpoint,
+    b: ContactEndpoint,
+    evaluated: Evaluated,
+  ) =>
+    composeTransform(
+      inverseTransform(endpoint(a, evaluated)),
+      endpoint(b, evaluated),
+    );
+  const initial: Evaluated = new Map();
   const targets = active.map((c) => {
     const t = Math.min(
       1,
@@ -138,14 +156,15 @@ export function solveContactFrame(
       c.blendOutFrames ? (c.endFrame - frame) / c.blendOutFrames : 1,
     );
     return blendTransform(
-      relative(c.a, c.b),
+      relative(c.a, c.b, initial),
       c.relativePose,
       t * t * (3 - 2 * t),
     );
   });
-  const residuals = (): ContactResidual[] =>
-    active.map((c, i) => {
-      const actual = relative(c.a, c.b),
+  const residuals = (): ContactResidual[] => {
+    const evaluated: Evaluated = new Map();
+    return active.map((c, i) => {
+      const actual = relative(c.a, c.b, evaluated),
         target = targets[i]!;
       const positionError =
         c.channels === 'orientation'
@@ -166,6 +185,7 @@ export function solveContactFrame(
           angularError <= c.angularTolerance,
       };
     });
+  };
   const priorities = [...new Set(active.map((c) => c.priority))];
   const score = (r: ContactResidual[]) =>
     priorities.map((priority) =>
@@ -222,7 +242,8 @@ export function solveContactFrame(
               changed = true;
             }
           }
-          rotations.set(id, selected);
+          if (selected === identity) rotations.delete(id);
+          else rotations.set(id, selected);
         }
       }
     errors = residuals();

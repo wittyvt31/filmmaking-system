@@ -2050,10 +2050,602 @@
           }
         ]
       }
+    },
+    {
+      "id": "shot.partner-contact",
+      "durationFrames": 96,
+      "visualDescription": "Two performers walk toward one another, briefly shake hands, then one presses against the other’s upper chest. The receiver takes a measured step back and both separate.",
+      "composition": {
+        "framing": "Full body with space for the gesture",
+        "subjectPlacement": "Center",
+        "cameraMovement": "Static",
+        "instructions": []
+      },
+      "requiredAssets": [],
+      "scene": {
+        "stylePreset": "charcoal_horror",
+        "styleVersion": "1.2.0",
+        "world": {
+          "schemaVersion": 1,
+          "materials": [
+            {
+              "id": "floor",
+              "color": [0.18, 0.2, 0.21],
+              "roughness": 0.82
+            },
+            {
+              "id": "wall",
+              "color": [0.26, 0.29, 0.3],
+              "roughness": 0.85
+            },
+            {
+              "id": "target",
+              "color": [0.9, 0.55, 0.08]
+            },
+            {
+              "id": "cup-stand",
+              "color": [0.34, 0.22, 0.12]
+            }
+          ],
+          "entities": [
+            {
+              "id": "studio",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "room",
+                "dimensions": {
+                  "x": 5.6,
+                  "y": 5.8,
+                  "z": 3.1
+                },
+                "floor": {
+                  "thickness": 0.15,
+                  "materialId": "floor"
+                },
+                "walls": [
+                  {
+                    "side": "north",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "west",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "east",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "motionClips": [
+          {
+            "id": "greeting",
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "duration": 2,
+            "joints": [
+              {
+                "joint": "upper_arm.L",
+                "keys": [
+                  {
+                    "time": 0,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 0.65,
+                    "value": [-8, 0, -76],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.35,
+                    "value": [-8, 0, -76],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 2,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  }
+                ]
+              },
+              {
+                "joint": "forearm.L",
+                "keys": [
+                  {
+                    "time": 0,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 0.65,
+                    "value": [-35, 0, -24],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1,
+                    "value": [-18, 0, -14],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.35,
+                    "value": [-48, 0, -27],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 2,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "partner-a-prep",
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "duration": 3.2,
+            "joints": [
+              {
+                "joint": "upper_arm.R",
+                "keys": [
+                  {
+                    "time": 0,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 0.82,
+                    "value": [-62, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.08,
+                    "value": [-76, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.28,
+                    "value": [-54, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.52,
+                    "value": [-62, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.68,
+                    "value": [-36, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.94,
+                    "value": [-93, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 2.4,
+                    "value": [-93, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 3.1,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "partner-b-prep",
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "duration": 3.2,
+            "joints": [
+              {
+                "joint": "upper_arm.R",
+                "keys": [
+                  {
+                    "time": 0,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 0.82,
+                    "value": [-62, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.08,
+                    "value": [-76, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.28,
+                    "value": [-54, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.52,
+                    "value": [-62, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.68,
+                    "value": [-9, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.94,
+                    "value": [-18, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 2.4,
+                    "value": [-18, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 3.1,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "characters": [
+          {
+            "id": "partner-a",
+            "transform": {
+              "position": {
+                "x": -0.95,
+                "y": 0.21,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": 90
+              },
+              "scale": 1
+            },
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "source": {
+              "kind": "procedural",
+              "body": {
+                "height": 1.72,
+                "shoulderWidth": 0.245,
+                "build": 1
+              },
+              "appearance": {
+                "skin": {
+                  "color": [0.66, 0.39, 0.24]
+                },
+                "top": {
+                  "color": [0.055, 0.15, 0.18]
+                },
+                "trousers": {
+                  "color": [0.24, 0.19, 0.13]
+                },
+                "shoes": {
+                  "color": [0.055, 0.043, 0.033]
+                },
+                "hair": {
+                  "color": [0.065, 0.045, 0.032]
+                }
+              }
+            },
+            "motion": [
+              {
+                "id": "contact-preparation",
+                "startFrame": 0,
+                "endFrame": 95,
+                "source": {
+                  "kind": "clip",
+                  "clipId": "partner-a-prep"
+                }
+              }
+            ],
+            "poses": {
+              "root": [],
+              "joints": []
+            },
+            "constraints": [],
+            "locomotion": {
+              "strideMeters": 0.23,
+              "waypoints": [
+                {
+                  "frame": 0,
+                  "position": [-0.95, 0.21, 0],
+                  "yawDegrees": 90
+                },
+                {
+                  "frame": 24,
+                  "position": [-0.51, 0.21, 0],
+                  "yawDegrees": 90
+                },
+                {
+                  "frame": 48,
+                  "position": [-0.51, 0.21, 0],
+                  "yawDegrees": 90
+                },
+                {
+                  "frame": 59,
+                  "position": [-0.25, 0.21, 0],
+                  "yawDegrees": 90
+                },
+                {
+                  "frame": 69,
+                  "position": [-0.25, 0.21, 0],
+                  "yawDegrees": 90
+                },
+                {
+                  "frame": 95,
+                  "position": [-0.98, 0.21, 0],
+                  "yawDegrees": 90
+                }
+              ]
+            }
+          },
+          {
+            "id": "partner-b",
+            "transform": {
+              "position": {
+                "x": 0.95,
+                "y": -0.21,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": -90
+              },
+              "scale": 1
+            },
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "source": {
+              "kind": "procedural",
+              "body": {
+                "height": 1.72,
+                "shoulderWidth": 0.245,
+                "build": 1
+              },
+              "appearance": {
+                "skin": {
+                  "color": [0.66, 0.39, 0.24]
+                },
+                "top": {
+                  "color": [0.38, 0.14, 0.06]
+                },
+                "trousers": {
+                  "color": [0.24, 0.19, 0.13]
+                },
+                "shoes": {
+                  "color": [0.055, 0.043, 0.033]
+                },
+                "hair": {
+                  "color": [0.065, 0.045, 0.032]
+                }
+              }
+            },
+            "motion": [
+              {
+                "id": "contact-preparation",
+                "startFrame": 0,
+                "endFrame": 95,
+                "source": {
+                  "kind": "clip",
+                  "clipId": "partner-b-prep"
+                }
+              }
+            ],
+            "poses": {
+              "root": [],
+              "joints": []
+            },
+            "constraints": [],
+            "locomotion": {
+              "strideMeters": 0.23,
+              "waypoints": [
+                {
+                  "frame": 0,
+                  "position": [0.95, -0.21, 0],
+                  "yawDegrees": -90
+                },
+                {
+                  "frame": 24,
+                  "position": [0.51, -0.21, 0],
+                  "yawDegrees": -90
+                },
+                {
+                  "frame": 59,
+                  "position": [0.51, -0.21, 0],
+                  "yawDegrees": -90
+                },
+                {
+                  "frame": 75,
+                  "position": [0.67, -0.21, 0],
+                  "yawDegrees": -90
+                },
+                {
+                  "frame": 95,
+                  "position": [0.98, -0.21, 0],
+                  "yawDegrees": -90
+                }
+              ]
+            }
+          }
+        ],
+        "lights": [
+          {
+            "id": "study.key",
+            "type": "area",
+            "position": {
+              "x": -2.6,
+              "y": -2.7,
+              "z": 3.25
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 135,
+            "color": [1, 0.91, 0.82],
+            "size": 3
+          },
+          {
+            "id": "study.fill",
+            "type": "area",
+            "position": {
+              "x": 2.8,
+              "y": -1.85,
+              "z": 2.3
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 75,
+            "color": [0.83, 0.91, 1],
+            "size": 2.7
+          },
+          {
+            "id": "study.rim",
+            "type": "area",
+            "position": {
+              "x": 1.2,
+              "y": 1.55,
+              "z": 2.85
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 100,
+            "color": [1, 0.92, 0.78],
+            "size": 2
+          }
+        ],
+        "camera": {
+          "type": "static",
+          "distance": 5.6,
+          "target": {
+            "x": 0,
+            "y": 0,
+            "z": 0.92
+          },
+          "focalLength": 48
+        },
+        "contactGraph": {
+          "version": 1,
+          "contacts": [
+            {
+              "id": "handshake",
+              "a": {
+                "entityId": "partner-a",
+                "boneId": "hand.R",
+                "chainRoot": "upper_arm.R",
+                "anchor": {
+                  "position": [0, 0, 0],
+                  "rotation": [1, 0, 0, 0]
+                }
+              },
+              "b": {
+                "entityId": "partner-b",
+                "boneId": "hand.R",
+                "chainRoot": "upper_arm.R",
+                "anchor": {
+                  "position": [0, 0, 0],
+                  "rotation": [1, 0, 0, 0]
+                }
+              },
+              "relativePose": {
+                "position": [0, 0, 0],
+                "rotation": [1, 0, 0, 0]
+              },
+              "channels": "position",
+              "startFrame": 25,
+              "endFrame": 48,
+              "blendInFrames": 5,
+              "blendOutFrames": 6,
+              "positionTolerance": 0.012
+            },
+            {
+              "id": "shove",
+              "a": {
+                "entityId": "partner-b",
+                "boneId": "chest",
+                "chainRoot": "chest",
+                "anchor": {
+                  "position": [-0.13, -0.15, 0.15],
+                  "rotation": [1, 0, 0, 0]
+                }
+              },
+              "b": {
+                "entityId": "partner-a",
+                "boneId": "hand.R",
+                "chainRoot": "upper_arm.R",
+                "anchor": {
+                  "position": [0, 0, 0],
+                  "rotation": [1, 0, 0, 0]
+                }
+              },
+              "relativePose": {
+                "position": [0, 0, 0],
+                "rotation": [1, 0, 0, 0]
+              },
+              "channels": "position",
+              "startFrame": 51,
+              "endFrame": 67,
+              "blendInFrames": 8,
+              "blendOutFrames": 7,
+              "positionTolerance": 0.016
+            }
+          ]
+        }
+      }
     }
   ],
   "timeline": {
-    "durationFrames": 474,
+    "durationFrames": 570,
     "videoTracks": [
       {
         "id": "video.main",
@@ -2077,6 +2669,10 @@
           {
             "shotId": "shot.cup-drop",
             "startFrame": 350
+          },
+          {
+            "shotId": "shot.partner-contact",
+            "startFrame": 474
           }
         ]
       }

@@ -3,13 +3,58 @@ import { expect, it } from 'vitest';
 import {
   ContactGraphSchema,
   RiggedCharacterSchema,
+  ShotSchema,
 } from '@filmmaking/contracts';
 import {
   prepareCharacter,
   solveContactFrame,
   bakeContactGraph,
+  compileScene,
   type ContactParticipant,
 } from '@filmmaking/scene';
+
+it('bakes the reference while preserving locomotion, authored joints and world identity', () => {
+  const manifest = JSON.parse(
+    readFileSync('examples/humanoid-animation/manifest.json', 'utf8'),
+  );
+  const shot = ShotSchema.parse(manifest.shots.at(-1));
+  const actor = shot.scene!.characters[0]!;
+  if (!('source' in actor)) throw new Error('Expected a skeletal character');
+  actor.poses.joints.push({
+    joint: 'head',
+    keys: [{ frame: 0, rotationDegrees: [5, 0, 0], interpolation: 'hold' }],
+  });
+  const fps = { numerator: 30, denominator: 1 };
+  const baked = compileScene(shot, fps);
+  const plainShot = structuredClone(shot);
+  delete plainShot.scene!.contactGraph;
+  const plain = compileScene(plainShot, fps);
+  expect(compileScene(shot, fps).sha256).toBe(baked.sha256);
+  expect(baked.sha256).not.toBe(plain.sha256);
+  expect(baked.world?.sha256).toBe(plain.world?.sha256);
+  for (const [index, c] of baked.characters.entries()) {
+    const original = plain.characters[index]!;
+    if (!('bones' in c) || !('bones' in original))
+      throw new Error('Expected compiled rigs');
+    expect(c.sampledMotion!.rootPosition).toEqual(
+      original.sampledMotion!.rootPosition,
+    );
+    expect(c.sampledMotion!.rootRotation).toEqual(
+      original.sampledMotion!.rootRotation,
+    );
+    for (const joint of ['foot.L', 'foot.R', 'head']) {
+      expect(
+        c.sampledMotion!.joints.find((track) => track.joint === joint),
+      ).toEqual(
+        original.sampledMotion!.joints.find((track) => track.joint === joint),
+      );
+    }
+    const arm = (motion: typeof c.sampledMotion) =>
+      motion!.joints.find((track) => track.joint === 'upper_arm.R')!.rotations;
+    expect(arm(c.sampledMotion)[0]).toEqual(arm(original.sampledMotion)[0]);
+    expect(arm(c.sampledMotion)[95]).toEqual(arm(original.sampledMotion)[95]);
+  }
+});
 const pose = { position: [0, 0, 0], rotation: [1, 0, 0, 0] } as const;
 function actor(id: string): ContactParticipant {
   const source = JSON.parse(

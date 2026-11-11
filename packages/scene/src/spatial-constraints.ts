@@ -152,7 +152,7 @@ export function forwardKinematics(
   return prepareKinematics(character)(rotations);
 }
 
-function prepareKinematics(character: PreparedCharacter) {
+export function prepareKinematics(character: PreparedCharacter) {
   const restBones = new Map(
     character.bones.map((bone) => [
       bone.id,
