@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 
 describe('versioned semantic motion-library planning', () => {
   it('resolves a motion library asset and compiles its curves before rendering', async () => {
-    const projectDirectory = resolve('examples/they-have-reached-procedural');
+    const projectDirectory = resolve('examples/3d-production');
     const temporary = await mkdtemp(join(tmpdir(), 'filmie-motion-library-'));
     try {
       const manifest = JSON.parse(

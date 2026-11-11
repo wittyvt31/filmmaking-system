@@ -8,7 +8,7 @@ import { BlenderRendererAdapter } from '@filmmaking/engine-blender';
 import { prepareProductionPlan } from '@filmmaking/planner';
 import { afterAll, describe, expect, it } from 'vitest';
 
-const projectDirectory = resolve('examples/they-have-reached-blender');
+const projectDirectory = resolve('examples/3d-production');
 const expectedBlenderPath = join(
   process.env['PROGRAMFILES'] ?? 'C:\\Program Files',
   'Blender Foundation',
@@ -54,6 +54,8 @@ describe('Blender EEVEE renderer adapter', () => {
       const camera = shotScene['camera'] as Record<string, unknown>;
       shot!['durationFrames'] = 3;
       camera['durationFrames'] = 3;
+      const characters = shotScene['characters'] as Record<string, unknown>[];
+      for (const character of characters) character['actions'] = [];
       const timeline = rawManifest['timeline'] as Record<string, unknown>;
       timeline['durationFrames'] = 3;
 

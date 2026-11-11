@@ -14,7 +14,7 @@ describe('approved production package lifecycle', () => {
       join(tmpdir(), 'filmie-package-test-'),
     );
     try {
-      const fixture = resolve('examples/they-have-reached-procedural');
+      const fixture = resolve('examples/3d-production');
       await Promise.all([
         cp(
           join(fixture, 'manifest.json'),
@@ -41,7 +41,7 @@ describe('approved production package lifecycle', () => {
         loadProductionPlan({ projectDirectory }),
       ).resolves.toMatchObject({
         prepared: {
-          manifest: { projectId: 'they-have-reached.procedural-proof' },
+          manifest: { projectId: 'filmie.3d-reference' },
         },
       });
 

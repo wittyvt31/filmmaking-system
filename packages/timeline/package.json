@@ -14,7 +14,6 @@
     "typecheck": "tsc -b --pretty"
   },
   "dependencies": {
-    "@filmmaking/contracts": "workspace:*",
-    "@filmmaking/manifest": "workspace:*"
+    "@filmmaking/contracts": "workspace:*"
   }
 }

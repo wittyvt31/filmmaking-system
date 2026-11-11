@@ -46,8 +46,6 @@ export interface CompiledSceneInstruction {
     finalGrade?: boolean;
   };
   environment: z.infer<typeof AssetVersionReferenceSchema>;
-  groups: z.infer<typeof ShotSceneSchema>['groups'];
-  layers: z.infer<typeof ShotSceneSchema>['layers'];
   characters: z.infer<typeof ShotSceneSchema>['characters'];
   props: z.infer<typeof ShotSceneSchema>['props'];
   lights: z.infer<typeof ShotSceneSchema>['lights'];

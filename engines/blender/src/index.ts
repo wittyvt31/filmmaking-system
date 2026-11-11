@@ -43,16 +43,6 @@ const ENGINE_PACKAGE_DIRECTORY = resolve(
   '..',
 );
 const WORKER_PATH = join(ENGINE_PACKAGE_DIRECTORY, 'worker', 'render_shot.py');
-export const ASSET_WORKER_PATH = join(
-  ENGINE_PACKAGE_DIRECTORY,
-  'worker',
-  'build_assets.py',
-);
-export const ARTWORK_WORKER_PATH = join(
-  ENGINE_PACKAGE_DIRECTORY,
-  'worker',
-  'prepare_artwork.py',
-);
 const ROOT_LOCKFILE = resolve(
   ENGINE_PACKAGE_DIRECTORY,
   '..',
@@ -674,7 +664,6 @@ export class BlenderRendererAdapter implements RendererAdapter {
         'head-turn',
         'blink',
         'expression',
-        'facial-variant',
         'walk',
         'run',
         'jump',
@@ -732,7 +721,6 @@ export class BlenderRendererAdapter implements RendererAdapter {
         lift: [],
         place: [],
         interaction: ['head'],
-        'facial-variant': [],
         'motion-clip': [],
         jump: [],
         'lip-sync': ['mouth'],
@@ -744,12 +732,12 @@ export class BlenderRendererAdapter implements RendererAdapter {
           (candidate) => candidate.id === characterId,
         );
         const rig = character
-          ? assetMap.get(assetKey(character.artwork))
+          ? assetMap.get(assetKey(character.asset))
           : undefined;
         if (!character || !rig)
           throw new BlenderFailure(
             'MISSING_ASSET',
-            `Character artwork could not be resolved for action "${action.id}"`,
+            `Character model could not be resolved for action "${action.id}"`,
           );
         const controls = (rig.metadata['semanticControls'] ?? {}) as Record<
           string,
@@ -759,17 +747,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
           if (typeof controls[control] !== 'string')
             throw new BlenderFailure(
               'INVALID_INSTRUCTIONS',
-              `Action "${action.id}" requires semantic rig control "${control}" on character "${characterId}"; map it in the prepared artwork specification.`,
-            );
-        }
-        if (action.type === 'facial-variant') {
-          const definitions = (rig.metadata['variantDefinitions'] ??
-            {}) as Record<string, { variants?: unknown } | undefined>;
-          const variants = definitions[action.slotId]?.variants;
-          if (!Array.isArray(variants) || !variants.includes(action.variantId))
-            throw new BlenderFailure(
-              'INVALID_INSTRUCTIONS',
-              `Action "${action.id}" requests undeclared facial variant ${action.slotId}=${action.variantId} on "${characterId}".`,
+              `Action "${action.id}" requires semantic rig control "${control}" on character "${characterId}"; provide a Blender model with that control.`,
             );
         }
       }
@@ -791,6 +769,26 @@ export class BlenderRendererAdapter implements RendererAdapter {
           contentHash: asset.contentHash,
           metadata: asset.metadata,
         };
+      };
+      const resolveModelAsset = (reference: {
+        assetId: string;
+        version: string;
+      }) => {
+        const asset = assetMap.get(assetKey(reference));
+        if (!asset)
+          throw new BlenderFailure(
+            'MISSING_ASSET',
+            `Missing scene model ${reference.assetId}@${reference.version}`,
+          );
+        if (
+          asset.type !== 'model' ||
+          typeof asset.metadata['blenderCollection'] !== 'string'
+        )
+          throw new BlenderFailure(
+            'UNSUPPORTED_SETTINGS',
+            `Scene asset ${reference.assetId}@${reference.version} must be a prepared Blender model collection`,
+          );
+        return resolveAsset(reference);
       };
       const workerHash = createHash('sha256')
         .update(await readFile(WORKER_PATH))
@@ -851,7 +849,6 @@ export class BlenderRendererAdapter implements RendererAdapter {
           backend?: string;
           engine?: string;
           samples?: number;
-          sourceFraming?: Record<string, number | boolean>;
         };
         const recoveryPath = join(
           outputDirectory,
@@ -903,7 +900,6 @@ export class BlenderRendererAdapter implements RendererAdapter {
             compositing: renderConfig.compositing,
             qualityProfile: settings.qualityProfile ?? 'custom',
             recoveredAttemptCount: recoveredAttempts,
-            ...cachedWorker.sourceFraming,
           },
           ...(cacheWarnings.length > 0
             ? { warnings: cacheWarnings, completedWithWarning: true }
@@ -941,20 +937,14 @@ export class BlenderRendererAdapter implements RendererAdapter {
         },
         renderOverrides,
         animationLibraryVersion: scene.animationLibraryVersion,
-        environment: resolveAsset(scene.environment),
-        groups: scene.groups,
-        layers: scene.layers.map((layer) => ({
-          ...layer,
-          asset: resolveAsset(layer.asset),
-        })),
+        environment: resolveModelAsset(scene.environment),
         characters: scene.characters.map((character) => ({
           ...character,
-          artwork: resolveAsset(character.artwork),
-          rig: character.rig ? resolveAsset(character.rig) : null,
+          asset: resolveModelAsset(character.asset),
         })),
         props: scene.props.map((prop) => ({
           ...prop,
-          artwork: resolveAsset(prop.artwork),
+          asset: resolveModelAsset(prop.asset),
         })),
         lights: scene.lights,
         camera: scene.camera,
@@ -973,7 +963,6 @@ export class BlenderRendererAdapter implements RendererAdapter {
         engine?: string;
         samples?: number;
         renderedFrames?: number;
-        sourceFraming?: Record<string, number | boolean>;
         blenderVersion?: string;
         metrics?: {
           constantInterpolationCurves?: number;
@@ -1334,7 +1323,6 @@ export class BlenderRendererAdapter implements RendererAdapter {
         workerResult?.renderedFrames ?? shot.durationFrames;
       metrics['resumedFrames'] =
         shot.durationFrames - Number(metrics['renderedFrames']);
-      Object.assign(metrics, workerResult?.sourceFraming);
       metrics['cacheHit'] = false;
       metrics['renderEngine'] = workerResult?.engine ?? renderConfig.engine;
       metrics['selectedBackend'] = workerResult?.backend ?? 'unknown';

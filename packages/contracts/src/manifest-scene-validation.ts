@@ -19,63 +19,6 @@ export function validateManifestSceneInstructions(
   );
   const cueIds = new Set<string>();
   manifest.shots.forEach((shot, shotIndex) => {
-    const elementIds = new Set<string>();
-    const requiredAssets = new Set(
-      shot.requiredAssets.map(
-        (asset) => `${asset.assetId}\u0000${asset.version}`,
-      ),
-    );
-    for (const [elementIndex, element] of (
-      shot.visualElements ?? []
-    ).entries()) {
-      if (elementIds.has(element.id)) {
-        issue(
-          ['shots', shotIndex, 'visualElements', elementIndex, 'id'],
-          `Duplicate visual element ID "${element.id}"`,
-        );
-      }
-      elementIds.add(element.id);
-      if (
-        !requiredAssets.has(
-          `${element.asset.assetId}\u0000${element.asset.version}`,
-        )
-      ) {
-        issue(
-          ['shots', shotIndex, 'visualElements', elementIndex, 'asset'],
-          'Visual element asset must also be listed in requiredAssets',
-        );
-      }
-      if (
-        element.animation.type !== 'static' &&
-        element.animation.startFrame + element.animation.durationFrames >
-          shot.durationFrames
-      ) {
-        issue(
-          ['shots', shotIndex, 'visualElements', elementIndex, 'animation'],
-          'Animation must fit within its shot duration',
-        );
-      }
-      if (
-        element.animation.type === 'pulse' &&
-        element.animation.minimumScale > element.animation.maximumScale
-      ) {
-        issue(
-          ['shots', shotIndex, 'visualElements', elementIndex, 'animation'],
-          'Pulse minimumScale must not exceed maximumScale',
-        );
-      }
-    }
-    const camera = shot.composition.camera;
-    if (
-      camera &&
-      camera.type !== 'static' &&
-      camera.startFrame + camera.durationFrames > shot.durationFrames
-    ) {
-      issue(
-        ['shots', shotIndex, 'composition', 'camera'],
-        'Camera movement must fit within its shot duration',
-      );
-    }
     if (shot.scene) {
       if (manifest.renderPolicy.renderer.id !== 'blender') {
         issue(
@@ -91,12 +34,8 @@ export function validateManifestSceneInstructions(
       const sceneReferences = [
         shot.scene.environment,
         ...shot.scene.motionLibraries,
-        ...shot.scene.layers.map((layer) => layer.asset),
-        ...shot.scene.characters.flatMap((character) => [
-          character.artwork,
-          ...(character.rig ? [character.rig] : []),
-        ]),
-        ...shot.scene.props.map((prop) => prop.artwork),
+        ...shot.scene.characters.map((character) => character.asset),
+        ...shot.scene.props.map((prop) => prop.asset),
       ];
       for (const reference of sceneReferences) {
         if (!references.has(`${reference.assetId}\u0000${reference.version}`)) {
@@ -108,8 +47,6 @@ export function validateManifestSceneInstructions(
       }
       const entityIds = new Set<string>();
       for (const entityId of [
-        ...shot.scene.groups.map((group) => group.id),
-        ...shot.scene.layers.map((layer) => layer.id),
         ...shot.scene.characters.map((character) => character.id),
         ...shot.scene.props.map((prop) => prop.id),
       ]) {
@@ -131,12 +68,6 @@ export function validateManifestSceneInstructions(
         );
       }
       shot.scene.characters.forEach((character, characterIndex) => {
-        if (character.actions.length > 0 && !character.rig) {
-          issue(
-            ['shots', shotIndex, 'scene', 'characters', characterIndex, 'rig'],
-            'Character actions require a versioned rig asset',
-          );
-        }
         const actionIds = new Set<string>();
         character.actions.forEach((action, actionIndex) => {
           if (actionIds.has(action.id))

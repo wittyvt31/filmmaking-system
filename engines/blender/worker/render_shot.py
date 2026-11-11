@@ -1,7 +1,6 @@
 """Fixed Blender worker. It accepts JSON data and never evaluates manifest code."""
 
 import json
-import hashlib
 import math
 import os
 import random
@@ -13,7 +12,6 @@ import bpy
 from mathutils import Euler, Matrix, Vector
 
 RENDER_METRICS = {"constantInterpolationCurves": 0, "constantInterpolationFailures": 0}
-
 
 def remove_volatile_png_metadata(path):
     """Keep encoded pixels intact; strip Blender's path/date/render-time stamps."""
@@ -36,7 +34,6 @@ def remove_volatile_png_metadata(path):
         stream.write(b"".join(chunks))
     os.replace(temporary, path)
 
-
 def action_fcurves(action):
     """Return FCurves for a Blender 5.x layered action, with a legacy fallback."""
     if hasattr(action, "fcurves"):
@@ -47,7 +44,6 @@ def action_fcurves(action):
             for channel_bag in getattr(strip, "channelbags", []):
                 curves.extend(getattr(channel_bag, "fcurves", []))
     return curves
-
 
 def set_constant_interpolation(owner, data_path=None):
     """Set CONSTANT interpolation without relying on the removed Action.fcurves."""
@@ -69,7 +65,6 @@ def set_constant_interpolation(owner, data_path=None):
         raise RuntimeError("Cannot apply constant interpolation: no matching FCurves for " + str(data_path))
     RENDER_METRICS["constantInterpolationCurves"] += matched
 
-
 def read_spec():
     try:
         separator = sys.argv.index("--")
@@ -79,333 +74,13 @@ def read_spec():
     with open(spec_path, "r", encoding="utf-8") as stream:
         return json.load(stream)
 
-
-def color_material(image, style, name, opacity=1.0, seed=0, depth=0.0):
-    material = bpy.data.materials.new(name)
-    nodes = material.node_tree.nodes
-    links = material.node_tree.links
-    nodes.clear()
-
-    output = nodes.new("ShaderNodeOutputMaterial")
-    shader = nodes.new("ShaderNodeBsdfPrincipled")
-    shader.inputs["Roughness"].default_value = 1.0
-    if hasattr(shader.inputs, 'get') and shader.inputs.get("Metallic") is not None:
-        shader.inputs["Metallic"].default_value = float(style.get("graphiteSheen", 0.0))
-        shader.inputs["Roughness"].default_value = max(0.38, 1.0 - float(style.get("graphiteSheen", 0.0)) * 0.65)
-    emission = nodes.new("ShaderNodeEmission")
-    illumination_mix = nodes.new("ShaderNodeMixShader")
-    illumination_mix.inputs[0].default_value = float(style["lighting"]["ambientFill"])
-
-    texture = nodes.new("ShaderNodeTexImage")
-    texture.image = image
-    texture.interpolation = {"low": "Closest", "medium": "Linear", "high": "Cubic"}.get(style.get("textureQuality", "high"), "Cubic")
-    bw = nodes.new("ShaderNodeRGBToBW")
-    ramp = nodes.new("ShaderNodeValToRGB")
-    palette = ramp.color_ramp
-    contrast_curve = style.get("contrastCurve", (0.0, 1.0)) if style.get("version") == "2.0.0" else (0.0, 1.0)
-    palette.elements[0].position = float(contrast_curve[0])
-    palette.elements[0].color = (*style["palette"]["shadow"], 1.0)
-    palette.elements[1].position = float(contrast_curve[1])
-    palette.elements[1].color = (*style["palette"]["paper"], 1.0)
-    middle = palette.elements.new(0.48)
-    middle.color = (*style["palette"]["graphite"], 1.0)
-
-    noise = nodes.new("ShaderNodeTexNoise")
-    noise.inputs["Scale"].default_value = float(style["grainScale"])
-    noise.inputs["Detail"].default_value = 2.0
-    noise.noise_dimensions = "4D"
-    noise.inputs["W"].default_value = 0.0
-    multiply = nodes.new("ShaderNodeMixRGB")
-    multiply.blend_type = "MULTIPLY"
-    multiply.inputs[0].default_value = float(style["grainStrength"])
-
-    uv = nodes.new("ShaderNodeTexCoord")
-    links.new(uv.outputs["UV"], texture.inputs["Vector"])
-    mapping = nodes.new("ShaderNodeMapping")
-    links.new(uv.outputs["UV"], mapping.inputs["Vector"])
-    links.new(mapping.outputs["Vector"], noise.inputs["Vector"])
-    rng = random.Random(int(seed))
-    mapping.inputs["Location"].default_value[0] = rng.uniform(-0.025, 0.025)
-    stable_offset = int(hashlib.sha256(name.encode("utf-8")).hexdigest()[:8], 16)
-    boil_rng = random.Random(int(seed) ^ stable_offset)
-    boil_fps = float(style.get("boilFps", 12))
-    frame_rate = float(style.get("frameRate", 24.0))
-    previous_index = None
-    for frame in range(1, int(style.get("durationFrames", 1)) + 1):
-        grain_index = math.floor(frame * boil_fps / frame_rate) if boil_fps > 0 else frame
-        if grain_index == previous_index:
-            continue
-        value_rng = random.Random((int(seed) ^ stable_offset ^ grain_index) & 0xFFFFFFFF)
-        noise.inputs["W"].default_value = value_rng.random() * 4.0 * float(style.get("lineBoilStrength", 0.12))
-        material.node_tree.keyframe_insert(
-            data_path='nodes["' + noise.name + '"].inputs["W"].default_value',
-            frame=frame,
-        )
-        previous_index = grain_index
-    set_constant_interpolation(
-        material.node_tree,
-        'nodes["' + noise.name + '"].inputs[' + str(noise.inputs.find("W")) + '].default_value',
-    )
-    if style.get("version") == "2.0.0":
-        # Image textures are scene-linear. The artistic contrast points describe
-        # perceptual tones; applying them directly crushed dark graphite detail.
-        perceptual = nodes.new("ShaderNodeGamma")
-        perceptual.name = "Graphite Perceptual Tone"
-        perceptual.inputs["Gamma"].default_value = 1.0 / 2.2
-        links.new(texture.outputs["Color"], perceptual.inputs["Color"])
-        links.new(perceptual.outputs["Color"], bw.inputs["Color"])
-    else:
-        links.new(texture.outputs["Color"], bw.inputs["Color"])
-    links.new(bw.outputs["Val"], ramp.inputs["Fac"])
-    links.new(ramp.outputs["Color"], multiply.inputs[1])
-    links.new(noise.outputs["Fac"], multiply.inputs[2])
-
-    # A UV-centered falloff darkens the paper edges without obscuring the panel.
-    subtract = nodes.new("ShaderNodeVectorMath")
-    subtract.operation = "SUBTRACT"
-    subtract.inputs[1].default_value = (0.5, 0.5, 0.0)
-    length = nodes.new("ShaderNodeVectorMath")
-    length.operation = "LENGTH"
-    vignette = nodes.new("ShaderNodeMapRange")
-    vignette.clamp = True
-    vignette.inputs["From Min"].default_value = 0.12
-    vignette.inputs["From Max"].default_value = 0.72
-    vignette.inputs["To Min"].default_value = 1.0
-    vignette.inputs["To Max"].default_value = 1.0 - float(style["vignetteStrength"])
-    shade = nodes.new("ShaderNodeMixRGB")
-    shade.blend_type = "MULTIPLY"
-    shade.inputs[0].default_value = 1.0
-    links.new(uv.outputs["UV"], subtract.inputs[0])
-    links.new(subtract.outputs["Vector"], length.inputs[0])
-    links.new(length.outputs["Value"], vignette.inputs["Value"])
-    links.new(multiply.outputs["Color"], shade.inputs[1])
-    links.new(vignette.outputs["Result"], shade.inputs[2])
-    transparent = nodes.new("ShaderNodeBsdfTransparent")
-    alpha_scale = nodes.new("ShaderNodeMath")
-    alpha_scale.operation = "MULTIPLY"
-    alpha_scale.inputs[1].default_value = float(opacity)
-    mix_shader = nodes.new("ShaderNodeMixShader")
-    links.new(shade.outputs["Color"], shader.inputs["Base Color"])
-    links.new(shade.outputs["Color"], emission.inputs["Color"])
-    links.new(shader.outputs["BSDF"], illumination_mix.inputs[1])
-    links.new(emission.outputs["Emission"], illumination_mix.inputs[2])
-    alpha_output = alpha_scale.outputs["Value"]
-    if style.get("version") == "2.0.0":
-        # Perturb alpha only near its boundary. Depth increases the soft transition
-        # width, while the noise threshold creates a controlled drawn edge.
-        edge_noise = nodes.new("ShaderNodeTexNoise")
-        edge_noise.noise_dimensions = "4D"
-        edge_noise.inputs["Scale"].default_value = float(style.get("grainScale", 42.0)) * 0.22
-        links.new(uv.outputs["UV"], edge_noise.inputs["Vector"])
-        edge_previous_index = None
-        for frame in range(1, int(style.get("durationFrames", 1)) + 1):
-            edge_index = math.floor(frame * boil_fps / frame_rate) if boil_fps > 0 else frame
-            if edge_index == edge_previous_index: continue
-            edge_rng = random.Random((int(seed) ^ stable_offset ^ (edge_index * 0x45D9F3B)) & 0xFFFFFFFF)
-            edge_noise.inputs["W"].default_value = edge_rng.random() * 4.0
-            material.node_tree.keyframe_insert(data_path='nodes["' + edge_noise.name + '"].inputs["W"].default_value', frame=frame)
-            edge_previous_index = edge_index
-        set_constant_interpolation(material.node_tree, 'nodes["' + edge_noise.name + '"].inputs[' + str(edge_noise.inputs.find("W")) + '].default_value')
-        center_noise = nodes.new("ShaderNodeMath")
-        center_noise.operation = "SUBTRACT"
-        center_noise.inputs[1].default_value = 0.5
-        noise_amount = nodes.new("ShaderNodeMath")
-        noise_amount.operation = "MULTIPLY"
-        noise_amount.inputs[1].default_value = float(style.get("edgeBreakup", 0.24)) * 0.24
-        eroded_alpha = nodes.new("ShaderNodeMath")
-        eroded_alpha.operation = "ADD"
-        edge_map = nodes.new("ShaderNodeMapRange")
-        edge_map.clamp = True
-        edge_map.inputs["From Min"].default_value = 0.12
-        edge_map.inputs["From Max"].default_value = 0.35 + min(abs(float(depth)) * float(style.get("edgeSoftness", 0.015)), 0.12)
-        edge_map.inputs["To Min"].default_value = 0.0
-        edge_map.inputs["To Max"].default_value = 1.0
-        links.new(texture.outputs["Alpha"], alpha_scale.inputs[0])
-        links.new(edge_noise.outputs["Fac"], center_noise.inputs[0])
-        links.new(center_noise.outputs["Value"], noise_amount.inputs[0])
-        links.new(texture.outputs["Alpha"], eroded_alpha.inputs[0])
-        links.new(noise_amount.outputs["Value"], eroded_alpha.inputs[1])
-        links.new(eroded_alpha.outputs["Value"], edge_map.inputs["Value"])
-        # Apply layer opacity after erosion so fades retain their intended alpha.
-        links.new(edge_map.outputs["Result"], alpha_scale.inputs[0])
-        alpha_output = alpha_scale.outputs["Value"]
-        # A subdued texture modulation softens shadow masses into graphite smudge.
-        if float(style.get("shadowSmudge", 0.0)) > 0:
-            smudge_noise = nodes.new("ShaderNodeTexNoise")
-            smudge_noise.inputs["Scale"].default_value = 5.0
-            smudge_noise.inputs["Detail"].default_value = 3.0
-            links.new(uv.outputs["UV"], smudge_noise.inputs["Vector"])
-            smudge = nodes.new("ShaderNodeMixRGB")
-            smudge.blend_type = "MULTIPLY"
-            smudge.inputs[0].default_value = float(style.get("shadowSmudge", 0.18))
-            links.new(shade.outputs["Color"], smudge.inputs[1])
-            links.new(smudge_noise.outputs["Color"], smudge.inputs[2])
-            links.new(smudge.outputs["Color"], shader.inputs["Base Color"])
-            links.new(smudge.outputs["Color"], emission.inputs["Color"])
-    else:
-        links.new(texture.outputs["Alpha"], alpha_scale.inputs[0])
-    links.new(alpha_output, mix_shader.inputs[0])
-    links.new(transparent.outputs["BSDF"], mix_shader.inputs[1])
-    links.new(illumination_mix.outputs["Shader"], mix_shader.inputs[2])
-    links.new(mix_shader.outputs["Shader"], output.inputs["Surface"])
-    material.surface_render_method = "BLENDED" if style.get("version") == "2.0.0" else "DITHERED"
-    return material
-
-
-def create_sprite_layer(layer, style):
-    """Build a pivoted, alpha-aware image plane under a transform root."""
-    asset = layer["asset"]
-    if asset.get("metadata", {}).get("blenderCollection"):
-        raise RuntimeError(
-            "Artwork layers must reference a raster image asset, not a Blender collection: "
-            + asset["assetId"]
-        )
-    image = bpy.data.images.load(asset["localPath"], check_existing=True)
-    if image.size[0] <= 0 or image.size[1] <= 0:
-        raise RuntimeError("Artwork image has invalid dimensions: " + asset["localPath"])
-    image.pack()
-    aspect = image.size[0] / image.size[1]
-    size = layer.get("size") or {"width": aspect * 2.0, "height": 2.0}
-    width = float(size["width"])
-    height = float(size["height"])
-    pivot = layer.get("pivot", {"x": 0.5, "y": 0.5})
-    pivot_x = float(pivot["x"])
-    pivot_y = float(pivot["y"])
-    mesh = bpy.data.meshes.new("ArtworkMesh__" + layer["id"])
-    mesh.from_pydata(
-        [
-            (-pivot_x * width, 0.0, -pivot_y * height),
-            ((1.0 - pivot_x) * width, 0.0, -pivot_y * height),
-            ((1.0 - pivot_x) * width, 0.0, (1.0 - pivot_y) * height),
-            (-pivot_x * width, 0.0, (1.0 - pivot_y) * height),
-        ],
-        [],
-        [(0, 1, 2, 3)],
-    )
-    mesh.update()
-    uv_layer = mesh.uv_layers.new(name="ArtworkUV")
-    for loop, uv_coord in zip(
-        uv_layer.data, ((0, 0), (1, 0), (1, 1), (0, 1))
-    ):
-        loop.uv = uv_coord
-    sprite = bpy.data.objects.new("ARTWORK__" + layer["id"], mesh)
-    bpy.context.scene.collection.objects.link(sprite)
-    sprite.data.materials.append(
-        color_material(image, style, "ArtworkMaterial__" + layer["id"], layer.get("opacity", 1.0), style.get("seed", 0), layer["transform"]["position"]["y"])
-    )
-
-    root = bpy.data.objects.new("LAYER__" + layer["id"], None)
-    bpy.context.scene.collection.objects.link(root)
-    root.empty_display_type = "PLAIN_AXES"
-    root["filmie_entity_id"] = layer["id"]
-    root["filmie_asset_id"] = asset["assetId"]
-    root["filmie_asset_version"] = asset["version"]
-    root["filmie_order"] = int(layer.get("order", 0))
-    position = layer["transform"]["position"]
-    rotation = layer["transform"]["rotationDegrees"]
-    root.location = (
-        float(position["x"]),
-        float(position["y"]) - int(layer.get("order", 0)) * 0.001,
-        float(position["z"]),
-    )
-    root.rotation_euler = tuple(
-        math.radians(float(rotation[axis])) for axis in ("x", "y", "z")
-    )
-    root.scale = (float(layer["transform"]["scale"]),) * 3
-    sprite.parent = root
-    sprite.location = (0.0, 0.0, 0.0)
-    sprite.rotation_euler = (0.0, 0.0, 0.0)
-    sprite.scale = (1.0, 1.0, 1.0)
-    sprite["filmie_layer_id"] = layer["id"]
-    sprite["filmie_pivot_normalized"] = (pivot_x, pivot_y)
-    return root, sprite
-
-
-def add_contact_shadow(root, layer):
-    """Add a soft, deterministic ellipse beneath a cutout character or prop."""
-    size = layer.get("size") or {"width": 1.0, "height": 2.0}
-    pivot = layer.get("pivot", {"x": 0.5, "y": 0.5})
-    width = max(0.12, float(size["width"]) * 0.38)
-    height = max(0.045, float(size["height"]) * 0.055)
-    bottom = -float(pivot.get("y", 0.5)) * float(size["height"])
-    mesh = bpy.data.meshes.new("ContactShadowMesh__" + layer["id"])
-    mesh.from_pydata([(-width, 0, -height), (width, 0, -height), (width, 0, height), (-width, 0, height)], [], [(0, 1, 2, 3)])
-    mesh.update()
-    uv_layer = mesh.uv_layers.new(name="UVMap")
-    for loop, coord in zip(uv_layer.data, ((0, 0), (1, 0), (1, 1), (0, 1))): loop.uv = coord
-    shadow = bpy.data.objects.new("ContactShadow__" + layer["id"], mesh)
-    bpy.context.scene.collection.objects.link(shadow)
-    shadow.parent = root
-    shadow.location = (0.0, -0.006, bottom - 0.035)
-    material = bpy.data.materials.new("ContactShadowMaterial__" + layer["id"])
-    material.use_nodes = True
-    nodes = material.node_tree.nodes
-    links = material.node_tree.links
-    nodes.clear()
-    output = nodes.new("ShaderNodeOutputMaterial")
-    transparent = nodes.new("ShaderNodeBsdfTransparent")
-    emission = nodes.new("ShaderNodeEmission")
-    emission.inputs["Color"].default_value = (0.012, 0.01, 0.009, 1)
-    coord = nodes.new("ShaderNodeTexCoord")
-    center = nodes.new("ShaderNodeVectorMath")
-    center.operation = "DISTANCE"
-    center.inputs[1].default_value = (0.5, 0.5, 0.0)
-    fade = nodes.new("ShaderNodeMapRange")
-    fade.clamp = True
-    fade.inputs["From Min"].default_value = 0.12
-    fade.inputs["From Max"].default_value = 0.72
-    fade.inputs["To Min"].default_value = 0.30
-    fade.inputs["To Max"].default_value = 0.0
-    mix = nodes.new("ShaderNodeMixShader")
-    links.new(coord.outputs["UV"], center.inputs[0])
-    links.new(center.outputs["Value"], fade.inputs["Value"])
-    links.new(fade.outputs["Result"], mix.inputs[0])
-    links.new(transparent.outputs["BSDF"], mix.inputs[1])
-    links.new(emission.outputs["Emission"], mix.inputs[2])
-    links.new(mix.outputs["Shader"], output.inputs["Surface"])
-    material.surface_render_method = "DITHERED"
-    shadow.data.materials.append(material)
-    shadow["filmie_owner"] = layer["id"]
-    return shadow
-
-
-def make_image_plane(asset, transform, style, name, width=None, height=None):
-    image = bpy.data.images.load(asset["localPath"], check_existing=True)
-    image.pack()
-    aspect = image.size[0] / image.size[1]
-    if width is None or height is None:
-        height = 2.0
-        width = height * aspect
-    width *= float(transform["scale"])
-    height *= float(transform["scale"])
-    x = float(transform["position"]["x"])
-    depth = float(transform["position"]["y"])
-    z = float(transform["position"]["z"])
-    vertices = [
-        (x - width / 2.0, depth, z - height / 2.0),
-        (x + width / 2.0, depth, z - height / 2.0),
-        (x + width / 2.0, depth, z + height / 2.0),
-        (x - width / 2.0, depth, z + height / 2.0),
-    ]
-    mesh = bpy.data.meshes.new(name + "Mesh")
-    mesh.from_pydata(vertices, [], [(0, 1, 2, 3)])
-    mesh.update()
-    uv_layer = mesh.uv_layers.new(name="UVMap")
-    for loop_index, uv_coord in zip(uv_layer.data, ((0, 0), (1, 0), (1, 1), (0, 1))):
-        loop_index.uv = uv_coord
-    obj = bpy.data.objects.new(name, mesh)
-    bpy.context.scene.collection.objects.link(obj)
-    obj.data.materials.append(color_material(image, style, name + "Charcoal", seed=style.get("seed", 0), depth=transform["position"]["y"]))
-    return obj
-
-
-def instantiate_asset(asset, transform, style, entity_id, rig=None):
-    """Append one immutable generated Blender collection or load a prepared image."""
+def instantiate_asset(asset, transform, entity_id):
+    """Append one immutable Blender model collection and apply its scene transform."""
     collection_name = asset.get("metadata", {}).get("blenderCollection")
     if not collection_name:
-        image_obj = make_image_plane(asset, transform, style, entity_id)
-        image_obj["filmie_entity_id"] = entity_id
-        return image_obj, {}
+        raise RuntimeError(
+            "Scene assets must be prepared Blender model collections: " + asset["assetId"]
+        )
     with bpy.data.libraries.load(asset["localPath"], link=False) as (source, destination):
         if collection_name not in source.collections:
             raise RuntimeError(
@@ -436,36 +111,11 @@ def instantiate_asset(asset, transform, style, entity_id, rig=None):
     for armature in collection.objects:
         if armature.type == "ARMATURE":
             armature["filmie_character_id"] = entity_id
-    for sprite in collection.objects:
-        if sprite.type != "MESH" or not sprite.get("filmie_prepared_matte"):
-            continue
-        if rig is not None and rig["contentHash"] != asset["contentHash"]:
-            raise RuntimeError("Matte cutout rig must reference the prepared artwork package: " + entity_id)
-        source = next(node.image for node in sprite.data.materials[0].node_tree.nodes
-                      if node.type == "TEX_IMAGE" and node.image)
-        sprite.data.materials[0] = color_material(
-            source, style, "EnvironmentCharcoal",
-            opacity=float(sprite["filmie_opacity"]), seed=style["seed"],
-        )
     controls = {
-        obj.get("filmie_semantic_id", obj.get("filmie_control_id", obj.name)): obj
+        obj.get("filmie_control_id", obj.name): obj
         for obj in collection.objects
         if obj.get("filmie_control_id") or obj.name.startswith("RIG_")
     }
-    try:
-        semantic_controls = json.loads(root.get("filmie_semantic_controls", "{}"))
-    except (TypeError, json.JSONDecodeError) as error:
-        raise RuntimeError("Prepared asset has malformed semantic control metadata") from error
-    for semantic_id, node_id in semantic_controls.items():
-        control = next(
-            (obj for obj in collection.objects if obj.get("filmie_node_id") == node_id),
-            None,
-        )
-        if control is None:
-            raise RuntimeError(
-                "Prepared asset semantic control " + semantic_id + " references missing node " + node_id
-            )
-        controls[semantic_id] = control
     legacy_semantic_names = {
         "RIG_chest": "chest", "RIG_head": "head",
         "RIG_arm.L": "left-arm", "RIG_arm.R": "right-arm",
@@ -478,177 +128,6 @@ def instantiate_asset(asset, transform, style, entity_id, rig=None):
         if legacy_name in controls:
             controls.setdefault(semantic_name, controls[legacy_name])
     return root, controls
-
-
-def create_haze_plane(spec, camera_distance):
-    style = spec["style"]
-    """A subtle procedural foreground layer adds depth without altering artwork."""
-    mesh = bpy.data.meshes.new("AtmosphereMesh")
-    depth = -2.4
-    plane_distance = camera_distance + depth
-    view_width = plane_distance * 36.0 / 50.0
-    view_height = view_width * float(spec["height"]) / float(spec["width"])
-    vertices = [
-        (-view_width / 2, depth, -view_height / 2),
-        (view_width / 2, depth, -view_height / 2),
-        (view_width / 2, depth, view_height / 2),
-        (-view_width / 2, depth, view_height / 2),
-    ]
-    mesh.from_pydata(vertices, [], [(0, 1, 2, 3)])
-    mesh.update()
-    uv_layer = mesh.uv_layers.new(name="UVMap")
-    for loop, uv_coord in zip(uv_layer.data, ((0, 0), (1, 0), (1, 1), (0, 1))):
-        loop.uv = uv_coord
-    obj = bpy.data.objects.new("Foreground Atmosphere", mesh)
-    bpy.context.scene.collection.objects.link(obj)
-
-    material = bpy.data.materials.new("Charcoal Mist")
-    nodes = material.node_tree.nodes
-    links = material.node_tree.links
-    nodes.clear()
-    output = nodes.new("ShaderNodeOutputMaterial")
-    transparent = nodes.new("ShaderNodeBsdfTransparent")
-    emission = nodes.new("ShaderNodeEmission")
-    emission.inputs["Color"].default_value = (0.29, 0.27, 0.24, 1)
-    mix = nodes.new("ShaderNodeMixShader")
-    uv = nodes.new("ShaderNodeTexCoord")
-    noise = nodes.new("ShaderNodeTexNoise")
-    noise.inputs["Scale"].default_value = 3.5
-    noise.inputs["Detail"].default_value = 4.0
-    ramp = nodes.new("ShaderNodeMapRange")
-    ramp.clamp = True
-    ramp.inputs["From Min"].default_value = 0.58
-    ramp.inputs["From Max"].default_value = 0.86
-    ramp.inputs["To Min"].default_value = 0.0
-    ramp.inputs["To Max"].default_value = float(spec["style"]["hazeStrength"])
-    mapping = nodes.new("ShaderNodeMapping")
-    links.new(uv.outputs["UV"], mapping.inputs["Vector"])
-    links.new(mapping.outputs["Vector"], noise.inputs["Vector"])
-    if spec["style"].get("version") == "2.0.0" and float(spec["style"].get("hazeDrift", 0.0)) > 0:
-        rate = float(spec["style"].get("frameRate", 30.0))
-        boil_rate = float(spec["style"].get("boilFps", 12.0))
-        for frame in range(1, int(spec["durationFrames"]) + 1):
-            index = math.floor(frame * boil_rate / rate)
-            if frame > 1 and index == math.floor((frame - 1) * boil_rate / rate):
-                continue
-            mapping.inputs["Location"].default_value = (index * float(spec["style"]["hazeDrift"]), 0.0, 0.0)
-            material.node_tree.keyframe_insert(data_path='nodes["' + mapping.name + '"].inputs["Location"].default_value', frame=frame)
-        set_constant_interpolation(material.node_tree, 'nodes["' + mapping.name + '"].inputs[' + str(mapping.inputs.find("Location")) + '].default_value')
-    links.new(noise.outputs["Fac"], ramp.inputs["Value"])
-    links.new(ramp.outputs["Result"], mix.inputs[0])
-    links.new(transparent.outputs["BSDF"], mix.inputs[1])
-    links.new(emission.outputs["Emission"], mix.inputs[2])
-    links.new(mix.outputs["Shader"], output.inputs["Surface"])
-    material.surface_render_method = "BLENDED" if style.get("version") == "2.0.0" else "DITHERED"
-    obj.data.materials.append(material)
-    return obj
-
-
-def create_screen_paper(scene, camera, style, width, height):
-    """Camera-parented procedural paper overlay; UV coordinates stay screen-fixed."""
-    distance = 0.2
-    lens = float(camera.data.lens)
-    plane_width = distance * 36.0 / lens
-    plane_height = plane_width * float(height) / float(width)
-    mesh = bpy.data.meshes.new("ScreenFixedPaperMesh")
-    mesh.from_pydata(
-        [(-plane_width / 2, -plane_height / 2, 0), (plane_width / 2, -plane_height / 2, 0),
-         (plane_width / 2, plane_height / 2, 0), (-plane_width / 2, plane_height / 2, 0)],
-        [], [(0, 1, 2, 3)],
-    )
-    mesh.uv_layers.new(name="UVMap")
-    for loop, uv in zip(mesh.uv_layers.active.data, [(0, 0), (1, 0), (1, 1), (0, 1)]):
-        loop.uv = uv
-    obj = bpy.data.objects.new("ScreenFixedPaper", mesh)
-    scene.collection.objects.link(obj)
-    obj.parent = camera
-    obj.location = (0, 0, -distance)
-    material = bpy.data.materials.new("ScreenFixedPaperMaterial")
-    material.use_nodes = True
-    nodes = material.node_tree.nodes
-    links = material.node_tree.links
-    nodes.clear()
-    output = nodes.new("ShaderNodeOutputMaterial")
-    transparent = nodes.new("ShaderNodeBsdfTransparent")
-    emission = nodes.new("ShaderNodeEmission")
-    texcoord = nodes.new("ShaderNodeTexCoord")
-    fibers = nodes.new("ShaderNodeTexNoise")
-    fibers.inputs["Scale"].default_value = float(style.get("paperFiberScale", 240.0))
-    fibers.inputs["Detail"].default_value = 2.0
-    ramp = nodes.new("ShaderNodeValToRGB")
-    ramp.color_ramp.elements[0].color = (0.2, 0.18, 0.15, 1)
-    paper_value = float(style.get("paperWhitePoint", 0.72)) if style.get("version") == "2.0.0" else 0.72
-    ramp.color_ramp.elements[1].color = (paper_value, paper_value * 0.95, paper_value * 0.86, 1)
-    mix = nodes.new("ShaderNodeMixShader")
-    mix.inputs[0].default_value = float(style.get("paperOpacity", 0.045))
-    links.new(texcoord.outputs["UV"], fibers.inputs["Vector"])
-    links.new(fibers.outputs["Fac"], ramp.inputs["Fac"])
-    links.new(ramp.outputs["Color"], emission.inputs["Color"])
-    links.new(transparent.outputs["BSDF"], mix.inputs[1])
-    links.new(emission.outputs["Emission"], mix.inputs[2])
-    links.new(mix.outputs["Shader"], output.inputs["Surface"])
-    material.surface_render_method = "BLENDED" if style.get("version") == "2.0.0" else "DITHERED"
-    obj.data.materials.append(material)
-    return obj
-
-
-def create_dust_motes(scene, camera, style, seed):
-    """Seeded world-space camera-facing motes; depth creates visible parallax."""
-    count = max(0, min(100, int(float(style.get("dustDensity", 0.0)))))
-    if count == 0:
-        return []
-    rng = random.Random(int(seed) ^ 0xD057C0DE)
-    material = bpy.data.materials.new("Seeded Dust Mote")
-    material.use_nodes = True
-    nodes, links = material.node_tree.nodes, material.node_tree.links
-    nodes.clear()
-    output = nodes.new("ShaderNodeOutputMaterial")
-    transparent = nodes.new("ShaderNodeBsdfTransparent")
-    emission = nodes.new("ShaderNodeEmission")
-    emission.inputs["Color"].default_value = (0.55, 0.50, 0.42, 1)
-    uv = nodes.new("ShaderNodeTexCoord")
-    radial = nodes.new("ShaderNodeVectorMath")
-    radial.operation = "DISTANCE"
-    radial.inputs[1].default_value = (0.5, 0.5, 0.0)
-    fade = nodes.new("ShaderNodeMapRange")
-    fade.clamp = True
-    fade.inputs["From Min"].default_value = 0.18
-    fade.inputs["From Max"].default_value = 0.5
-    fade.inputs["To Min"].default_value = 0.5
-    fade.inputs["To Max"].default_value = 0.0
-    mix = nodes.new("ShaderNodeMixShader")
-    links.new(uv.outputs["UV"], radial.inputs[0])
-    links.new(radial.outputs["Value"], fade.inputs["Value"])
-    links.new(fade.outputs["Result"], mix.inputs[0])
-    links.new(transparent.outputs["BSDF"], mix.inputs[1])
-    links.new(emission.outputs["Emission"], mix.inputs[2])
-    links.new(mix.outputs["Shader"], output.inputs["Surface"])
-    material.surface_render_method = "BLENDED" if style.get("version") == "2.0.0" else "DITHERED"
-    forward = camera.matrix_world.to_quaternion() @ Vector((0.0, 0.0, -1.0))
-    right = camera.matrix_world.to_quaternion() @ Vector((1.0, 0.0, 0.0))
-    up = camera.matrix_world.to_quaternion() @ Vector((0.0, 1.0, 0.0))
-    objects = []
-    for index in range(count):
-        size = rng.uniform(0.008, 0.025)
-        mesh = bpy.data.meshes.new("DustBillboardMesh_%03d" % index)
-        mesh.from_pydata([(-size, -size, 0), (size, -size, 0), (size, size, 0), (-size, size, 0)], [], [(0, 1, 2, 3)])
-        mesh.update()
-        layer = mesh.uv_layers.new(name="UVMap")
-        for loop, coord in zip(layer.data, ((0, 0), (1, 0), (1, 1), (0, 1))): loop.uv = coord
-        obj = bpy.data.objects.new("DustBillboard_%03d" % index, mesh)
-        scene.collection.objects.link(obj)
-        obj.data.materials.append(material)
-        depth = rng.uniform(0.8, 2.6)
-        origin = camera.location + forward * depth + right * rng.uniform(-1.0, 1.0) + up * rng.uniform(-0.55, 0.55)
-        obj.location = origin
-        obj.rotation_euler = camera.rotation_euler
-        for frame in range(1, int(style.get("durationFrames", 1)) + 1, 15):
-            drift = (frame - 1) / max(1.0, float(style.get("frameRate", 30.0)))
-            obj.location = origin + right * (drift * rng.uniform(0.008, 0.02)) + up * (drift * rng.uniform(0.003, 0.009))
-            obj.keyframe_insert(data_path="location", frame=frame)
-        objects.append(obj)
-    return objects
-
 
 def create_scene(spec):
     scene = bpy.context.scene
@@ -793,75 +272,23 @@ def create_scene(spec):
         spec["environment"],
         {"position": {"x": 0.0, "y": 0.0, "z": 0.0},
          "rotationDegrees": {"x": 0.0, "y": 0.0, "z": 0.0}, "scale": 1.0},
-        spec["style"],
         "Environment",
     )
-    environment_collection = spec["environment"].get("metadata", {}).get("blenderCollection")
+    if not spec["environment"].get("metadata", {}).get("blenderCollection"):
+        raise RuntimeError("Scene environment must be a prepared Blender model collection")
     camera_distance = float(spec["cameraKeyframes"][0]["distance"])
     initial_focal_length = float(spec["cameraKeyframes"][0].get("focalLength", 50.0))
-    if not environment_collection:
-        image = bpy.data.images.load(spec["environment"]["localPath"], check_existing=True)
-        aspect = image.size[0] / image.size[1]
-        view_height = (
-            camera_distance
-            * 36.0
-            / initial_focal_length
-            * float(spec["height"])
-            / float(spec["width"])
-        )
-        image.pack()
-        fit_distance = spec["environment"].get("metadata", {}).get("filmieFitDistance")
-        if fit_distance is not None:
-            frame_scale = source_framing(spec, image.size, fit_distance)
-        else:
-            frame_scale = view_height * 1.04 / 2.0
-        environment.scale = (frame_scale, 1.0, frame_scale)
-    if engine != "BLENDER_WORKBENCH":
-        create_haze_plane(spec, camera_distance)
     entity_roots = {}
     control_objects = {}
-    node_roots = {}
-    for group in sorted(spec.get("groups", []), key=lambda item: item["id"]):
-        root = bpy.data.objects.new("GROUP__" + group["id"], None)
-        scene.collection.objects.link(root)
-        root.empty_display_type = "PLAIN_AXES"
-        position = group["transform"]["position"]
-        rotation = group["transform"]["rotationDegrees"]
-        root.location = tuple(float(position[axis]) for axis in ("x", "y", "z"))
-        root.rotation_euler = tuple(
-            math.radians(float(rotation[axis])) for axis in ("x", "y", "z")
-        )
-        root.scale = (float(group["transform"]["scale"]),) * 3
-        root["filmie_group_id"] = group["id"]
-        node_roots[group["id"]] = root
-        entity_roots[group["id"]] = root
-    for layer in sorted(spec["layers"], key=lambda item: (item.get("order", 0), item["id"])):
-        root, sprite = create_sprite_layer(layer, spec["style"])
-        node_roots[layer["id"]] = root
-        entity_roots[layer["id"]] = root
-        control_objects[layer["id"]] = {"sprite": sprite, "root": root}
-        if spec["style"].get("version") == "2.0.0" and spec.get("renderConfig", {}).get("shadows") != "off" and layer.get("role") in {"character", "prop"}:
-            add_contact_shadow(root, layer)
-    for node in [*spec.get("groups", []), *spec["layers"]]:
-        parent_id = node.get("parentId")
-        if parent_id:
-            root = node_roots.get(node["id"])
-            parent = node_roots.get(parent_id)
-            if root is None or parent is None:
-                raise RuntimeError(
-                    "Artwork hierarchy references missing node " + str(parent_id)
-                )
-            root.parent = parent
     for character in spec["characters"]:
         root, controls = instantiate_asset(
-            character["artwork"], character["transform"], spec["style"],
-            character["id"], character.get("rig"),
+            character["asset"], character["transform"], character["id"]
         )
         entity_roots[character["id"]] = root
         control_objects[character["id"]] = controls
     for prop in spec["props"]:
         root, controls = instantiate_asset(
-            prop["artwork"], prop["transform"], spec["style"], prop["id"]
+            prop["asset"], prop["transform"], prop["id"]
         )
         entity_roots[prop["id"]] = root
         control_objects[prop["id"]] = controls
@@ -889,43 +316,8 @@ def create_scene(spec):
             camera_data.keyframe_insert(data_path="lens", frame=frame)
     scene.frame_set(1)
     bpy.context.view_layer.update()
-    if spec["style"].get("version") == "2.0.0" and config["engine"] != "BLENDER_WORKBENCH":
-        create_dust_motes(scene, camera, spec["style"], int(spec.get("randomSeed", 0)))
-    if config["engine"] != "BLENDER_WORKBENCH":
-        paper = create_screen_paper(scene, camera, spec["style"], spec["width"], spec["height"])
-        for keyframe in spec["cameraKeyframes"]:
-            frame = int(keyframe["frame"])
-            focal_length = float(keyframe.get("focalLength", initial_focal_length))
-            paper.scale = (initial_focal_length / focal_length,) * 3
-            paper.keyframe_insert(data_path="scale", frame=frame)
     scene.frame_set(1)
     return scene, environment, entity_roots, control_objects
-
-
-def source_framing(spec, image_size, fit_distance):
-    """Keep the artwork plane fixed across shots and measure its peak projection."""
-    if not isinstance(fit_distance, (int, float)) or not math.isfinite(fit_distance) or fit_distance <= 0:
-        raise RuntimeError("filmieFitDistance must be a positive finite distance")
-    width, height = image_size
-    output_width, output_height = spec["width"], spec["height"]
-    plain_fit = max(output_width / width, output_height / height)
-    frame_scale = fit_distance * 36 / 50 * output_height / output_width * 1.04 / 2
-    effective = max(
-        frame_scale * 2 * output_width * key["focalLength"] / (36 * key["distance"] * height)
-        for key in spec["cameraKeyframes"]
-    )
-    relative = effective / plain_fit
-    if relative > 2:
-        raise RuntimeError("Source framing exceeds twice the plain full-frame fit")
-    spec["sourceFraming"] = {
-        "sourceLimited": width < output_width or height < output_height,
-        "sourceWidth": int(width),
-        "sourceHeight": int(height),
-        "effectiveUpscale": effective,
-        "upscaleRelativeToFit": relative,
-    }
-    return frame_scale
-
 
 def bind_authoritative_rig(control_objects):
     bone_semantics = {
@@ -982,72 +374,6 @@ def bind_authoritative_rig(control_objects):
             if ik_target is not None and hand_control is not None:
                 ik_target["filmie_drives_from"] = hand_control.name
 
-
-def apply_facial_variants(actions, scene, entity_roots):
-    """Drive declared artwork alternatives as frame-dependent visibility states."""
-    schedules = {}
-    for instruction in actions:
-        action = instruction["action"]
-        if action["type"] != "facial-variant":
-            continue
-        character_id = instruction["characterId"]
-        slot_id = action["slotId"]
-        root = entity_roots.get(character_id)
-        if root is None:
-            raise RuntimeError("Facial variant requires a valid character asset")
-        try:
-            variants = json.loads(root.get("filmie_variant_map_" + slot_id, "[]"))
-        except (TypeError, json.JSONDecodeError) as error:
-            raise RuntimeError("Character has malformed facial variant metadata") from error
-        if action["variantId"] not in variants:
-            raise RuntimeError(
-                "Character has no declared variant " + slot_id + "=" + action["variantId"]
-            )
-        default_index = int(root.get("filmie_variant_" + slot_id, -1))
-        if default_index < 0 or default_index >= len(variants):
-            raise RuntimeError("Character facial variant default is invalid for " + slot_id)
-        key = (character_id, slot_id)
-        schedules.setdefault(key, {"root": root, "default": variants[default_index], "events": []})["events"].append(
-            (int(action["startFrame"]) + 1, int(action["endFrame"]), action["variantId"])
-        )
-
-    for (character_id, slot_id), schedule in schedules.items():
-        events = sorted(schedule["events"])
-        root = schedule["root"]
-        descendants = []
-        for obj in scene.objects:
-            ancestor = obj
-            while ancestor is not None and ancestor != root:
-                ancestor = ancestor.parent
-            if ancestor == root and obj.get("filmie_variant_slot") == slot_id:
-                descendants.append(obj)
-        if not descendants:
-            raise RuntimeError("Character has no rendered artwork for variant slot " + slot_id)
-        for obj in descendants:
-            variant_id = obj.get("filmie_variant_id")
-            conditions = [
-                "((frame >= %d and frame <= %d) and %d)"
-                % (start, end, int(variant_id != selected))
-                for start, end, selected in events
-            ]
-            conditions.append(
-                "((%s) and %d)"
-                % (
-                    " and ".join("not (frame >= %d and frame <= %d)" % (start, end) for start, end, _selected in events),
-                    int(variant_id != schedule["default"]),
-                )
-            )
-            driver = obj.driver_add("hide_render").driver
-            driver.type = "SCRIPTED"
-            variable = driver.variables.new()
-            variable.name = "frame"
-            variable.type = "SINGLE_PROP"
-            variable.targets[0].id_type = "SCENE"
-            variable.targets[0].id = scene
-            variable.targets[0].data_path = "frame_current"
-            driver.expression = " or ".join(conditions)
-
-
 def resolve_asset_anchor(target, anchor_id):
     """Resolve prepared child anchors in world space, with legacy metadata fallback."""
     for candidate in bpy.context.scene.objects:
@@ -1068,17 +394,14 @@ def resolve_asset_anchor(target, anchor_id):
         raise RuntimeError("Target asset does not define anchor " + anchor_id)
     return target.matrix_world @ Vector(anchor)
 
-
 def apply_actions(spec, entity_roots, control_objects):
     if spec.get("animationLibraryVersion") != "1.0.0":
         raise RuntimeError("Unsupported semantic animation library version: " + str(spec.get("animationLibraryVersion")))
     scene = bpy.context.scene
     bind_authoritative_rig(control_objects)
-    apply_facial_variants(spec["actions"], scene, entity_roots)
     action_priority = {
         "walk": 0, "run": 0, "jump": 0,
         "breathing": 1, "head-turn": 1, "blink": 1, "expression": 1,
-        "facial-variant": 1,
         "lip-sync": 1, "celebrate": 1, "sit": 1, "stand": 1,
         "interaction": 2, "kick": 2, "reach": 3, "grasp": 4,
         "lift": 5, "place": 6, "motion-clip": 7,
@@ -1098,9 +421,6 @@ def apply_actions(spec, entity_roots, control_objects):
             continue
         controls = control_objects.get(character_id, {})
         character_root = entity_roots.get(character_id)
-        is_cutout_rig = bool(
-            character_root and character_root.get("filmie_semantic_controls")
-        )
         start = int(action["startFrame"]) + 1
         end = int(action["endFrame"])
         if action["type"] == "breathing":
@@ -1152,13 +472,11 @@ def apply_actions(spec, entity_roots, control_objects):
             expression = action["expressionId"]
             angle = {"neutral": 0.0, "worried": 0.14, "stern": -0.12, "fearful": 0.22}[expression]
             for brow in brows:
-                axis = 1 if is_cutout_rig else 0
+                axis = 0
                 brow.rotation_euler[axis] = 0.0
                 brow.keyframe_insert(data_path="rotation_euler", index=axis, frame=start)
                 brow.rotation_euler[axis] = angle
                 brow.keyframe_insert(data_path="rotation_euler", index=axis, frame=end)
-        elif action["type"] == "facial-variant":
-            continue
         elif action["type"] == "lip-sync":
             mouth = controls.get("mouth")
             if mouth is None:
@@ -1234,7 +552,7 @@ def apply_actions(spec, entity_roots, control_objects):
             if target is None:
                 raise RuntimeError("Kick action requires targetEntityId to resolve a target object")
             angle = math.radians(float(action["angleDegrees"]))
-            axis = 1 if is_cutout_rig else 0
+            axis = 0
             leg.rotation_euler[axis] = 0.0
             leg.keyframe_insert(data_path="rotation_euler", index=axis, frame=start)
             contact_frame = start + min(end - start, int(action["contactFrame"]))
@@ -1284,14 +602,10 @@ def apply_actions(spec, entity_roots, control_objects):
             for frame in range(start, end + 1):
                 phase = 2.0 * math.pi * (frame - start) / max(2, end - start)
                 for side, arm in enumerate(arms):
-                    if is_cutout_rig:
-                        arm.rotation_euler.y = math.sin(phase) * intensity * (1 if side == 0 else -1)
-                        arm.rotation_euler.z = 0.0
-                    else:
-                        arm.rotation_euler.z = math.sin(phase) * intensity * (1 if side == 0 else -1)
-                        arm.rotation_euler.x = -intensity * 0.9
+                    arm.rotation_euler.z = math.sin(phase) * intensity * (1 if side == 0 else -1)
+                    arm.rotation_euler.x = -intensity * 0.9
                     arm.keyframe_insert(data_path="rotation_euler", frame=frame)
-                axis = 1 if is_cutout_rig else 0
+                axis = 0
                 chest.rotation_euler[axis] = math.sin(phase * 2.0) * intensity * 0.08
                 chest.keyframe_insert(data_path="rotation_euler", index=axis, frame=frame)
         elif action["type"] in ("sit", "stand"):
@@ -1469,7 +783,6 @@ def apply_actions(spec, entity_roots, control_objects):
         else:
             raise RuntimeError("Unsupported compiled character action: " + action["type"])
 
-
 def motion_blend(keyframe, progress):
     interpolation = keyframe.get("interpolation", "linear")
     if interpolation == "linear":
@@ -1497,7 +810,6 @@ def motion_blend(keyframe, progress):
                 high = mid
         return coordinate((low + high) / 2, y1, y2)
     raise RuntimeError("Unsupported motion interpolation: " + interpolation)
-
 
 def apply_motion_curves(spec, control_objects, entity_roots):
     grouped = {}
@@ -1565,7 +877,6 @@ def apply_motion_curves(spec, control_objects, entity_roots):
             setattr(control, property_name, value)
             control.keyframe_insert(data_path=property_name, frame=frame)
 
-
 def main():
     spec = read_spec()
     spec.setdefault("renderConfig", {
@@ -1625,12 +936,10 @@ def main():
         "samples": int(spec["renderConfig"]["samples"]),
         "denoising": bool(spec["renderConfig"].get("denoising", False)),
         "renderedFrames": rendered,
-        "sourceFraming": spec.get("sourceFraming"),
         "metrics": RENDER_METRICS,
     }
     with open(os.path.join(spec["outputDirectory"], "worker-result.json"), "w", encoding="utf-8") as stream:
         json.dump(result, stream, sort_keys=True)
-
 
 if __name__ == "__main__":
     try:

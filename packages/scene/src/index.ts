@@ -158,7 +158,6 @@ export function compileScene(
       `Unsupported semantic animation library version "${scene.animationLibraryVersion}"; available version is "${SEMANTIC_ANIMATION_LIBRARY_VERSION}"`,
     );
   const entities = new Set([
-    ...scene.layers.map((layer) => layer.id),
     ...scene.characters.map((character) => character.id),
     ...scene.props.map((prop) => prop.id),
   ]);
@@ -191,26 +190,6 @@ export function compileScene(
           `Overlapping motion clips "${previous.id}" and "${current.id}" on character "${character.id}" are unsupported`,
         );
       }
-    }
-    const facialVariants = character.actions
-      .filter((action) => action.type === 'facial-variant')
-      .sort(
-        (left, right) =>
-          left.startFrame - right.startFrame ||
-          compareStrings(left.id, right.id),
-      );
-    for (let index = 1; index < facialVariants.length; index += 1) {
-      const previous = facialVariants[index - 1];
-      const current = facialVariants[index];
-      if (
-        previous?.type === 'facial-variant' &&
-        current?.type === 'facial-variant' &&
-        previous.slotId === current.slotId &&
-        current.startFrame < previous.endFrame
-      )
-        throw new TypeError(
-          `Overlapping facial variants "${previous.id}" and "${current.id}" target slot "${current.slotId}" on character "${character.id}"`,
-        );
     }
   }
   const libraryMap = new Map(
@@ -293,15 +272,6 @@ export function compileScene(
     styleVersion: scene.styleVersion,
     style,
     environment: scene.environment,
-    groups: [...scene.groups].sort((left, right) =>
-      compareStrings(left.id, right.id),
-    ),
-    layers: [...scene.layers].sort(
-      (left, right) =>
-        left.order - right.order ||
-        left.transform.position.y - right.transform.position.y ||
-        compareStrings(left.id, right.id),
-    ),
     characters: [...scene.characters]
       .map((character) => ({
         ...character,

@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { StableIdSchema } from './identifiers.js';
 import { greatestCommonDivisor } from './shared-internal.js';
 
 export const RationalSchema = z
@@ -41,13 +40,6 @@ const QualitySettingsSchema = z.discriminatedUnion('mode', [
     .strict(),
   z.object({ mode: z.literal('lossless') }).strict(),
 ]);
-
-const RemotionRendererConfigurationSchema = z
-  .object({
-    compositionId: StableIdSchema,
-    concurrency: z.number().int().positive().safe().optional(),
-  })
-  .strict();
 
 const BlenderRendererConfigurationSchema = z
   .object({
@@ -91,20 +83,12 @@ export const QualityProfilePostProcessingSchema = z
   })
   .strict();
 
-export const RendererSelectionSchema = z.discriminatedUnion('id', [
-  z
-    .object({
-      id: z.literal('remotion'),
-      config: RemotionRendererConfigurationSchema,
-    })
-    .strict(),
-  z
-    .object({
-      id: z.literal('blender'),
-      config: BlenderRendererConfigurationSchema,
-    })
-    .strict(),
-]);
+export const RendererSelectionSchema = z
+  .object({
+    id: z.literal('blender'),
+    config: BlenderRendererConfigurationSchema,
+  })
+  .strict();
 
 export const RenderPolicySchema = z
   .object({

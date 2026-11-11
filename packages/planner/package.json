@@ -16,7 +16,6 @@
   "dependencies": {
     "@filmmaking/assets": "workspace:*",
     "@filmmaking/contracts": "workspace:*",
-    "@filmmaking/manifest": "workspace:*",
     "@filmmaking/scene": "workspace:*",
     "@filmmaking/timeline": "workspace:*"
   }

@@ -3,7 +3,6 @@
   "compilerOptions": { "rootDir": "src", "outDir": "dist" },
   "references": [
     { "path": "../contracts" },
-    { "path": "../manifest" },
     { "path": "../assets" },
     { "path": "../timeline" },
     { "path": "../scene" }

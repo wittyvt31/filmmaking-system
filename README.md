@@ -1,38 +1,40 @@
 # Filmie
 
-Filmie is a local-first production system. It validates prepared project packages, compiles frame-accurate timelines, renders shots through Blender or Remotion, assembles video with FFmpeg, and verifies the output. It does not invent scripts or creative instructions during production.
+Filmie is a local, manifest-driven 3D production pipeline. It validates an approved project, resolves exact versioned Blender model assets, compiles a frame timeline, renders through Blender, assembles with FFmpeg, and verifies outputs. It does not interpret scripts, create assets, or invent missing instructions during production.
 
 ## Requirements
 
 - Windows 10/11, Node.js 22.17+, pnpm 12.16.1
-- FFmpeg and FFprobe on `PATH` for assembly and media inspection
-- Blender 5.x for Blender projects; Chrome or Edge for Remotion
+- Blender 5.x, FFmpeg, and FFprobe available locally
 
-Install with `pnpm install --frozen-lockfile`. Set `FILMIE_BLENDER`, `FILMIE_FFMPEG`, or `FILMIE_FFPROBE` to select non-default executables.
+Install dependencies with `pnpm install --frozen-lockfile`. Set `FILMIE_BLENDER`, `FILMIE_FFMPEG`, or `FILMIE_FFPROBE` to choose executables.
 
-## Run a project
+## Run the reference project
 
 ```powershell
 pnpm filmie doctor
-pnpm filmie validate --project examples/demo
-pnpm filmie plan --project examples/demo
-pnpm filmie render --project examples/demo --output renders/demo
+pnpm filmie validate --project examples/3d-production
+pnpm filmie plan --project examples/3d-production
+pnpm filmie render --project examples/3d-production --output renders/3d-production
 ```
 
-A prepared project keeps its `manifest.json`, `assets.json`, source artwork, and versioned reusable assets together. `renders/` contains disposable production outputs; `.cache/` contains reusable local render artifacts; `dist/` contains build output. Never store source artwork or authoritative manifests in these generated directories.
+Each project contains `manifest.json`, `assets.json`, and exact versioned assets. The manifest describes scene models, characters, props, lighting, camera, shot timing, and audio cues. Scene assets must be Blender model collections identified in asset metadata. Source manifests and assets live with the project; `.cache/` stores reusable artifacts; `renders/` and `dist/` are disposable outputs.
 
 ## Architecture
 
-- `packages/contracts`: runtime schemas and shared interfaces.
-- `packages/manifest`, `packages/assets`, `packages/timeline`, `packages/scene`: input parsing, asset resolution, and deterministic compilation.
-- `packages/planner`: resolved render jobs and dependencies.
+- `packages/contracts`: validated manifest, scene, render, timeline, receipt, and serialization contracts.
+- `packages/assets`: immutable asset versions, SHA-256 verification, and file resolution.
+- `packages/scene`, `packages/timeline`, `packages/planner`: renderer-facing scene instructions, integer-frame timeline, and render-job planning.
 - `packages/cache`, `packages/media`: local artifact cache and renderer-independent FFmpeg/FFprobe operations.
-- `engines/blender`, `engines/remotion`: renderer adapters and engine-specific execution.
-- `packages/orchestrator`: coordinates injected renderer/media interfaces, receipts, and production stages.
-- `apps/cli`: command-line composition root. A future API or frontend can call the same validated project and orchestration interfaces without owning renderer logic.
-- `examples/`: source project packages and reproducible inputs. `tests/`: automated checks.
+- `engines/blender`: Blender adapter and Python render worker.
+- `packages/orchestrator`: filesystem project loading, validation, package approval, job execution, caching, assembly, and receipts.
+- `apps/cli`: command-line composition root.
 
-Dependencies point from engines and domain packages toward contracts. The orchestrator coordinates adapters through interfaces; media assembly does not depend on a renderer. Project data is persistent input, reusable cache is regenerable, and render/build outputs are disposable.
+## Implemented and planned
+
+Implemented: strict JSON manifests; Blender 3D collection loading; perspective camera paths and scene lighting; deterministic keyframed actions supported by the Blender worker when the referenced model supplies required controls; EEVEE, Cycles, and Workbench configuration; PNG sequence rendering; FFmpeg encoding, timeline ordering, transitions and audio cues; asset integrity checks, cache fingerprints, receipts, and FFprobe verification.
+
+Planned: frontend/API and persistent manifest service; general asset authoring and rig preparation; broader animation/physics systems; richer model interchange and validation. Filmie currently consumes prepared `.blend` collections and does not create or rig production models.
 
 ## Development
 
@@ -46,4 +48,4 @@ pnpm build
 pnpm check
 ```
 
-Use `pnpm install --frozen-lockfile` to reproduce the pinned dependency graph. Keep production deterministic: validate inputs, preserve exact asset versions, include pixel-affecting inputs in cache keys, and reject unsupported instructions explicitly.
+Production packages use ESM and strict TypeScript. Validate schema changes, preserve exact asset identities, include pixel-affecting values in render fingerprints, spawn tools with argument arrays, and reject unsupported instructions explicitly.

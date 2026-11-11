@@ -17,9 +17,7 @@
     "@filmmaking/contracts": "workspace:*",
     "@filmmaking/orchestrator": "workspace:*",
     "@filmmaking/assets": "workspace:*",
-    "@filmmaking/engine-remotion": "workspace:*",
     "@filmmaking/engine-blender": "workspace:*",
-    "@filmmaking/manifest": "workspace:*",
     "@filmmaking/media": "workspace:*",
     "commander": "15.0.0"
   }

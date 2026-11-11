@@ -1,12 +1,5 @@
 import { spawn } from 'node:child_process';
-import {
-  copyFile,
-  mkdir,
-  mkdtemp,
-  readFile,
-  rm,
-  writeFile,
-} from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { inflateSync } from 'node:zlib';
@@ -60,7 +53,7 @@ function run(
 
 async function projectForShotCount(count: number) {
   const sample = JSON.parse(
-    await readFile(resolve('examples/demo/manifest.json'), 'utf8'),
+    await readFile(resolve('examples/3d-production/manifest.json'), 'utf8'),
   ) as {
     shots: Record<string, unknown>[];
     timeline: Record<string, unknown>;
@@ -84,10 +77,7 @@ async function projectForShotCount(count: number) {
     const shot = structuredClone(sourceShot);
     shot['id'] = `shot.test-${index + 1}`;
     shot['durationFrames'] = 30;
-    const composition = shot['composition'] as Record<string, unknown>;
-    composition['camera'] = { type: 'static' };
-    for (const element of shot['visualElements'] as Record<string, unknown>[])
-      element['animation'] = { type: 'static' };
+    delete shot['scene'];
     return shot;
   });
   sample.shots = shots;
@@ -433,27 +423,39 @@ describe('FFmpeg timeline video assembly', () => {
     const root = await temporaryDirectory();
     const frameDirectory = join(root, 'frames');
     await mkdir(frameDirectory, { recursive: true });
-    const sourceImage = resolve(
-      'examples/they-have-reached/assets/backgrounds/interior-wide.png',
-    );
-    await copyFile(sourceImage, join(frameDirectory, 'frame_000001.png'));
-    await copyFile(sourceImage, join(frameDirectory, 'frame_000002.png'));
+    const ffmpegPath = process.env['FILMIE_FFMPEG'] ?? 'ffmpeg';
+    for (const frame of [1, 2]) {
+      await run(ffmpegPath, [
+        '-hide_banner',
+        '-loglevel',
+        'error',
+        '-f',
+        'lavfi',
+        '-i',
+        'color=c=black:s=64x64',
+        '-frames:v',
+        '1',
+        '-c:v',
+        'png',
+        '-y',
+        join(frameDirectory, `frame_${String(frame).padStart(6, '0')}.png`),
+      ]);
+    }
     const manifest = parseProjectManifest(
       JSON.parse(
-        await readFile(
-          resolve('examples/they-have-reached-blender/manifest.json'),
-          'utf8',
-        ),
+        await readFile(resolve('examples/3d-production/manifest.json'), 'utf8'),
       ) as unknown,
     );
+    manifest.video.resolution = { width: 1280, height: 720 };
+    manifest.renderPolicy.outputDimensions = { width: 1280, height: 720 };
     const outputPath = join(root, 'shot.mp4');
     manifest.renderPolicy.qualityProfile = 'final';
     manifest.renderPolicy.qualityPostProcessing = {
       final: { glow: true, finalGrade: true },
     };
     const result = await new FfmpegMediaEngine({
-      ffmpegPath: 'ffmpeg',
-      ffprobePath: 'ffprobe',
+      ffmpegPath,
+      ffprobePath: process.env['FILMIE_FFPROBE'] ?? 'ffprobe',
     }).encodeImageSequence({
       inputDirectory: frameDirectory,
       outputPath,

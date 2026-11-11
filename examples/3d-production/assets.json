@@ -1,152 +1,8 @@
 [
   {
     "assetId": "character.father",
-    "version": "1.0.0",
-    "type": "other",
-    "sourceUri": "assets/generated/character.father/1.0.0/asset.blend",
-    "contentHash": "32327928e5a7d6c7f2249f392cad84c8f7692b3dc136889406afbf38b807cc21",
-    "metadata": {
-      "generator": "blender-procedural-assets-v1",
-      "generatorFingerprint": "d7342a6cdfd2c2b46cad7b40006465902452cb356d379aab6572162623c4ca33",
-      "assetKind": "character",
-      "displayName": "Father",
-      "blenderCollection": "ASSET__character_father",
-      "blenderControls": ["RIG_chest", "RIG_head", "RIG_arm.L", "RIG_arm.R"],
-      "stylePreset": "charcoal_horror",
-      "styleVersion": "1.0.0"
-    },
-    "license": {
-      "name": "Procedurally authored in-house with Blender",
-      "restrictions": []
-    },
-    "provenance": {
-      "source": "Filmie Blender procedural asset worker"
-    }
-  },
-  {
-    "assetId": "environment.village-interior",
-    "version": "1.0.0",
-    "type": "other",
-    "sourceUri": "assets/generated/environment.village-interior/1.0.0/asset.blend",
-    "contentHash": "a7567b7215e14ff0004b2eebcb2e1150e771b2afa89bcf50caa6a06d0654cfee",
-    "metadata": {
-      "generator": "blender-procedural-assets-v1",
-      "generatorFingerprint": "7e96c1c0d1949476647f98fc16a0e6b7c9a4b6a6863e25e02cc26a592704443a",
-      "assetKind": "environment",
-      "displayName": "1950s rural Indian village-house interior",
-      "blenderCollection": "ASSET__environment_village_interior",
-      "blenderControls": [],
-      "stylePreset": "charcoal_horror",
-      "styleVersion": "1.0.0"
-    },
-    "license": {
-      "name": "Procedurally authored in-house with Blender",
-      "restrictions": []
-    },
-    "provenance": {
-      "source": "Filmie Blender procedural asset worker"
-    }
-  },
-  {
-    "assetId": "furniture.chair",
-    "version": "1.0.0",
-    "type": "other",
-    "sourceUri": "assets/generated/furniture.chair/1.0.0/asset.blend",
-    "contentHash": "249b74abcb228f4a2056b44314e9249a587967c940ade771a0e67edf5a1ebcaf",
-    "metadata": {
-      "generator": "blender-procedural-assets-v1",
-      "generatorFingerprint": "b60d4292ede7916922171beebf5d17008b2cca6cfe0b0f85b58ae6acfc8f96a5",
-      "assetKind": "furniture",
-      "displayName": "Worn wooden chair",
-      "blenderCollection": "ASSET__furniture_chair",
-      "blenderControls": [],
-      "stylePreset": "charcoal_horror",
-      "styleVersion": "1.0.0"
-    },
-    "license": {
-      "name": "Procedurally authored in-house with Blender",
-      "restrictions": []
-    },
-    "provenance": {
-      "source": "Filmie Blender procedural asset worker"
-    }
-  },
-  {
-    "assetId": "furniture.table",
-    "version": "1.0.0",
-    "type": "other",
-    "sourceUri": "assets/generated/furniture.table/1.0.0/asset.blend",
-    "contentHash": "f04a9d94df2930ff8491de066c0e37abdb1c9e9bbed6feee8982b624efb278cc",
-    "metadata": {
-      "generator": "blender-procedural-assets-v1",
-      "generatorFingerprint": "8403fb5e2bfd5c05c0310466c135f957472aa179dfd6ebfbd1110863a4a88aad",
-      "assetKind": "furniture",
-      "displayName": "Small village-house side table",
-      "blenderCollection": "ASSET__furniture_table",
-      "blenderControls": [],
-      "stylePreset": "charcoal_horror",
-      "styleVersion": "1.0.0"
-    },
-    "license": {
-      "name": "Procedurally authored in-house with Blender",
-      "restrictions": []
-    },
-    "provenance": {
-      "source": "Filmie Blender procedural asset worker"
-    }
-  },
-  {
-    "assetId": "prop.lantern",
-    "version": "1.0.0",
-    "type": "other",
-    "sourceUri": "assets/generated/prop.lantern/1.0.0/asset.blend",
-    "contentHash": "0eeefab477bc5460644b4212e08205a138ebd361ed7e89e638b797df6b9c933f",
-    "metadata": {
-      "generator": "blender-procedural-assets-v1",
-      "generatorFingerprint": "4553d007cb9121a131d396a7bd0828131f9ab8bed2a07922866d55f2c0cebf7a",
-      "assetKind": "prop",
-      "displayName": "Kerosene lantern",
-      "blenderCollection": "ASSET__prop_lantern",
-      "blenderControls": [],
-      "stylePreset": "charcoal_horror",
-      "styleVersion": "1.0.0"
-    },
-    "license": {
-      "name": "Procedurally authored in-house with Blender",
-      "restrictions": []
-    },
-    "provenance": {
-      "source": "Filmie Blender procedural asset worker"
-    }
-  },
-  {
-    "assetId": "prop.telephone",
-    "version": "1.0.0",
-    "type": "other",
-    "sourceUri": "assets/generated/prop.telephone/1.0.0/asset.blend",
-    "contentHash": "34b914d34519b9f3dd6b60975a0a8003b59210b0d4be4e00fbe509c0482d8a7f",
-    "metadata": {
-      "generator": "blender-procedural-assets-v1",
-      "generatorFingerprint": "b1023558dc6e34517dfac63f8980642797b545047bea22e51f9c7b4162e6d1ae",
-      "assetKind": "prop",
-      "displayName": "Vintage rotary telephone",
-      "blenderCollection": "ASSET__prop_telephone",
-      "blenderControls": [],
-      "stylePreset": "charcoal_horror",
-      "styleVersion": "1.0.0"
-    },
-    "license": {
-      "name": "Procedurally authored in-house with Blender",
-      "restrictions": []
-    },
-    "provenance": {
-      "source": "Filmie Blender procedural asset worker"
-    }
-  },
-  {
-    "assetId": "character.father",
     "version": "1.1.0",
-    "type": "other",
+    "type": "model",
     "sourceUri": "assets/generated/character.father/1.1.0/asset.blend",
     "contentHash": "9f10d828e882b38bf3edec42b65484e670a52657395d32299c48e37d8bb776db",
     "metadata": {
@@ -170,7 +26,7 @@
   {
     "assetId": "environment.village-interior",
     "version": "1.1.0",
-    "type": "other",
+    "type": "model",
     "sourceUri": "assets/generated/environment.village-interior/1.1.0/asset.blend",
     "contentHash": "f5a7a08760e298392b702f5fb07b8ee14b271f31cbe24c427a879f13af391c63",
     "metadata": {
@@ -194,7 +50,7 @@
   {
     "assetId": "furniture.chair",
     "version": "1.1.0",
-    "type": "other",
+    "type": "model",
     "sourceUri": "assets/generated/furniture.chair/1.1.0/asset.blend",
     "contentHash": "9f2291f48abfe7fb4e0985a970f736b1e6fe3510d593e4bbc1eb2d631269f043",
     "metadata": {
@@ -218,7 +74,7 @@
   {
     "assetId": "furniture.table",
     "version": "1.1.0",
-    "type": "other",
+    "type": "model",
     "sourceUri": "assets/generated/furniture.table/1.1.0/asset.blend",
     "contentHash": "d1178a8732425ce67db8dbd1c4a58351e0c7a7456c9ab556fba897ff993b60d6",
     "metadata": {
@@ -242,7 +98,7 @@
   {
     "assetId": "prop.lantern",
     "version": "1.1.0",
-    "type": "other",
+    "type": "model",
     "sourceUri": "assets/generated/prop.lantern/1.1.0/asset.blend",
     "contentHash": "c9fc766ea170706b81b4fb891a5720c333696a5c6d367f2bf46be23786cdc802",
     "metadata": {
@@ -266,7 +122,7 @@
   {
     "assetId": "prop.telephone",
     "version": "1.1.0",
-    "type": "other",
+    "type": "model",
     "sourceUri": "assets/generated/prop.telephone/1.1.0/asset.blend",
     "contentHash": "6acd360e9e5371ae0604b2522d5c59ad44ead4a6bd8f70a0400ad48547725dd8",
     "metadata": {

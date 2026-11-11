@@ -12,7 +12,6 @@ import { ArtifactCache } from '@filmmaking/cache';
 import { parseProjectManifest } from '@filmmaking/contracts';
 import { compileTimeline } from '@filmmaking/timeline';
 import { FfmpegMediaEngine } from '@filmmaking/media';
-import { getBundledMediaExecutables } from '@filmmaking/engine-remotion';
 import { cleanProductionFiles } from '@filmmaking/orchestrator';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -122,7 +121,7 @@ describe('QA regression coverage', () => {
     const root = await temporaryDirectory('filmmaking-aborted-media-');
     const manifest = parseProjectManifest(
       JSON.parse(
-        await readFile(resolve('examples/demo/manifest.json'), 'utf8'),
+        await readFile(resolve('examples/3d-production/manifest.json'), 'utf8'),
       ),
     );
     const controller = new AbortController();
@@ -154,7 +153,7 @@ describe('QA regression coverage', () => {
     const root = await temporaryDirectory('filmmaking-ffmpeg-failure-');
     const manifest = parseProjectManifest(
       JSON.parse(
-        await readFile(resolve('examples/demo/manifest.json'), 'utf8'),
+        await readFile(resolve('examples/3d-production/manifest.json'), 'utf8'),
       ),
     );
     const outputPath = join(root, 'master.mp4');
@@ -186,11 +185,11 @@ describe('QA regression coverage', () => {
     await writeFile(path, 'not an MP4 file');
     const manifest = parseProjectManifest(
       JSON.parse(
-        await readFile(resolve('examples/demo/manifest.json'), 'utf8'),
+        await readFile(resolve('examples/3d-production/manifest.json'), 'utf8'),
       ),
     );
     const media = new FfmpegMediaEngine({
-      ffprobePath: getBundledMediaExecutables().ffprobePath,
+      ffprobePath: process.env['FILMIE_FFPROBE'] ?? 'ffprobe',
     });
 
     const result = await media.inspect(path, {

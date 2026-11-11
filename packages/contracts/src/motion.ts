@@ -80,11 +80,6 @@ export const CharacterActionSchema = z.discriminatedUnion('type', [
     expressionId: z.enum(['neutral', 'worried', 'stern', 'fearful']),
   }).strict(),
   SceneActionBaseSchema.extend({
-    type: z.literal('facial-variant'),
-    slotId: StableIdSchema,
-    variantId: StableIdSchema,
-  }).strict(),
-  SceneActionBaseSchema.extend({
     type: z.literal('lip-sync'),
     visemes: z
       .array(

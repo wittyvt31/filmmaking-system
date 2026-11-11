@@ -82,10 +82,7 @@ function manifest(): ProjectManifest {
       pixelFormat: 'yuv420p',
       colorProfile: 'bt709',
       quality: { mode: 'crf', value: 18 },
-      renderer: {
-        id: 'remotion',
-        config: { compositionId: 'PreparedShot', concurrency: 2 },
-      },
+      renderer: { id: 'blender', config: { engine: 'BLENDER_EEVEE' } },
     },
     shots: [
       {
@@ -239,7 +236,7 @@ describe('manifest validation and planning', () => {
       kind: 'render-shot',
       durationFrames: 10,
       inputAssets: [{ assetId: 'image.hero', version: '1.0.0' }],
-      renderer: { id: 'remotion' },
+      renderer: { id: 'blender' },
       dependsOn: [],
     });
     expect(prepared.renderPlan.jobs[3]).toMatchObject({
@@ -377,8 +374,8 @@ describe('manifest validation and planning', () => {
     const unsupportedRenderer = mutableManifest();
     const policy = unsupportedRenderer.renderPolicy as Record<string, unknown>;
     policy.renderer = {
-      id: 'remotion',
-      config: { compositionId: 'PreparedShot', unknownSetting: true },
+      id: 'blender',
+      config: { engine: 'BLENDER_EEVEE', unknownSetting: true },
     };
     expect(() => parseProjectManifest(unsupportedRenderer)).toThrow();
 

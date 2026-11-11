@@ -33,7 +33,15 @@ export const AssetVersionSchema = z
   .object({
     assetId: StableIdSchema,
     version: AssetVersionReferenceSchema.shape.version,
-    type: z.enum(['video', 'image', 'audio', 'font', 'graphic', 'other']),
+    type: z.enum([
+      'model',
+      'video',
+      'image',
+      'audio',
+      'font',
+      'graphic',
+      'other',
+    ]),
     sourceUri: sourceUriSchema,
     contentHash: z
       .string()

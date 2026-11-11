@@ -1,31 +1,6 @@
 import { z } from 'zod';
 import { AssetVersionReferenceSchema, StableIdSchema } from './identifiers.js';
-import { RenderPolicySchema, VideoSettingsSchema } from './render-policy.js';
-import { ShotSchema, TimelineInstructionsSchema } from './shots.js';
 import { nonEmptyText } from './shared-internal.js';
-
-export const PreparedScreenplaySchema = z
-  .object({
-    schemaVersion: z.literal('1.0.0'),
-    projectId: StableIdSchema,
-    version: z.string().regex(/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/),
-    video: VideoSettingsSchema,
-    renderPolicy: RenderPolicySchema,
-    videoTrackId: StableIdSchema.default('video.main'),
-    scenes: z
-      .array(
-        z
-          .object({
-            id: StableIdSchema,
-            title: nonEmptyText,
-            shots: z.array(ShotSchema).min(1),
-          })
-          .strict(),
-      )
-      .min(1),
-    timeline: TimelineInstructionsSchema.optional(),
-  })
-  .strict();
 
 export const ProductionPackageSchema = z
   .object({
@@ -72,4 +47,3 @@ export const ProductionPackageSchema = z
   });
 
 export type ProductionPackage = z.infer<typeof ProductionPackageSchema>;
-export type PreparedScreenplay = z.infer<typeof PreparedScreenplaySchema>;

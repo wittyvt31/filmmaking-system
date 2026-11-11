@@ -16,7 +16,6 @@
     "lint": "eslint .",
     "typecheck": "tsc -b --pretty",
     "test": "vitest run",
-    "render:example": "pnpm build && node scripts/render-sample.mjs",
     "filmie": "pnpm build && node apps/cli/dist/index.js",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },

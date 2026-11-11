@@ -7,41 +7,6 @@ import {
 import { CharacterActionSchema } from './motion.js';
 import { SceneTransformSchema, UnitColorSchema } from './shared-internal.js';
 
-const NormalizedPivotSchema = z
-  .object({
-    x: z.number().finite().min(0).max(1).default(0.5),
-    y: z.number().finite().min(0).max(1).default(0.5),
-  })
-  .strict();
-
-const SceneGroupSchema = z
-  .object({
-    id: StableIdSchema,
-    parentId: StableIdSchema.optional(),
-    transform: SceneTransformSchema,
-  })
-  .strict();
-
-const SceneLayerSchema = z
-  .object({
-    id: StableIdSchema,
-    asset: AssetVersionReferenceSchema,
-    role: z.enum(['character', 'prop', 'foreground']),
-    parentId: StableIdSchema.optional(),
-    transform: SceneTransformSchema,
-    pivot: NormalizedPivotSchema.default({ x: 0.5, y: 0.5 }),
-    size: z
-      .object({
-        width: z.number().positive().max(1000),
-        height: z.number().positive().max(1000),
-      })
-      .strict()
-      .optional(),
-    opacity: z.number().finite().min(0).max(1).default(1),
-    order: z.number().int().safe().min(-1000).max(1000).default(0),
-  })
-  .strict();
-
 const SceneCameraTargetSchema = z
   .object({
     x: z.number().finite(),
@@ -135,15 +100,12 @@ export const ShotSceneSchema = z
     styleOverrides: CharcoalStyleOverridesSchema.optional(),
     motionLibraries: z.array(AssetVersionReferenceSchema).default([]),
     environment: AssetVersionReferenceSchema,
-    groups: z.array(SceneGroupSchema).default([]),
-    layers: z.array(SceneLayerSchema).default([]),
     characters: z
       .array(
         z
           .object({
             id: StableIdSchema,
-            artwork: AssetVersionReferenceSchema,
-            rig: AssetVersionReferenceSchema.optional(),
+            asset: AssetVersionReferenceSchema,
             transform: SceneTransformSchema,
             actions: z.array(CharacterActionSchema).default([]),
           })
@@ -155,7 +117,7 @@ export const ShotSceneSchema = z
         z
           .object({
             id: StableIdSchema,
-            artwork: AssetVersionReferenceSchema,
+            asset: AssetVersionReferenceSchema,
             transform: SceneTransformSchema,
           })
           .strict(),
@@ -166,14 +128,12 @@ export const ShotSceneSchema = z
   })
   .strict()
   .superRefine((scene, context) => {
-    const legacy =
-      scene.stylePreset === 'charcoal_horror' && scene.styleVersion === '1.1.0';
     const registered = STYLE_DEFINITION_REGISTRY.some(
       (definition) =>
         definition.id === scene.stylePreset &&
         definition.version === scene.styleVersion,
     );
-    if (!legacy && !registered)
+    if (!registered)
       context.addIssue({
         code: 'custom',
         path: ['stylePreset'],
@@ -224,52 +184,21 @@ export const ShotSceneSchema = z
         message: 'A push-in must end closer to the subject than it begins',
       });
     }
-    const nodes = [
-      ...scene.groups.map((node) => ({ ...node, kind: 'group' as const })),
-      ...scene.layers.map((node) => ({ ...node, kind: 'layer' as const })),
-    ];
-    const nodeIds = new Set<string>();
-    for (const [index, node] of nodes.entries()) {
-      if (nodeIds.has(node.id)) {
+    const entityIds = new Set<string>();
+    for (const [index, entity] of [
+      ...scene.characters.map((item) => ({
+        ...item,
+        kind: 'characters' as const,
+      })),
+      ...scene.props.map((item) => ({ ...item, kind: 'props' as const })),
+    ].entries()) {
+      if (entityIds.has(entity.id))
         context.addIssue({
           code: 'custom',
-          path: [node.kind === 'group' ? 'groups' : 'layers', index, 'id'],
-          message: `Duplicate artwork node ID "${node.id}"`,
+          path: [entity.kind, index, 'id'],
+          message: `Duplicate scene entity ID "${entity.id}"`,
         });
-      }
-      nodeIds.add(node.id);
-    }
-    const nodeById = new Map(nodes.map((node) => [node.id, node]));
-    for (const [index, node] of nodes.entries()) {
-      if (node.parentId && !nodeById.has(node.parentId)) {
-        context.addIssue({
-          code: 'custom',
-          path: [
-            node.kind === 'group' ? 'groups' : 'layers',
-            index,
-            'parentId',
-          ],
-          message: `Artwork node "${node.id}" has unknown parent "${node.parentId}"`,
-        });
-      }
-      const ancestry = new Set([node.id]);
-      let parentId = node.parentId;
-      while (parentId) {
-        if (ancestry.has(parentId)) {
-          context.addIssue({
-            code: 'custom',
-            path: [
-              node.kind === 'group' ? 'groups' : 'layers',
-              index,
-              'parentId',
-            ],
-            message: `Artwork hierarchy contains a cycle at "${parentId}"`,
-          });
-          break;
-        }
-        ancestry.add(parentId);
-        parentId = nodeById.get(parentId)?.parentId;
-      }
+      entityIds.add(entity.id);
     }
   });
 

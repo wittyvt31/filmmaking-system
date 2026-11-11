@@ -1,5 +1,5 @@
 {
-  "projectId": "they-have-reached.procedural-proof",
+  "projectId": "filmie.3d-reference",
   "version": "1.0.0",
   "video": {
     "resolution": { "width": 640, "height": 360 },
@@ -27,7 +27,6 @@
         "framing": "Wide medium interior view showing father, chair, table, lantern and telephone",
         "subjectPlacement": "Father left of center; telephone on table to the right",
         "cameraMovement": "Slow push toward the father and telephone",
-        "camera": { "type": "static" },
         "instructions": [
           "All visible objects in this proof are procedurally authored from asset-spec.json.",
           "Father breathing and head turn are evaluated as frame-based rig control animation."
@@ -43,38 +42,15 @@
       ],
       "scene": {
         "stylePreset": "charcoal_horror",
-        "styleVersion": "1.1.0",
+        "styleVersion": "1.2.0",
         "environment": {
           "assetId": "environment.village-interior",
           "version": "1.1.0"
         },
-        "layers": [
-          {
-            "id": "seat.chair",
-            "asset": { "assetId": "furniture.chair", "version": "1.1.0" },
-            "role": "prop",
-            "transform": {
-              "position": { "x": -1.05, "y": 0.75, "z": 0 },
-              "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
-              "scale": 1
-            }
-          },
-          {
-            "id": "table.side",
-            "asset": { "assetId": "furniture.table", "version": "1.1.0" },
-            "role": "prop",
-            "transform": {
-              "position": { "x": 1.05, "y": 0.75, "z": 0 },
-              "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
-              "scale": 1
-            }
-          }
-        ],
         "characters": [
           {
             "id": "character.father.instance",
-            "artwork": { "assetId": "character.father", "version": "1.1.0" },
-            "rig": { "assetId": "character.father", "version": "1.1.0" },
+            "asset": { "assetId": "character.father", "version": "1.1.0" },
             "transform": {
               "position": { "x": -1.05, "y": 0.65, "z": 0 },
               "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
@@ -102,8 +78,26 @@
         ],
         "props": [
           {
+            "id": "seat.chair",
+            "asset": { "assetId": "furniture.chair", "version": "1.1.0" },
+            "transform": {
+              "position": { "x": -1.05, "y": 0.75, "z": 0 },
+              "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+              "scale": 1
+            }
+          },
+          {
+            "id": "table.side",
+            "asset": { "assetId": "furniture.table", "version": "1.1.0" },
+            "transform": {
+              "position": { "x": 1.05, "y": 0.75, "z": 0 },
+              "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
+              "scale": 1
+            }
+          },
+          {
             "id": "prop.telephone.instance",
-            "artwork": { "assetId": "prop.telephone", "version": "1.1.0" },
+            "asset": { "assetId": "prop.telephone", "version": "1.1.0" },
             "transform": {
               "position": { "x": 1.05, "y": 0.68, "z": 0.76 },
               "rotationDegrees": { "x": 0, "y": 0, "z": 0 },
@@ -112,7 +106,7 @@
           },
           {
             "id": "prop.lantern.instance",
-            "artwork": { "assetId": "prop.lantern", "version": "1.1.0" },
+            "asset": { "assetId": "prop.lantern", "version": "1.1.0" },
             "transform": {
               "position": { "x": -2.1, "y": 0.62, "z": 0.02 },
               "rotationDegrees": { "x": 0, "y": 0, "z": 0 },

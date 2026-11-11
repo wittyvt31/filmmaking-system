@@ -9,7 +9,7 @@ import { BlenderRendererAdapter } from '@filmmaking/engine-blender';
 import { prepareProductionPlan } from '@filmmaking/planner';
 import { afterAll, describe, expect, it } from 'vitest';
 
-const projectDirectory = resolve('examples/they-have-reached-blender');
+const projectDirectory = resolve('examples/3d-production');
 const cscCandidates = [
   'C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe',
   'C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe',
@@ -57,8 +57,8 @@ describe.skipIf(!fakeBlenderPath)('Blender crash tolerance', () => {
     temporaryDirectories.push(temporary);
     process.env['FILMIE_FAKE_BLENDER_MODE'] = 'valid';
     process.env['FILMIE_FAKE_DURATION_FRAMES'] = '3';
-    process.env['FILMIE_FAKE_WIDTH'] = '1280';
-    process.env['FILMIE_FAKE_HEIGHT'] = '720';
+    process.env['FILMIE_FAKE_WIDTH'] = '640';
+    process.env['FILMIE_FAKE_HEIGHT'] = '360';
     try {
       const { adapter, request } = await buildRequest(temporary);
       const fingerprints = [];
@@ -87,8 +87,8 @@ describe.skipIf(!fakeBlenderPath)('Blender crash tolerance', () => {
     temporaryDirectories.push(temporary);
     process.env['FILMIE_FAKE_BLENDER_MODE'] = 'partial-retry';
     process.env['FILMIE_FAKE_DURATION_FRAMES'] = '3';
-    process.env['FILMIE_FAKE_WIDTH'] = '1280';
-    process.env['FILMIE_FAKE_HEIGHT'] = '720';
+    process.env['FILMIE_FAKE_WIDTH'] = '640';
+    process.env['FILMIE_FAKE_HEIGHT'] = '360';
     try {
       const { request } = await buildRequest(temporary);
       const adapter = new BlenderRendererAdapter({
@@ -100,8 +100,8 @@ describe.skipIf(!fakeBlenderPath)('Blender crash tolerance', () => {
       if (result.status !== 'success') throw new Error(result.error.message);
       expect(result.receipt.completedWithWarning).toBe(true);
       expect(result.receipt.metrics['retryCount']).toBe(2);
-      expect(result.receipt.metrics['nativeRenderWidth']).toBe(1280);
-      expect(result.receipt.metrics['nativeRenderHeight']).toBe(720);
+      expect(result.receipt.metrics['nativeRenderWidth']).toBe(640);
+      expect(result.receipt.metrics['nativeRenderHeight']).toBe(360);
       expect(result.receipt.metrics['upscaled']).toBe(false);
       expect(result.receipt.metrics['recoveredAttemptCount']).toBe(2);
       expect(result.receipt.metrics['firstFailedExitCode']).toBe(3);
@@ -167,8 +167,8 @@ describe.skipIf(!fakeBlenderPath)('Blender crash tolerance', () => {
     temporaryDirectories.push(temporary);
     process.env['FILMIE_FAKE_BLENDER_MODE'] = 'missing';
     process.env['FILMIE_FAKE_DURATION_FRAMES'] = '3';
-    process.env['FILMIE_FAKE_WIDTH'] = '1280';
-    process.env['FILMIE_FAKE_HEIGHT'] = '720';
+    process.env['FILMIE_FAKE_WIDTH'] = '640';
+    process.env['FILMIE_FAKE_HEIGHT'] = '360';
     try {
       const { adapter, request } = await buildRequest(temporary);
       const result = await adapter.renderShot(request);
@@ -199,8 +199,8 @@ describe.skipIf(!fakeBlenderPath)('Blender crash tolerance', () => {
     temporaryDirectories.push(temporary);
     process.env['FILMIE_FAKE_BLENDER_MODE'] = 'mismatch';
     process.env['FILMIE_FAKE_DURATION_FRAMES'] = '3';
-    process.env['FILMIE_FAKE_WIDTH'] = '1280';
-    process.env['FILMIE_FAKE_HEIGHT'] = '720';
+    process.env['FILMIE_FAKE_WIDTH'] = '640';
+    process.env['FILMIE_FAKE_HEIGHT'] = '360';
     try {
       const { adapter, request } = await buildRequest(temporary);
       const result = await adapter.renderShot(request);
@@ -230,6 +230,8 @@ async function buildRequest(temporary: string) {
   const camera = shotScene['camera'] as Record<string, unknown>;
   shot!['durationFrames'] = 3;
   camera['durationFrames'] = 3;
+  const characters = shotScene['characters'] as Record<string, unknown>[];
+  for (const character of characters) character['actions'] = [];
   const timeline = rawManifest['timeline'] as Record<string, unknown>;
   timeline['durationFrames'] = 3;
 

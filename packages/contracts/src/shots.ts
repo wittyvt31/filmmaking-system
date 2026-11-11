@@ -16,97 +16,10 @@ export const ShotSchema = z
         framing: nonEmptyText,
         subjectPlacement: nonEmptyText,
         cameraMovement: nonEmptyText,
-        camera: z
-          .discriminatedUnion('type', [
-            z.object({ type: z.literal('static') }).strict(),
-            z
-              .object({
-                type: z.literal('pan'),
-                startFrame: z.number().int().nonnegative().safe(),
-                durationFrames: z.number().int().positive().safe(),
-                from: z
-                  .object({
-                    x: z.number().min(0).max(1),
-                    y: z.number().min(0).max(1),
-                  })
-                  .strict(),
-                to: z
-                  .object({
-                    x: z.number().min(0).max(1),
-                    y: z.number().min(0).max(1),
-                  })
-                  .strict(),
-              })
-              .strict(),
-            z
-              .object({
-                type: z.literal('zoom'),
-                startFrame: z.number().int().nonnegative().safe(),
-                durationFrames: z.number().int().positive().safe(),
-                fromScale: z.number().positive().max(8),
-                toScale: z.number().positive().max(8),
-              })
-              .strict(),
-          ])
-          .optional(),
         instructions: z.array(nonEmptyText),
       })
       .strict(),
     requiredAssets: z.array(AssetVersionReferenceSchema),
-    visualElements: z
-      .array(
-        z
-          .object({
-            id: StableIdSchema,
-            asset: AssetVersionReferenceSchema,
-            role: z.enum(['background', 'character', 'prop']),
-            position: z
-              .object({
-                x: z.number().min(0).max(1),
-                y: z.number().min(0).max(1),
-              })
-              .strict(),
-            scale: z.number().positive().max(8),
-            zIndex: z.number().int().min(-1000).max(1000),
-            animation: z.discriminatedUnion('type', [
-              z.object({ type: z.literal('static') }).strict(),
-              z
-                .object({
-                  type: z.literal('fade-in'),
-                  startFrame: z.number().int().nonnegative().safe(),
-                  durationFrames: z.number().int().positive().safe(),
-                })
-                .strict(),
-              z
-                .object({
-                  type: z.literal('slide-in'),
-                  startFrame: z.number().int().nonnegative().safe(),
-                  durationFrames: z.number().int().positive().safe(),
-                  direction: z.enum(['left', 'right', 'up', 'down']),
-                })
-                .strict(),
-              z
-                .object({
-                  type: z.literal('float'),
-                  startFrame: z.number().int().nonnegative().safe(),
-                  durationFrames: z.number().int().positive().safe(),
-                  amplitudePx: z.number().positive().max(256),
-                })
-                .strict(),
-              z
-                .object({
-                  type: z.literal('pulse'),
-                  startFrame: z.number().int().nonnegative().safe(),
-                  durationFrames: z.number().int().positive().safe(),
-                  minimumScale: z.number().positive().max(8),
-                  maximumScale: z.number().positive().max(8),
-                })
-                .strict(),
-            ]),
-          })
-          .strict(),
-      )
-      .optional(),
     scene: ShotSceneSchema.optional(),
     audioCues: z.array(ShotAudioCueSchema).optional(),
   })

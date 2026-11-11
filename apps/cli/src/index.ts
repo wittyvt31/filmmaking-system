@@ -1,9 +1,8 @@
 import { createCommand } from 'commander';
 import { spawnSync } from 'node:child_process';
 import { cpus, totalmem } from 'node:os';
-import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
-import { RendererSelectionSchema } from '@filmmaking/contracts';
 import {
   approveProductionPackage,
   cleanProductionFiles,
@@ -11,49 +10,14 @@ import {
   inspectProductionProject,
   prepareProductionPackage,
 } from '@filmmaking/orchestrator';
-import {
-  RemotionRendererAdapter,
-  getBundledMediaExecutables,
-} from '@filmmaking/engine-remotion';
 import { FfmpegMediaEngine } from '@filmmaking/media';
 import { BlenderRendererAdapter } from '@filmmaking/engine-blender';
-import { buildProceduralAssets } from '@filmmaking/engine-blender/authoring';
-import { prepareLayeredArtwork } from '@filmmaking/engine-blender/artwork';
-import { compilePreparedScreenplay } from '@filmmaking/manifest';
 
 const cli = createCommand('filmie')
   .description(
     'Validate prepared projects, inspect plans, and render a complete local production.',
   )
   .showHelpAfterError();
-
-cli
-  .command('compile-screenplay')
-  .description(
-    'Compile a prepared scene and shot breakdown into a deterministic manifest without inventing instructions.',
-  )
-  .requiredOption('-i, --input <file>', 'Prepared screenplay JSON')
-  .requiredOption('-p, --project <directory>', 'Destination project directory')
-  .option('--replace', 'Replace an existing manifest')
-  .action(async ({ input, project, replace }) => {
-    const destination = resolve(project, 'manifest.json');
-    const screenplay = JSON.parse(
-      await readFile(resolve(input), 'utf8'),
-    ) as unknown;
-    const result = compilePreparedScreenplay(screenplay);
-    await mkdir(resolve(project), { recursive: true });
-    await writeFile(
-      destination,
-      `${JSON.stringify(result.manifest, null, 2)}\n`,
-      {
-        flag: replace ? 'w' : 'wx',
-      },
-    );
-    process.stdout.write(
-      `Compiled ${result.manifest.shots.length} prepared shots (${result.manifest.timeline.durationFrames} frames).\n` +
-        `Source fingerprint: ${result.sourceFingerprint}\nManifest: ${destination}\n`,
-    );
-  });
 
 const packageCommand = cli
   .command('package')
@@ -93,62 +57,6 @@ packageCommand
     });
     process.stdout.write(
       `Approved package ${result.fingerprint}.\nPackage: ${result.path}\n`,
-    );
-  });
-
-cli
-  .command('prepare')
-  .description(
-    'Create and register deterministic Blender assets from asset-spec.json.',
-  )
-  .requiredOption(
-    '-p, --project <directory>',
-    'Project directory containing asset-spec.json',
-  )
-  .option(
-    '--timeout <milliseconds>',
-    'Asset build timeout',
-    (value: string) => Number.parseInt(value, 10),
-    600_000,
-  )
-  .action(async ({ project, timeout }) => {
-    const result = await buildProceduralAssets({
-      projectDirectory: project,
-      timeoutMs: timeout,
-    });
-    process.stdout.write(
-      `Prepared ${result.createdAssetIds.length} new assets; reused ${result.reusedAssetIds.length}.\n` +
-        `Registry: ${resolve(project, 'assets.json')}\nReceipt: ${result.receiptPath}\n`,
-    );
-  });
-
-cli
-  .command('artwork')
-  .description(
-    'Prepare layered 2.5D artwork into reusable Blender asset packages.',
-  )
-  .command('prepare')
-  .description(
-    'Build and register versioned character, environment, and prop packages from registered PNG artwork.',
-  )
-  .requiredOption(
-    '-p, --project <directory>',
-    'Project directory containing artwork-spec.json and assets.json',
-  )
-  .option(
-    '--timeout <milliseconds>',
-    'Blender preparation timeout',
-    (value: string) => Number.parseInt(value, 10),
-    600_000,
-  )
-  .action(async ({ project, timeout }) => {
-    const result = await prepareLayeredArtwork({
-      projectDirectory: project,
-      timeoutMs: timeout,
-    });
-    process.stdout.write(
-      `Prepared ${result.createdAssetIds.length} new artwork packages; reused ${result.reusedAssetIds.length}.\n` +
-        `Registry: ${resolve(project, 'assets.json')}\nReceipt: ${result.receiptPath}\n`,
     );
   });
 
@@ -207,13 +115,8 @@ cli
           )
         : null;
     const marker = capability?.stdout.match(/FILMIE_CAPABILITIES=(\{.*\})/);
-    const bundled = getBundledMediaExecutables();
-    const ffmpeg =
-      process.env['FILMIE_FFMPEG'] ??
-      (availableOnPath('ffmpeg') ? 'ffmpeg' : bundled.ffmpegPath);
-    const ffprobe =
-      process.env['FILMIE_FFPROBE'] ??
-      (availableOnPath('ffprobe') ? 'ffprobe' : bundled.ffprobePath);
+    const ffmpeg = process.env['FILMIE_FFMPEG'] ?? 'ffmpeg';
+    const ffprobe = process.env['FILMIE_FFPROBE'] ?? 'ffprobe';
     const report = {
       blender: {
         executable: blenderPath,
@@ -334,35 +237,9 @@ projectOptions(
     process.once('SIGINT', abort);
     process.once('SIGTERM', abort);
     try {
-      const manifest = JSON.parse(
-        await readFile(resolve(project, 'manifest.json'), 'utf8'),
-      ) as unknown;
-      if (!manifest || typeof manifest !== 'object')
-        throw new Error('Project manifest must be a JSON object.');
-      const renderPolicy = (manifest as Record<string, unknown>)[
-        'renderPolicy'
-      ];
-      if (!renderPolicy || typeof renderPolicy !== 'object')
-        throw new Error('Project manifest needs a renderPolicy.');
-      const rendererSelection = RendererSelectionSchema.parse(
-        (renderPolicy as Record<string, unknown>)['renderer'],
-      );
-      const renderer =
-        rendererSelection.id === 'remotion'
-          ? new RemotionRendererAdapter()
-          : new BlenderRendererAdapter({
-              ...rendererSelection.config,
-              workers,
-            });
-      const bundledExecutables = getBundledMediaExecutables();
-      const ffmpegPath =
-        process.env['FILMIE_FFMPEG'] ??
-        (availableOnPath('ffmpeg') ? 'ffmpeg' : bundledExecutables.ffmpegPath);
-      const ffprobePath =
-        process.env['FILMIE_FFPROBE'] ??
-        (availableOnPath('ffprobe')
-          ? 'ffprobe'
-          : bundledExecutables.ffprobePath);
+      const renderer = new BlenderRendererAdapter({ workers });
+      const ffmpegPath = process.env['FILMIE_FFMPEG'] ?? 'ffmpeg';
+      const ffprobePath = process.env['FILMIE_FFPROBE'] ?? 'ffprobe';
       const result = await executeProduction({
         projectDirectory: project,
         outputDirectory: output,
