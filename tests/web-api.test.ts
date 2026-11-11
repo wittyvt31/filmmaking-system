@@ -21,13 +21,14 @@ let root: string;
 let server: Server;
 let base: string;
 
-async function start() {
+async function start(allowedHosts: string[] = []) {
   server = createFilmieServer({
     dataDirectory: join(root, 'data'),
     outputDirectory: join(root, 'outputs'),
     cacheDirectory: join(root, 'cache'),
     catalogsDirectory: resolve('examples'),
     webDirectory: join(root, 'web'),
+    allowedHosts,
   });
   server.listen(0, '127.0.0.1');
   await once(server, 'listening');
@@ -98,6 +99,21 @@ it('validates the humanoid animation catalog and reports incompatible motion edi
     text: JSON.stringify(draft),
   })) as Validation;
   expect(result.issues[0]?.message).toMatch(/gesture.*unknown clip/);
+});
+
+it('allows requests using an explicitly configured LAN host', async () => {
+  await stop();
+  await start(['192.168.1.20']);
+  const address = server.address();
+  if (!address || typeof address === 'string')
+    throw new Error('Server did not bind a port');
+  const response = await fetch(base + '/api/projects', {
+    headers: {
+      Host: '192.168.1.20:' + address.port,
+      Origin: 'http://192.168.1.20:' + address.port,
+    },
+  });
+  expect(response.status).toBe(200);
 });
 
 it('validates reference assets, persists revisions, rejects stale saves, and duplicates an older revision', async () => {

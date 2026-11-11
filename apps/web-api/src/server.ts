@@ -63,6 +63,7 @@ export function createFilmieServer(options: {
   cacheDirectory: string;
   catalogsDirectory: string;
   webDirectory: string;
+  allowedHosts?: string[];
 }) {
   const store = new WorkspaceStore(options.dataDirectory);
   const production = new ProductionService(
@@ -78,12 +79,21 @@ export function createFilmieServer(options: {
       "default-src 'self'; frame-ancestors 'none'",
     );
     const handle = async () => {
-      const host = '127.0.0.1:' + request.socket.localPort;
+      const port = request.socket.localPort;
+      const allowedHosts = ['127.0.0.1', ...(options.allowedHosts ?? [])];
+      const host = request.headers.host;
       if (
-        request.headers.host !== host ||
-        (request.headers.origin && request.headers.origin !== 'http://' + host)
+        !host ||
+        !allowedHosts.some(
+          (allowedHost) => host === `${allowedHost}:${port}`,
+        ) ||
+        (request.headers.origin &&
+          !allowedHosts.some(
+            (allowedHost) =>
+              request.headers.origin === `http://${allowedHost}:${port}`,
+          ))
       )
-        throw new ApiError(403, 'Use the local Filmie address.');
+        throw new ApiError(403, 'Use an allowed Filmie address.');
       const url = new URL(request.url ?? '/', 'http://' + host);
       const method = request.method;
       if (

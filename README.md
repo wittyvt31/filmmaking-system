@@ -9,7 +9,7 @@ Filmie is a local, manifest-driven 3D production pipeline. It validates an appro
 
 Install dependencies with `pnpm install --frozen-lockfile`. Set `FILMIE_BLENDER`, `FILMIE_FFMPEG`, or `FILMIE_FFPROBE` to choose executables.
 
-Run `pnpm web` and open [Filmie Studio](http://127.0.0.1:4173). Create a project from the `3d-production` catalog, edit and validate the manifest, save a revision, then run it. Restart the command after changing frontend or API source.
+Run `pnpm web` and open [Filmie Studio](http://127.0.0.1:4173). Create a project from the `3d-production` catalog, edit and validate the manifest, save a revision, then run it. Restart the command after changing frontend or API source. To access it from your local network, set `FILMIE_WEB_HOST=0.0.0.0` and `FILMIE_WEB_ALLOWED_HOSTS` to the server's IP address before running `pnpm web`; allow the selected port through the Windows firewall on a private network only. The app has no authentication, so only expose it to trusted devices.
 
 The web app stores project revisions and run history in `.filmie/`, writes outputs to `renders/web/`, and shares the production cache with the CLI. Set `FILMIE_WEB_PORT` to change the port or `FILMIE_WEB_CATALOGS` to use another folder of prepared projects, each with a `manifest.json` and `assets.json`. Keep the catalog asset files available for reruns.
 
