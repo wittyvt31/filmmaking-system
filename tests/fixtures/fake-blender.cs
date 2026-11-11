@@ -34,6 +34,7 @@ public static class FakeBlender {
             int height = h == null ? 720 : int.Parse(h);
             int startFrame = 1;
             bool partialRetry = mode == "partial-retry";
+            bool partialFailureOnce = mode == "partial-crash-once" || mode == "partial-timeout-once";
             bool firstAttempt = false;
             if (partialRetry) {
                 Match range = Regex.Match(File.ReadAllText(specPath),
@@ -44,20 +45,38 @@ public static class FakeBlender {
                 string marker = Path.Combine(Path.GetDirectoryName(specPath), "first-attempt.marker");
                 firstAttempt = !File.Exists(marker);
                 if (firstAttempt) File.WriteAllText(marker, "first attempt started");
+            } else if (partialFailureOnce) {
+                string marker = Path.Combine(Path.GetDirectoryName(specPath), "first-attempt.marker");
+                firstAttempt = !File.Exists(marker);
+                if (firstAttempt) File.WriteAllText(marker, "first attempt started");
             }
             string framesDir = Path.Combine(outputDirectory, "frames");
             Directory.CreateDirectory(framesDir);
-            int endFrame = startFrame + durationFrames - (firstAttempt ? 1 : 0);
+            int endFrame = startFrame + durationFrames;
+            if (partialRetry && firstAttempt) endFrame--;
+            if (partialFailureOnce && firstAttempt) endFrame = startFrame + 1;
+            int renderedFrames = 0;
             for (int f = startFrame; f < endFrame; f++) {
                 string path = Path.Combine(
                     framesDir, "frame_" + f.ToString("D6") + ".png");
+                if (partialFailureOnce && File.Exists(path)) continue;
                 File.WriteAllBytes(path, MakePng(width, height));
+                renderedFrames++;
             }
             File.WriteAllText(
                 Path.Combine(outputDirectory, "scene.blend"), "fake blend scene");
-            File.WriteAllText(
-                Path.Combine(outputDirectory, "worker-result.json"),
-                "{\"status\":\"success\",\"frameCount\":" + durationFrames + (mode == "mismatch" ? ",\"engine\":\"BLENDER_WORKBENCH\"" : "") + "}");
+            if (!partialFailureOnce || !firstAttempt)
+                File.WriteAllText(
+                    Path.Combine(outputDirectory, "worker-result.json"),
+                    "{\"status\":\"success\",\"frameCount\":" + durationFrames + ",\"renderedFrames\":" + renderedFrames + (mode == "mismatch" ? ",\"engine\":\"BLENDER_WORKBENCH\"" : "") + "}");
+            if (partialFailureOnce && firstAttempt) {
+                if (mode == "partial-timeout-once") {
+                    System.Threading.Thread.Sleep(2000);
+                    return 4;
+                }
+                Console.Error.WriteLine("FILMIE_FAKE_CRASH: interrupted after one complete frame");
+                return 3;
+            }
             if (partialRetry) {
                 if (firstAttempt) {
                     string crashPath = Path.Combine(Path.GetDirectoryName(specPath), "blender.crash.txt");

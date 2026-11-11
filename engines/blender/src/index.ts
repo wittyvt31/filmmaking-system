@@ -73,7 +73,7 @@ export function defaultBlenderExecutable(): string {
 export async function runBlenderProcess(
   executable: string,
   args: readonly string[],
-  options: { timeoutMs: number; signal?: AbortSignal },
+  options: { timeoutMs?: number; signal?: AbortSignal } = {},
 ): Promise<ProcessResult> {
   return await spawnCapture(executable, args, options);
 }
@@ -101,7 +101,7 @@ interface ProcessResult {
 function spawnCapture(
   executable: string,
   args: readonly string[],
-  options: { timeoutMs: number; signal?: AbortSignal },
+  options: { timeoutMs?: number; signal?: AbortSignal },
 ): Promise<ProcessResult> {
   return new Promise((resolvePromise, reject) => {
     let stdout = '';
@@ -114,10 +114,13 @@ function spawnCapture(
       windowsHide: true,
       stdio: ['ignore', 'pipe', 'pipe'],
     });
-    const timer = setTimeout(() => {
-      timedOut = true;
-      child.kill();
-    }, options.timeoutMs);
+    const timer =
+      options.timeoutMs !== undefined
+        ? setTimeout(() => {
+            timedOut = true;
+            child.kill();
+          }, options.timeoutMs)
+        : undefined;
     const abort = () => {
       interrupted = true;
       child.kill();
@@ -133,14 +136,14 @@ function spawnCapture(
     child.once('error', (error) => {
       if (settled) return;
       settled = true;
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
       options.signal?.removeEventListener('abort', abort);
       reject(error);
     });
     child.once('close', (code, signal) => {
       if (settled) return;
       settled = true;
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
       options.signal?.removeEventListener('abort', abort);
       resolvePromise({ code, signal, stdout, stderr, timedOut, interrupted });
     });
@@ -1034,7 +1037,9 @@ export class BlenderRendererAdapter implements RendererAdapter {
             workerSpecPath,
           ],
           {
-            timeoutMs: request.timeoutMs ?? 600_000,
+            ...(request.timeoutMs === undefined
+              ? {}
+              : { timeoutMs: request.timeoutMs }),
             ...(request.signal ? { signal: request.signal } : {}),
           },
         );
@@ -1282,13 +1287,13 @@ export class BlenderRendererAdapter implements RendererAdapter {
         throw new BlenderFailure(
           processResult.timedOut ? 'TIMEOUT' : 'INTERRUPTED',
           processResult.timedOut
-            ? `Blender timed out after ${request.timeoutMs ?? 600_000} ms`
+            ? `Blender timed out after ${request.timeoutMs} ms`
             : 'Blender render was interrupted',
           true,
         );
       }
       if (stagedChecksums === null) {
-        await preserveWorkerFailure();
+        await preserveWorkerFailure(true);
         if (
           workerResult?.errorCode === 'INVALID_INSTRUCTIONS' &&
           workerResult.error
@@ -1297,7 +1302,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
         if (processResult.timedOut)
           throw new BlenderFailure(
             'TIMEOUT',
-            `Blender timed out after ${request.timeoutMs ?? 600_000} ms`,
+            `Blender timed out after ${request.timeoutMs} ms`,
             true,
           );
         if (processResult.interrupted)

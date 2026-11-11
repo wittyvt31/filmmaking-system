@@ -5,7 +5,10 @@ import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { AssetRegistry } from '@filmmaking/assets';
 import { parseProjectManifest } from '@filmmaking/contracts';
-import { BlenderRendererAdapter } from '@filmmaking/engine-blender';
+import {
+  BlenderRendererAdapter,
+  runBlenderProcess,
+} from '@filmmaking/engine-blender';
 import { prepareProductionPlan } from '@filmmaking/planner';
 import { afterAll, describe, expect, it } from 'vitest';
 
@@ -42,6 +45,24 @@ function compileFakeBlender(): string | null {
 
 const temporaryDirectories: string[] = [];
 const fakeBlenderPath = compileFakeBlender();
+
+describe('Blender process timeout', () => {
+  it('has no default render timeout and honors an explicitly configured timeout', async () => {
+    const unbounded = await runBlenderProcess(process.execPath, [
+      '-e',
+      'setTimeout(() => {}, 80)',
+    ]);
+    expect(unbounded.code).toBe(0);
+    expect(unbounded.timedOut).toBe(false);
+
+    const bounded = await runBlenderProcess(
+      process.execPath,
+      ['-e', 'setTimeout(() => {}, 500)'],
+      { timeoutMs: 30 },
+    );
+    expect(bounded.timedOut).toBe(true);
+  });
+});
 
 afterAll(async () => {
   await Promise.all(
@@ -121,6 +142,45 @@ describe.skipIf(!fakeBlenderPath)('Blender crash tolerance', () => {
       expect(cached.cacheHit).toBe(true);
       expect(cached.receipt.completedWithWarning).toBe(true);
       expect(cached.receipt.metrics['recoveredAttemptCount']).toBe(2);
+    } finally {
+      delete process.env['FILMIE_FAKE_BLENDER_MODE'];
+      delete process.env['FILMIE_FAKE_DURATION_FRAMES'];
+      delete process.env['FILMIE_FAKE_WIDTH'];
+      delete process.env['FILMIE_FAKE_HEIGHT'];
+    }
+  }, 120_000);
+
+  it('resumes after a crash using previously rendered valid frames', async () => {
+    const temporary = await mkdtemp(join(tmpdir(), 'filmie-resume-crash-'));
+    temporaryDirectories.push(temporary);
+    process.env['FILMIE_FAKE_BLENDER_MODE'] = 'partial-timeout-once';
+    process.env['FILMIE_FAKE_DURATION_FRAMES'] = '3';
+    process.env['FILMIE_FAKE_WIDTH'] = '640';
+    process.env['FILMIE_FAKE_HEIGHT'] = '360';
+    try {
+      const { adapter, request } = await buildRequest(temporary);
+      request.timeoutMs = 100;
+      const first = await adapter.renderShot(request);
+      expect(first.status).toBe('failure');
+      if (first.status !== 'failure')
+        throw new Error('Expected timed-out failure');
+      expect(first.error.code).toBe('TIMEOUT');
+      expect(first.receipt.metrics['partialFrameCount']).toBe(1);
+      expect(first.receipt.logs.join('\n')).toContain(
+        'Failed render artifacts preserved at',
+      );
+
+      const resumed = await adapter.renderShot(request);
+      expect(resumed.status).toBe('success');
+      if (resumed.status !== 'success') throw new Error(resumed.error.message);
+      expect(resumed.receipt.metrics['frameCount']).toBe(3);
+      expect(resumed.receipt.metrics['renderedFrames']).toBe(2);
+      expect(resumed.receipt.metrics['resumedFrames']).toBe(1);
+      expect(
+        resumed.receipt.outputChecksums.filter((file) =>
+          /frame_\d{6}\.png$/.test(file.path),
+        ),
+      ).toHaveLength(3);
     } finally {
       delete process.env['FILMIE_FAKE_BLENDER_MODE'];
       delete process.env['FILMIE_FAKE_DURATION_FRAMES'];

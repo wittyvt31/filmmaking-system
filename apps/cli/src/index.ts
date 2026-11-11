@@ -221,9 +221,8 @@ projectOptions(
   )
   .option(
     '--timeout <milliseconds>',
-    'Timeout per rendering or media process',
+    'Optional timeout per rendering or media process',
     (value: string) => Number.parseInt(value, 10),
-    600_000,
   )
   .option(
     '--workers <count>',
