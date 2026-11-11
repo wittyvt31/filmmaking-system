@@ -7,12 +7,14 @@ import type {
   SpatialConstraint,
 } from '@filmmaking/contracts';
 import { compareStrings } from '@filmmaking/contracts';
+import { angularDistance } from './rigid-transforms.js';
 import {
   identity,
   multiply,
   quaternion,
   withinLimits,
   mixVector,
+  slerp,
 } from './motion-math.js';
 
 const sub = (a: readonly number[], b: readonly number[]): V => [
@@ -211,6 +213,25 @@ export function constrainMotion(
         : 1;
       return {
         c,
+        orientation: c.orientation
+          ? slerp(
+              initial.get(c.effector)!.rotation,
+              c.space === 'world'
+                ? multiply(
+                    inverse(r),
+                    parents.reduce(
+                      (q, transform) =>
+                        multiply(
+                          inverse(quaternion(xyz(transform.rotationDegrees))),
+                          q,
+                        ),
+                      c.orientation,
+                    ),
+                  )
+                : c.orientation,
+              t * t * (3 - 2 * t),
+            )
+          : undefined,
         unitScale: c.space === 'world' ? scale * parentScale : 1,
         target: mixVector(
           initial.get(c.effector)!.tail,
@@ -221,24 +242,39 @@ export function constrainMotion(
     });
     const errors = () => {
       const fk = evaluate(rotations);
-      return targets.map(({ c, target }) =>
-        Math.hypot(...sub(fk.get(c.effector)!.tail, target)),
-      );
+      return targets.map(({ c, target, orientation, unitScale }) => ({
+        position:
+          Math.hypot(...sub(fk.get(c.effector)!.tail, target)) * unitScale,
+        angle: orientation
+          ? angularDistance(fk.get(c.effector)!.rotation, orientation)
+          : 0,
+        angularTolerance: c.angularTolerance ?? 0.01,
+      }));
     };
     let best = errors();
-    const better = (next: number[]) => {
-      for (let i = 0; i < next.length; i++) {
-        const { c, unitScale } = targets[i]!;
-        const tolerance = c.tolerance / unitScale;
-        const a = Math.max(0, next[i]! - tolerance),
-          b = Math.max(0, best[i]! - tolerance);
-        if (Math.abs(a - b) > 1e-10) return a < b;
+    const priorities = [...new Set(targets.map(({ c }) => c.priority))];
+    const cost = (values: ReturnType<typeof errors>, priority: number) =>
+      values.reduce(
+        (sum, error, i) =>
+          targets[i]!.c.priority !== priority
+            ? sum
+            : sum +
+              Math.max(0, error.position / targets[i]!.c.tolerance - 1) ** 2 +
+              Math.max(0, error.angle / error.angularTolerance - 1) ** 2,
+        0,
+      );
+    const better = (next: ReturnType<typeof errors>) => {
+      for (const priority of priorities) {
+        const difference = cost(next, priority) - cost(best, priority);
+        if (Math.abs(difference) > 1e-10) return difference < 0;
       }
       return false;
     };
     const solved = () =>
       best.every(
-        (e, i) => e * targets[i]!.unitScale <= targets[i]!.c.tolerance,
+        (e, i) =>
+          e.position <= targets[i]!.c.tolerance &&
+          e.angle <= e.angularTolerance,
       );
     const movable = new Set(targets.flatMap(({ c }) => chains.get(c.id)!));
     for (const step of [8, 4, 2, 1, 0.5, 0.25, 0.125, 0.0625]) {
@@ -268,9 +304,12 @@ export function constrainMotion(
       }
     }
     for (let i = 0; i < best.length; i++)
-      if (best[i]! * targets[i]!.unitScale > targets[i]!.c.tolerance)
+      if (
+        best[i]!.position > targets[i]!.c.tolerance ||
+        best[i]!.angle > best[i]!.angularTolerance
+      )
         throw new TypeError(
-          `Constraint ${targets[i]!.c.id} on ${character.id} unreachable or conflicts with authored motion/contacts at frame ${frame}: residual ${best[i]! * targets[i]!.unitScale} metres in ${targets[i]!.c.space} space`,
+          `Constraint ${targets[i]!.c.id} on ${character.id} unreachable or conflicts with authored motion/contacts at frame ${frame}: residual ${best[i]!.position} metres, ${best[i]!.angle} radians in ${targets[i]!.c.space} space`,
         );
     for (const [joint, value] of rotations) {
       let track = output.joints.find((t) => t.joint === joint);

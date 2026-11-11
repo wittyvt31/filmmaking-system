@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { StableIdSchema } from './identifiers.js';
 import { MotionVectorSchema } from './skeletal-motion.js';
+import { UnitQuaternionSchema } from './interactions.js';
 
 export const SpatialConstraintSchema = z
   .object({
@@ -8,6 +9,8 @@ export const SpatialConstraintSchema = z
     effector: StableIdSchema,
     chainRoot: StableIdSchema,
     target: MotionVectorSchema,
+    orientation: UnitQuaternionSchema.optional(),
+    angularTolerance: z.number().positive().max(Math.PI).optional(),
     space: z.enum(['world', 'character-local']).default('world'),
     startFrame: z.number().int().nonnegative(),
     endFrame: z.number().int().nonnegative(),

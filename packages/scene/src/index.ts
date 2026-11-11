@@ -13,6 +13,8 @@ import { compileWorld } from './world.js';
 import { prepareCharacter } from './character.js';
 import { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
 import { constrainMotion } from './spatial-constraints.js';
+export * from './interactions.js';
+export * from './rigid-transforms.js';
 export { constrainMotion, forwardKinematics } from './spatial-constraints.js';
 
 export { compileWorld } from './world.js';
