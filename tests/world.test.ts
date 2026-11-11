@@ -106,6 +106,9 @@ describe('manifest world', () => {
       /prop.lantern@1.1.0/,
     );
     delete shot.scene!.world;
+    shot.scene!.characters = shot.scene!.characters.filter(
+      (character) => 'asset' in character,
+    );
     shot.scene!.environment = {
       assetId: 'environment.village-interior',
       version: '1.1.0',

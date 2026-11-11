@@ -1,10 +1,12 @@
 import { execFile } from 'node:child_process';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readdir, rm } from 'node:fs/promises';
 import { promisify } from 'node:util';
 import { defaultBlenderExecutable } from '@filmmaking/engine-blender';
+import { RiggedCharacterSchema } from '@filmmaking/contracts';
+import { prepareCharacter } from '@filmmaking/scene';
 import { once } from 'node:events';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import type { Server } from 'node:http';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { createFilmieServer } from '../apps/web-api/src/server.js';
@@ -159,17 +161,28 @@ it('runs the real orchestration path and retains Blender launch errors and logs'
 });
 
 it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
-  'renders one Blender frame through HTTP, serves previews, and reruns from cache',
+  'renders three Blender frames through HTTP, verifies character poses, and reuses assets',
   async () => {
     const { path, revision, text } = await createProject();
     const input = JSON.parse(text);
     const shot = input.shots[0];
-    shot.durationFrames = 1;
+    shot.durationFrames = 3;
     shot.scene.characters.forEach((character: { actions: unknown[] }) => {
       character.actions = [];
     });
-    shot.scene.camera.durationFrames = 1;
-    input.timeline.durationFrames = 1;
+    const visitor = shot.scene.characters[1];
+    visitor.poses.root = visitor.poses.root.slice(0, 2);
+    visitor.poses.root[1].frame = 2;
+    for (const track of visitor.poses.joints) {
+      track.keys = track.keys.slice(0, 2);
+      track.keys[1].frame = 2;
+    }
+    shot.scene.camera = {
+      type: 'static',
+      distance: 9.4,
+      target: { x: 0, y: 0.55, z: 1.2 },
+    };
+    input.timeline.durationFrames = 3;
     input.video.resolution = { width: 320, height: 180 };
     input.renderPolicy.outputDimensions = input.video.resolution;
     input.renderPolicy.renderer.config.engine = 'BLENDER_WORKBENCH';
@@ -191,6 +204,28 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
       output.name.endsWith('/scene.blend'),
     );
     expect(blend).toBeDefined();
+    const cacheRoot = join(root, 'cache');
+    const cacheEntry = (await readdir(cacheRoot, { recursive: true })).find(
+      (file) => /[\\/]characters[\\/][a-f0-9]{64}\.blend$/.test(file),
+    );
+    expect(cacheEntry).toBeDefined();
+    const prepared = prepareCharacter(RiggedCharacterSchema.parse(visitor), 3);
+    const imported = {
+      ...prepared,
+      id: 'visitor.imported',
+      source: {
+        kind: 'imported',
+        body: prepared.source.body,
+        asset: {
+          assetId: 'character.visitor',
+          localPath: join(cacheRoot, cacheEntry!),
+          metadata: {
+            blenderCollection:
+              'Filmie Humanoid ' + basename(cacheEntry!, '.blend').slice(0, 32),
+          },
+        },
+      },
+    };
     await promisify(execFile)(
       defaultBlenderExecutable(),
       [
@@ -210,6 +245,26 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
           'assert objects["bench.leg-left/body"].data == objects["bench.leg-right/body"].data',
           'assert objects["bench"]["filmie_physics_massKg"] == 14',
           'assert math.isclose(objects["room.main/north.entry.leaf"].rotation_euler.z, math.radians(-22), abs_tol=1e-5)',
+          'root = objects["visitor"]',
+          'assert root.parent == objects["room.main"]',
+          'rig = next(obj for obj in root.children if obj.type == "ARMATURE")',
+          'skin = next(obj for obj in rig.children if obj.type == "MESH")',
+          'assert rig.pose.bones["forearm.L"].parent.name == "upper_arm.L"',
+          'assert any(len(vertex.groups) == 2 for vertex in skin.data.vertices)',
+          'def pose(frame):\n    bpy.context.scene.frame_set(frame)\n    evaluated = skin.evaluated_get(bpy.context.evaluated_depsgraph_get())\n    return rig.pose.bones["forearm.L"].rotation_euler.x, root.location.y, [tuple(v.co) for v in evaluated.data.vertices]',
+          'a, b, c = [pose(frame) for frame in (1, 2, 3)]',
+          'assert c[0] < b[0] < a[0] and c[1] < b[1] < a[1]',
+          'assert max(math.dist(x, y) for x, y in zip(a[2], c[2])) > 0.05',
+          'import json, sys',
+          'sys.path.insert(0, ' +
+            JSON.stringify(resolve('engines/blender/worker')) +
+            ')',
+          'from render_shot import instantiate_asset, prepare_character',
+          'spec = json.loads(' + JSON.stringify(JSON.stringify(imported)) + ')',
+          'imported_root, imported_rig, _ = prepare_character(bpy.context.scene, spec, instantiate_asset, {"room.main": objects["room.main"]})',
+          'assert imported_root.parent == root.parent and len(imported_rig.data.bones) == len(rig.data.bones)',
+          'spec["bones"][0]["head"][0] += 0.1',
+          'try:\n    prepare_character(bpy.context.scene, spec, instantiate_asset, {"room.main": objects["room.main"]})\nexcept ValueError as error:\n    assert "Incompatible joint rest pose" in str(error)\nelse:\n    raise AssertionError("Incompatible rest pose was accepted")',
         ].join('\n'),
       ],
       { timeout: 15_000, windowsHide: true },
@@ -237,7 +292,7 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
       shots: 1,
       assembly: true,
     });
-    shot.scene.camera.fromDistance += 0.5;
+    visitor.poses.joints[0].keys[1].rotationDegrees[2] += 4;
     const cameraRevision = (await request(
       path + '/revisions',
       { text: JSON.stringify(input), baseRevisionId: version },
@@ -258,6 +313,7 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
     )!;
     expect(await (await fetch(base + workerResult.url)).json()).toMatchObject({
       worldCacheHit: true,
+      characterCacheHits: 1,
     });
   },
   65_000,

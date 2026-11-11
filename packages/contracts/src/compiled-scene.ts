@@ -4,6 +4,7 @@ import type { Rational } from './render-policy.js';
 import type { CharacterAction } from './motion.js';
 import { ShotSceneSchema } from './scene.js';
 import type { CompiledWorld } from './world.js';
+import type { PreparedCharacter, SceneCharacter } from './character.js';
 
 export interface CompiledSceneInstruction {
   version: string;
@@ -48,7 +49,9 @@ export interface CompiledSceneInstruction {
   };
   environment?: z.infer<typeof AssetVersionReferenceSchema>;
   world?: CompiledWorld;
-  characters: z.infer<typeof ShotSceneSchema>['characters'];
+  characters: (
+    Extract<SceneCharacter, { asset: unknown }> | PreparedCharacter
+  )[];
   props: z.infer<typeof ShotSceneSchema>['props'];
   lights: z.infer<typeof ShotSceneSchema>['lights'];
   camera: z.infer<typeof ShotSceneSchema>['camera'];

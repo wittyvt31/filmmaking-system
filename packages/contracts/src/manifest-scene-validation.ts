@@ -37,7 +37,10 @@ export function validateManifestSceneInstructions(
           geometry.kind === 'asset' ? [geometry.asset] : [],
         ) ?? []),
         ...shot.scene.motionLibraries,
-        ...shot.scene.characters.map((character) => character.asset),
+        ...shot.scene.characters.flatMap((character) => {
+          const asset = characterAsset(character);
+          return asset ? [asset] : [];
+        }),
         ...shot.scene.props.map((prop) => prop.asset),
       ];
       for (const reference of sceneReferences) {
@@ -71,6 +74,33 @@ export function validateManifestSceneInstructions(
         );
       }
       shot.scene.characters.forEach((character, characterIndex) => {
+        if ('poses' in character) {
+          const { poses } = character;
+          const prefix = [
+            'shots',
+            shotIndex,
+            'scene',
+            'characters',
+            characterIndex,
+            'poses',
+          ];
+          const validateFrames = (
+            keys: readonly { frame: number }[],
+            path: (number | string)[],
+          ) => {
+            keys.forEach((key, index) => {
+              if (key.frame >= shot.durationFrames)
+                issue(
+                  [...prefix, ...path, index, 'frame'],
+                  'Pose keyframe must be within the shot',
+                );
+            });
+          };
+          validateFrames(poses.root, ['root']);
+          poses.joints.forEach((track, index) =>
+            validateFrames(track.keys, ['joints', index, 'keys']),
+          );
+        }
         const actionIds = new Set<string>();
         character.actions.forEach((action, actionIndex) => {
           if (actionIds.has(action.id))
@@ -293,3 +323,4 @@ export function validateManifestSceneInstructions(
     });
   });
 }
+import { characterAsset } from './character.js';

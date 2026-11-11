@@ -10,10 +10,12 @@ import {
   type Shot,
 } from '@filmmaking/contracts';
 import { compileWorld } from './world.js';
+import { prepareCharacter } from './character.js';
 
 export { compileWorld } from './world.js';
+export { prepareCharacter } from './character.js';
 
-export const SCENE_COMPILER_VERSION = 'scene-compiler-v5';
+export const SCENE_COMPILER_VERSION = 'scene-compiler-v6';
 export const SEMANTIC_ANIMATION_LIBRARY_VERSION = '1.0.0';
 
 export const CHARCOAL_HORROR_STYLE = {
@@ -277,14 +279,18 @@ export function compileScene(
     ...(scene.environment ? { environment: scene.environment } : {}),
     ...(scene.world ? { world: compileWorld(scene.world) } : {}),
     characters: [...scene.characters]
-      .map((character) => ({
-        ...character,
-        actions: [...character.actions].sort(
-          (left, right) =>
-            left.startFrame - right.startFrame ||
-            compareStrings(left.id, right.id),
-        ),
-      }))
+      .map((character) =>
+        'source' in character
+          ? prepareCharacter(character, shot.durationFrames)
+          : {
+              ...character,
+              actions: [...character.actions].sort(
+                (left, right) =>
+                  left.startFrame - right.startFrame ||
+                  compareStrings(left.id, right.id),
+              ),
+            },
+      )
       .sort((left, right) => compareStrings(left.id, right.id)),
     props: [...scene.props].sort((left, right) =>
       compareStrings(left.id, right.id),

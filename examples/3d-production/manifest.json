@@ -22,7 +22,7 @@
     {
       "id": "shot.father-hears-telephone",
       "durationFrames": 90,
-      "visualDescription": "The father sits alone in his rural village home. He breathes subtly, hears the rotary telephone, and turns his head toward it while the camera slowly pushes closer.",
+      "visualDescription": "The father turns toward the rotary telephone as a visitor gestures in the furnished room.",
       "composition": {
         "framing": "Wide medium interior view showing father, chair, table, lantern and telephone",
         "subjectPlacement": "Father left of center; telephone on table to the right",
@@ -298,6 +298,169 @@
                 "maxYawDegrees": 34
               }
             ]
+          },
+          {
+            "id": "visitor",
+            "parentId": "room.main",
+            "transform": {
+              "position": {
+                "x": 2.2,
+                "y": 1.45,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "scale": 1
+            },
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "source": {
+              "kind": "procedural",
+              "body": {
+                "height": 1.72,
+                "shoulderWidth": 0.23,
+                "legLength": 0.48,
+                "armLength": 0.35,
+                "build": 0.95
+              },
+              "appearance": {
+                "skin": {
+                  "color": [0.52, 0.34, 0.23]
+                },
+                "top": {
+                  "color": [0.17, 0.25, 0.26]
+                },
+                "trousers": {
+                  "color": [0.12, 0.115, 0.1]
+                },
+                "shoes": {
+                  "color": [0.064, 0.046, 0.036]
+                },
+                "hair": {
+                  "color": [0.075, 0.052, 0.04]
+                }
+              }
+            },
+            "poses": {
+              "root": [
+                {
+                  "frame": 0,
+                  "transform": {
+                    "position": {
+                      "x": 2.2,
+                      "y": 1.45,
+                      "z": 0
+                    },
+                    "rotationDegrees": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "scale": 1
+                  },
+                  "interpolation": "ease"
+                },
+                {
+                  "frame": 42,
+                  "transform": {
+                    "position": {
+                      "x": 2.15,
+                      "y": 1.23,
+                      "z": 0
+                    },
+                    "rotationDegrees": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "scale": 1
+                  },
+                  "interpolation": "hold"
+                }
+              ],
+              "joints": [
+                {
+                  "joint": "upper_arm.L",
+                  "keys": [
+                    {
+                      "frame": 0,
+                      "rotationDegrees": [0, 0, 0],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 24,
+                      "rotationDegrees": [-22, 0, 56],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 47,
+                      "rotationDegrees": [-22, 0, 56],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 75,
+                      "rotationDegrees": [0, 0, 0],
+                      "interpolation": "hold"
+                    }
+                  ]
+                },
+                {
+                  "joint": "forearm.L",
+                  "keys": [
+                    {
+                      "frame": 0,
+                      "rotationDegrees": [0, 0, 0],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 24,
+                      "rotationDegrees": [-45, 0, 0],
+                      "interpolation": "linear"
+                    },
+                    {
+                      "frame": 35,
+                      "rotationDegrees": [-25, 0, 0],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 46,
+                      "rotationDegrees": [-45, 0, 0],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 75,
+                      "rotationDegrees": [0, 0, 0],
+                      "interpolation": "hold"
+                    }
+                  ]
+                },
+                {
+                  "joint": "head",
+                  "keys": [
+                    {
+                      "frame": 0,
+                      "rotationDegrees": [0, 0, 0],
+                      "interpolation": "linear"
+                    },
+                    {
+                      "frame": 47,
+                      "rotationDegrees": [0, -18, 0],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 75,
+                      "rotationDegrees": [0, 0, 0],
+                      "interpolation": "hold"
+                    }
+                  ]
+                }
+              ]
+            }
           }
         ],
         "props": [

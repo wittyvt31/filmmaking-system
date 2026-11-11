@@ -26,6 +26,10 @@ Each project contains `manifest.json`, `assets.json`, and exact versioned assets
 
 The reference manifest uses `scene.world` version 1 for a measured room, a box-built bench, and a registered lantern attached to the bench. Dimensions and positions are in meters, Z is up, and child transforms are relative to their parent. Room dimensions describe the clear interior, centered on X and Y with the floor surface at Z = 0. Wall openings are measured from the low-coordinate end of the interior span, and window sill heights are measured from the floor. Physical properties are stored as object metadata for future simulation. Existing revisions that use `scene.environment` still load. Create a fresh project from the `3d-production` catalog in Studio to see the new reference.
 
+The reference visitor uses `FilmieHumanoid` v1. Its procedural source defines height in meters, body proportions as fractions of height, and skin, clothing, shoe, and optional hair materials. The neutral rig stands at Z = 0 facing −Y, with the character's left toward +X. Bones use zero rest roll and local +Y along the bone. Pose tracks use zero-based shot frames and local XYZ joint angles in degrees. Each key sets the interpolation toward the next key using `linear`, `hold`, or `ease`. Root keys set transforms relative to the character's world parent.
+
+An imported source references a pinned Blender model with `blenderCollection`, `rigProfile: "FilmieHumanoid"`, and `rigVersion: 1` in its asset metadata. The collection needs a root marked `filmie_asset_id` or `filmie_character_root`, an identity child armature matching the compiled rest skeleton, and skinned geometry with normalized weights. Filmie checks the actual rig when Blender loads it. Imported materials come from the model. Earlier asset-based character entries still use their existing semantic actions.
+
 ## Architecture
 
 - `packages/contracts`: validated manifest, scene, render, timeline, receipt, and serialization contracts.

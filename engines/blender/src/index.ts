@@ -736,9 +736,10 @@ export class BlenderRendererAdapter implements RendererAdapter {
         const character = compiledScene.characters.find(
           (candidate) => candidate.id === characterId,
         );
-        const rig = character
-          ? assetMap.get(assetKey(character.asset))
-          : undefined;
+        const rig =
+          character && 'asset' in character
+            ? assetMap.get(assetKey(character.asset))
+            : undefined;
         if (!character || !rig)
           throw new BlenderFailure(
             'MISSING_ASSET',
@@ -806,6 +807,17 @@ export class BlenderRendererAdapter implements RendererAdapter {
         worldBuilderHash: createHash('sha256')
           .update(await readFile(WORLD_BUILDER_PATH))
           .digest('hex'),
+        characterWorkerHashes: await Promise.all(
+          [
+            'character_builder.py',
+            'character_runtime.py',
+            'collection_cache.py',
+          ].map(async (file) =>
+            createHash('sha256')
+              .update(await readFile(join(dirname(WORKER_PATH), file)))
+              .digest('hex'),
+          ),
+        ),
         lockHash,
         compilerVersion: SCENE_COMPILER_VERSION,
       });
@@ -979,10 +991,36 @@ export class BlenderRendererAdapter implements RendererAdapter {
               },
             }
           : {}),
-        characters: scene.characters.map((character) => ({
-          ...character,
-          asset: resolveModelAsset(character.asset),
-        })),
+        characters: scene.characters.map((character) => {
+          if ('asset' in character)
+            return { ...character, asset: resolveModelAsset(character.asset) };
+          if (character.source.kind === 'imported')
+            return {
+              ...character,
+              source: {
+                ...character.source,
+                asset: resolveModelAsset(character.source.asset),
+              },
+            };
+          const key = canonicalJsonSha256({
+            rig: character.rig,
+            bones: character.bones,
+            source: character.source,
+            rendererVersion,
+            dependenciesHash,
+          });
+          return {
+            ...character,
+            cache: {
+              key,
+              path: resolve(
+                request.cacheDirectory,
+                'characters',
+                key + '.blend',
+              ),
+            },
+          };
+        }),
         props: scene.props.map((prop) => ({
           ...prop,
           asset: resolveModelAsset(prop.asset),

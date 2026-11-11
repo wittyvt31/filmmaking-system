@@ -1,10 +1,9 @@
 """Build validated, renderer-independent world geometry in Blender."""
 
 import math
-import os
-import tempfile
 
 import bpy
+from collection_cache import read_collection, write_collection
 
 
 def coordinates(value):
@@ -79,35 +78,6 @@ def populate_collection(scene, world, instantiate_asset, name):
     return collection
 
 
-def read_cached_world(cache, name):
-    if not os.path.isfile(cache["path"]):
-        return None
-    try:
-        with bpy.data.libraries.load(cache["path"], link=False) as (source, destination):
-            if name not in source.collections:
-                return None
-            destination.collections = [name]
-        collection = destination.collections[0]
-        if collection and collection.get("filmie_world_cache_key") == cache["key"]:
-            return collection
-    except (OSError, RuntimeError) as exc:
-        print("Could not restore Filmie world cache:", exc, flush=True)
-    return None
-
-
-def write_cached_world(cache, collection):
-    path = cache["path"]
-    parent = os.path.dirname(path)
-    try:
-        os.makedirs(parent, exist_ok=True)
-        with tempfile.TemporaryDirectory(dir=parent) as scratch:
-            temporary = os.path.join(scratch, "world.blend")
-            bpy.data.libraries.write(temporary, {collection}, path_remap="ABSOLUTE", compress=True)
-            os.replace(temporary, path)
-    except (OSError, RuntimeError) as exc:
-        print("Could not store Filmie world cache:", exc, flush=True)
-
-
 def build_world(scene, world, instantiate_asset, cache=None):
     if world["schemaVersion"] != 1:
         raise ValueError("Unsupported compiled world version")
@@ -115,12 +85,12 @@ def build_world(scene, world, instantiate_asset, cache=None):
     scene.unit_settings.scale_length = 1.0
     scene["filmie_world_sha256"] = world["sha256"]
     name = "Filmie World"
-    collection = read_cached_world(cache, name) if cache else None
+    collection = read_collection(cache, name) if cache else None
     scene["filmie_world_cache_hit"] = collection is not None
     if collection is not None:
         scene.collection.children.link(collection)
-        return
+        return collection
     collection = populate_collection(scene, world, instantiate_asset, name)
     if cache:
-        collection["filmie_world_cache_key"] = cache["key"]
-        write_cached_world(cache, collection)
+        write_collection(cache, collection)
+    return collection

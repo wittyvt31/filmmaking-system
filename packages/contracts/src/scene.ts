@@ -4,7 +4,7 @@ import {
   CharcoalStyleOverridesSchema,
   STYLE_DEFINITION_REGISTRY,
 } from './style.js';
-import { CharacterActionSchema } from './motion.js';
+import { SceneCharacterSchema } from './character.js';
 import { SceneTransformSchema, UnitColorSchema } from './shared-internal.js';
 import { WorldSchema } from './world.js';
 
@@ -102,18 +102,7 @@ export const ShotSceneSchema = z
     motionLibraries: z.array(AssetVersionReferenceSchema).default([]),
     environment: AssetVersionReferenceSchema.optional(),
     world: WorldSchema.optional(),
-    characters: z
-      .array(
-        z
-          .object({
-            id: StableIdSchema,
-            asset: AssetVersionReferenceSchema,
-            transform: SceneTransformSchema,
-            actions: z.array(CharacterActionSchema).default([]),
-          })
-          .strict(),
-      )
-      .default([]),
+    characters: z.array(SceneCharacterSchema).default([]),
     props: z
       .array(
         z
@@ -194,6 +183,19 @@ export const ShotSceneSchema = z
     }
     const entityIds = new Set<string>();
     scene.world?.entities.forEach((entity) => entityIds.add(entity.id));
+    const worldIds = new Set(entityIds);
+    scene.characters.forEach((character, index) => {
+      if (
+        'parentId' in character &&
+        character.parentId &&
+        !worldIds.has(character.parentId)
+      )
+        context.addIssue({
+          code: 'custom',
+          path: ['characters', index, 'parentId'],
+          message: 'Character parent must be a world entity',
+        });
+    });
     for (const [index, entity] of [
       ...scene.characters.map((item) => ({
         ...item,

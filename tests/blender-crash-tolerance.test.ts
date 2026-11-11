@@ -232,6 +232,7 @@ async function buildRequest(temporary: string) {
   camera['durationFrames'] = 3;
   const characters = shotScene['characters'] as Record<string, unknown>[];
   for (const character of characters) character['actions'] = [];
+  for (const character of characters) delete character['poses'];
   const timeline = rawManifest['timeline'] as Record<string, unknown>;
   timeline['durationFrames'] = 3;
 

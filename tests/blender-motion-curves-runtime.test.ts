@@ -118,7 +118,7 @@ assert additive_end == (2.0, 2.0, 2.0), additive_end
 
 head = bpy.data.objects.new('head-pivot', None)
 scene.collection.objects.link(head)
-render_shot.apply_motion_curves({'motionCurves':${JSON.stringify(compiled.motionCurves)}}, {'father': {'head': head}}, {})
+render_shot.apply_motion_curves({'motionCurves':${JSON.stringify(compiled.motionCurves)}}, {${JSON.stringify(shot.scene!.characters[0]!.id)}: {'head': head}}, {})
 for frame, expected in ((1, 0), (2, .0125), (3, .04), (4, .0675), (5, .08), (6, .08)):
     scene.frame_set(frame)
     assert abs(head.rotation_euler.y - expected) < 1e-6, (frame, head.rotation_euler.y)
@@ -140,7 +140,14 @@ print('FILMIE_MOTION_RUNTIME', replace_start, replace_mid, replace_end, additive
       );
       const result = await runBlenderProcess(
         blenderExecutable,
-        ['--background', '--factory-startup', '--python', script],
+        [
+          '--background',
+          '--factory-startup',
+          '--python-exit-code',
+          '1',
+          '--python',
+          script,
+        ],
         { timeoutMs: 60_000 },
       );
       expect(result.code, `${result.stderr}\n${result.stdout}`).toBe(0);

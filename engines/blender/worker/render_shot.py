@@ -13,6 +13,7 @@ from mathutils import Euler, Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from world_builder import build_world
+from character_runtime import apply_poses, prepare_character
 
 RENDER_METRICS = {"constantInterpolationCurves": 0, "constantInterpolationFailures": 0}
 
@@ -77,7 +78,7 @@ def read_spec():
     with open(spec_path, "r", encoding="utf-8") as stream:
         return json.load(stream)
 
-def instantiate_asset(asset, transform, entity_id, parent_collection=None):
+def instantiate_asset(asset, transform, entity_id, parent_collection=None, root_marker=None):
     """Append one immutable Blender model collection and apply its scene transform."""
     collection_name = asset.get("metadata", {}).get("blenderCollection")
     if not collection_name:
@@ -97,7 +98,8 @@ def instantiate_asset(asset, transform, entity_id, parent_collection=None):
         parent_collection = bpy.context.scene.collection
     parent_collection.children.link(collection)
     root = next(
-        (obj for obj in collection.objects if obj.get("filmie_asset_id") == asset["assetId"]),
+        (obj for obj in collection.objects if obj.get("filmie_asset_id") == asset["assetId"]
+         or (root_marker and obj.get(root_marker))),
         None,
     )
     if root is None:
@@ -273,8 +275,10 @@ def create_scene(spec):
                 light_data.keyframe_insert(data_path="energy", frame=frame)
             set_constant_interpolation(light_data, "energy")
 
+    world_entities = {}
     if "world" in spec:
-        build_world(scene, spec["world"], instantiate_asset, spec.get("worldCache"))
+        world = build_world(scene, spec["world"], instantiate_asset, spec.get("worldCache"))
+        world_entities = {obj["filmie_entity_id"]: obj for obj in world.all_objects if obj.get("filmie_entity_id")}
     else:
         instantiate_asset(
             spec["environment"],
@@ -285,7 +289,14 @@ def create_scene(spec):
     initial_focal_length = float(spec["cameraKeyframes"][0].get("focalLength", 50.0))
     entity_roots = {}
     control_objects = {}
+    scene["filmie_character_cache_hits"] = 0
     for character in spec["characters"]:
+        if "source" in character:
+            root, rig, cache_hit = prepare_character(scene, character, instantiate_asset, world_entities)
+            apply_poses(character, root, rig, action_fcurves)
+            entity_roots[character["id"]] = root
+            scene["filmie_character_cache_hits"] += int(cache_hit)
+            continue
         root, controls = instantiate_asset(
             character["asset"], character["transform"], character["id"]
         )
@@ -942,6 +953,7 @@ def main():
         "denoising": bool(spec["renderConfig"].get("denoising", False)),
         "renderedFrames": rendered,
         "worldCacheHit": scene.get("filmie_world_cache_hit", False),
+        "characterCacheHits": scene["filmie_character_cache_hits"],
         "metrics": RENDER_METRICS,
     }
     with open(os.path.join(spec["outputDirectory"], "worker-result.json"), "w", encoding="utf-8") as stream:

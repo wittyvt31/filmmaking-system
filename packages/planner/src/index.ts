@@ -213,6 +213,24 @@ export async function prepareProductionPlan(
     manifest.shots
       .filter((shot) => shot.scene !== undefined)
       .map(async (shot) => {
+        for (const character of shot.scene?.characters ?? []) {
+          if (!('source' in character) || character.source.kind !== 'imported')
+            continue;
+          const reference = character.source.asset;
+          const asset = assets.find(
+            (candidate) => referenceKey(candidate) === referenceKey(reference),
+          );
+          if (
+            asset?.type !== 'model' ||
+            typeof asset.metadata['blenderCollection'] !== 'string' ||
+            !asset.metadata['blenderCollection'].trim() ||
+            asset.metadata['rigProfile'] !== character.rig.profile ||
+            asset.metadata['rigVersion'] !== character.rig.version
+          )
+            throw new Error(
+              `Character "${character.id}" requires a Blender model declaring ${character.rig.profile} v${character.rig.version} in rigProfile and rigVersion metadata`,
+            );
+        }
         for (const entity of shot.scene?.world?.entities ?? []) {
           if (entity.geometry.kind !== 'asset') continue;
           const reference = entity.geometry.asset;
