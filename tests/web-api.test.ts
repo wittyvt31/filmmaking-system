@@ -230,12 +230,83 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
   235_000,
 );
 
+it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
+  'renders and caches the cup drop with frame-addressable physics through Studio',
+  async () => {
+    const { path, revision, text } = await createProject('humanoid-animation');
+    const input = JSON.parse(text);
+    const shot = input.shots.find(
+      (item: { id: string }) => item.id === 'shot.cup-drop',
+    );
+    input.shots = [shot];
+    input.timeline.durationFrames = shot.durationFrames;
+    input.timeline.videoTracks[0].clips = [{ shotId: shot.id, startFrame: 0 }];
+    input.video.resolution = { width: 160, height: 90 };
+    input.renderPolicy.outputDimensions = input.video.resolution;
+    input.renderPolicy.renderer.config.samples = 1;
+    const saved = (await request(
+      path + '/revisions',
+      {
+        text: JSON.stringify(input),
+        baseRevisionId: revision,
+      },
+      201,
+    )) as ProjectSummary;
+    const queue = async () =>
+      (await request(
+        path + '/runs',
+        {
+          revisionId: saved.revisions[0]!.id,
+        },
+        202,
+      )) as Run;
+    const { run, outputs } = await waitForRun((await queue()).id, 180_000);
+    expect(run.status, run.error).toBe('succeeded');
+    expect(outputs.some((output) => output.name === 'master.mp4')).toBe(true);
+    const blend = outputs.find((output) =>
+      output.name.endsWith('/scene.blend'),
+    )!;
+    expect(blend).toBeDefined();
+    await promisify(execFile)(
+      defaultBlenderExecutable(),
+      [
+        '--background',
+        join(root, 'outputs', run.id, blend.name),
+        '--python-exit-code',
+        '1',
+        '--python-expr',
+        [
+          'import bpy, math',
+          'scene = bpy.context.scene',
+          'assert scene.rigidbody_world is None',
+          'cup = next(o for o in scene.objects if o.get("filmie_entity_id") == "cup")',
+          'def sample(f):\n    scene.frame_set(f)\n    return cup.matrix_world.translation.copy()',
+          'last = sample(124)',
+          'release = sample(32)',
+          'assert release.z > 0.65 and last.z < 0.08 and last.z > 0.02, (tuple(release), tuple(last))',
+          'earlier = sample(115)',
+          'assert math.dist(last, earlier) < 0.006, (tuple(last), tuple(earlier))',
+          'heights = [sample(f).z for f in range(33, 76)]',
+          'assert min(heights) >= 0.015, heights',
+          'assert any(b-a > 0.005 for a,b in zip(heights, heights[1:])), heights',
+          'assert math.dist(last, sample(124)) < 1e-6',
+        ].join('\n'),
+      ],
+      { timeout: 20_000, windowsHide: true },
+    );
+    const cached = (await waitForRun((await queue()).id, 30_000)).run;
+    expect(cached.status, cached.error).toBe('succeeded');
+    expect(cached.cacheHits).toEqual({ shots: 1, assembly: true });
+  },
+  225_000,
+);
+
 it('validates the humanoid animation catalog and reports incompatible motion edits', async () => {
   const { path, text } = await createProject('humanoid-animation');
   expect(await request(path + '/validate', { text })).toEqual({
     issues: [],
-    frames: 350,
-    shots: 4,
+    frames: 474,
+    shots: 5,
   });
   const draft = JSON.parse(text);
   draft.shots[0].scene.characters[0].motion.at(-1).source.clipId =

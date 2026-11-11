@@ -15,3 +15,4 @@ export * from './serialization.js';
 export * from './spatial-constraints.js';
 export * from './interactions.js';
 export * from './locomotion.js';
+export * from './physics.js';

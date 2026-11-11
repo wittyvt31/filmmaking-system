@@ -13,7 +13,7 @@ import {
   type InteractionState,
   type InteractionStep,
 } from './interactions.js';
-import { quaternion } from './motion-math.js';
+import { sceneTransformPose, scaleVector } from './collision.js';
 import { composeTransform, inverseTransform } from './rigid-transforms.js';
 
 export function compileInteractions(
@@ -50,24 +50,17 @@ export function compileInteractions(
       );
     ids.add(interaction.id);
     objectIds.add(interaction.objectId);
-    const { position, rotationDegrees, scale } = object.transform;
-    const initial = {
-      position: [position.x, position.y, position.z],
-      rotation: quaternion([
-        rotationDegrees.x,
-        rotationDegrees.y,
-        rotationDegrees.z,
-      ]),
-    } satisfies RigidTransform;
+    const initial = sceneTransformPose(object.transform);
     const scaled = {
       ...interaction,
       objectAnchor: {
         ...interaction.objectAnchor,
         transform: {
           ...interaction.objectAnchor.transform,
-          position: interaction.objectAnchor.transform.position.map(
-            (v) => v * scale,
-          ) as RigidTransform['position'],
+          position: scaleVector(
+            interaction.objectAnchor.transform.position,
+            object.transform.scale,
+          ),
         },
       },
     };

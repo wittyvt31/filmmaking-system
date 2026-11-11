@@ -230,6 +230,7 @@ export function compileWorld(world: World): CompiledWorld {
   for (const entity of queue) queue.push(...(children.get(entity.id) ?? []));
   const geometry = {
     schemaVersion: world.schemaVersion,
+    ...(world.physics ? { physics: world.physics } : {}),
     materials: ordered(world.materials),
     entities: queue.map(compileEntity),
   };

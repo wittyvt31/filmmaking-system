@@ -14,6 +14,9 @@ import { prepareCharacter } from './character.js';
 import { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
 import { constrainMotion } from './spatial-constraints.js';
 import { compileInteractions } from './compile-interactions.js';
+import { compilePhysics } from './physics.js';
+export * from './collision.js';
+export { compilePhysics } from './physics.js';
 import { sampleLocomotion } from './locomotion.js';
 export { sampleLocomotion } from './locomotion.js';
 export * from './interactions.js';
@@ -24,7 +27,7 @@ export { compileWorld } from './world.js';
 export { prepareCharacter } from './character.js';
 export { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
 
-export const SCENE_COMPILER_VERSION = 'scene-compiler-v10';
+export const SCENE_COMPILER_VERSION = 'scene-compiler-v11';
 export const SEMANTIC_ANIMATION_LIBRARY_VERSION = '1.0.0';
 
 export const CHARCOAL_HORROR_STYLE = {
@@ -280,6 +283,11 @@ export function compileScene(
   }
   const world = scene.world ? compileWorld(scene.world) : undefined;
   const interactions = compileInteractions(scene, shot.durationFrames);
+  const physics = compilePhysics(
+    world,
+    scene.interactions,
+    shot.durationFrames,
+  );
   const withoutHash = {
     version: SCENE_COMPILER_VERSION,
     shotId: shot.id,
@@ -290,6 +298,7 @@ export function compileScene(
     style,
     ...(scene.environment ? { environment: scene.environment } : {}),
     ...(world ? { world } : {}),
+    ...(physics ? { physics } : {}),
     characters: [...scene.characters]
       .map((character) =>
         'source' in character

@@ -741,6 +741,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
             'character_runtime.py',
             'collection_cache.py',
             'semantic_rig.py',
+            'physics_backend.py',
           ].map(async (file) =>
             createHash('sha256')
               .update(await readFile(join(dirname(WORKER_PATH), file)))
@@ -951,6 +952,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
           };
         }),
         objectMotion: scene.objectMotion ?? [],
+        ...(scene.physics ? { physics: scene.physics } : {}),
         props: scene.props.map((prop) => ({
           ...prop,
           asset: resolveModelAsset(prop.asset),

@@ -5,6 +5,7 @@ import type { CharacterAction } from './motion.js';
 import { ShotSceneSchema } from './scene.js';
 import type { CompiledWorld } from './world.js';
 import type { RigidTransform } from './interactions.js';
+import type { PhysicsSimulation } from './physics.js';
 import type { PreparedCharacter, SceneCharacter } from './character.js';
 
 export interface CompiledSceneInstruction {
@@ -50,6 +51,7 @@ export interface CompiledSceneInstruction {
   };
   environment?: z.infer<typeof AssetVersionReferenceSchema>;
   world?: CompiledWorld;
+  physics?: PhysicsSimulation;
   objectMotion?: { objectId: string; poses: RigidTransform[] }[];
   characters: (
     Extract<SceneCharacter, { asset: unknown }> | PreparedCharacter

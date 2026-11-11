@@ -1,6 +1,12 @@
 import { z } from 'zod';
 import { AssetVersionReferenceSchema, StableIdSchema } from './identifiers.js';
 import { SceneTransformSchema, UnitColorSchema } from './shared-internal.js';
+import {
+  ColliderSchema,
+  PhysicsSettingsSchema,
+  RigidBodySchema,
+  type PhysicsSettings,
+} from './physics.js';
 
 const length = z.number().min(0.001).max(10_000);
 const fraction = z.number().min(0).max(1);
@@ -61,20 +67,13 @@ const RoomSchema = z
   })
   .strict();
 
-const PhysicsSchema = z
-  .object({
-    massKg: z.number().positive().optional(),
-    friction: fraction.optional(),
-    restitution: fraction.optional(),
-  })
-  .strict();
-
 const EntitySchema = z
   .object({
     id: StableIdSchema,
     parentId: StableIdSchema.optional(),
     transform: SceneTransformSchema,
-    physics: PhysicsSchema.optional(),
+    physics: RigidBodySchema.optional(),
+    colliders: z.array(ColliderSchema).min(1).max(64).optional(),
     geometry: z.discriminatedUnion('kind', [
       z.object({ kind: z.literal('group') }).strict(),
       z
@@ -184,6 +183,7 @@ function validateRoom(
 export const WorldSchema = z
   .object({
     schemaVersion: z.literal(1),
+    physics: PhysicsSettingsSchema.optional(),
     materials: z.array(MaterialSchema).max(256).default([]),
     entities: z.array(EntitySchema).min(1).max(2048),
   })
@@ -203,6 +203,12 @@ export const WorldSchema = z
         issue(['entities', index, 'id'], 'Duplicate world entity ID');
       entities.set(entity.id, index);
       const base = ['entities', index, 'geometry'];
+      if (
+        entity.colliders &&
+        new Set(entity.colliders.map((c) => c.id)).size !==
+          entity.colliders.length
+      )
+        issue(['entities', index, 'colliders'], 'Duplicate collider ID');
       const material = (id: string, path: (string | number)[]) => {
         if (!materials.has(id))
           issue([...base, ...path], 'Unknown material "' + id + '"');
@@ -260,5 +266,6 @@ export interface CompiledWorld {
   schemaVersion: 1;
   materials: World['materials'];
   entities: CompiledWorldEntity[];
+  physics?: PhysicsSettings;
   sha256: string;
 }

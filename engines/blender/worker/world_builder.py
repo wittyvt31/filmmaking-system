@@ -37,7 +37,8 @@ def box_mesh(dimensions, material):
     mesh = bpy.data.meshes.new("World box")
     mesh.from_pydata(vertices, [], faces)
     mesh.update()
-    mesh.materials.append(material)
+    if material is not None:
+        mesh.materials.append(material)
     return mesh
 
 
@@ -61,8 +62,9 @@ def populate_collection(scene, world, instantiate_asset, name):
         if "parentId" in entity:
             root.parent = roots[entity["parentId"]]
         root["filmie_entity_id"] = entity_id
-        for name, value in entity.get("physics", {}).items():
-            root["filmie_physics_" + name] = value
+        for name in ("massKg", "friction", "restitution"):
+            if name in entity.get("physics", {}):
+                root["filmie_physics_" + name] = entity["physics"][name]
         roots[entity_id] = root
         for box in entity.get("boxes", []):
             dimensions = coordinates(box["dimensions"])

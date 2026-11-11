@@ -36,6 +36,10 @@ The fourth shot, `shot.walk-and-place`, adds a walk across the room and a turn b
 
 Locomotion adapts alternating steps to the timing and stride settings and locks each planted foot with IK. Feet use horizontal world box tops near the waypoint elevation, with `floorHeight` as the fallback. Use world boxes as collision proxies for prepared mesh assets. A blocked path or unreachable gait fails validation. Locomotion supplies the root track and rejects competing authored root tracks. Joint animation and hand interactions still use the existing Motion Engine and constraint priorities.
 
+The fifth shot, `shot.cup-drop`, hands the cup from the interaction track to rigid-body simulation. Set `world.physics` for gravity, substeps, and solver iterations. World entities can define box, sphere, cylinder, or capsule `colliders` in local coordinates. Built world boxes provide default colliders. Imported assets use explicit proxies. Locomotion queries the same geometry at its authored pose, including horizontal box and cylinder tops for foot support.
+
+Set an entity's `physics.mode` to `static`, `kinematic`, or `dynamic`, with mass in kilograms and friction, restitution, and damping from zero to one. Moving bodies use one primitive collider on a root entity. Static geometry can use several. `releaseOnInteraction` starts simulation on the frame after release. Explicit `transitions` use zero-based shot frames. Returning to kinematic mode requires a world-pose keyframe at the takeover frame. Blender samples the whole simulation in order and saves transform keys that can be evaluated directly at any render frame.
+
 An imported source references a pinned Blender model with `blenderCollection`, `rigProfile: "FilmieHumanoid"`, and `rigVersion: 1` in its asset metadata. The collection needs a root marked `filmie_asset_id` or `filmie_character_root`, an identity child armature matching the compiled rest skeleton, and skinned geometry with normalized weights. Filmie checks the actual rig when Blender loads it. Imported materials come from the model. Earlier asset-based character entries still use their existing semantic actions.
 
 ## Architecture

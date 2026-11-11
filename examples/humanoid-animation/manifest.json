@@ -1598,10 +1598,462 @@
           }
         ]
       }
+    },
+    {
+      "id": "shot.cup-drop",
+      "durationFrames": 124,
+      "visualDescription": "The performer carries a cup away from its stand and releases it. The cup falls, bounces on the floor and settles.",
+      "composition": {
+        "framing": "Full body with space for the gesture",
+        "subjectPlacement": "Center",
+        "cameraMovement": "Static",
+        "instructions": []
+      },
+      "requiredAssets": [
+        {
+          "assetId": "prop.reference-cup",
+          "version": "1.0.0"
+        }
+      ],
+      "scene": {
+        "stylePreset": "charcoal_horror",
+        "styleVersion": "1.2.0",
+        "world": {
+          "schemaVersion": 1,
+          "materials": [
+            {
+              "id": "floor",
+              "color": [0.18, 0.2, 0.21],
+              "roughness": 0.82
+            },
+            {
+              "id": "wall",
+              "color": [0.26, 0.29, 0.3],
+              "roughness": 0.85
+            },
+            {
+              "id": "target",
+              "color": [0.9, 0.55, 0.08]
+            },
+            {
+              "id": "cup-stand",
+              "color": [0.34, 0.22, 0.12]
+            }
+          ],
+          "entities": [
+            {
+              "id": "studio",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "room",
+                "dimensions": {
+                  "x": 5.6,
+                  "y": 5.8,
+                  "z": 3.1
+                },
+                "floor": {
+                  "thickness": 0.15,
+                  "materialId": "floor"
+                },
+                "walls": [
+                  {
+                    "side": "north",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "west",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "east",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  }
+                ]
+              },
+              "physics": {
+                "mode": "static",
+                "friction": 0.8,
+                "restitution": 0.65
+              }
+            },
+            {
+              "id": "cup-stand-1",
+              "transform": {
+                "position": {
+                  "x": 0.44039652259302703,
+                  "y": -0.16429504157558056,
+                  "z": 0.3844401419757029
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.13,
+                  "y": 0.13,
+                  "z": 0.7688802839514058
+                },
+                "materialId": "cup-stand"
+              }
+            },
+            {
+              "id": "cup",
+              "transform": {
+                "position": {
+                  "x": 0.44039652259302703,
+                  "y": -0.16429504157558056,
+                  "z": 0.8238802839514059
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "asset",
+                "asset": {
+                  "assetId": "prop.reference-cup",
+                  "version": "1.0.0"
+                }
+              },
+              "physics": {
+                "mode": "kinematic",
+                "massKg": 0.28,
+                "friction": 0.8,
+                "restitution": 0.55,
+                "linearDamping": 0.25,
+                "angularDamping": 0.75,
+                "releaseOnInteraction": true
+              },
+              "colliders": [
+                {
+                  "id": "cup-cylinder",
+                  "shape": {
+                    "kind": "cylinder",
+                    "radius": 0.045,
+                    "height": 0.1
+                  }
+                }
+              ]
+            }
+          ],
+          "physics": {
+            "gravity": [0, 0, -9.81]
+          }
+        },
+        "motionClips": [
+          {
+            "id": "greeting",
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "duration": 2,
+            "joints": [
+              {
+                "joint": "upper_arm.L",
+                "keys": [
+                  {
+                    "time": 0,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 0.65,
+                    "value": [-8, 0, -76],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.35,
+                    "value": [-8, 0, -76],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 2,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  }
+                ]
+              },
+              {
+                "joint": "forearm.L",
+                "keys": [
+                  {
+                    "time": 0,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 0.65,
+                    "value": [-35, 0, -24],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1,
+                    "value": [-18, 0, -14],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.35,
+                    "value": [-48, 0, -27],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 2,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "characters": [
+          {
+            "id": "performer",
+            "transform": {
+              "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "scale": 1
+            },
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "source": {
+              "kind": "procedural",
+              "body": {
+                "height": 1.72,
+                "shoulderWidth": 0.245,
+                "build": 1
+              },
+              "appearance": {
+                "skin": {
+                  "color": [0.66, 0.39, 0.24]
+                },
+                "top": {
+                  "color": [0.055, 0.15, 0.18]
+                },
+                "trousers": {
+                  "color": [0.24, 0.19, 0.13]
+                },
+                "shoes": {
+                  "color": [0.055, 0.043, 0.033]
+                },
+                "hair": {
+                  "color": [0.065, 0.045, 0.032]
+                }
+              }
+            },
+            "motion": [],
+            "poses": {
+              "root": [],
+              "joints": []
+            },
+            "constraints": [
+              {
+                "id": "plant.L",
+                "effector": "foot.L",
+                "chainRoot": "thigh.L",
+                "target": [0.1548, -0.18059999999999993, 0.04299999999999993],
+                "space": "world",
+                "startFrame": 0,
+                "endFrame": 123,
+                "tolerance": 0.002,
+                "priority": 100
+              },
+              {
+                "id": "plant.R",
+                "effector": "foot.R",
+                "chainRoot": "thigh.R",
+                "target": [-0.1548, -0.18059999999999993, 0.04299999999999993],
+                "space": "world",
+                "startFrame": 0,
+                "endFrame": 123,
+                "tolerance": 0.002,
+                "priority": 100
+              }
+            ]
+          }
+        ],
+        "lights": [
+          {
+            "id": "study.key",
+            "type": "area",
+            "position": {
+              "x": -2.6,
+              "y": -2.7,
+              "z": 3.25
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 135,
+            "color": [1, 0.91, 0.82],
+            "size": 3
+          },
+          {
+            "id": "study.fill",
+            "type": "area",
+            "position": {
+              "x": 2.8,
+              "y": -1.85,
+              "z": 2.3
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 75,
+            "color": [0.83, 0.91, 1],
+            "size": 2.7
+          },
+          {
+            "id": "study.rim",
+            "type": "area",
+            "position": {
+              "x": 1.2,
+              "y": 1.55,
+              "z": 2.85
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 100,
+            "color": [1, 0.92, 0.78],
+            "size": 2
+          }
+        ],
+        "camera": {
+          "type": "static",
+          "distance": 5.05,
+          "target": {
+            "x": 0.1,
+            "y": 0,
+            "z": 0.94
+          },
+          "focalLength": 48
+        },
+        "props": [],
+        "interactions": [
+          {
+            "id": "cup-transfer",
+            "characterId": "performer",
+            "objectId": "cup",
+            "effector": "hand.L",
+            "chainRoot": "upper_arm.L",
+            "handAnchor": {
+              "id": "palm",
+              "transform": {
+                "position": [0, 0, 0],
+                "rotation": [1, 0, 0, 0]
+              }
+            },
+            "objectAnchor": {
+              "id": "cup-grip",
+              "transform": {
+                "position": [-0.05, 0, 0],
+                "rotation": [
+                  0.6044880933510324, -0.7391847840674438, 0.043897155511833964,
+                  -0.2937227259473974
+                ]
+              }
+            },
+            "tolerance": 0.008,
+            "angularTolerance": 0.035,
+            "actions": [
+              {
+                "id": "reach-cup",
+                "kind": "reach",
+                "startFrame": 0,
+                "endFrame": 10
+              },
+              {
+                "id": "grasp-cup",
+                "kind": "grasp",
+                "startFrame": 11,
+                "endFrame": 11
+              },
+              {
+                "id": "lift-cup",
+                "kind": "carry",
+                "startFrame": 12,
+                "endFrame": 19,
+                "target": {
+                  "position": [
+                    0.40216471316774305, -0.23101265762046713,
+                    0.8729744133922253
+                  ],
+                  "rotation": [
+                    0.998134798421867, -0.05027957716090813,
+                    0.025640386604639853, -0.02326926888889888
+                  ]
+                }
+              },
+              {
+                "id": "carry-cup",
+                "kind": "carry",
+                "startFrame": 20,
+                "endFrame": 30,
+                "target": {
+                  "position": [
+                    0.26236384145684505, -0.1621747728466244, 0.8559022923467943
+                  ],
+                  "rotation": [
+                    0.9884210191769788, -0.00041041927880901003,
+                    0.15145821947488, 0.009172140353110867
+                  ]
+                }
+              },
+              {
+                "id": "release-cup",
+                "kind": "release",
+                "startFrame": 31,
+                "endFrame": 31
+              }
+            ]
+          }
+        ]
+      }
     }
   ],
   "timeline": {
-    "durationFrames": 350,
+    "durationFrames": 474,
     "videoTracks": [
       {
         "id": "video.main",
@@ -1621,6 +2073,10 @@
           {
             "shotId": "shot.walk-and-place",
             "startFrame": 231
+          },
+          {
+            "shotId": "shot.cup-drop",
+            "startFrame": 350
           }
         ]
       }

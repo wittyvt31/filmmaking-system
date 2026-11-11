@@ -13,6 +13,7 @@ from mathutils import Euler, Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from world_builder import build_world
+from physics_backend import apply_physics_bake, bake_physics
 from character_runtime import apply_poses, prepare_character
 from semantic_rig import RigCapabilityError, discover_controls, foot_ik, preflight_actions
 
@@ -899,6 +900,9 @@ def main():
     try:
         apply_actions(spec, entity_roots, control_objects)
         apply_motion_curves(spec, control_objects, entity_roots)
+        if spec.get("physics"):
+            baked = bake_physics(scene, spec["physics"], spec.get("objectMotion", []), int(spec["durationFrames"]))
+            apply_physics_bake(scene, baked, action_fcurves)
     except RuntimeError as error:
         raise RigCapabilityError("Could not prepare semantic animation: " + str(error)) from error
     blend_path = os.path.join(spec["outputDirectory"], "scene.blend")
