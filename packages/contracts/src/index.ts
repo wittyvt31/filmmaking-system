@@ -3,6 +3,7 @@ export * from './identifiers.js';
 export * from './render-policy.js';
 export * from './motion.js';
 export * from './scene.js';
+export * from './world.js';
 export * from './shots.js';
 export * from './project-manifest.js';
 export * from './production-package.js';

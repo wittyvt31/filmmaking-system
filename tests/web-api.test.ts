@@ -1,4 +1,7 @@
+import { execFile } from 'node:child_process';
 import { mkdtemp, rm } from 'node:fs/promises';
+import { promisify } from 'node:util';
+import { defaultBlenderExecutable } from '@filmmaking/engine-blender';
 import { once } from 'node:events';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -184,6 +187,33 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
     const { run, outputs } = await waitForRun(queued.id, 55_000);
     expect(run.status, run.error).toBe('succeeded');
     expect(run.progress).toEqual({ completed: 1, total: 1 });
+    const blend = outputs.find((output) =>
+      output.name.endsWith('/scene.blend'),
+    );
+    expect(blend).toBeDefined();
+    await promisify(execFile)(
+      defaultBlenderExecutable(),
+      [
+        '--background',
+        join(root, 'outputs', run.id, blend!.name),
+        '--python-exit-code',
+        '1',
+        '--python-expr',
+        [
+          'import bpy, math',
+          'objects = bpy.context.scene.objects',
+          'floor = objects["room.main/floor"]',
+          'assert all(math.isclose(a, b, abs_tol=1e-5) for a, b in zip(floor.dimensions, (6.44, 7.22, 0.18)))',
+          'assert floor.data.materials[0].name == "floor-stone"',
+          'assert objects["bench.seat"].parent == objects["bench"]',
+          'assert objects["bench.lantern"].parent == objects["bench"]',
+          'assert objects["bench.leg-left/body"].data == objects["bench.leg-right/body"].data',
+          'assert objects["bench"]["filmie_physics_massKg"] == 14',
+          'assert math.isclose(objects["room.main/north.entry.leaf"].rotation_euler.z, math.radians(-22), abs_tol=1e-5)',
+        ].join('\n'),
+      ],
+      { timeout: 15_000, windowsHide: true },
+    );
     const master = outputs.find((output) => output.name === 'master.mp4')!;
     const frame = outputs.find((output) => output.kind === 'image')!;
     const response = await fetch(base + master.url, {
@@ -206,6 +236,28 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
     expect((await waitForRun(rerun.id)).run.cacheHits).toEqual({
       shots: 1,
       assembly: true,
+    });
+    shot.scene.camera.fromDistance += 0.5;
+    const cameraRevision = (await request(
+      path + '/revisions',
+      { text: JSON.stringify(input), baseRevisionId: version },
+      201,
+    )) as ProjectSummary;
+    const cameraRun = (await request(
+      path + '/runs',
+      {
+        revisionId: cameraRevision.revisions[0]!.id,
+      },
+      202,
+    )) as Run;
+    const changed = await waitForRun(cameraRun.id, 35_000);
+    expect(changed.run.status, changed.run.error).toBe('succeeded');
+    expect(changed.run.cacheHits?.shots).toBe(0);
+    const workerResult = changed.outputs.find((output) =>
+      output.name.endsWith('/worker-result.json'),
+    )!;
+    expect(await (await fetch(base + workerResult.url)).json()).toMatchObject({
+      worldCacheHit: true,
     });
   },
   65_000,

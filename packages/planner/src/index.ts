@@ -213,6 +213,21 @@ export async function prepareProductionPlan(
     manifest.shots
       .filter((shot) => shot.scene !== undefined)
       .map(async (shot) => {
+        for (const entity of shot.scene?.world?.entities ?? []) {
+          if (entity.geometry.kind !== 'asset') continue;
+          const reference = entity.geometry.asset;
+          const asset = assets.find(
+            (candidate) => referenceKey(candidate) === referenceKey(reference),
+          );
+          if (
+            asset?.type !== 'model' ||
+            typeof asset.metadata['blenderCollection'] !== 'string' ||
+            !asset.metadata['blenderCollection'].trim()
+          )
+            throw new Error(
+              `World entity "${entity.id}" requires a prepared Blender model collection for ${reference.assetId}@${reference.version}`,
+            );
+        }
         const libraries = await Promise.all(
           (shot.scene?.motionLibraries ?? []).map(async (reference) => {
             const asset = assets.find(

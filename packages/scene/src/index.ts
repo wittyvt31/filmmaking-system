@@ -9,8 +9,11 @@ import {
   type Rational,
   type Shot,
 } from '@filmmaking/contracts';
+import { compileWorld } from './world.js';
 
-export const SCENE_COMPILER_VERSION = 'scene-compiler-v4';
+export { compileWorld } from './world.js';
+
+export const SCENE_COMPILER_VERSION = 'scene-compiler-v5';
 export const SEMANTIC_ANIMATION_LIBRARY_VERSION = '1.0.0';
 
 export const CHARCOAL_HORROR_STYLE = {
@@ -271,7 +274,8 @@ export function compileScene(
     animationLibraryVersion: scene.animationLibraryVersion,
     styleVersion: scene.styleVersion,
     style,
-    environment: scene.environment,
+    ...(scene.environment ? { environment: scene.environment } : {}),
+    ...(scene.world ? { world: compileWorld(scene.world) } : {}),
     characters: [...scene.characters]
       .map((character) => ({
         ...character,

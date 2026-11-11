@@ -11,6 +11,9 @@ import struct
 import bpy
 from mathutils import Euler, Matrix, Vector
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from world_builder import build_world
+
 RENDER_METRICS = {"constantInterpolationCurves": 0, "constantInterpolationFailures": 0}
 
 def remove_volatile_png_metadata(path):
@@ -74,7 +77,7 @@ def read_spec():
     with open(spec_path, "r", encoding="utf-8") as stream:
         return json.load(stream)
 
-def instantiate_asset(asset, transform, entity_id):
+def instantiate_asset(asset, transform, entity_id, parent_collection=None):
     """Append one immutable Blender model collection and apply its scene transform."""
     collection_name = asset.get("metadata", {}).get("blenderCollection")
     if not collection_name:
@@ -90,7 +93,9 @@ def instantiate_asset(asset, transform, entity_id):
     collection = destination.collections[0]
     if collection is None:
         raise RuntimeError("Blender could not append asset collection " + collection_name)
-    bpy.context.scene.collection.children.link(collection)
+    if parent_collection is None:
+        parent_collection = bpy.context.scene.collection
+    parent_collection.children.link(collection)
     root = next(
         (obj for obj in collection.objects if obj.get("filmie_asset_id") == asset["assetId"]),
         None,
@@ -268,15 +273,15 @@ def create_scene(spec):
                 light_data.keyframe_insert(data_path="energy", frame=frame)
             set_constant_interpolation(light_data, "energy")
 
-    environment, _ = instantiate_asset(
-        spec["environment"],
-        {"position": {"x": 0.0, "y": 0.0, "z": 0.0},
-         "rotationDegrees": {"x": 0.0, "y": 0.0, "z": 0.0}, "scale": 1.0},
-        "Environment",
-    )
-    if not spec["environment"].get("metadata", {}).get("blenderCollection"):
-        raise RuntimeError("Scene environment must be a prepared Blender model collection")
-    camera_distance = float(spec["cameraKeyframes"][0]["distance"])
+    if "world" in spec:
+        build_world(scene, spec["world"], instantiate_asset, spec.get("worldCache"))
+    else:
+        instantiate_asset(
+            spec["environment"],
+            {"position": {"x": 0.0, "y": 0.0, "z": 0.0},
+             "rotationDegrees": {"x": 0.0, "y": 0.0, "z": 0.0}, "scale": 1.0},
+            "Environment",
+        )
     initial_focal_length = float(spec["cameraKeyframes"][0].get("focalLength", 50.0))
     entity_roots = {}
     control_objects = {}
@@ -317,7 +322,7 @@ def create_scene(spec):
     scene.frame_set(1)
     bpy.context.view_layer.update()
     scene.frame_set(1)
-    return scene, environment, entity_roots, control_objects
+    return scene, entity_roots, control_objects
 
 def bind_authoritative_rig(control_objects):
     bone_semantics = {
@@ -889,7 +894,7 @@ def main():
         "frameRate": spec.get("frameRate", {"numerator": 30, "denominator": 1}),
     })
     os.makedirs(os.path.join(spec["outputDirectory"], "frames"), exist_ok=True)
-    scene, _environment, entity_roots, control_objects = create_scene(spec)
+    scene, entity_roots, control_objects = create_scene(spec)
     apply_actions(spec, entity_roots, control_objects)
     apply_motion_curves(spec, control_objects, entity_roots)
     blend_path = os.path.join(spec["outputDirectory"], "scene.blend")
@@ -936,6 +941,7 @@ def main():
         "samples": int(spec["renderConfig"]["samples"]),
         "denoising": bool(spec["renderConfig"].get("denoising", False)),
         "renderedFrames": rendered,
+        "worldCacheHit": scene.get("filmie_world_cache_hit", False),
         "metrics": RENDER_METRICS,
     }
     with open(os.path.join(spec["outputDirectory"], "worker-result.json"), "w", encoding="utf-8") as stream:

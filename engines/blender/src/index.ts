@@ -43,6 +43,11 @@ const ENGINE_PACKAGE_DIRECTORY = resolve(
   '..',
 );
 const WORKER_PATH = join(ENGINE_PACKAGE_DIRECTORY, 'worker', 'render_shot.py');
+const WORLD_BUILDER_PATH = join(
+  ENGINE_PACKAGE_DIRECTORY,
+  'worker',
+  'world_builder.py',
+);
 const ROOT_LOCKFILE = resolve(
   ENGINE_PACKAGE_DIRECTORY,
   '..',
@@ -798,9 +803,13 @@ export class BlenderRendererAdapter implements RendererAdapter {
         .digest('hex');
       const dependenciesHash = canonicalJsonSha256({
         workerHash,
+        worldBuilderHash: createHash('sha256')
+          .update(await readFile(WORLD_BUILDER_PATH))
+          .digest('hex'),
         lockHash,
         compilerVersion: SCENE_COMPILER_VERSION,
       });
+      const rendererVersion = await this.#inspectVersion();
       fingerprint = canonicalJsonSha256({
         shot,
         compiledScene,
@@ -817,7 +826,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
               `${right.assetId}@${right.version}`,
             ),
           ),
-        renderer: { id: RENDERER_ID, version: await this.#inspectVersion() },
+        renderer: { id: RENDERER_ID, version: rendererVersion },
         dependenciesHash,
         renderSettings: {
           outputDimensions: renderDimensions,
@@ -921,6 +930,23 @@ export class BlenderRendererAdapter implements RendererAdapter {
       await mkdir(frameDirectory, { recursive: true });
       const specPath = join(workDirectory, 'worker-spec.json');
       const scene = compiledScene;
+      const world = scene.world
+        ? {
+            ...scene.world,
+            entities: scene.world.entities.map((entity) =>
+              'asset' in entity
+                ? { ...entity, asset: resolveModelAsset(entity.asset) }
+                : entity,
+            ),
+          }
+        : undefined;
+      const worldCacheKey = world
+        ? canonicalJsonSha256({
+            world,
+            dependenciesHash,
+            rendererVersion,
+          })
+        : undefined;
       const workerSpec = {
         durationFrames: shot.durationFrames,
         frameRate: settings.frameRate,
@@ -937,7 +963,22 @@ export class BlenderRendererAdapter implements RendererAdapter {
         },
         renderOverrides,
         animationLibraryVersion: scene.animationLibraryVersion,
-        environment: resolveModelAsset(scene.environment),
+        ...(scene.environment
+          ? { environment: resolveModelAsset(scene.environment) }
+          : {}),
+        ...(world && worldCacheKey
+          ? {
+              world,
+              worldCache: {
+                key: worldCacheKey,
+                path: resolve(
+                  request.cacheDirectory,
+                  'worlds',
+                  worldCacheKey + '.blend',
+                ),
+              },
+            }
+          : {}),
         characters: scene.characters.map((character) => ({
           ...character,
           asset: resolveModelAsset(character.asset),

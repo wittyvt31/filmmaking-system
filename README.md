@@ -24,6 +24,8 @@ pnpm filmie render --project examples/3d-production --output renders/3d-producti
 
 Each project contains `manifest.json`, `assets.json`, and exact versioned assets. The manifest describes scene models, characters, props, lighting, camera, shot timing, and audio cues. Scene assets must be Blender model collections identified in asset metadata. Source manifests and assets live with the project; `.cache/` stores reusable artifacts; `renders/` and `dist/` are disposable outputs.
 
+The reference manifest uses `scene.world` version 1 for a measured room, a box-built bench, and a registered lantern attached to the bench. Dimensions and positions are in meters, Z is up, and child transforms are relative to their parent. Room dimensions describe the clear interior, centered on X and Y with the floor surface at Z = 0. Wall openings are measured from the low-coordinate end of the interior span, and window sill heights are measured from the floor. Physical properties are stored as object metadata for future simulation. Existing revisions that use `scene.environment` still load. Create a fresh project from the `3d-production` catalog in Studio to see the new reference.
+
 ## Architecture
 
 - `packages/contracts`: validated manifest, scene, render, timeline, receipt, and serialization contracts.

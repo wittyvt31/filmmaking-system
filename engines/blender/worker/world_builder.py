@@ -1,0 +1,126 @@
+"""Build validated, renderer-independent world geometry in Blender."""
+
+import math
+import os
+import tempfile
+
+import bpy
+
+
+def coordinates(value):
+    return tuple(float(value[axis]) for axis in ("x", "y", "z"))
+
+
+def build_material(spec):
+    material = bpy.data.materials.new(spec["id"])
+    color = (*spec["color"], 1.0)
+    material.diffuse_color = color
+    material.roughness = spec["roughness"]
+    material.metallic = spec["metallic"]
+    material.use_nodes = True
+    shader = material.node_tree.nodes.get("Principled BSDF")
+    shader.inputs["Base Color"].default_value = color
+    shader.inputs["Roughness"].default_value = spec["roughness"]
+    shader.inputs["Metallic"].default_value = spec["metallic"]
+    return material
+
+
+def box_mesh(dimensions, material):
+    x, y, z = (value / 2 for value in dimensions)
+    vertices = [
+        (-x, -y, -z), (x, -y, -z), (x, y, -z), (-x, y, -z),
+        (-x, -y, z), (x, -y, z), (x, y, z), (-x, y, z),
+    ]
+    faces = [
+        (3, 2, 1, 0), (4, 5, 6, 7), (0, 1, 5, 4),
+        (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7),
+    ]
+    mesh = bpy.data.meshes.new("World box")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    mesh.materials.append(material)
+    return mesh
+
+
+def populate_collection(scene, world, instantiate_asset, name):
+    collection = bpy.data.collections.new(name)
+    scene.collection.children.link(collection)
+    materials = {item["id"]: build_material(item) for item in world["materials"]}
+    roots = {}
+    meshes = {}
+    for entity in world["entities"]:
+        entity_id = entity["id"]
+        transform = entity["transform"]
+        if "asset" in entity:
+            root, _ = instantiate_asset(entity["asset"], transform, entity_id, collection)
+        else:
+            root = bpy.data.objects.new(entity_id, None)
+            collection.objects.link(root)
+            root.location = coordinates(transform["position"])
+            root.rotation_euler = tuple(math.radians(value) for value in coordinates(transform["rotationDegrees"]))
+            root.scale = (float(transform["scale"]),) * 3
+        if "parentId" in entity:
+            root.parent = roots[entity["parentId"]]
+        root["filmie_entity_id"] = entity_id
+        for name, value in entity.get("physics", {}).items():
+            root["filmie_physics_" + name] = value
+        roots[entity_id] = root
+        for box in entity.get("boxes", []):
+            dimensions = coordinates(box["dimensions"])
+            key = (dimensions, box["materialId"])
+            if key not in meshes:
+                meshes[key] = box_mesh(dimensions, materials[box["materialId"]])
+            obj = bpy.data.objects.new(entity_id + "/" + box["id"], meshes[key])
+            collection.objects.link(obj)
+            obj.parent = root
+            obj.location = coordinates(box["position"])
+            obj.rotation_euler.z = math.radians(box.get("rotationDegrees", 0))
+            obj["filmie_world_part"] = box["id"]
+    return collection
+
+
+def read_cached_world(cache, name):
+    if not os.path.isfile(cache["path"]):
+        return None
+    try:
+        with bpy.data.libraries.load(cache["path"], link=False) as (source, destination):
+            if name not in source.collections:
+                return None
+            destination.collections = [name]
+        collection = destination.collections[0]
+        if collection and collection.get("filmie_world_cache_key") == cache["key"]:
+            return collection
+    except (OSError, RuntimeError) as exc:
+        print("Could not restore Filmie world cache:", exc, flush=True)
+    return None
+
+
+def write_cached_world(cache, collection):
+    path = cache["path"]
+    parent = os.path.dirname(path)
+    try:
+        os.makedirs(parent, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=parent) as scratch:
+            temporary = os.path.join(scratch, "world.blend")
+            bpy.data.libraries.write(temporary, {collection}, path_remap="ABSOLUTE", compress=True)
+            os.replace(temporary, path)
+    except (OSError, RuntimeError) as exc:
+        print("Could not store Filmie world cache:", exc, flush=True)
+
+
+def build_world(scene, world, instantiate_asset, cache=None):
+    if world["schemaVersion"] != 1:
+        raise ValueError("Unsupported compiled world version")
+    scene.unit_settings.system = "METRIC"
+    scene.unit_settings.scale_length = 1.0
+    scene["filmie_world_sha256"] = world["sha256"]
+    name = "Filmie World"
+    collection = read_cached_world(cache, name) if cache else None
+    scene["filmie_world_cache_hit"] = collection is not None
+    if collection is not None:
+        scene.collection.children.link(collection)
+        return
+    collection = populate_collection(scene, world, instantiate_asset, name)
+    if cache:
+        collection["filmie_world_cache_key"] = cache["key"]
+        write_cached_world(cache, collection)

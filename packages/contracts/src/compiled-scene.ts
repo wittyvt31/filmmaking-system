@@ -3,6 +3,7 @@ import { AssetVersionReferenceSchema } from './identifiers.js';
 import type { Rational } from './render-policy.js';
 import type { CharacterAction } from './motion.js';
 import { ShotSceneSchema } from './scene.js';
+import type { CompiledWorld } from './world.js';
 
 export interface CompiledSceneInstruction {
   version: string;
@@ -45,7 +46,8 @@ export interface CompiledSceneInstruction {
     glow?: boolean;
     finalGrade?: boolean;
   };
-  environment: z.infer<typeof AssetVersionReferenceSchema>;
+  environment?: z.infer<typeof AssetVersionReferenceSchema>;
+  world?: CompiledWorld;
   characters: z.infer<typeof ShotSceneSchema>['characters'];
   props: z.infer<typeof ShotSceneSchema>['props'];
   lights: z.infer<typeof ShotSceneSchema>['lights'];

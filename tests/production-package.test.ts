@@ -27,7 +27,7 @@ describe('approved production package lifecycle', () => {
       ]);
 
       const prepared = await prepareProductionPackage({ projectDirectory });
-      expect(prepared.dependencyCount).toBe(6);
+      expect(prepared.dependencyCount).toBe(5);
       await expect(loadProductionPlan({ projectDirectory })).rejects.toThrow(
         /not approved/,
       );

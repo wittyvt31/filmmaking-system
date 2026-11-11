@@ -6,6 +6,7 @@ import {
 } from './style.js';
 import { CharacterActionSchema } from './motion.js';
 import { SceneTransformSchema, UnitColorSchema } from './shared-internal.js';
+import { WorldSchema } from './world.js';
 
 const SceneCameraTargetSchema = z
   .object({
@@ -99,7 +100,8 @@ export const ShotSceneSchema = z
       AssetVersionReferenceSchema.shape.version.default('1.0.0'),
     styleOverrides: CharcoalStyleOverridesSchema.optional(),
     motionLibraries: z.array(AssetVersionReferenceSchema).default([]),
-    environment: AssetVersionReferenceSchema,
+    environment: AssetVersionReferenceSchema.optional(),
+    world: WorldSchema.optional(),
     characters: z
       .array(
         z
@@ -128,6 +130,12 @@ export const ShotSceneSchema = z
   })
   .strict()
   .superRefine((scene, context) => {
+    if (Boolean(scene.world) === Boolean(scene.environment))
+      context.addIssue({
+        code: 'custom',
+        path: ['world'],
+        message: 'Specify exactly one of world or a prepared environment asset',
+      });
     const registered = STYLE_DEFINITION_REGISTRY.some(
       (definition) =>
         definition.id === scene.stylePreset &&
@@ -185,6 +193,7 @@ export const ShotSceneSchema = z
       });
     }
     const entityIds = new Set<string>();
+    scene.world?.entities.forEach((entity) => entityIds.add(entity.id));
     for (const [index, entity] of [
       ...scene.characters.map((item) => ({
         ...item,

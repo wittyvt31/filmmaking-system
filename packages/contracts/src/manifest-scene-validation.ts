@@ -32,7 +32,10 @@ export function validateManifestSceneInstructions(
         ),
       );
       const sceneReferences = [
-        shot.scene.environment,
+        ...(shot.scene.environment ? [shot.scene.environment] : []),
+        ...(shot.scene.world?.entities.flatMap(({ geometry }) =>
+          geometry.kind === 'asset' ? [geometry.asset] : [],
+        ) ?? []),
         ...shot.scene.motionLibraries,
         ...shot.scene.characters.map((character) => character.asset),
         ...shot.scene.props.map((prop) => prop.asset),
