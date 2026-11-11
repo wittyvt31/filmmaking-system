@@ -70,10 +70,10 @@ async function request(path: string, payload?: object, expected = 200) {
   return data;
 }
 
-async function createProject() {
+async function createProject(catalog = '3d-production') {
   const project = (await request(
     'projects',
-    { name: 'Reference', catalog: '3d-production' },
+    { name: 'Reference', catalog },
     201,
   )) as ProjectSummary;
   const path = 'projects/' + project.id;
@@ -83,6 +83,22 @@ async function createProject() {
   };
   return { path, revision, text };
 }
+
+it('validates the humanoid animation catalog and reports incompatible motion edits', async () => {
+  const { path, text } = await createProject('humanoid-animation');
+  expect(await request(path + '/validate', { text })).toEqual({
+    issues: [],
+    frames: 121,
+    shots: 1,
+  });
+  const draft = JSON.parse(text);
+  draft.shots[0].scene.characters[0].motion.at(-1).source.clipId =
+    'missing-clip';
+  const result = (await request(path + '/validate', {
+    text: JSON.stringify(draft),
+  })) as Validation;
+  expect(result.issues[0]?.message).toMatch(/gesture.*unknown clip/);
+});
 
 it('validates reference assets, persists revisions, rejects stale saves, and duplicates an older revision', async () => {
   const { path, revision, text } = await createProject();
@@ -250,7 +266,7 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
           'skin = next(obj for obj in rig.children if obj.type == "MESH")',
           'assert rig.pose.bones["forearm.L"].parent.name == "upper_arm.L"',
           'assert any(len(vertex.groups) == 2 for vertex in skin.data.vertices)',
-          'def pose(frame):\n    bpy.context.scene.frame_set(frame)\n    evaluated = skin.evaluated_get(bpy.context.evaluated_depsgraph_get())\n    return rig.pose.bones["forearm.L"].rotation_euler.x, root.location.y, [tuple(v.co) for v in evaluated.data.vertices]',
+          'def pose(frame):\n    bpy.context.scene.frame_set(frame)\n    evaluated = skin.evaluated_get(bpy.context.evaluated_depsgraph_get())\n    return rig.pose.bones["forearm.L"].rotation_quaternion.to_euler().x, root.location.y, [tuple(v.co) for v in evaluated.data.vertices]',
           'a, b, c = [pose(frame) for frame in (1, 2, 3)]',
           'assert c[0] < b[0] < a[0] and c[1] < b[1] < a[1]',
           'assert max(math.dist(x, y) for x, y in zip(a[2], c[2])) > 0.05',

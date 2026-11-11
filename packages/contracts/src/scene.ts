@@ -5,6 +5,7 @@ import {
   STYLE_DEFINITION_REGISTRY,
 } from './style.js';
 import { SceneCharacterSchema } from './character.js';
+import { SkeletalClipSchema } from './skeletal-motion.js';
 import { SceneTransformSchema, UnitColorSchema } from './shared-internal.js';
 import { WorldSchema } from './world.js';
 
@@ -100,6 +101,7 @@ export const ShotSceneSchema = z
       AssetVersionReferenceSchema.shape.version.default('1.0.0'),
     styleOverrides: CharcoalStyleOverridesSchema.optional(),
     motionLibraries: z.array(AssetVersionReferenceSchema).default([]),
+    motionClips: z.array(SkeletalClipSchema).max(128).default([]),
     environment: AssetVersionReferenceSchema.optional(),
     world: WorldSchema.optional(),
     characters: z.array(SceneCharacterSchema).default([]),

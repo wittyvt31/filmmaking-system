@@ -1,0 +1,368 @@
+{
+  "projectId": "filmie.humanoid-animation",
+  "version": "1.0.0",
+  "video": {
+    "resolution": {
+      "width": 640,
+      "height": 360
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    }
+  },
+  "renderPolicy": {
+    "outputDimensions": {
+      "width": 640,
+      "height": 360
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": {
+      "mode": "crf",
+      "value": 22
+    },
+    "qualityOverrides": { "denoising": true },
+    "renderer": {
+      "id": "blender",
+      "config": {
+        "engine": "CYCLES",
+        "device": "CPU",
+        "samples": 12
+      }
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.humanoid-motion",
+      "durationFrames": 121,
+      "visualDescription": "Full-body humanoid study with a head turn, torso turn, side shift and raised-arm greeting.",
+      "composition": {
+        "framing": "Full body with space for the gesture",
+        "subjectPlacement": "Center",
+        "cameraMovement": "Static",
+        "instructions": []
+      },
+      "requiredAssets": [],
+      "scene": {
+        "stylePreset": "charcoal_horror",
+        "styleVersion": "1.2.0",
+        "world": {
+          "schemaVersion": 1,
+          "materials": [
+            {
+              "id": "floor",
+              "color": [0.18, 0.2, 0.21],
+              "roughness": 0.82
+            },
+            {
+              "id": "wall",
+              "color": [0.26, 0.29, 0.3],
+              "roughness": 0.85
+            }
+          ],
+          "entities": [
+            {
+              "id": "studio",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "room",
+                "dimensions": {
+                  "x": 5.6,
+                  "y": 5.8,
+                  "z": 3.1
+                },
+                "floor": {
+                  "thickness": 0.15,
+                  "materialId": "floor"
+                },
+                "walls": [
+                  {
+                    "side": "north",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "west",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "east",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "motionClips": [
+          {
+            "id": "greeting",
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "duration": 2,
+            "joints": [
+              {
+                "joint": "upper_arm.L",
+                "keys": [
+                  {
+                    "time": 0,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 0.65,
+                    "value": [-8, 0, -76],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.35,
+                    "value": [-8, 0, -76],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 2,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  }
+                ]
+              },
+              {
+                "joint": "forearm.L",
+                "keys": [
+                  {
+                    "time": 0,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 0.65,
+                    "value": [-35, 0, -24],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1,
+                    "value": [-18, 0, -14],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.35,
+                    "value": [-48, 0, -27],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 2,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "characters": [
+          {
+            "id": "performer",
+            "transform": {
+              "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": -12
+              },
+              "scale": 1
+            },
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "source": {
+              "kind": "procedural",
+              "body": {
+                "height": 1.72,
+                "shoulderWidth": 0.245,
+                "build": 1
+              },
+              "appearance": {
+                "skin": {
+                  "color": [0.66, 0.39, 0.24]
+                },
+                "top": {
+                  "color": [0.055, 0.15, 0.18]
+                },
+                "trousers": {
+                  "color": [0.24, 0.19, 0.13]
+                },
+                "shoes": {
+                  "color": [0.055, 0.043, 0.033]
+                },
+                "hair": {
+                  "color": [0.065, 0.045, 0.032]
+                }
+              }
+            },
+            "motion": [
+              {
+                "id": "turn.head",
+                "startFrame": 0,
+                "endFrame": 90,
+                "source": {
+                  "kind": "primitive",
+                  "primitive": {
+                    "kind": "head-turn",
+                    "degrees": 32
+                  },
+                  "duration": 0.65
+                },
+                "fadeOut": 1
+              },
+              {
+                "id": "turn.torso",
+                "startFrame": 30,
+                "endFrame": 120,
+                "source": {
+                  "kind": "primitive",
+                  "primitive": {
+                    "kind": "torso-turn",
+                    "degrees": -23
+                  },
+                  "duration": 0.65
+                },
+                "fadeOut": 1
+              },
+              {
+                "id": "shift.weight",
+                "startFrame": 30,
+                "endFrame": 120,
+                "source": {
+                  "kind": "primitive",
+                  "primitive": {
+                    "kind": "body-position",
+                    "offset": [0.16, -0.08, 0]
+                  },
+                  "duration": 0.65
+                },
+                "fadeOut": 1
+              },
+              {
+                "id": "gesture",
+                "startFrame": 60,
+                "endFrame": 120,
+                "source": {
+                  "kind": "clip",
+                  "clipId": "greeting"
+                },
+                "mask": ["upper_arm.L", "forearm.L"]
+              }
+            ]
+          }
+        ],
+        "lights": [
+          {
+            "id": "study.key",
+            "type": "area",
+            "position": {
+              "x": -2.6,
+              "y": -2.7,
+              "z": 3.25
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 135,
+            "color": [1, 0.91, 0.82],
+            "size": 3
+          },
+          {
+            "id": "study.fill",
+            "type": "area",
+            "position": {
+              "x": 2.8,
+              "y": -1.85,
+              "z": 2.3
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 75,
+            "color": [0.83, 0.91, 1],
+            "size": 2.7
+          },
+          {
+            "id": "study.rim",
+            "type": "area",
+            "position": {
+              "x": 1.2,
+              "y": 1.55,
+              "z": 2.85
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 100,
+            "color": [1, 0.92, 0.78],
+            "size": 2
+          }
+        ],
+        "camera": {
+          "type": "static",
+          "distance": 5.05,
+          "target": {
+            "x": 0.1,
+            "y": 0,
+            "z": 0.94
+          },
+          "focalLength": 48
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "durationFrames": 121,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [
+          {
+            "shotId": "shot.humanoid-motion",
+            "startFrame": 0
+          }
+        ]
+      }
+    ],
+    "audioTracks": [],
+    "transitions": []
+  }
+}

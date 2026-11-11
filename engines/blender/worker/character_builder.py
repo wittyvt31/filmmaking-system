@@ -127,9 +127,19 @@ def generate_character(scene, character, name):
         radius(body["shoulderWidth"] * 0.53, 0.083), radius(body["shoulderWidth"] * 0.48, 0.065),
     ], "top")
     mesh.tube(("neck",), bones, [radius(0.038, 0.039), radius(0.036, 0.038)], "skin")
+    pelvis_width, pelvis_depth = radius(body["hipWidth"] * 0.74, 0.072)
+    mesh.oval((0, 0, height * (body["legLength"] - 0.012)),
+              (pelvis_width, pelvis_depth, height * 0.057), "pelvis", "trousers")
     mesh.oval((0, 0, height * 0.926), (height * 0.061, height * 0.054, height * 0.074), "head", "skin")
     mesh.oval((0, -height * 0.053, height * 0.924), (height * 0.013, height * 0.013, height * 0.02), "head", "skin")
-    appearance = character["source"]["appearance"]
+    appearance = dict(character["source"]["appearance"])
+    appearance["eyes"] = {"color": (0.055, 0.037, 0.031), "roughness": 0.58, "metallic": 0.0}
+    for side in (-1, 1):
+        mesh.oval(
+            (side * height * 0.024, -height * 0.049, height * 0.941),
+            (height * 0.01, height * 0.006, height * 0.0045),
+            "head", "eyes",
+        )
     if "hair" in appearance:
         mesh.oval((0, height * 0.004, height * 0.965), (height * 0.063, height * 0.054, height * 0.035), "head", "hair")
     for side in SIDES:

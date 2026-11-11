@@ -11,11 +11,13 @@ import {
 } from '@filmmaking/contracts';
 import { compileWorld } from './world.js';
 import { prepareCharacter } from './character.js';
+import { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
 
 export { compileWorld } from './world.js';
 export { prepareCharacter } from './character.js';
+export { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
 
-export const SCENE_COMPILER_VERSION = 'scene-compiler-v6';
+export const SCENE_COMPILER_VERSION = 'scene-compiler-v7';
 export const SEMANTIC_ANIMATION_LIBRARY_VERSION = '1.0.0';
 
 export const CHARCOAL_HORROR_STYLE = {
@@ -151,6 +153,7 @@ export function compileScene(
     throw new TypeError(`Shot "${shot.id}" has no structured scene`);
   }
   const scene = ShotSceneSchema.parse(shot.scene);
+  const skeletalClips = motionLibrary(scene.motionClips);
   if (scene.stylePreset !== 'charcoal_horror')
     throw new TypeError(`Unknown style "${scene.stylePreset}"`);
   const style = resolveStyle(
@@ -281,7 +284,17 @@ export function compileScene(
     characters: [...scene.characters]
       .map((character) =>
         'source' in character
-          ? prepareCharacter(character, shot.durationFrames)
+          ? (() => {
+              const prepared = prepareCharacter(character, shot.durationFrames);
+              const sampledMotion = sampleCharacterMotion(
+                prepared,
+                character.motion,
+                skeletalClips,
+                shot.durationFrames,
+                frameRate,
+              );
+              return sampledMotion ? { ...prepared, sampledMotion } : prepared;
+            })()
           : {
               ...character,
               actions: [...character.actions].sort(

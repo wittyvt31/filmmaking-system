@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { AssetVersionReferenceSchema, StableIdSchema } from './identifiers.js';
 import { CharacterActionSchema } from './motion.js';
+import {
+  MotionInterpolationSchema,
+  MotionLayerSchema,
+  type SampledSkeletalMotion,
+} from './skeletal-motion.js';
 import { SceneTransformSchema, UnitColorSchema } from './shared-internal.js';
 
 type Vector = readonly [number, number, number];
@@ -104,7 +109,7 @@ const RotationSchema = z.tuple([
 ]);
 const FrameSchema = z.object({
   frame: z.number().int().nonnegative().safe(),
-  interpolation: z.enum(['linear', 'hold', 'ease']).default('linear'),
+  interpolation: MotionInterpolationSchema.default('linear'),
 });
 const PosesSchema = z
   .object({
@@ -141,6 +146,7 @@ export const RiggedCharacterSchema = z
     rig: RigSchema,
     source: SourceSchema,
     poses: PosesSchema.default({ root: [], joints: [] }),
+    motion: z.array(MotionLayerSchema).max(64).default([]),
     actions: z.tuple([]).default([]),
   })
   .strict()
@@ -234,4 +240,5 @@ export interface PreparedCharacter {
     max: Vector;
   }[];
   poses: RiggedCharacter['poses'];
+  sampledMotion?: SampledSkeletalMotion;
 }

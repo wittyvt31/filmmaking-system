@@ -102,6 +102,9 @@ def interpolate(owner, paths, keys, action_fcurves):
 
 
 def apply_poses(character, root, rig, action_fcurves):
+    if "sampledMotion" in character:
+        apply_sampled_motion(character["sampledMotion"], root, rig, action_fcurves)
+        return
     root_keys = character["poses"]["root"]
     if root_keys:
         channels = ("location", "rotation_euler", "scale")
@@ -117,3 +120,28 @@ def apply_poses(character, root, rig, action_fcurves):
             bone.rotation_euler = tuple(math.radians(value) for value in key["rotationDegrees"])
             bone.keyframe_insert(data_path="rotation_euler", frame=key["frame"] + 1)
         interpolate(rig, (bone.path_from_id("rotation_euler"),), track["keys"], action_fcurves)
+
+
+def apply_sampled_motion(motion, root, rig, action_fcurves):
+    def key_channel(owner, channel, values):
+        for frame, value in enumerate(values, start=1):
+            setattr(owner, channel, value)
+            owner.keyframe_insert(data_path=channel, frame=frame)
+
+    if "rootPosition" in motion:
+        key_channel(root, "location", motion["rootPosition"])
+    if "rootRotation" in motion:
+        root.rotation_mode = "QUATERNION"
+        key_channel(root, "rotation_quaternion", motion["rootRotation"])
+    if "rootScale" in motion:
+        key_channel(root, "scale", ((value,) * 3 for value in motion["rootScale"]))
+    for track in motion["joints"]:
+        bone = rig.pose.bones[track["joint"]]
+        bone.rotation_mode = "QUATERNION"
+        key_channel(bone, "rotation_quaternion", track["rotations"])
+
+    for owner in (root, rig):
+        if owner.animation_data and owner.animation_data.action:
+            for curve in action_fcurves(owner.animation_data.action):
+                for key in curve.keyframe_points:
+                    key.interpolation = "LINEAR"

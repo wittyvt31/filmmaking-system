@@ -31,7 +31,7 @@ describe('FilmieHumanoid', () => {
     expect(prepared).toEqual(prepareCharacter(character, 90));
     expect(
       compileScene(reference.shots[0]!, reference.video.frameRate).characters,
-    ).toContainEqual(prepared);
+    ).toContainEqual(expect.objectContaining(prepared));
     character.poses.root.shift();
     character.poses.joints[0]!.keys.shift();
     const delayed = prepareCharacter(character, 90);
