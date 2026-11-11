@@ -16,3 +16,4 @@ export * from './spatial-constraints.js';
 export * from './interactions.js';
 export * from './locomotion.js';
 export * from './physics.js';
+export * from './contact-graph.js';
