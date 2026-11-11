@@ -2,18 +2,39 @@ import { readFileSync } from 'node:fs';
 import { expect, it } from 'vitest';
 import {
   RiggedCharacterSchema,
+  ShotSchema,
   SpatialConstraintSchema,
 } from '@filmmaking/contracts';
 import {
   prepareCharacter,
   forwardKinematics,
   constrainMotion,
+  compileScene,
 } from '@filmmaking/scene';
 import { quaternion, withinLimits } from '../packages/scene/src/motion-math.js';
 
 const manifest = JSON.parse(
   readFileSync('examples/humanoid-animation/manifest.json', 'utf8'),
 );
+
+it('bakes deterministic cup motion and fingerprints a change to placement', () => {
+  const shot = ShotSchema.parse(manifest.shots[2]);
+  const fps = { numerator: 30, denominator: 1 };
+  const compiled = compileScene(shot, fps);
+  expect(compileScene(shot, fps).sha256).toBe(compiled.sha256);
+  const poses = compiled.objectMotion![0]!.poses;
+  expect(poses).toHaveLength(shot.durationFrames);
+  expect(poses[11]).toEqual(poses[0]);
+  expect(poses[19]!.position[2]).toBeGreaterThan(poses[0]!.position[2] + 0.02);
+  expect(poses[48]).toEqual(poses[40]);
+  const place = shot.scene!.interactions[0]!.actions.find(
+    (action) => action.kind === 'place',
+  )!;
+  place.target.position[2] += 0.025;
+  const changed = compileScene(shot, fps);
+  expect(changed.sha256).not.toBe(compiled.sha256);
+  expect(changed.world?.sha256).toBe(compiled.world?.sha256);
+});
 const actor = RiggedCharacterSchema.parse(
   manifest.shots[0].scene.characters[0],
 );

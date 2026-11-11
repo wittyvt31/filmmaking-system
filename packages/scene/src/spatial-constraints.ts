@@ -8,6 +8,7 @@ import type {
 } from '@filmmaking/contracts';
 import { compareStrings } from '@filmmaking/contracts';
 import { angularDistance } from './rigid-transforms.js';
+import type { RigidTransform } from '@filmmaking/contracts';
 import {
   identity,
   multiply,
@@ -116,13 +117,22 @@ export function constrainMotion(
   constraints: readonly SpatialConstraint[],
   frames: number,
   world?: CompiledWorld,
+  driver?: {
+    constraint: SpatialConstraint;
+    target(
+      frame: number,
+      hand: RigidTransform,
+    ): { pose: RigidTransform; priority: number } | undefined;
+    resolved(frame: number, hand: RigidTransform): void;
+  },
 ): SampledSkeletalMotion | undefined {
-  if (!constraints.length) return input;
+  if (!constraints.length && !driver) return input;
   const parents: PreparedCharacter['transform'][] = [];
   const visited = new Set<string>();
-  const worldParent = constraints.some(({ space }) => space === 'world')
-    ? character.parentId
-    : undefined;
+  const worldParent =
+    driver || constraints.some(({ space }) => space === 'world')
+      ? character.parentId
+      : undefined;
   for (let id = worldParent; id;) {
     const entity = world?.entities.find((item) => item.id === id);
     if (!entity || visited.has(id))
@@ -155,7 +165,7 @@ export function constrainMotion(
     (a, b) => b.priority - a.priority || compareStrings(a.id, b.id),
   );
   const chains = new Map<string, string[]>();
-  for (const c of ordered) {
+  for (const c of driver ? [...ordered, driver.constraint] : ordered) {
     if (ids.has(c.id) || c.endFrame >= frames)
       throw new TypeError('Duplicate or out-of-range constraint: ' + c.id);
     ids.add(c.id);
@@ -172,7 +182,9 @@ export function constrainMotion(
       throw new TypeError('Constraint root is not an ancestor: ' + c.id);
     chains.set(
       c.id,
-      chain.filter((id) => !locked.has(id)),
+      (c === driver?.constraint ? chain.reverse() : chain).filter(
+        (id) => !locked.has(id),
+      ),
     );
   }
   const outputJoints = new Set([
@@ -183,11 +195,12 @@ export function constrainMotion(
     throw new TypeError(
       `Character "${character.id}" exceeds 250,000 motion samples with constraints`,
     );
+  let previousInteractionPose: Map<string, Q> | undefined;
   for (let frame = 0; frame < frames; frame++) {
     const active = ordered.filter(
       (c) => frame >= c.startFrame && frame <= c.endFrame,
     );
-    if (!active.length) continue;
+    if (!active.length && !driver) continue;
     const rotations = new Map(
       output.joints.map((t) => [t.joint, t.rotations[frame]!]),
     );
@@ -197,6 +210,45 @@ export function constrainMotion(
       output.rootRotation?.[frame] ??
       quaternion(xyz(character.transform.rotationDegrees));
     const scale = output.rootScale?.[frame] ?? character.transform.scale;
+    const worldHand = (pose: ReturnType<typeof evaluate>): RigidTransform => {
+      const bone = pose.get(driver!.constraint.effector)!;
+      let position = add(
+        p,
+        rotate(r, bone.tail.map((value) => value * scale) as V),
+      );
+      let rotation = multiply(r, bone.rotation);
+      for (const parent of [...parents].reverse()) {
+        const q = quaternion(xyz(parent.rotationDegrees));
+        position = add(
+          xyz(parent.position),
+          rotate(q, position.map((value) => value * parent.scale) as V),
+        );
+        rotation = multiply(q, rotation);
+      }
+      return { position, rotation };
+    };
+    if (driver) {
+      const desired = driver.target(frame, worldHand(initial));
+      if (desired) {
+        for (const [joint, rotation] of previousInteractionPose ?? [])
+          rotations.set(joint, rotation);
+        active.push({
+          ...driver.constraint,
+          target: desired.pose.position,
+          orientation: desired.pose.rotation,
+          priority: desired.priority,
+        });
+        active.sort(
+          (a, b) => b.priority - a.priority || compareStrings(a.id, b.id),
+        );
+      } else {
+        previousInteractionPose = undefined;
+      }
+    }
+    if (!active.length) {
+      driver?.resolved(frame, worldHand(initial));
+      continue;
+    }
     const targets = active.map((c) => {
       const target =
         c.space === 'world'
@@ -259,8 +311,13 @@ export function constrainMotion(
           targets[i]!.c.priority !== priority
             ? sum
             : sum +
-              Math.max(0, error.position / targets[i]!.c.tolerance - 1) ** 2 +
-              Math.max(0, error.angle / error.angularTolerance - 1) ** 2,
+              Math.max(
+                0,
+                error.position / targets[i]!.c.tolerance -
+                  (targets[i]!.orientation ? 0.85 : 1),
+              ) **
+                2 +
+              Math.max(0, error.angle / error.angularTolerance - 0.85) ** 2,
         0,
       );
     const better = (next: ReturnType<typeof errors>) => {
@@ -277,7 +334,9 @@ export function constrainMotion(
           e.angle <= e.angularTolerance,
       );
     const movable = new Set(targets.flatMap(({ c }) => chains.get(c.id)!));
-    for (const step of [8, 4, 2, 1, 0.5, 0.25, 0.125, 0.0625]) {
+    for (const step of [
+      8, 4, 2, 1, 0.5, 0.25, 0.125, 0.0625, 0.03125, 0.015625, 0.0078125,
+    ]) {
       if (solved()) break;
       for (let iteration = 0; iteration < 80; iteration++) {
         let changed = false;
@@ -311,6 +370,14 @@ export function constrainMotion(
         throw new TypeError(
           `Constraint ${targets[i]!.c.id} on ${character.id} unreachable or conflicts with authored motion/contacts at frame ${frame}: residual ${best[i]!.position} metres, ${best[i]!.angle} radians in ${targets[i]!.c.space} space`,
         );
+    driver?.resolved(frame, worldHand(evaluate(rotations)));
+    if (driver && active.some((c) => c.id === driver.constraint.id)) {
+      previousInteractionPose = new Map(
+        chains
+          .get(driver.constraint.id)!
+          .map((joint) => [joint, rotations.get(joint) ?? identity]),
+      );
+    }
     for (const [joint, value] of rotations) {
       let track = output.joints.find((t) => t.joint === joint);
       if (!track) {

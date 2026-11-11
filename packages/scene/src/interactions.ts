@@ -79,6 +79,7 @@ export function planInteractionFrame(
   actions: readonly InteractionAction[],
   frame: number,
   handAnchor: InteractionAnchor,
+  objectAnchor?: InteractionAnchor,
 ): InteractionStep {
   if (!Number.isSafeInteger(frame) || frame !== state.frame + 1)
     throw new TypeError('Interactions require consecutive frames');
@@ -86,18 +87,31 @@ export function planInteractionFrame(
     (a) => frame >= a.startFrame && frame <= a.endFrame,
   );
   if (!action) return { frame };
-  if (action.kind !== 'reach' && action.kind !== 'place')
+  if (action.kind === 'release')
+    return { frame, action, desiredHand: state.hand };
+  if (
+    action.kind !== 'reach' &&
+    action.kind !== 'place' &&
+    !(action.kind === 'carry' && action.target)
+  )
     return { frame, action };
-  if (action.kind === 'place' && !state.attachment)
-    throw new TypeError('Place requires an attachment');
+  if (action.kind !== 'reach' && !state.attachment)
+    throw new TypeError('Moving a held object requires an attachment');
   const transition =
     state.transition?.id === action.id
       ? state.transition
       : { id: action.id, start: state.hand };
-  const target =
-    action.kind === 'place'
-      ? composeTransform(action.target, inverseTransform(state.attachment!))
-      : composeTransform(action.target, inverseTransform(handAnchor.transform));
+  const destination =
+    action.target ??
+    (objectAnchor && composeTransform(state.object, objectAnchor.transform));
+  if (!destination)
+    throw new TypeError('Reach requires a target or object anchor');
+  const target = composeTransform(
+    destination,
+    inverseTransform(
+      action.kind === 'reach' ? handAnchor.transform : state.attachment!,
+    ),
+  );
   const t =
     action.endFrame === action.startFrame
       ? 1

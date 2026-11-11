@@ -294,6 +294,24 @@ def create_scene(spec):
         entity_roots[prop["id"]] = root
         control_objects[prop["id"]] = controls
 
+    for track in spec.get("objectMotion", []):
+        object_id = track["objectId"]
+        root = world_entities.get(object_id) or entity_roots[object_id]
+        root.rotation_mode = "QUATERNION"
+        previous_rotation = None
+        for frame, pose in enumerate(track["poses"], start=1):
+            root.location = pose["position"]
+            rotation = pose["rotation"]
+            if previous_rotation and sum(a * b for a, b in zip(previous_rotation, rotation)) < 0:
+                rotation = [-value for value in rotation]
+            root.rotation_quaternion = rotation
+            previous_rotation = rotation
+            root.keyframe_insert(data_path="location", frame=frame)
+            root.keyframe_insert(data_path="rotation_quaternion", frame=frame)
+        for curve in action_fcurves(root.animation_data.action):
+            for point in curve.keyframe_points:
+                point.interpolation = "LINEAR"
+
     camera_data = bpy.data.cameras.new("Cinematic Camera")
     camera_data.type = "PERSP"
     camera_data.lens = initial_focal_length

@@ -13,6 +13,7 @@ import { compileWorld } from './world.js';
 import { prepareCharacter } from './character.js';
 import { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
 import { constrainMotion } from './spatial-constraints.js';
+import { compileInteractions } from './compile-interactions.js';
 export * from './interactions.js';
 export * from './rigid-transforms.js';
 export { constrainMotion, forwardKinematics } from './spatial-constraints.js';
@@ -21,7 +22,7 @@ export { compileWorld } from './world.js';
 export { prepareCharacter } from './character.js';
 export { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
 
-export const SCENE_COMPILER_VERSION = 'scene-compiler-v8';
+export const SCENE_COMPILER_VERSION = 'scene-compiler-v9';
 export const SEMANTIC_ANIMATION_LIBRARY_VERSION = '1.0.0';
 
 export const CHARCOAL_HORROR_STYLE = {
@@ -276,6 +277,7 @@ export function compileScene(
     }
   }
   const world = scene.world ? compileWorld(scene.world) : undefined;
+  const interactions = compileInteractions(scene, shot.durationFrames);
   const withoutHash = {
     version: SCENE_COMPILER_VERSION,
     shotId: shot.id,
@@ -303,6 +305,7 @@ export function compileScene(
                 character.constraints,
                 shot.durationFrames,
                 world,
+                interactions.get(character.id),
               );
               return sampledMotion ? { ...prepared, sampledMotion } : prepared;
             })()
@@ -316,6 +319,13 @@ export function compileScene(
             },
       )
       .sort((left, right) => compareStrings(left.id, right.id)),
+    ...(interactions.size
+      ? {
+          objectMotion: [...interactions.values()]
+            .map(({ track }) => track)
+            .sort((a, b) => compareStrings(a.objectId, b.objectId)),
+        }
+      : {}),
     props: [...scene.props].sort((left, right) =>
       compareStrings(left.id, right.id),
     ),

@@ -8,6 +8,7 @@ import { SceneCharacterSchema } from './character.js';
 import { SkeletalClipSchema } from './skeletal-motion.js';
 import { SceneTransformSchema, UnitColorSchema } from './shared-internal.js';
 import { WorldSchema } from './world.js';
+import { ObjectInteractionSchema } from './interactions.js';
 
 const SceneCameraTargetSchema = z
   .object({
@@ -105,6 +106,7 @@ export const ShotSceneSchema = z
     environment: AssetVersionReferenceSchema.optional(),
     world: WorldSchema.optional(),
     characters: z.array(SceneCharacterSchema).default([]),
+    interactions: z.array(ObjectInteractionSchema).max(32).default([]),
     props: z
       .array(
         z

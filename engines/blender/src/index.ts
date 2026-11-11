@@ -950,6 +950,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
             },
           };
         }),
+        objectMotion: scene.objectMotion ?? [],
         props: scene.props.map((prop) => ({
           ...prop,
           asset: resolveModelAsset(prop.asset),

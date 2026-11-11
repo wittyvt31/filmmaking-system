@@ -150,12 +150,83 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
   120_000,
 );
 
+it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
+  'renders the cup interaction through Studio and reuses its production cache',
+  async () => {
+    const { path, revision, text } = await createProject('humanoid-animation');
+    const input = JSON.parse(text);
+    const shot = input.shots[2];
+    input.shots = [shot];
+    input.timeline.durationFrames = shot.durationFrames;
+    input.timeline.videoTracks[0].clips = [{ shotId: shot.id, startFrame: 0 }];
+    input.video.resolution = { width: 320, height: 180 };
+    input.renderPolicy.outputDimensions = input.video.resolution;
+    input.renderPolicy.renderer.config.samples = 2;
+    const saved = (await request(
+      path + '/revisions',
+      {
+        text: JSON.stringify(input),
+        baseRevisionId: revision,
+      },
+      201,
+    )) as ProjectSummary;
+    const queue = async () =>
+      (await request(
+        path + '/runs',
+        {
+          revisionId: saved.revisions[0]!.id,
+        },
+        202,
+      )) as Run;
+    const { run, outputs } = await waitForRun((await queue()).id, 90_000);
+    expect(run.status, run.error).toBe('succeeded');
+    expect(outputs.some((output) => output.name === 'master.mp4')).toBe(true);
+    const blend = outputs.find((output) =>
+      output.name.endsWith('/scene.blend'),
+    )!;
+    expect(blend).toBeDefined();
+    await promisify(execFile)(
+      defaultBlenderExecutable(),
+      [
+        '--background',
+        join(root, 'outputs', run.id, blend.name),
+        '--python-exit-code',
+        '1',
+        '--python-expr',
+        [
+          'import bpy, math',
+          'scene = bpy.context.scene',
+          'cup = next(o for o in scene.objects if o.get("filmie_entity_id") == "cup")',
+          'rig = next(o for o in scene.objects if o.type == "ARMATURE")',
+          'def sample(f):\n    scene.frame_set(f)\n    matrix = cup.matrix_world\n    return matrix.translation.copy(), matrix.inverted() @ (rig.matrix_world @ rig.pose.bones["hand.L"].tail)',
+          'placed, _ = sample(49)',
+          'start, _ = sample(1)',
+          'grasped, grip = sample(12)',
+          'lifted, lift_grip = sample(20)',
+          'carried, carry_grip = sample(31)',
+          'released, _ = sample(41)',
+          'assert math.dist(start, grasped) < 1e-5',
+          'assert lifted.z > start.z + 0.02',
+          'assert math.dist(lifted, carried) > 0.04',
+          'assert math.dist(grip, lift_grip) < 1e-5 and math.dist(grip, carry_grip) < 1e-5',
+          'assert math.dist(placed, start) > 0.04 and math.dist(placed, released) < 1e-5',
+        ].join('\n'),
+      ],
+      { timeout: 20_000, windowsHide: true },
+    );
+    const cached = (await waitForRun((await queue()).id, 30_000)).run;
+    expect(cached.status, cached.error).toBe('succeeded');
+    expect(cached.cacheHits).toEqual({ shots: 1, assembly: true });
+  },
+  145_000,
+);
+
 it('validates the humanoid animation catalog and reports incompatible motion edits', async () => {
   const { path, text } = await createProject('humanoid-animation');
   expect(await request(path + '/validate', { text })).toEqual({
     issues: [],
-    frames: 182,
-    shots: 2,
+    frames: 231,
+    shots: 3,
   });
   const draft = JSON.parse(text);
   draft.shots[0].scene.characters[0].motion.at(-1).source.clipId =
@@ -164,6 +235,14 @@ it('validates the humanoid animation catalog and reports incompatible motion edi
     text: JSON.stringify(draft),
   })) as Validation;
   expect(result.issues[0]?.message).toMatch(/gesture.*unknown clip/);
+  const missingObject = JSON.parse(text);
+  missingObject.shots[2].scene.interactions[0].objectId = 'missing-cup';
+  const invalidInteraction = (await request(path + '/validate', {
+    text: JSON.stringify(missingObject),
+  })) as Validation;
+  expect(invalidInteraction.issues[0]?.message).toMatch(
+    /cup-transfer.*missing-cup/,
+  );
 });
 
 it('allows requests using an explicitly configured LAN host', async () => {

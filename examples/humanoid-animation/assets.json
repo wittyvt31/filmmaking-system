@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "assetId": "prop.reference-cup",
+    "version": "1.0.0",
+    "type": "model",
+    "sourceUri": "cup.blend",
+    "contentHash": "cc3fd73f78857c36129973e3a7db257014b1960725d5f6b34a3e5ee53bb5572c",
+    "metadata": {
+      "assetKind": "prop",
+      "blenderCollection": "ASSET__cup"
+    },
+    "license": {
+      "name": "Filmie reference asset",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "Authored for the humanoid interaction reference"
+    }
+  }
+]

@@ -31,12 +31,20 @@ const action = z.object({
 export const InteractionActionSchema = z
   .discriminatedUnion('kind', [
     action
-      .extend({ kind: z.literal('reach'), target: RigidTransformSchema })
+      .extend({
+        kind: z.literal('reach'),
+        target: RigidTransformSchema.optional(),
+      })
       .strict(),
     action
       .extend({ kind: z.literal('place'), target: RigidTransformSchema })
       .strict(),
-    action.extend({ kind: z.literal('carry') }).strict(),
+    action
+      .extend({
+        kind: z.literal('carry'),
+        target: RigidTransformSchema.optional(),
+      })
+      .strict(),
     action.extend({ kind: z.literal('grasp') }).strict(),
     action.extend({ kind: z.literal('release') }).strict(),
   ])
@@ -53,3 +61,19 @@ export const InteractionActionSchema = z
 export type RigidTransform = z.infer<typeof RigidTransformSchema>;
 export type InteractionAction = z.infer<typeof InteractionActionSchema>;
 export type InteractionAnchor = z.infer<typeof InteractionAnchorSchema>;
+
+export const ObjectInteractionSchema = z
+  .object({
+    id: StableIdSchema,
+    characterId: StableIdSchema,
+    objectId: StableIdSchema,
+    effector: StableIdSchema,
+    chainRoot: StableIdSchema,
+    handAnchor: InteractionAnchorSchema,
+    objectAnchor: InteractionAnchorSchema,
+    tolerance: z.number().positive().max(1).default(0.005),
+    angularTolerance: z.number().positive().max(Math.PI).default(0.01),
+    actions: z.array(InteractionActionSchema).min(1).max(128),
+  })
+  .strict();
+export type ObjectInteraction = z.infer<typeof ObjectInteractionSchema>;

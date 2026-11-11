@@ -4,6 +4,7 @@ import type { Rational } from './render-policy.js';
 import type { CharacterAction } from './motion.js';
 import { ShotSceneSchema } from './scene.js';
 import type { CompiledWorld } from './world.js';
+import type { RigidTransform } from './interactions.js';
 import type { PreparedCharacter, SceneCharacter } from './character.js';
 
 export interface CompiledSceneInstruction {
@@ -49,6 +50,7 @@ export interface CompiledSceneInstruction {
   };
   environment?: z.infer<typeof AssetVersionReferenceSchema>;
   world?: CompiledWorld;
+  objectMotion?: { objectId: string; poses: RigidTransform[] }[];
   characters: (
     Extract<SceneCharacter, { asset: unknown }> | PreparedCharacter
   )[];
