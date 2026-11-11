@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SpatialConstraintSchema } from './spatial-constraints.js';
 import { AssetVersionReferenceSchema, StableIdSchema } from './identifiers.js';
 import { CharacterActionSchema } from './motion.js';
 import {
@@ -147,6 +148,7 @@ export const RiggedCharacterSchema = z
     source: SourceSchema,
     poses: PosesSchema.default({ root: [], joints: [] }),
     motion: z.array(MotionLayerSchema).max(64).default([]),
+    constraints: z.array(SpatialConstraintSchema).max(32).default([]),
     actions: z.tuple([]).default([]),
   })
   .strict()

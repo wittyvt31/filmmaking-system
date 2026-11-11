@@ -12,12 +12,14 @@ import {
 import { compileWorld } from './world.js';
 import { prepareCharacter } from './character.js';
 import { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
+import { constrainMotion } from './spatial-constraints.js';
+export { constrainMotion, forwardKinematics } from './spatial-constraints.js';
 
 export { compileWorld } from './world.js';
 export { prepareCharacter } from './character.js';
 export { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
 
-export const SCENE_COMPILER_VERSION = 'scene-compiler-v7';
+export const SCENE_COMPILER_VERSION = 'scene-compiler-v8';
 export const SEMANTIC_ANIMATION_LIBRARY_VERSION = '1.0.0';
 
 export const CHARCOAL_HORROR_STYLE = {
@@ -286,12 +288,17 @@ export function compileScene(
         'source' in character
           ? (() => {
               const prepared = prepareCharacter(character, shot.durationFrames);
-              const sampledMotion = sampleCharacterMotion(
+              const sampledMotion = constrainMotion(
                 prepared,
-                character.motion,
-                skeletalClips,
+                sampleCharacterMotion(
+                  prepared,
+                  character.motion,
+                  skeletalClips,
+                  shot.durationFrames,
+                  frameRate,
+                ),
+                character.constraints,
                 shot.durationFrames,
-                frameRate,
               );
               return sampledMotion ? { ...prepared, sampledMotion } : prepared;
             })()

@@ -12,3 +12,4 @@ export * from './production-package.js';
 export * from './compiled-scene.js';
 export * from './renderer.js';
 export * from './serialization.js';
+export * from './spatial-constraints.js';

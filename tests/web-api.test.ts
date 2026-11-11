@@ -85,6 +85,70 @@ async function createProject(catalog = '3d-production') {
   return { path, revision, text };
 }
 
+it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
+  'executes planted reach constraints through Studio and checks Blender endpoints',
+  async () => {
+    const { path, revision, text } = await createProject('humanoid-animation');
+    const input = JSON.parse(text);
+    const shot = input.shots[1];
+    shot.durationFrames = 3;
+    for (const c of shot.scene.characters[0].constraints) {
+      c.endFrame = 2;
+      if (c.fadeFrames) c.fadeFrames = 1;
+    }
+    input.shots = [shot];
+    input.timeline.durationFrames = 3;
+    input.timeline.videoTracks[0].clips = [{ shotId: shot.id, startFrame: 0 }];
+    input.video.resolution = { width: 320, height: 180 };
+    input.renderPolicy.outputDimensions = input.video.resolution;
+    input.renderPolicy.renderer.config.samples = 4;
+    const saved = (await request(
+      path + '/revisions',
+      { text: JSON.stringify(input), baseRevisionId: revision },
+      201,
+    )) as ProjectSummary;
+    const queued = (await request(
+      path + '/runs',
+      { revisionId: saved.revisions[0]!.id },
+      202,
+    )) as Run;
+    const { run, outputs } = await waitForRun(queued.id, 90_000);
+    expect(run.status, run.error).toBe('succeeded');
+    const blend = outputs.find((o) => o.name.endsWith('/scene.blend'))!;
+    expect(blend).toBeDefined();
+    const response = await fetch(base + blend.url);
+    const { writeFile } = await import('node:fs/promises');
+    const local = join(root, 'ik.blend');
+    await writeFile(local, Buffer.from(await response.arrayBuffer()));
+    await promisify(execFile)(
+      defaultBlenderExecutable(),
+      [
+        '--background',
+        local,
+        '--python-expr',
+        [
+          'import bpy, math',
+          'rig = next(o for o in bpy.context.scene.objects if o.type == "ARMATURE")',
+          'bpy.context.scene.frame_set(2)',
+          'targets = ' +
+            JSON.stringify(
+              shot.scene.characters[0].constraints.map(
+                (c: {
+                  effector: string;
+                  target: number[];
+                  tolerance: number;
+                }) => [c.effector, c.target, c.tolerance],
+              ),
+            ),
+          'for name, target, tolerance in targets:\n    actual = rig.matrix_world @ rig.pose.bones[name].tail\n    assert math.dist(actual, target) <= tolerance + 0.00001, (name, tuple(actual), target)',
+        ].join('\n'),
+      ],
+      { timeout: 20_000, windowsHide: true },
+    );
+  },
+  120_000,
+);
+
 it('validates the humanoid animation catalog and reports incompatible motion edits', async () => {
   const { path, text } = await createProject('humanoid-animation');
   expect(await request(path + '/validate', { text })).toEqual({

@@ -28,7 +28,9 @@
       "mode": "crf",
       "value": 22
     },
-    "qualityOverrides": { "denoising": true },
+    "qualityOverrides": {
+      "denoising": true
+    },
     "renderer": {
       "id": "blender",
       "config": {
@@ -347,10 +349,336 @@
           "focalLength": 48
         }
       }
+    },
+    {
+      "id": "shot.planted-reach",
+      "durationFrames": 61,
+      "visualDescription": "Reach to the stationary gold marker while both feet remain planted.",
+      "composition": {
+        "framing": "Full body with space for the gesture",
+        "subjectPlacement": "Center",
+        "cameraMovement": "Static",
+        "instructions": []
+      },
+      "requiredAssets": [],
+      "scene": {
+        "stylePreset": "charcoal_horror",
+        "styleVersion": "1.2.0",
+        "world": {
+          "schemaVersion": 1,
+          "materials": [
+            {
+              "id": "floor",
+              "color": [0.18, 0.2, 0.21],
+              "roughness": 0.82
+            },
+            {
+              "id": "wall",
+              "color": [0.26, 0.29, 0.3],
+              "roughness": 0.85
+            },
+            {
+              "id": "target",
+              "color": [0.9, 0.55, 0.08]
+            }
+          ],
+          "entities": [
+            {
+              "id": "studio",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "room",
+                "dimensions": {
+                  "x": 5.6,
+                  "y": 5.8,
+                  "z": 3.1
+                },
+                "floor": {
+                  "thickness": 0.15,
+                  "materialId": "floor"
+                },
+                "walls": [
+                  {
+                    "side": "north",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "west",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "east",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reach-target",
+              "transform": {
+                "position": {
+                  "x": 0.5539292049483355,
+                  "y": 0.28096946271080786,
+                  "z": 0.9611600552095518
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.06,
+                  "y": 0.06,
+                  "z": 0.06
+                },
+                "materialId": "target"
+              }
+            }
+          ]
+        },
+        "motionClips": [
+          {
+            "id": "greeting",
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "duration": 2,
+            "joints": [
+              {
+                "joint": "upper_arm.L",
+                "keys": [
+                  {
+                    "time": 0,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 0.65,
+                    "value": [-8, 0, -76],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.35,
+                    "value": [-8, 0, -76],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 2,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  }
+                ]
+              },
+              {
+                "joint": "forearm.L",
+                "keys": [
+                  {
+                    "time": 0,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 0.65,
+                    "value": [-35, 0, -24],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1,
+                    "value": [-18, 0, -14],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 1.35,
+                    "value": [-48, 0, -27],
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "time": 2,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease-in-out"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "characters": [
+          {
+            "id": "performer",
+            "transform": {
+              "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "scale": 1
+            },
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "source": {
+              "kind": "procedural",
+              "body": {
+                "height": 1.72,
+                "shoulderWidth": 0.245,
+                "build": 1
+              },
+              "appearance": {
+                "skin": {
+                  "color": [0.66, 0.39, 0.24]
+                },
+                "top": {
+                  "color": [0.055, 0.15, 0.18]
+                },
+                "trousers": {
+                  "color": [0.24, 0.19, 0.13]
+                },
+                "shoes": {
+                  "color": [0.055, 0.043, 0.033]
+                },
+                "hair": {
+                  "color": [0.065, 0.045, 0.032]
+                }
+              }
+            },
+            "motion": [],
+            "poses": {
+              "root": [],
+              "joints": []
+            },
+            "constraints": [
+              {
+                "id": "reach",
+                "effector": "hand.L",
+                "chainRoot": "upper_arm.L",
+                "target": [
+                  0.5539292049483355, 0.28096946271080786, 0.9611600552095518
+                ],
+                "space": "world",
+                "startFrame": 0,
+                "endFrame": 60,
+                "fadeFrames": 15,
+                "tolerance": 0.008
+              },
+              {
+                "id": "plant.L",
+                "effector": "foot.L",
+                "chainRoot": "thigh.L",
+                "target": [0.1548, -0.18059999999999993, 0.04299999999999993],
+                "space": "world",
+                "startFrame": 0,
+                "endFrame": 60,
+                "tolerance": 0.002,
+                "priority": 100
+              },
+              {
+                "id": "plant.R",
+                "effector": "foot.R",
+                "chainRoot": "thigh.R",
+                "target": [-0.1548, -0.18059999999999993, 0.04299999999999993],
+                "space": "world",
+                "startFrame": 0,
+                "endFrame": 60,
+                "tolerance": 0.002,
+                "priority": 100
+              }
+            ]
+          }
+        ],
+        "lights": [
+          {
+            "id": "study.key",
+            "type": "area",
+            "position": {
+              "x": -2.6,
+              "y": -2.7,
+              "z": 3.25
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 135,
+            "color": [1, 0.91, 0.82],
+            "size": 3
+          },
+          {
+            "id": "study.fill",
+            "type": "area",
+            "position": {
+              "x": 2.8,
+              "y": -1.85,
+              "z": 2.3
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 75,
+            "color": [0.83, 0.91, 1],
+            "size": 2.7
+          },
+          {
+            "id": "study.rim",
+            "type": "area",
+            "position": {
+              "x": 1.2,
+              "y": 1.55,
+              "z": 2.85
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 100,
+            "color": [1, 0.92, 0.78],
+            "size": 2
+          }
+        ],
+        "camera": {
+          "type": "static",
+          "distance": 5.05,
+          "target": {
+            "x": 0.1,
+            "y": 0,
+            "z": 0.94
+          },
+          "focalLength": 48
+        }
+      }
     }
   ],
   "timeline": {
-    "durationFrames": 121,
+    "durationFrames": 182,
     "videoTracks": [
       {
         "id": "video.main",
@@ -358,6 +686,10 @@
           {
             "shotId": "shot.humanoid-motion",
             "startFrame": 0
+          },
+          {
+            "shotId": "shot.planted-reach",
+            "startFrame": 121
           }
         ]
       }
