@@ -53,6 +53,97 @@ function basis(head: readonly number[], tail: readonly number[]): Q {
   return q.map((v) => v / n) as Q;
 }
 
+const dotVector = (a: V, b: V) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const scaled = (v: V, amount: number): V => [
+  v[0] * amount,
+  v[1] * amount,
+  v[2] * amount,
+];
+const unit = (v: V) => scaled(v, 1 / Math.hypot(...v));
+function align(from: V, to: V): Q {
+  const a = unit(from),
+    b = unit(to);
+  const q: Q = [
+    1 + dotVector(a, b),
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0],
+  ];
+  const length = Math.hypot(...q);
+  return length < 1e-10 ? identity : (q.map((v) => v / length) as Q);
+}
+
+// Seed a humanoid leg from the two-link knee intersection. The normal IK
+// search still checks all joint limits and resolves competing constraints.
+function seedLeg(
+  effector: string,
+  root: string,
+  target: V,
+  orientation: Q,
+  rotations: Map<string, Q>,
+  evaluate: ReturnType<typeof prepareKinematics>,
+  bones: ReadonlyMap<string, PreparedCharacter['bones'][number]>,
+  movable: readonly string[],
+) {
+  const foot = bones.get(effector)!;
+  const shin = bones.get(foot.parent!)!;
+  const thigh = bones.get(root)!;
+  if (
+    !movable.includes(foot.id) ||
+    !movable.includes(shin.id) ||
+    !movable.includes(thigh.id)
+  )
+    return;
+  const trial = new Map(rotations);
+  for (const bone of [foot, shin, thigh]) trial.delete(bone.id);
+  const fk = evaluate(trial);
+  const hip = fk.get(root)!.head;
+  const ankle = sub(
+    target,
+    rotate(orientation, [0, Math.hypot(...sub(foot.tail, foot.head)), 0]),
+  );
+  const ray = sub(ankle, hip);
+  const distance = Math.hypot(...ray);
+  const upper = Math.hypot(...sub(shin.head, thigh.head));
+  const lower = Math.hypot(...sub(foot.head, shin.head));
+  if (
+    distance < 1e-8 ||
+    distance > upper + lower ||
+    distance < Math.abs(upper - lower)
+  )
+    return;
+  const axis = unit(ray);
+  const forward: V = [0, -1, 0];
+  const pole = sub(forward, scaled(axis, dotVector(forward, axis)));
+  if (Math.hypot(...pole) < 1e-8) return;
+  const projection = (upper ** 2 - lower ** 2 + distance ** 2) / (2 * distance);
+  const knee = add(
+    hip,
+    add(
+      scaled(axis, projection),
+      scaled(unit(pole), Math.sqrt(Math.max(0, upper ** 2 - projection ** 2))),
+    ),
+  );
+  for (const [bone, point] of [
+    [thigh, knee],
+    [shin, ankle],
+  ] as const) {
+    const current = evaluate(trial).get(bone.id)!;
+    const desired = multiply(
+      align(sub(current.tail, current.head), sub(point, current.head)),
+      current.rotation,
+    );
+    trial.set(bone.id, multiply(inverse(current.rotation), desired));
+  }
+  const currentFoot = evaluate(trial).get(foot.id)!;
+  trial.set(foot.id, multiply(inverse(currentFoot.rotation), orientation));
+  for (const bone of [thigh, shin, foot]) {
+    if (!withinLimits(trial.get(bone.id)!, bone.min, bone.max)) return;
+  }
+  for (const bone of [thigh, shin, foot])
+    rotations.set(bone.id, trial.get(bone.id)!);
+}
+
 /** Bone-local rotations use the same zero-roll +Y rest convention as the rig. */
 export function forwardKinematics(
   character: PreparedCharacter,
@@ -125,6 +216,7 @@ export function constrainMotion(
     ): { pose: RigidTransform; priority: number } | undefined;
     resolved(frame: number, hand: RigidTransform): void;
   },
+  locomotionContacts: ReadonlySet<string> = new Set(),
 ): SampledSkeletalMotion | undefined {
   if (!constraints.length && !driver) return input;
   const parents: PreparedCharacter['transform'][] = [];
@@ -196,15 +288,34 @@ export function constrainMotion(
       `Character "${character.id}" exceeds 250,000 motion samples with constraints`,
     );
   let previousInteractionPose: Map<string, Q> | undefined;
+  let previousContactPose = new Map<string, Q>();
+  const starts = new Map<number, SpatialConstraint[]>();
+  for (const constraint of ordered) {
+    const start = starts.get(constraint.startFrame) ?? [];
+    start.push(constraint);
+    starts.set(constraint.startFrame, start);
+  }
+  let ongoing: SpatialConstraint[] = [];
   for (let frame = 0; frame < frames; frame++) {
-    const active = ordered.filter(
-      (c) => frame >= c.startFrame && frame <= c.endFrame,
+    ongoing = ongoing.filter((c) => c.endFrame >= frame);
+    ongoing.push(...(starts.get(frame) ?? []));
+    const active = [...ongoing].sort(
+      (a, b) => b.priority - a.priority || compareStrings(a.id, b.id),
     );
     if (!active.length && !driver) continue;
     const rotations = new Map(
       output.joints.map((t) => [t.joint, t.rotations[frame]!]),
     );
     const initial = evaluate(rotations);
+    const contactJoints = new Set(
+      active
+        .filter((c) => locomotionContacts.has(c.id))
+        .flatMap((c) => chains.get(c.id)!),
+    );
+    for (const joint of contactJoints) {
+      const previous = previousContactPose.get(joint);
+      if (previous) rotations.set(joint, previous);
+    }
     const p = output.rootPosition?.[frame] ?? xyz(character.transform.position);
     const r =
       output.rootRotation?.[frame] ??
@@ -292,6 +403,19 @@ export function constrainMotion(
         ),
       };
     });
+    for (const { c, target, orientation } of targets) {
+      if (orientation && locomotionContacts.has(c.id))
+        seedLeg(
+          c.effector,
+          c.chainRoot,
+          target,
+          orientation,
+          rotations,
+          evaluate,
+          bones,
+          chains.get(c.id)!,
+        );
+    }
     const errors = () => {
       const fk = evaluate(rotations);
       return targets.map(({ c, target, orientation, unitScale }) => ({
@@ -371,6 +495,12 @@ export function constrainMotion(
           `Constraint ${targets[i]!.c.id} on ${character.id} unreachable or conflicts with authored motion/contacts at frame ${frame}: residual ${best[i]!.position} metres, ${best[i]!.angle} radians in ${targets[i]!.c.space} space`,
         );
     driver?.resolved(frame, worldHand(evaluate(rotations)));
+    previousContactPose = new Map(
+      [...contactJoints].map((joint) => [
+        joint,
+        rotations.get(joint) ?? identity,
+      ]),
+    );
     if (driver && active.some((c) => c.id === driver.constraint.id)) {
       previousInteractionPose = new Map(
         chains

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { SpatialConstraintSchema } from './spatial-constraints.js';
+import { LocomotionSchema } from './locomotion.js';
 import { AssetVersionReferenceSchema, StableIdSchema } from './identifiers.js';
 import { CharacterActionSchema } from './motion.js';
 import {
@@ -39,7 +40,7 @@ export const FilmieHumanoid = {
       ),
       joint('hand.' + side, 'forearm.' + side, [-75, -35, -40], [75, 35, 40]),
       joint('thigh.' + side, 'pelvis', [-130, -55, -50], [80, 55, 50]),
-      joint('shin.' + side, 'thigh.' + side, [-150, -15, -15], [30, 15, 15]),
+      joint('shin.' + side, 'thigh.' + side, [-150, -15, -15], [145, 15, 15]),
       joint('foot.' + side, 'shin.' + side, [-60, -30, -30], [60, 30, 30]),
     ]),
   ] as readonly Joint[],
@@ -149,6 +150,7 @@ export const RiggedCharacterSchema = z
     poses: PosesSchema.default({ root: [], joints: [] }),
     motion: z.array(MotionLayerSchema).max(64).default([]),
     constraints: z.array(SpatialConstraintSchema).max(32).default([]),
+    locomotion: LocomotionSchema.optional(),
     actions: z.tuple([]).default([]),
   })
   .strict()

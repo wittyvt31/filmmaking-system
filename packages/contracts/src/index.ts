@@ -14,3 +14,4 @@ export * from './renderer.js';
 export * from './serialization.js';
 export * from './spatial-constraints.js';
 export * from './interactions.js';
+export * from './locomotion.js';

@@ -151,17 +151,17 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
 );
 
 it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
-  'renders the cup interaction through Studio and reuses its production cache',
+  'renders walking and cup interaction through Studio and reuses its production cache',
   async () => {
     const { path, revision, text } = await createProject('humanoid-animation');
     const input = JSON.parse(text);
-    const shot = input.shots[2];
+    const shot = input.shots[3];
     input.shots = [shot];
     input.timeline.durationFrames = shot.durationFrames;
     input.timeline.videoTracks[0].clips = [{ shotId: shot.id, startFrame: 0 }];
-    input.video.resolution = { width: 320, height: 180 };
+    input.video.resolution = { width: 160, height: 90 };
     input.renderPolicy.outputDimensions = input.video.resolution;
-    input.renderPolicy.renderer.config.samples = 2;
+    input.renderPolicy.renderer.config.samples = 1;
     const saved = (await request(
       path + '/revisions',
       {
@@ -178,7 +178,7 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
         },
         202,
       )) as Run;
-    const { run, outputs } = await waitForRun((await queue()).id, 90_000);
+    const { run, outputs } = await waitForRun((await queue()).id, 190_000);
     expect(run.status, run.error).toBe('succeeded');
     expect(outputs.some((output) => output.name === 'master.mp4')).toBe(true);
     const blend = outputs.find((output) =>
@@ -199,17 +199,26 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
           'cup = next(o for o in scene.objects if o.get("filmie_entity_id") == "cup")',
           'rig = next(o for o in scene.objects if o.type == "ARMATURE")',
           'def sample(f):\n    scene.frame_set(f)\n    matrix = cup.matrix_world\n    return matrix.translation.copy(), matrix.inverted() @ (rig.matrix_world @ rig.pose.bones["hand.L"].tail)',
-          'placed, _ = sample(49)',
+          'placed, _ = sample(119)',
           'start, _ = sample(1)',
-          'grasped, grip = sample(12)',
-          'lifted, lift_grip = sample(20)',
-          'carried, carry_grip = sample(31)',
-          'released, _ = sample(41)',
+          'grasped, grip = sample(82)',
+          'lifted, lift_grip = sample(90)',
+          'carried, carry_grip = sample(101)',
+          'released, _ = sample(111)',
           'assert math.dist(start, grasped) < 1e-5',
           'assert lifted.z > start.z + 0.02',
           'assert math.dist(lifted, carried) > 0.04',
           'assert math.dist(grip, lift_grip) < 1e-5 and math.dist(grip, carry_grip) < 1e-5',
           'assert math.dist(placed, start) > 0.04 and math.dist(placed, released) < 1e-5',
+          'def stance(f):\n    scene.frame_set(f)\n    return rig.matrix_world.translation.copy(), rig.matrix_world.to_quaternion(), rig.matrix_world @ rig.pose.bones["foot.R"].tail',
+          'origin, _, contact = stance(1)',
+          'early, _, same_contact = stance(8)',
+          'approach, facing, _ = stance(50)',
+          'stopped, turned, _ = stance(69)',
+          'final, _, _ = stance(119)',
+          'assert math.dist(origin, early) > 0.02 and math.dist(contact, same_contact) < 0.008',
+          'assert math.dist(origin, approach) > 0.5 and abs(facing.dot(turned)) < 0.99',
+          'assert math.dist(stopped, final) < 1e-5',
         ].join('\n'),
       ],
       { timeout: 20_000, windowsHide: true },
@@ -218,15 +227,15 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
     expect(cached.status, cached.error).toBe('succeeded');
     expect(cached.cacheHits).toEqual({ shots: 1, assembly: true });
   },
-  145_000,
+  235_000,
 );
 
 it('validates the humanoid animation catalog and reports incompatible motion edits', async () => {
   const { path, text } = await createProject('humanoid-animation');
   expect(await request(path + '/validate', { text })).toEqual({
     issues: [],
-    frames: 231,
-    shots: 3,
+    frames: 350,
+    shots: 4,
   });
   const draft = JSON.parse(text);
   draft.shots[0].scene.characters[0].motion.at(-1).source.clipId =

@@ -14,6 +14,8 @@ import { prepareCharacter } from './character.js';
 import { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
 import { constrainMotion } from './spatial-constraints.js';
 import { compileInteractions } from './compile-interactions.js';
+import { sampleLocomotion } from './locomotion.js';
+export { sampleLocomotion } from './locomotion.js';
 export * from './interactions.js';
 export * from './rigid-transforms.js';
 export { constrainMotion, forwardKinematics } from './spatial-constraints.js';
@@ -22,7 +24,7 @@ export { compileWorld } from './world.js';
 export { prepareCharacter } from './character.js';
 export { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
 
-export const SCENE_COMPILER_VERSION = 'scene-compiler-v9';
+export const SCENE_COMPILER_VERSION = 'scene-compiler-v10';
 export const SEMANTIC_ANIMATION_LIBRARY_VERSION = '1.0.0';
 
 export const CHARCOAL_HORROR_STYLE = {
@@ -293,8 +295,9 @@ export function compileScene(
         'source' in character
           ? (() => {
               const prepared = prepareCharacter(character, shot.durationFrames);
-              const sampledMotion = constrainMotion(
+              const locomotion = sampleLocomotion(
                 prepared,
+                character.locomotion,
                 sampleCharacterMotion(
                   prepared,
                   character.motion,
@@ -302,10 +305,18 @@ export function compileScene(
                   shot.durationFrames,
                   frameRate,
                 ),
-                character.constraints,
+                shot.durationFrames,
+                frameRate,
+                world,
+              );
+              const sampledMotion = constrainMotion(
+                prepared,
+                locomotion.motion,
+                [...character.constraints, ...locomotion.contacts],
                 shot.durationFrames,
                 world,
                 interactions.get(character.id),
+                new Set(locomotion.contacts.map((contact) => contact.id)),
               );
               return sampledMotion ? { ...prepared, sampledMotion } : prepared;
             })()
