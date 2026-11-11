@@ -23,6 +23,7 @@ import { sampleLocomotion } from './locomotion.js';
 export { sampleLocomotion } from './locomotion.js';
 export * from './interactions.js';
 export * from './contact-graph.js';
+export * from './contact-response.js';
 export * from './rigid-transforms.js';
 export { constrainMotion, forwardKinematics } from './spatial-constraints.js';
 
