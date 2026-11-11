@@ -2,4 +2,8 @@ node_modules
 dist
 coverage
 pnpm-lock.yaml
+.cache
+renders
+baselines
+**/preview
 *.tsbuildinfo
