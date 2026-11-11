@@ -1,1 +1,0 @@
-PASS: pnpm exec vitest run tests/blender-crash-tolerance.test.ts — 4 tests passed in this session. Existing recovered-parallel-crash test checks completedWithWarning, per-attempt diagnostics, crash reports, and cached receipts. No render needed.
