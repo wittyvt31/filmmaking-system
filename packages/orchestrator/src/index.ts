@@ -56,6 +56,7 @@ export class ProductionError extends Error {
 
 export interface ProductionOptions {
   projectDirectory: string;
+  assetBaseDirectory?: string;
   outputDirectory?: string;
   cacheDirectory?: string;
   manifestFileName?: string;
@@ -66,6 +67,7 @@ export interface ProductionOptions {
   timeoutMs?: number;
   signal?: AbortSignal;
   onLog?: (line: string) => void;
+  onShotProgress?: (completed: number, total: number) => void;
 }
 
 export interface ProductionResult {
@@ -163,6 +165,7 @@ function packageContent(
 
 export async function loadProductionPlan(options: {
   projectDirectory: string;
+  assetBaseDirectory?: string;
   manifestFileName?: string;
   registryFileName?: string;
   allowUnapprovedPackage?: boolean;
@@ -211,7 +214,7 @@ export async function loadProductionPlan(options: {
     prepared = await prepareProductionPlan(
       manifestInput,
       registry,
-      projectDirectory,
+      resolve(options.assetBaseDirectory ?? projectDirectory),
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -454,7 +457,9 @@ export async function executeProduction(
         metrics: Record<string, number | string | boolean>;
       };
     }[] = [];
-    for (const job of prepared.renderPlan.jobs.filter(asShotJob)) {
+    const shotJobs = prepared.renderPlan.jobs.filter(asShotJob);
+    options.onShotProgress?.(0, shotJobs.length);
+    for (const job of shotJobs) {
       const shot = prepared.manifest.shots.find(
         (candidate) => candidate.id === job.shotId,
       );
@@ -623,6 +628,7 @@ export async function executeProduction(
       await log(
         `Shot ${shot.id} ${result.cacheHit ? 'cache hit' : 'rendered'}; SHA-256 ${shotChecksum || 'missing'}.`,
       );
+      options.onShotProgress?.(shotReceipts.length, shotJobs.length);
     }
 
     const assemblyFingerprint = createAssemblyFingerprint({

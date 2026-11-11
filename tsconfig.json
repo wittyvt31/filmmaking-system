@@ -10,6 +10,8 @@
     { "path": "./packages/media" },
     { "path": "./engines/blender" },
     { "path": "./packages/orchestrator" },
-    { "path": "./apps/cli" }
+    { "path": "./apps/cli" },
+    { "path": "./apps/web-api" },
+    { "path": "./apps/web" }
   ]
 }

@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist/types",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": [],
+    "jsx": "react-jsx",
+    "emitDeclarationOnly": true
+  },
+  "references": [
+    {
+      "path": "../web-api"
+    }
+  ],
+  "include": ["src/**/*.tsx"]
+}

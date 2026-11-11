@@ -3,6 +3,7 @@ dist
 coverage
 pnpm-lock.yaml
 .cache
+.filmie
 renders
 baselines
 **/preview

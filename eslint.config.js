@@ -11,6 +11,7 @@ export default tseslint.config(
       '**/.cache/**',
       '**/renders/**',
       '**/baselines/**',
+      '.filmie/**',
     ],
   },
   js.configs.recommended,

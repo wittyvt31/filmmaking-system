@@ -1,0 +1,414 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  color: #e2e8ee;
+  background: #10151a;
+  --border: #303b45;
+  --muted: #a1afbc;
+  --surface: #171e25;
+  --accent: #f2bd79;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+  background: #202a33;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.46rem 0.65rem;
+}
+button {
+  cursor: pointer;
+}
+button:hover:not(:disabled),
+button[aria-pressed='true'],
+button[aria-current] {
+  border-color: var(--accent);
+}
+button:disabled {
+  opacity: 0.47;
+  cursor: default;
+}
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+button.primary {
+  background: var(--accent);
+  color: #232019;
+  border-color: var(--accent);
+  font-weight: 650;
+}
+a {
+  color: #9fcef4;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+h1 {
+  font-size: 1.55rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+h2 {
+  font-size: 0.96rem;
+}
+h3 {
+  font-size: 0.9rem;
+  margin-block: 0.9rem 0.55rem;
+}
+small,
+.muted,
+.local {
+  color: var(--muted);
+}
+.top {
+  height: 62px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.2rem;
+  background: #131a20;
+}
+.brand {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+  font-weight: 650;
+  font-size: 1.05rem;
+}
+.mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: var(--accent);
+  color: #232019;
+  border-radius: 8px;
+  font-weight: 850;
+}
+.local {
+  font-size: 0.84rem;
+}
+main {
+  display: grid;
+  grid-template-columns: minmax(175px, 215px) minmax(0, 1fr) minmax(
+      260px,
+      330px
+    );
+  min-height: calc(100vh - 62px);
+}
+.sidebar,
+.activity {
+  background: var(--surface);
+  padding: 1rem;
+  min-width: 0;
+}
+.sidebar {
+  border-right: 1px solid var(--border);
+}
+.activity {
+  border-left: 1px solid var(--border);
+}
+.section-heading,
+.workspace-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.sidebar p,
+.activity p {
+  font-size: 0.85rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+nav,
+.history {
+  display: grid;
+  gap: 0.42rem;
+}
+nav button,
+.history button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 0.28rem;
+  overflow-wrap: anywhere;
+}
+.assets {
+  margin-top: 1.2rem;
+}
+.assets ul,
+.outputs ul,
+.validation ul {
+  padding-left: 1.15rem;
+}
+.assets li,
+.outputs li {
+  margin-bottom: 0.55rem;
+  overflow-wrap: anywhere;
+}
+.assets small {
+  display: block;
+}
+summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.workspace {
+  padding: 1.1rem;
+  min-width: 0;
+}
+.workspace-head p {
+  margin-top: 0.35rem;
+  font-size: 0.86rem;
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.7rem;
+  font-size: 0.84rem;
+}
+.run {
+  margin-left: auto;
+}
+.editor {
+  display: flex;
+  height: clamp(420px, 67vh, 960px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #111920;
+}
+.editor:focus-within {
+  border-color: #6988a0;
+}
+.editor pre,
+.editor textarea {
+  font:
+    13px/1.58 Consolas,
+    'IBM Plex Mono',
+    monospace;
+  tab-size: 2;
+  margin: 0;
+}
+.gutter {
+  color: #8495a6;
+  text-align: right;
+  background: #151e26;
+  padding: 12px 10px;
+  min-width: 48px;
+  overflow: hidden;
+  user-select: none;
+}
+.code {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+.code pre,
+.code textarea {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  padding: 12px;
+  white-space: pre;
+}
+.code pre {
+  overflow: hidden;
+  pointer-events: none;
+}
+.code textarea {
+  resize: none;
+  background: transparent;
+  color: transparent;
+  caret-color: #fff;
+  outline: none;
+  overflow: auto;
+}
+.code textarea::selection {
+  background: #43658b80;
+  color: transparent;
+}
+.token-key {
+  color: #9ccdf0;
+}
+.token-string {
+  color: #c4db9e;
+}
+.token-number {
+  color: #efbc86;
+}
+.token-literal {
+  color: #d9abef;
+}
+.validation,
+.run-detail {
+  margin-top: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  background: #111920;
+  font-size: 0.86rem;
+  overflow-wrap: anywhere;
+}
+.validation li {
+  margin-top: 0.35rem;
+}
+.success,
+.succeeded {
+  color: #b2e1a1;
+}
+.failed,
+.failure,
+.interrupted {
+  color: #ffaeab;
+}
+.queued,
+.running {
+  color: var(--accent);
+}
+.run-detail p,
+.run-detail details {
+  margin-bottom: 0.7rem;
+}
+.rerun {
+  margin-bottom: 0.7rem;
+}
+.shot-progress {
+  display: grid;
+  gap: 0.3rem;
+  margin-bottom: 0.75rem;
+  color: var(--muted);
+}
+.shot-progress progress {
+  width: 100%;
+  accent-color: var(--accent);
+}
+.logs {
+  max-height: 210px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.74rem;
+}
+.outputs img,
+.outputs video {
+  width: 100%;
+  display: block;
+  border-radius: 4px;
+  background: #090c0f;
+}
+.outputs button {
+  font-size: 0.74rem;
+  padding: 0.22rem 0.35rem;
+  margin-right: 0.4rem;
+}
+.history {
+  max-height: 235px;
+  overflow: auto;
+}
+.history button {
+  font-size: 0.82rem;
+}
+.empty {
+  grid-column: 2 / -1;
+  padding: 12vh 6vw;
+}
+.empty p {
+  margin: 0.65rem 0 1.2rem;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #0009;
+  padding: 1rem;
+}
+.dialog {
+  width: min(100%, 420px);
+  padding: 1.15rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.dialog form,
+.dialog label {
+  display: grid;
+  gap: 0.45rem;
+}
+.dialog form {
+  margin-top: 1rem;
+  gap: 0.8rem;
+}
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+}
+.banner {
+  padding: 0.65rem 1.2rem;
+  background: #43282a;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: space-between;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+@media (max-width: 1050px) {
+  main {
+    grid-template-columns: 175px minmax(0, 1fr);
+  }
+  .activity {
+    grid-column: 2;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+}
+@media (max-width: 620px) {
+  main {
+    display: block;
+  }
+  .sidebar {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .editor {
+    height: 55vh;
+    min-height: 300px;
+  }
+  .run {
+    margin-left: 0;
+  }
+}

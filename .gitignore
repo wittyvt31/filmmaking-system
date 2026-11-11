@@ -2,6 +2,7 @@ node_modules/
 dist/
 coverage/
 .cache/
+/.filmie/
 renders/
 tmp/
 temp/

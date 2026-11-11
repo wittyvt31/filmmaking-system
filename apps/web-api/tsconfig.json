@@ -1,0 +1,28 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "references": [
+    {
+      "path": "../../packages/assets"
+    },
+    {
+      "path": "../../packages/contracts"
+    },
+    {
+      "path": "../../packages/planner"
+    },
+    {
+      "path": "../../packages/orchestrator"
+    },
+    {
+      "path": "../../engines/blender"
+    },
+    {
+      "path": "../../packages/media"
+    }
+  ],
+  "include": ["src/**/*.ts"]
+}
