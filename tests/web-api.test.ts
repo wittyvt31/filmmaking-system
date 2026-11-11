@@ -161,15 +161,15 @@ it('runs the real orchestration path and retains Blender launch errors and logs'
 });
 
 it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
-  'renders three Blender frames through HTTP, verifies character poses, and reuses assets',
+  'renders father actions and visitor poses through HTTP and reuses assets',
   async () => {
     const { path, revision, text } = await createProject();
     const input = JSON.parse(text);
     const shot = input.shots[0];
     shot.durationFrames = 3;
-    shot.scene.characters.forEach((character: { actions: unknown[] }) => {
-      character.actions = [];
-    });
+    const [breathing, headTurn] = shot.scene.characters[0].actions;
+    Object.assign(breathing, { startFrame: 0, endFrame: 3, cycleFrames: 4 });
+    Object.assign(headTurn, { startFrame: 0, endFrame: 3 });
     const visitor = shot.scene.characters[1];
     visitor.poses.root = visitor.poses.root.slice(0, 2);
     visitor.poses.root[1].frame = 2;
@@ -185,7 +185,6 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
     input.timeline.durationFrames = 3;
     input.video.resolution = { width: 320, height: 180 };
     input.renderPolicy.outputDimensions = input.video.resolution;
-    input.renderPolicy.renderer.config.engine = 'BLENDER_WORKBENCH';
     const saved = (await request(
       path + '/revisions',
       { text: JSON.stringify(input), baseRevisionId: revision },
@@ -255,11 +254,37 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
           'a, b, c = [pose(frame) for frame in (1, 2, 3)]',
           'assert c[0] < b[0] < a[0] and c[1] < b[1] < a[1]',
           'assert max(math.dist(x, y) for x, y in zip(a[2], c[2])) > 0.05',
+          'father = objects["character.father.instance"]',
+          'chest = next(obj for obj in father.children if obj.get("filmie_control_id") == "RIG_chest")',
+          'head = next(obj for obj in chest.children if obj.get("filmie_control_id") == "RIG_head")',
+          'head_mesh = next(obj for obj in head.children if obj.type == "MESH")',
+          'def father_pose(frame):\n    bpy.context.scene.frame_set(frame)\n    return chest.scale.z, head.rotation_euler.z, head_mesh.matrix_world.copy()',
+          'rest, mid, turn = [father_pose(frame) for frame in (1, 2, 3)]',
+          'assert math.isclose(mid[0] / rest[0], 1.018, abs_tol=1e-5)',
+          'assert math.isclose(turn[1] - rest[1], math.radians(34), abs_tol=1e-5)',
+          'assert rest[2] != turn[2]',
           'import json, sys',
           'sys.path.insert(0, ' +
             JSON.stringify(resolve('engines/blender/worker')) +
             ')',
           'from render_shot import instantiate_asset, prepare_character',
+          'from semantic_rig import discover_controls, RigCapabilityError, preflight_actions',
+          'collection = bpy.data.collections.new("Renamed rig")',
+          'nested = bpy.data.collections.new("Nested controls")',
+          'collection.children.link(nested)',
+          'control = bpy.data.objects.new("Arbitrary display name", None)',
+          'nested.objects.link(control)',
+          'control["filmie_control_id"] = "custom.torso"',
+          'assert discover_controls(collection, {"semanticControls": {"chest": "custom.torso"}}, "test")["chest"] == control',
+          'control.name = "Renamed control"',
+          'control["filmie_control_id"] = "chest"',
+          'assert discover_controls(collection, {}, "test")["chest"] == control',
+          'instruction = {"characterId": "test", "action": {"type": "breathing", "id": "test.breathe"}}',
+          'preflight_actions({"actions": [instruction], "motionCurves": []}, {"test": control}, {"test": {"chest": control}})',
+          'duplicate = bpy.data.objects.new("Conflicting control", None)',
+          'duplicate["filmie_control_id"] = "RIG_chest"',
+          'nested.objects.link(duplicate)',
+          'try:\n    discover_controls(collection, {}, "test")\nexcept RigCapabilityError as error:\n    assert "ambiguous semantic control" in str(error)\nelse:\n    raise AssertionError("Ambiguous controls were accepted")',
           'spec = json.loads(' + JSON.stringify(JSON.stringify(imported)) + ')',
           'imported_root, imported_rig, _ = prepare_character(bpy.context.scene, spec, instantiate_asset, {"room.main": objects["room.main"]})',
           'assert imported_root.parent == root.parent and len(imported_rig.data.bones) == len(rig.data.bones)',
@@ -316,5 +341,44 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
       characterCacheHits: 1,
     });
   },
-  65_000,
+  85_000,
+);
+
+it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
+  'reports missing semantic capabilities in production preflight before rendering',
+  async () => {
+    const { path, revision, text } = await createProject();
+    const input = JSON.parse(text);
+    input.shots[0].scene.characters[0].actions.push({
+      id: 'father.blinks',
+      type: 'blink',
+      startFrame: 0,
+      endFrame: 5,
+      intervalFrames: 4,
+      closureFrames: 2,
+    });
+    const saved = (await request(
+      path + '/revisions',
+      {
+        text: JSON.stringify(input),
+        baseRevisionId: revision,
+      },
+      201,
+    )) as ProjectSummary;
+    const queued = (await request(
+      path + '/runs',
+      { revisionId: saved.revisions[0]!.id },
+      202,
+    )) as Run;
+    const { run, outputs } = await waitForRun(queued.id, 35_000);
+    expect(run.status).toBe('failed');
+    expect(run.error).toMatch(/INVALID_INSTRUCTIONS|requires semantic control/);
+    expect(run.error).toMatch(/father\.blinks.*left-eye, right-eye/);
+    expect(
+      outputs.some(
+        (output) => output.kind === 'image' || output.kind === 'video',
+      ),
+    ).toBe(false);
+  },
+  45_000,
 );

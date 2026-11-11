@@ -664,35 +664,6 @@ export class BlenderRendererAdapter implements RendererAdapter {
           'INVALID_INSTRUCTIONS',
           'Compiled scene does not match the requested shot and duration',
         );
-      const supportedActions = new Set([
-        'breathing',
-        'head-turn',
-        'blink',
-        'expression',
-        'walk',
-        'run',
-        'jump',
-        'kick',
-        'celebrate',
-        'sit',
-        'stand',
-        'lip-sync',
-        'reach',
-        'grasp',
-        'lift',
-        'place',
-        'interaction',
-        'motion-clip',
-      ]);
-      const unsupportedAction = compiledScene.actions.find(
-        ({ action }) => !supportedActions.has(action.type),
-      );
-      if (unsupportedAction)
-        throw new BlenderFailure(
-          'INVALID_INSTRUCTIONS',
-          `Blender does not yet implement the "${unsupportedAction.action.type}" action`,
-        );
-
       const assetMap = new Map<string, RendererAssetInput>();
       for (const asset of request.assets) {
         const reference = AssetVersionReferenceSchema.parse({
@@ -712,52 +683,6 @@ export class BlenderRendererAdapter implements RendererAdapter {
           );
         assetMap.set(assetKey(reference), asset);
       }
-      const requiredControls: Record<string, readonly string[]> = {
-        breathing: ['chest'],
-        'head-turn': ['head'],
-        blink: ['left-eye', 'right-eye'],
-        expression: ['left-brow', 'right-brow'],
-        celebrate: ['chest', 'left-arm', 'right-arm'],
-        walk: ['left-leg', 'right-leg'],
-        run: ['left-leg', 'right-leg'],
-        kick: [],
-        reach: [],
-        grasp: [],
-        lift: [],
-        place: [],
-        interaction: ['head'],
-        'motion-clip': [],
-        jump: [],
-        'lip-sync': ['mouth'],
-        sit: ['chest', 'left-leg', 'right-leg'],
-        stand: ['chest', 'left-leg', 'right-leg'],
-      };
-      for (const { characterId, action } of compiledScene.actions) {
-        const character = compiledScene.characters.find(
-          (candidate) => candidate.id === characterId,
-        );
-        const rig =
-          character && 'asset' in character
-            ? assetMap.get(assetKey(character.asset))
-            : undefined;
-        if (!character || !rig)
-          throw new BlenderFailure(
-            'MISSING_ASSET',
-            `Character model could not be resolved for action "${action.id}"`,
-          );
-        const controls = (rig.metadata['semanticControls'] ?? {}) as Record<
-          string,
-          unknown
-        >;
-        for (const control of requiredControls[action.type] ?? []) {
-          if (typeof controls[control] !== 'string')
-            throw new BlenderFailure(
-              'INVALID_INSTRUCTIONS',
-              `Action "${action.id}" requires semantic rig control "${control}" on character "${characterId}"; provide a Blender model with that control.`,
-            );
-        }
-      }
-
       const resolveAsset = (reference: {
         assetId: string;
         version: string;
@@ -812,6 +737,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
             'character_builder.py',
             'character_runtime.py',
             'collection_cache.py',
+            'semantic_rig.py',
           ].map(async (file) =>
             createHash('sha256')
               .update(await readFile(join(dirname(WORKER_PATH), file)))
@@ -1037,6 +963,8 @@ export class BlenderRendererAdapter implements RendererAdapter {
       const workerResultPath = join(stagedDirectory, 'worker-result.json');
       type WorkerResult = {
         status?: unknown;
+        error?: string;
+        errorCode?: string;
         frameCount?: unknown;
         backend?: string;
         engine?: string;
@@ -1165,6 +1093,19 @@ export class BlenderRendererAdapter implements RendererAdapter {
             }[] = [];
             for (let attempt = 0; attempt < 2; attempt += 1) {
               rangeProcess = await spawnWorker(rangeSpecPath);
+              const preflight = await readWorkerResult(rangeDirectory);
+              if (
+                preflight?.errorCode === 'INVALID_INSTRUCTIONS' &&
+                preflight.error
+              ) {
+                lastProcessResult = rangeProcess;
+                lastWorkerResult = preflight;
+                logs.push(`Failed range artifacts preserved at ${rangeRoot}`);
+                throw new BlenderFailure(
+                  'INVALID_INSTRUCTIONS',
+                  preflight.error,
+                );
+              }
               const crashLine = rangeProcess.stderr
                 .split(/\r?\n/)
                 .find((line) => /Writing:\s*.*crash\.txt/i.test(line));
@@ -1348,6 +1289,11 @@ export class BlenderRendererAdapter implements RendererAdapter {
       }
       if (stagedChecksums === null) {
         await preserveWorkerFailure();
+        if (
+          workerResult?.errorCode === 'INVALID_INSTRUCTIONS' &&
+          workerResult.error
+        )
+          throw new BlenderFailure('INVALID_INSTRUCTIONS', workerResult.error);
         if (processResult.timedOut)
           throw new BlenderFailure(
             'TIMEOUT',

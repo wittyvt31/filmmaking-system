@@ -14,6 +14,7 @@ from mathutils import Euler, Matrix, Vector
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from world_builder import build_world
 from character_runtime import apply_poses, prepare_character
+from semantic_rig import RigCapabilityError, discover_controls, foot_ik, preflight_actions
 
 RENDER_METRICS = {"constantInterpolationCurves": 0, "constantInterpolationFailures": 0}
 
@@ -98,7 +99,7 @@ def instantiate_asset(asset, transform, entity_id, parent_collection=None, root_
         parent_collection = bpy.context.scene.collection
     parent_collection.children.link(collection)
     root = next(
-        (obj for obj in collection.objects if obj.get("filmie_asset_id") == asset["assetId"]
+        (obj for obj in collection.all_objects if obj.get("filmie_asset_id") == asset["assetId"]
          or (root_marker and obj.get(root_marker))),
         None,
     )
@@ -115,26 +116,10 @@ def instantiate_asset(asset, transform, entity_id, parent_collection=None, root_
     root.scale = (float(transform["scale"]),) * 3
     root.name = entity_id
     root["filmie_entity_id"] = entity_id
-    for armature in collection.objects:
+    for armature in collection.all_objects:
         if armature.type == "ARMATURE":
             armature["filmie_character_id"] = entity_id
-    controls = {
-        obj.get("filmie_control_id", obj.name): obj
-        for obj in collection.objects
-        if obj.get("filmie_control_id") or obj.name.startswith("RIG_")
-    }
-    legacy_semantic_names = {
-        "RIG_chest": "chest", "RIG_head": "head",
-        "RIG_arm.L": "left-arm", "RIG_arm.R": "right-arm",
-        "RIG_leg.L": "left-leg", "RIG_leg.R": "right-leg",
-        "RIG_brow.L": "left-brow", "RIG_brow.R": "right-brow",
-        "RIG_eye.L": "left-eye", "RIG_eye.R": "right-eye",
-        "RIG_hand.L": "left-hand", "RIG_hand.R": "right-hand",
-    }
-    for legacy_name, semantic_name in legacy_semantic_names.items():
-        if legacy_name in controls:
-            controls.setdefault(semantic_name, controls[legacy_name])
-    return root, controls
+    return root, discover_controls(collection, asset["metadata"], entity_id)
 
 def create_scene(spec):
     scene = bpy.context.scene
@@ -442,7 +427,7 @@ def apply_actions(spec, entity_roots, control_objects):
         if action["type"] == "breathing":
             chest = controls.get("chest")
             if chest is None:
-                raise RuntimeError("Breathing action requires RIG_chest on " + character_id)
+                raise RuntimeError("Breathing requires a semantic chest control on " + character_id)
             base = chest.scale.z
             for frame in range(start, end + 1):
                 phase = 2.0 * math.pi * (frame - start) / int(action["cycleFrames"])
@@ -453,19 +438,16 @@ def apply_actions(spec, entity_roots, control_objects):
             target = entity_roots.get(action["targetEntityId"])
             character = entity_roots.get(character_id)
             if head is None or target is None or character is None:
-                raise RuntimeError("Head turn needs RIG_head and a valid target entity")
+                raise RuntimeError("Head turn needs a semantic head control and a valid target entity")
             depsgraph = bpy.context.evaluated_depsgraph_get()
-            character_position = character.evaluated_get(depsgraph).matrix_world.translation
             target_position = target.evaluated_get(depsgraph).matrix_world.translation
-            direction = math.atan2(
-                target_position.x - character_position.x,
-                -(target_position.y - character_position.y),
-            )
+            local_target = character.evaluated_get(depsgraph).matrix_world.inverted() @ target_position
+            direction = math.atan2(local_target.x, -local_target.y)
             limit = math.radians(float(action["maxYawDegrees"]))
             yaw = max(-limit, min(limit, direction))
-            head.rotation_euler.z = 0.0
+            base_yaw = head.rotation_euler.z
             head.keyframe_insert(data_path="rotation_euler", index=2, frame=start)
-            head.rotation_euler.z = yaw
+            head.rotation_euler.z = base_yaw + yaw
             head.keyframe_insert(data_path="rotation_euler", index=2, frame=end)
         elif action["type"] == "blink":
             eyes = [controls.get("left-eye"), controls.get("right-eye")]
@@ -512,10 +494,7 @@ def apply_actions(spec, entity_roots, control_objects):
             character_root = entity_roots.get(character_id)
             if character_root is None:
                 raise RuntimeError("Walk action requires a character root")
-            rig = next((obj for obj in bpy.context.scene.objects
-                        if obj.type == "ARMATURE"
-                        and obj.get("filmie_character_id") == character_id), None)
-            collection = rig.users_collection[0]             if rig is not None else None
+            feet = [foot_ik(character_root, controls, side)[1] for side in ("left", "right")]
             initial_y = float(character_root.location.y)
             initial_x = float(character_root.location.x)
             initial_z = float(character_root.location.z)
@@ -532,9 +511,7 @@ def apply_actions(spec, entity_roots, control_objects):
                 for side, leg in enumerate(legs):
                     leg.rotation_euler[1] = math.sin(phase + side * math.pi) * min(0.8, stride) * velocity_scale
                     leg.keyframe_insert(data_path="rotation_euler", index=1, frame=frame)
-                    foot_side = "L" if side == 0 else "R"
-                    foot_target = next((obj for obj in collection.objects
-                                        if obj.name == "IK_foot." + foot_side + ".Target"), None) if collection is not None else None
+                    foot_target = feet[side]
                     if foot_target is not None:
                         planted = math.sin(phase + side * math.pi) >= -0.05
                         if planted:
@@ -576,14 +553,8 @@ def apply_actions(spec, entity_roots, control_objects):
             leg.keyframe_insert(data_path="rotation_euler", index=axis, frame=contact_frame)
             leg.rotation_euler[axis] = 0.0
             leg.keyframe_insert(data_path="rotation_euler", index=axis, frame=end)
-            rig = next((obj for obj in bpy.context.scene.objects
-                        if obj.type == "ARMATURE"
-                        and obj.get("filmie_character_id") == character_id), None)
-            collection = rig.users_collection[0] if rig is not None else None
-            foot_target = next((obj for obj in collection.objects
-                                if obj.name == "IK_foot." + ("L" if action["leg"] == "left" else "R") + ".Target"),
-                               None) if collection is not None else None
-            if foot_target is None:
+            rig, foot_target, foot_bone_name = foot_ik(character_root, controls, action["leg"])
+            if rig is None or foot_target is None:
                 raise RuntimeError("Kick action requires a mapped foot IK target")
             anchor_world = (
                 resolve_asset_anchor(target, action["targetAnchorId"])
@@ -597,7 +568,7 @@ def apply_actions(spec, entity_roots, control_objects):
             foot_target.keyframe_insert(data_path="location", frame=contact_frame)
             scene.frame_set(contact_frame)
             bpy.context.view_layer.update()
-            foot_bone = rig.pose.bones["foot." + ("L" if action["leg"] == "left" else "R")]
+            foot_bone = rig.pose.bones[foot_bone_name]
             achieved_world = rig.matrix_world @ foot_bone.matrix.translation
             contact_distance = (achieved_world - anchor_world).length
             tolerance = float(action["contactToleranceMeters"])
@@ -906,8 +877,12 @@ def main():
     })
     os.makedirs(os.path.join(spec["outputDirectory"], "frames"), exist_ok=True)
     scene, entity_roots, control_objects = create_scene(spec)
-    apply_actions(spec, entity_roots, control_objects)
-    apply_motion_curves(spec, control_objects, entity_roots)
+    preflight_actions(spec, entity_roots, control_objects)
+    try:
+        apply_actions(spec, entity_roots, control_objects)
+        apply_motion_curves(spec, control_objects, entity_roots)
+    except RuntimeError as error:
+        raise RigCapabilityError("Could not prepare semantic animation: " + str(error)) from error
     blend_path = os.path.join(spec["outputDirectory"], "scene.blend")
     bpy.ops.wm.save_as_mainfile(filepath=blend_path)
     frame_dir = os.path.join(spec["outputDirectory"], "frames")
@@ -971,7 +946,10 @@ if __name__ == "__main__":
             if output_directory:
                 os.makedirs(output_directory, exist_ok=True)
                 with open(os.path.join(output_directory, "worker-result.json"), "w", encoding="utf-8") as stream:
-                    json.dump({"status": "failure", "error": str(error), "metrics": RENDER_METRICS}, stream, sort_keys=True)
+                    result = {"status": "failure", "error": str(error), "metrics": RENDER_METRICS}
+                    if isinstance(error, RigCapabilityError):
+                        result["errorCode"] = "INVALID_INSTRUCTIONS"
+                    json.dump(result, stream, sort_keys=True)
         except Exception as receipt_error:
             print("FILMIE_WORKER_FAILURE_RECEIPT_ERROR: " + str(receipt_error), file=sys.stderr)
         sys.exit(1)
