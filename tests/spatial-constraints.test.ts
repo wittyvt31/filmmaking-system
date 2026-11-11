@@ -40,6 +40,41 @@ it('reproduces every rest head and tail through forward kinematics', () => {
       expect(fk.get(bone.id)!.tail[i]).toBeCloseTo(bone.tail[i]!, 8);
     }
 });
+
+it('converts world targets through the character and its world parent', () => {
+  const child = structuredClone(prepared);
+  child.parentId = 'anchor';
+  child.transform = {
+    position: { x: 1, y: 0, z: 0 },
+    rotationDegrees: { x: 0, y: 0, z: 0 },
+    scale: 1,
+  };
+  const [x, y, z] = target;
+  const worldTarget = SpatialConstraintSchema.parse({
+    ...constraint,
+    space: 'world',
+    tolerance: 2 * constraint.tolerance,
+    target: [3 - 2 * y, 2 * (x + 1), 2 * z],
+  });
+  expect(
+    constrainMotion(child, undefined, [worldTarget], 3, {
+      schemaVersion: 1,
+      materials: [],
+      sha256: '',
+      entities: [
+        {
+          id: 'anchor',
+          boxes: [],
+          transform: {
+            position: { x: 3, y: 0, z: 0 },
+            rotationDegrees: { x: 0, y: 0, z: 90 },
+            scale: 2,
+          },
+        },
+      ],
+    }),
+  ).toEqual(constrainMotion(child, undefined, [constraint], 3));
+});
 it('converges deterministically within tolerance and joint limits', () => {
   const result = constrainMotion(prepared, undefined, [constraint], 3)!;
   expect(result).toEqual(constrainMotion(prepared, undefined, [constraint], 3));

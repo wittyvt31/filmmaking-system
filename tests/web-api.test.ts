@@ -125,11 +125,12 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
       [
         '--background',
         local,
+        '--python-exit-code',
+        '1',
         '--python-expr',
         [
           'import bpy, math',
           'rig = next(o for o in bpy.context.scene.objects if o.type == "ARMATURE")',
-          'bpy.context.scene.frame_set(2)',
           'targets = ' +
             JSON.stringify(
               shot.scene.characters[0].constraints.map(
@@ -140,7 +141,7 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
                 }) => [c.effector, c.target, c.tolerance],
               ),
             ),
-          'for name, target, tolerance in targets:\n    actual = rig.matrix_world @ rig.pose.bones[name].tail\n    assert math.dist(actual, target) <= tolerance + 0.00001, (name, tuple(actual), target)',
+          'for frame in (1, 2, 3):\n    bpy.context.scene.frame_set(frame)\n    for name, target, tolerance in targets:\n        distance = math.dist(rig.matrix_world @ rig.pose.bones[name].tail, target)\n        if name == "hand.L" and frame != 2:\n            assert distance > 0.1, (frame, distance)\n        else:\n            assert distance <= tolerance + 0.00001, (frame, name, distance)',
         ].join('\n'),
       ],
       { timeout: 20_000, windowsHide: true },
@@ -153,8 +154,8 @@ it('validates the humanoid animation catalog and reports incompatible motion edi
   const { path, text } = await createProject('humanoid-animation');
   expect(await request(path + '/validate', { text })).toEqual({
     issues: [],
-    frames: 121,
-    shots: 1,
+    frames: 182,
+    shots: 2,
   });
   const draft = JSON.parse(text);
   draft.shots[0].scene.characters[0].motion.at(-1).source.clipId =

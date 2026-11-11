@@ -273,6 +273,7 @@ export function compileScene(
       }
     }
   }
+  const world = scene.world ? compileWorld(scene.world) : undefined;
   const withoutHash = {
     version: SCENE_COMPILER_VERSION,
     shotId: shot.id,
@@ -282,7 +283,7 @@ export function compileScene(
     styleVersion: scene.styleVersion,
     style,
     ...(scene.environment ? { environment: scene.environment } : {}),
-    ...(scene.world ? { world: compileWorld(scene.world) } : {}),
+    ...(world ? { world } : {}),
     characters: [...scene.characters]
       .map((character) =>
         'source' in character
@@ -299,6 +300,7 @@ export function compileScene(
                 ),
                 character.constraints,
                 shot.durationFrames,
+                world,
               );
               return sampledMotion ? { ...prepared, sampledMotion } : prepared;
             })()

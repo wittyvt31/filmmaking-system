@@ -1,10 +1,12 @@
 import type {
+  CompiledWorld,
   MotionQuaternion as Q,
   MotionVector as V,
   PreparedCharacter,
   SampledSkeletalMotion,
   SpatialConstraint,
 } from '@filmmaking/contracts';
+import { compareStrings } from '@filmmaking/contracts';
 import {
   identity,
   multiply,
@@ -24,6 +26,7 @@ const add = (a: readonly number[], b: readonly number[]): V => [
   a[2]! + b[2]!,
 ];
 const inverse = (q: Q): Q => [q[0], -q[1], -q[2], -q[3]];
+const xyz = ({ x, y, z }: { x: number; y: number; z: number }): V => [x, y, z];
 function rotate(q: Q, v: readonly number[]): V {
   const [w, x, y, z] = q;
   const [a, b, c] = v as V;
@@ -52,44 +55,56 @@ export function forwardKinematics(
   character: PreparedCharacter,
   rotations: ReadonlyMap<string, Q>,
 ) {
-  const result = new Map<string, { head: V; tail: V; rotation: Q }>();
-  const bones = new Map(character.bones.map((b) => [b.id, b]));
-  const visiting = new Set<string>();
-  const visit = (id: string): { head: V; tail: V; rotation: Q } => {
-    const cached = result.get(id);
-    if (cached) return cached;
-    const bone = bones.get(id);
-    if (!bone || visiting.has(id))
-      throw new TypeError('Invalid IK hierarchy: ' + id);
-    visiting.add(id);
-    const rest = basis(bone.head, bone.tail);
-    let head: V = [...bone.head],
-      orientation = rest;
-    if (bone.parent) {
-      const parent = visit(bone.parent),
-        parentBone = bones.get(bone.parent)!;
-      const deformation = multiply(
-        parent.rotation,
-        inverse(basis(parentBone.head, parentBone.tail)),
-      );
-      head = add(
-        parent.head,
-        rotate(deformation, sub(bone.head, parentBone.head)),
-      );
-      orientation = multiply(deformation, rest);
-    }
-    const rotation = multiply(orientation, rotations.get(id) ?? identity);
-    const tail = add(
-      head,
-      rotate(rotation, [0, Math.hypot(...sub(bone.tail, bone.head)), 0]),
-    );
-    const value = { head, tail, rotation };
-    result.set(id, value);
-    visiting.delete(id);
-    return value;
+  return prepareKinematics(character)(rotations);
+}
+
+function prepareKinematics(character: PreparedCharacter) {
+  const restBones = new Map(
+    character.bones.map((bone) => [
+      bone.id,
+      {
+        ...bone,
+        basis: basis(bone.head, bone.tail),
+        length: Math.hypot(...sub(bone.tail, bone.head)),
+      },
+    ]),
+  );
+  return (rotations: ReadonlyMap<string, Q>) => {
+    const result = new Map<string, { head: V; tail: V; rotation: Q }>();
+    const visiting = new Set<string>();
+    const visit = (id: string): { head: V; tail: V; rotation: Q } => {
+      const cached = result.get(id);
+      if (cached) return cached;
+      const bone = restBones.get(id);
+      if (!bone || visiting.has(id))
+        throw new TypeError('Invalid IK hierarchy: ' + id);
+      visiting.add(id);
+      const rest = bone.basis;
+      let head: V = [...bone.head],
+        orientation = rest;
+      if (bone.parent) {
+        const parent = visit(bone.parent),
+          parentBone = restBones.get(bone.parent)!;
+        const deformation = multiply(
+          parent.rotation,
+          inverse(parentBone.basis),
+        );
+        head = add(
+          parent.head,
+          rotate(deformation, sub(bone.head, parentBone.head)),
+        );
+        orientation = multiply(deformation, rest);
+      }
+      const rotation = multiply(orientation, rotations.get(id) ?? identity);
+      const tail = add(head, rotate(rotation, [0, bone.length, 0]));
+      const value = { head, tail, rotation };
+      result.set(id, value);
+      visiting.delete(id);
+      return value;
+    };
+    for (const bone of character.bones) visit(bone.id);
+    return result;
   };
-  for (const bone of character.bones) visit(bone.id);
-  return result;
 }
 
 /** Deterministic bounded coordinate descent, seeded with the sampled authored pose. */
@@ -98,12 +113,36 @@ export function constrainMotion(
   input: SampledSkeletalMotion | undefined,
   constraints: readonly SpatialConstraint[],
   frames: number,
+  world?: CompiledWorld,
 ): SampledSkeletalMotion | undefined {
   if (!constraints.length) return input;
-  if (character.parentId)
-    throw new TypeError(
-      'IK on parented characters requires a resolved parent transform',
+  const parents: PreparedCharacter['transform'][] = [];
+  const visited = new Set<string>();
+  const worldParent = constraints.some(({ space }) => space === 'world')
+    ? character.parentId
+    : undefined;
+  for (let id = worldParent; id;) {
+    const entity = world?.entities.find((item) => item.id === id);
+    if (!entity || visited.has(id))
+      throw new TypeError(`Invalid IK world parent ${id} for ${character.id}`);
+    visited.add(id);
+    parents.unshift(entity.transform);
+    id = entity.parentId;
+  }
+  const parentScale = parents.reduce(
+    (scale, transform) => scale * transform.scale,
+    1,
+  );
+  const inParentSpace = (target: V): V =>
+    parents.reduce(
+      (point, transform) =>
+        rotate(
+          inverse(quaternion(xyz(transform.rotationDegrees))),
+          sub(point, xyz(transform.position)),
+        ).map((value) => value / transform.scale) as V,
+      target,
     );
+  const evaluate = prepareKinematics(character);
   const output: SampledSkeletalMotion = structuredClone(
     input ?? { joints: [] },
   );
@@ -111,7 +150,7 @@ export function constrainMotion(
   const bones = new Map(character.bones.map((b) => [b.id, b]));
   const ids = new Set<string>();
   const ordered = [...constraints].sort(
-    (a, b) => b.priority - a.priority || a.id.localeCompare(b.id),
+    (a, b) => b.priority - a.priority || compareStrings(a.id, b.id),
   );
   const chains = new Map<string, string[]>();
   for (const c of ordered) {
@@ -134,6 +173,14 @@ export function constrainMotion(
       chain.filter((id) => !locked.has(id)),
     );
   }
+  const outputJoints = new Set([
+    ...output.joints.map((t) => t.joint),
+    ...[...chains.values()].flat(),
+  ]);
+  if (frames * outputJoints.size > 250_000)
+    throw new TypeError(
+      `Character "${character.id}" exceeds 250,000 motion samples with constraints`,
+    );
   for (let frame = 0; frame < frames; frame++) {
     const active = ordered.filter(
       (c) => frame >= c.startFrame && frame <= c.endFrame,
@@ -142,18 +189,18 @@ export function constrainMotion(
     const rotations = new Map(
       output.joints.map((t) => [t.joint, t.rotations[frame]!]),
     );
-    const initial = forwardKinematics(character, rotations);
-    const p =
-      output.rootPosition?.[frame] ??
-      (Object.values(character.transform.position) as V);
+    const initial = evaluate(rotations);
+    const p = output.rootPosition?.[frame] ?? xyz(character.transform.position);
     const r =
       output.rootRotation?.[frame] ??
-      quaternion(Object.values(character.transform.rotationDegrees) as V);
+      quaternion(xyz(character.transform.rotationDegrees));
     const scale = output.rootScale?.[frame] ?? character.transform.scale;
     const targets = active.map((c) => {
       const target =
         c.space === 'world'
-          ? (rotate(inverse(r), sub(c.target, p)).map((v) => v / scale) as V)
+          ? (rotate(inverse(r), sub(inParentSpace(c.target), p)).map(
+              (v) => v / scale,
+            ) as V)
           : c.target;
       const t = c.fadeFrames
         ? Math.min(
@@ -164,6 +211,7 @@ export function constrainMotion(
         : 1;
       return {
         c,
+        unitScale: c.space === 'world' ? scale * parentScale : 1,
         target: mixVector(
           initial.get(c.effector)!.tail,
           target,
@@ -172,7 +220,7 @@ export function constrainMotion(
       };
     });
     const errors = () => {
-      const fk = forwardKinematics(character, rotations);
+      const fk = evaluate(rotations);
       return targets.map(({ c, target }) =>
         Math.hypot(...sub(fk.get(c.effector)!.tail, target)),
       );
@@ -180,47 +228,49 @@ export function constrainMotion(
     let best = errors();
     const better = (next: number[]) => {
       for (let i = 0; i < next.length; i++) {
-        const tolerance = targets[i]!.c.tolerance / scale;
+        const { c, unitScale } = targets[i]!;
+        const tolerance = c.tolerance / unitScale;
         const a = Math.max(0, next[i]! - tolerance),
           b = Math.max(0, best[i]! - tolerance);
         if (Math.abs(a - b) > 1e-10) return a < b;
       }
       return false;
     };
+    const solved = () =>
+      best.every(
+        (e, i) => e * targets[i]!.unitScale <= targets[i]!.c.tolerance,
+      );
+    const movable = new Set(targets.flatMap(({ c }) => chains.get(c.id)!));
     for (const step of [8, 4, 2, 1, 0.5, 0.25, 0.125, 0.0625]) {
+      if (solved()) break;
       for (let iteration = 0; iteration < 80; iteration++) {
         let changed = false;
-        for (const { c } of targets)
-          for (const id of chains.get(c.id)!)
-            for (let axis = 0; axis < 3; axis++) {
-              const old = rotations.get(id) ?? identity,
-                bone = bones.get(id)!;
-              for (const sign of [-1, 1]) {
-                const delta: V = [0, 0, 0];
-                delta[axis] = sign * step;
-                const candidate = multiply(old, quaternion(delta));
-                if (!withinLimits(candidate, bone.min, bone.max)) continue;
-                rotations.set(id, candidate);
-                const next = errors();
-                if (better(next)) {
-                  best = next;
-                  changed = true;
-                  break;
-                }
-                rotations.set(id, old);
+        for (const id of movable)
+          for (let axis = 0; axis < 3; axis++) {
+            const old = rotations.get(id) ?? identity,
+              bone = bones.get(id)!;
+            for (const sign of [-1, 1]) {
+              const delta: V = [0, 0, 0];
+              delta[axis] = sign * step;
+              const candidate = multiply(old, quaternion(delta));
+              if (!withinLimits(candidate, bone.min, bone.max)) continue;
+              rotations.set(id, candidate);
+              const next = errors();
+              if (better(next)) {
+                best = next;
+                changed = true;
+                break;
               }
+              rotations.set(id, old);
             }
-        if (
-          !changed ||
-          best.every((e, i) => e <= targets[i]!.c.tolerance / scale)
-        )
-          break;
+          }
+        if (!changed || solved()) break;
       }
     }
     for (let i = 0; i < best.length; i++)
-      if (best[i]! > targets[i]!.c.tolerance / scale)
+      if (best[i]! * targets[i]!.unitScale > targets[i]!.c.tolerance)
         throw new TypeError(
-          `Constraint ${targets[i]!.c.id} unreachable or conflicts with authored motion/contacts at frame ${frame}: residual ${best[i]! * scale} metres`,
+          `Constraint ${targets[i]!.c.id} on ${character.id} unreachable or conflicts with authored motion/contacts at frame ${frame}: residual ${best[i]! * targets[i]!.unitScale} metres in ${targets[i]!.c.space} space`,
         );
     for (const [joint, value] of rotations) {
       let track = output.joints.find((t) => t.joint === joint);
