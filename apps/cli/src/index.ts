@@ -236,8 +236,23 @@ projectOptions(
     (value: string) => Number.parseInt(value, 10),
     1,
   )
+  .option(
+    '--max-processes <count>',
+    'Maximum concurrent Blender render processes',
+    (value: string) => Number.parseInt(value, 10),
+    16,
+  )
   .action(
-    async ({ project, output, cache, seed, timeout, workers, shotWorkers }) => {
+    async ({
+      project,
+      output,
+      cache,
+      seed,
+      timeout,
+      workers,
+      shotWorkers,
+      maxProcesses,
+    }) => {
       const cancellation = new AbortController();
       const abort = () => cancellation.abort();
       process.once('SIGINT', abort);
@@ -257,6 +272,7 @@ projectOptions(
           signal: cancellation.signal,
           shotConcurrency: shotWorkers,
           frameWorkers: workers,
+          maxRenderProcesses: maxProcesses,
           onLog: (line) => process.stdout.write(`${line}\n`),
         });
         process.stdout.write(

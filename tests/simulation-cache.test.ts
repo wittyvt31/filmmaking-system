@@ -132,8 +132,62 @@ it('promotes only complete successful bakes and restores them without invoking t
     const restored = await prepareSimulation(dep, cache, work, async () => {
       throw new Error('Unexpected bake');
     });
+
     expect(restored.cacheHit).toBe(true);
     expect(JSON.parse(await readFile(restored.path, 'utf8'))).toEqual(valid);
+  } finally {
+    await rm(scratch, { recursive: true, force: true });
+  }
+});
+
+it('shares one bake result across concurrent isolated cache directories', async () => {
+  const input = manifest();
+  const scene = compileScene(input.shots[0]!, input.video.frameRate);
+  const dep = await dependency(scene);
+  const scratch = await mkdtemp(join(tmpdir(), 'filmie-simulation-isolated-'));
+  try {
+    const valid = {
+      version: 1,
+      fingerprint: dep.fingerprint,
+      backend: dep.input.backend,
+      startFrame: 0,
+      frameCount: scene.durationFrames,
+      frameRate: scene.frameRate,
+      space: 'world',
+      tracks: Object.fromEntries(
+        dep.movingIds.map((id) => [
+          id,
+          Array.from({ length: scene.durationFrames }, () => ({
+            position: [0, 0, 0],
+            rotation: [1, 0, 0, 0],
+          })),
+        ]),
+      ),
+    };
+    let bakes = 0;
+    const run = async (args: string[]) => {
+      bakes += 1;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      await writeFile(args.at(-1)!, JSON.stringify(valid));
+    };
+    await mkdir(join(scratch, 'work-a'));
+    await mkdir(join(scratch, 'work-b'));
+    const first = prepareSimulation(
+      dep,
+      new ArtifactCache(join(scratch, 'cache-a')),
+      join(scratch, 'work-a'),
+      run,
+    );
+    const second = prepareSimulation(
+      dep,
+      new ArtifactCache(join(scratch, 'cache-b')),
+      join(scratch, 'work-b'),
+      run,
+    );
+    const results = await Promise.all([first, second]);
+    expect(bakes).toBe(1);
+    expect(JSON.parse(await readFile(results[0]!.path, 'utf8'))).toEqual(valid);
+    expect(JSON.parse(await readFile(results[1]!.path, 'utf8'))).toEqual(valid);
   } finally {
     await rm(scratch, { recursive: true, force: true });
   }

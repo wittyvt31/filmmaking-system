@@ -71,7 +71,7 @@ export async function simulationDependency(
   };
 }
 type Dependency = NonNullable<Awaited<ReturnType<typeof simulationDependency>>>;
-const inFlight = new Map<string, Promise<void>>();
+const inFlight = new Map<string, Promise<string>>();
 
 async function validArtifact(
   path: string,
@@ -111,7 +111,7 @@ async function bakeSimulation(
   dependency: Dependency,
   cache: ArtifactCache,
   run: (args: string[]) => Promise<void>,
-) {
+): Promise<string> {
   const { fingerprint, input, workerPath } = dependency;
   await mkdir(cache.directory, { recursive: true });
   const scratch = await mkdtemp(
@@ -134,7 +134,7 @@ async function bakeSimulation(
     ]);
     if (!(await validArtifact(result, dependency)))
       throw new Error('Incomplete or invalid Bullet simulation artifact');
-    await cache.store(fingerprint, artifactType, result);
+    return await readFile(result, 'utf8');
   } finally {
     await rm(scratch, { recursive: true, force: true });
   }
@@ -172,12 +172,11 @@ export async function prepareSimulation(
       },
     );
   }
-  await task;
+  const contents = await task;
   signal?.throwIfAborted();
-  if (
-    !(await cache.restore(fingerprint, artifactType, path)) ||
-    !(await validArtifact(path, dependency))
-  )
+  await writeFile(path, contents);
+  await cache.store(fingerprint, artifactType, path);
+  if (!(await validArtifact(path, dependency)))
     throw new Error('Simulation cache entry was not available after baking');
   return { path, cacheHit };
 }

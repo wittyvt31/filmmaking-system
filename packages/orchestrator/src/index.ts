@@ -70,6 +70,7 @@ export interface ProductionOptions {
   onShotProgress?: (completed: number, total: number) => void;
   shotConcurrency?: number;
   frameWorkers?: number;
+  maxRenderProcesses?: number;
   retryAttempts?: number;
 }
 
@@ -462,7 +463,14 @@ export async function executeProduction(
     }[] = [];
     const shotJobs = prepared.renderPlan.jobs.filter(asShotJob);
     options.onShotProgress?.(0, shotJobs.length);
-    const renderShot = async (job: (typeof shotJobs)[number]) => {
+    let scheduledFrameWorkers =
+      options.frameWorkers ??
+      prepared.manifest.renderPolicy.execution?.frameWorkers ??
+      1;
+    const renderShot = async (
+      job: (typeof shotJobs)[number],
+      signal?: AbortSignal,
+    ) => {
       const shot = prepared.manifest.shots.find(
         (candidate) => candidate.id === job.shotId,
       );
@@ -493,9 +501,6 @@ export async function executeProduction(
       const assets = prepared.assets.filter((asset) =>
         refs.has(`${asset.assetId}\u0000${asset.version}`),
       );
-      const frameWorkers =
-        options.frameWorkers ??
-        prepared.manifest.renderPolicy.execution?.frameWorkers;
       await log(`Rendering shot ${shot.id} (${shot.durationFrames} frames).`);
       const result = await options.renderer.renderShot({
         jobId: job.id,
@@ -521,8 +526,8 @@ export async function executeProduction(
         ),
         receiptPath,
         ...(options.timeoutMs ? { timeoutMs: options.timeoutMs } : {}),
-        ...(options.signal ? { signal: options.signal } : {}),
-        ...(frameWorkers === undefined ? {} : { frameWorkers }),
+        ...(signal ? { signal } : {}),
+        frameWorkers: scheduledFrameWorkers,
       });
       if (result.status === 'failure') {
         await log(
@@ -647,6 +652,14 @@ export async function executeProduction(
       options.shotConcurrency ??
       prepared.manifest.renderPolicy.execution?.shotConcurrency ??
       1;
+    const configuredFrameWorkers =
+      options.frameWorkers ??
+      prepared.manifest.renderPolicy.execution?.frameWorkers ??
+      1;
+    const processBudget =
+      options.maxRenderProcesses ??
+      prepared.manifest.renderPolicy.execution?.maxRenderProcesses ??
+      16;
     const retryAttempts =
       options.retryAttempts ??
       prepared.manifest.renderPolicy.execution?.retryAttempts ??
@@ -660,6 +673,33 @@ export async function executeProduction(
         'render-shots',
         'Shot concurrency must be an integer from 1 to 16.',
       );
+    if (
+      !Number.isSafeInteger(configuredFrameWorkers) ||
+      configuredFrameWorkers < 1 ||
+      configuredFrameWorkers > 16
+    )
+      throw new ProductionError(
+        'render-shots',
+        'Frame worker count must be an integer from 1 to 16.',
+      );
+    if (
+      !Number.isSafeInteger(processBudget) ||
+      processBudget < 1 ||
+      processBudget > 64
+    )
+      throw new ProductionError(
+        'render-shots',
+        'Render process budget must be an integer from 1 to 64.',
+      );
+    const effectiveFrameWorkers = Math.min(
+      configuredFrameWorkers,
+      processBudget,
+    );
+    const effectiveConcurrency = Math.min(
+      configuredConcurrency,
+      Math.max(1, Math.floor(processBudget / effectiveFrameWorkers)),
+    );
+    scheduledFrameWorkers = effectiveFrameWorkers;
     if (
       !Number.isSafeInteger(retryAttempts) ||
       retryAttempts < 1 ||
@@ -675,17 +715,23 @@ export async function executeProduction(
     );
     let nextJob = 0;
     let completedCount = 0;
+    const renderAbort = new AbortController();
+    const abortRender = () => renderAbort.abort();
+    let firstFailure: unknown;
+    options.signal?.addEventListener('abort', abortRender, { once: true });
+    if (options.signal?.aborted) renderAbort.abort();
     const worker = async () => {
       for (;;) {
+        if (renderAbort.signal.aborted) return;
         const index = nextJob++;
         if (index >= shotJobs.length) return;
         const job = shotJobs[index]!;
         let lastError: unknown;
         for (let attempt = 1; attempt <= retryAttempts; attempt += 1) {
-          if (options.signal?.aborted)
+          if (renderAbort.signal.aborted)
             throw new ProductionError('render-shots', 'Production cancelled.');
           try {
-            completed[index] = await renderShot(job);
+            completed[index] = await renderShot(job, renderAbort.signal);
             lastError = undefined;
             break;
           } catch (error) {
@@ -697,7 +743,15 @@ export async function executeProduction(
               cause !== null &&
               'retryable' in cause &&
               cause.retryable === true;
-            if (!retryable || attempt === retryAttempts) throw error;
+            if (
+              renderAbort.signal.aborted ||
+              !retryable ||
+              attempt === retryAttempts
+            ) {
+              if (firstFailure === undefined) firstFailure = error;
+              renderAbort.abort();
+              throw error;
+            }
             await log(
               `Retrying shot ${job.shotId} (${attempt + 1}/${retryAttempts}).`,
             );
@@ -708,12 +762,18 @@ export async function executeProduction(
         options.onShotProgress?.(completedCount, shotJobs.length);
       }
     };
-    await Promise.all(
-      Array.from(
-        { length: Math.min(configuredConcurrency, shotJobs.length) },
-        () => worker(),
-      ),
+    const workerPromises = Array.from(
+      { length: Math.min(effectiveConcurrency, shotJobs.length) },
+      () => worker(),
     );
+    await Promise.allSettled(workerPromises);
+    options.signal?.removeEventListener('abort', abortRender);
+    if (firstFailure !== undefined) {
+      renderAbort.abort();
+      throw firstFailure;
+    }
+    if (renderAbort.signal.aborted)
+      throw new ProductionError('render-shots', 'Production cancelled.');
     for (const item of completed) {
       if (!item)
         throw new ProductionError('render-shots', 'Shot result missing.');

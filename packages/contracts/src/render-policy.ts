@@ -80,6 +80,7 @@ export const RenderExecutionSchema = z
   .object({
     shotConcurrency: z.number().int().min(1).max(16).default(1),
     frameWorkers: z.number().int().min(1).max(16).default(1),
+    maxRenderProcesses: z.number().int().min(1).max(64).default(16),
     retryAttempts: z.number().int().min(1).max(3).default(1),
   })
   .strict();

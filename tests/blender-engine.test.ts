@@ -3,7 +3,10 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { AssetRegistry } from '@filmmaking/assets';
-import { parseProjectManifest } from '@filmmaking/contracts';
+import {
+  parseProjectManifest,
+  resolveShotRenderDimensions,
+} from '@filmmaking/contracts';
 import { BlenderRendererAdapter } from '@filmmaking/engine-blender';
 import { prepareProductionPlan } from '@filmmaking/planner';
 import { afterAll, describe, expect, it } from 'vitest';
@@ -109,8 +112,12 @@ describe('Blender EEVEE renderer adapter', () => {
         artifactType: 'image-sequence/png',
         path: outputDirectory,
         expectedFrameCount: 3,
-        expectedWidth: 1280,
-        expectedHeight: 720,
+        expectedWidth: resolveShotRenderDimensions(
+          prepared.manifest.renderPolicy,
+        ).width,
+        expectedHeight: resolveShotRenderDimensions(
+          prepared.manifest.renderPolicy,
+        ).height,
       });
       expect(inspected.status).toBe('success');
 
