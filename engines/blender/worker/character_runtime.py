@@ -2,10 +2,18 @@
 import math
 
 import bpy
-from mathutils import Matrix, Vector
+from mathutils import Euler, Matrix, Quaternion, Vector
 
 from character_builder import generate_character
 from collection_cache import read_collection, write_collection
+from model_import import apply_material_overrides, capture_character_names
+from visual_runtime import build_material
+
+
+def ancestors(item):
+    while item.parent:
+        item = item.parent
+        yield item
 
 
 def apply_root(root, transform):
@@ -20,22 +28,47 @@ def validate_rig(root, collection, character):
     if len(armatures) != 1:
         raise ValueError("Character must have exactly one armature: " + character["id"])
     rig = armatures[0]
+    source = character["source"]
+    mapped = source.get("jointMap", {})
+    adaptive = source["kind"] == "imported" and (
+        source["asset"].get("format") == "glb" or mapped or source.get("restSkeleton"))
     identity = Matrix.Identity(4)
-    if rig.parent != root or any(abs(a - b) > 1e-5 for row, expected in zip(rig.matrix_local, identity) for a, b in zip(row, expected)):
+    if not adaptive and (rig.parent != root or any(abs(a - b) > 1e-5 for row, expected in zip(rig.matrix_local, identity) for a, b in zip(row, expected))):
         raise ValueError("Character armature must have an identity transform relative to its root")
+    if adaptive and root not in ancestors(rig):
+        raise ValueError("Character armature is outside the model root")
+    relative = root.matrix_world.inverted() @ rig.matrix_world if adaptive else identity
+    position, orientation, scale = relative.decompose()
+    if adaptive and (min(scale) <= 0 or max(scale) - min(scale) > 1e-5 or
+                     any(abs(a-b) > 1e-5 for row, rebuilt in zip(relative, Matrix.LocRotScale(position, orientation, scale))
+                         for a,b in zip(row, rebuilt))):
+        raise ValueError("Character armature requires a positive uniform scale and no shear")
+    bindings = {}
+    mapped_names = {mapped.get(b["id"], b["id"]) for b in character["bones"]}
     for expected in character["bones"]:
-        joint = rig.data.bones.get(expected["id"])
+        name = mapped.get(expected["id"], expected["id"])
+        joint = rig.data.bones.get(name)
         head, tail = Vector(expected["head"]), Vector(expected["tail"])
-        if joint is None or (joint.parent.name if joint.parent else None) != expected.get("parent"):
-            raise ValueError("Missing or incompatible joint hierarchy: " + expected["id"])
+        parent = expected.get("parent")
+        parent_name = mapped.get(parent, parent)
+        if joint is None or (parent and (joint.parent is None or joint.parent.name != parent_name)):
+            raise ValueError(f"Missing or incompatible joint hierarchy: {expected['id']} -> {name}")
+        if not parent and joint.parent and (not adaptive or any(p.name in mapped_names for p in ancestors(joint))):
+            raise ValueError("Incompatible mapped root joint: " + name)
         rest = bpy.types.Bone.MatrixFromAxisRoll((tail - head).normalized(), 0)
+        actual_head = relative @ joint.head_local
+        if (actual_head - head).length > 1e-4:
+            raise ValueError(f"Incompatible joint rest pose: {name}, expected head {tuple(head)}, got {tuple(actual_head)}")
         rotation = joint.matrix_local.to_3x3()
-        if (joint.head_local - head).length > 1e-4 or (joint.tail_local - tail).length > 1e-4 or any(
+        if not adaptive and ((joint.tail_local - tail).length > 1e-4 or any(
             abs(a - b) > 1e-4 for row, expected_row in zip(rotation, rest) for a, b in zip(row, expected_row)
-        ):
+        )):
             raise ValueError("Incompatible joint rest pose: " + joint.name)
-        if rig.pose.bones[joint.name].constraints:
-            raise ValueError("FilmieHumanoid pose joints must be free of imported constraints: " + joint.name)
+        if adaptive:
+            source_basis = orientation @ rotation.to_quaternion()
+            bindings[expected["id"]] = {"bone": name, "basis": list(source_basis.inverted() @ rest.to_quaternion())}
+    if any(bone.constraints for bone in rig.pose.bones):
+        raise ValueError("Filmie pose rigs must be free of imported pose constraints")
     meshes = [obj for obj in collection.all_objects if obj.type == "MESH" and len(obj.data.vertices) and any(
         modifier.type == "ARMATURE" and modifier.object == rig and modifier.use_vertex_groups
         for modifier in obj.modifiers
@@ -48,7 +81,7 @@ def validate_rig(root, collection, character):
             total = sum(group.weight for group in vertex.groups if group.group in indices)
             if abs(total - 1) > 1e-3:
                 raise ValueError("Character mesh has unnormalized or missing skin weights: " + mesh.name)
-    return rig
+    return rig, bindings, meshes
 
 
 def prepare_character(scene, character, instantiate_asset, parents):
@@ -56,9 +89,21 @@ def prepare_character(scene, character, instantiate_asset, parents):
     cache = character.get("cache")
     cache_hit = False
     if source["kind"] == "imported":
-        root, _ = instantiate_asset(source["asset"], character["transform"], character["id"],
-                                    root_marker="filmie_character_root")
-        collection = root.users_collection[0]
+        name = "Filmie Imported Character " + cache["key"][:24] if cache else None
+        collection = read_collection(cache, name) if cache else None
+        if collection is not None:
+            scene.collection.children.link(collection)
+            root = next(obj for obj in collection.objects if obj.get("filmie_character_root"))
+            cache_hit = True
+        else:
+            root = capture_character_names(
+                lambda: instantiate_asset(source["asset"], character["transform"], character["id"],
+                                          root_marker="filmie_character_root")[0],
+                character["id"], capture_meshes=True)
+            collection = root.users_collection[0]
+            if cache:
+                collection.name = name
+                write_collection(cache, collection)
     else:
         name = "Filmie Humanoid " + cache["key"][:32] if cache else "Filmie Humanoid"
         collection = read_collection(cache, name) if cache else None
@@ -71,9 +116,29 @@ def prepare_character(scene, character, instantiate_asset, parents):
                 write_collection(cache, collection)
         root = next(obj for obj in collection.objects if obj.get("filmie_character_root"))
     bpy.context.view_layer.update()
-    rig = validate_rig(root, collection, character)
-    root.animation_data_clear()
-    rig.animation_data_clear()
+    rig, bindings, meshes = validate_rig(root, collection, character)
+    if bindings:
+        rig["filmie_joint_bindings"] = bindings
+    if source["kind"] == "imported":
+        for obj in collection.all_objects:
+            obj.animation_data_clear()
+            if obj.type == "MESH" and obj.data.shape_keys:
+                obj.data.shape_keys.animation_data_clear()
+        if "materialOverrides" in source:
+            materials = {m["id"]: build_material(m) for m in source.get("materials", [])}
+            apply_material_overrides(root, character["id"], source["materialOverrides"], materials)
+    else:
+        root.animation_data_clear()
+        rig.animation_data_clear()
+    deformation = character.get("deformation", {})
+    for mesh in meshes:
+        if "skinning" in deformation:
+            for modifier in mesh.modifiers:
+                if modifier.type == "ARMATURE" and modifier.object == rig:
+                    modifier.use_deform_preserve_volume = deformation["skinning"] == "preserve-volume"
+        if deformation.get("subdivision", 0):
+            modifier = mesh.modifiers.new("Filmie surface subdivision", "SUBSURF")
+            modifier.levels = modifier.render_levels = deformation["subdivision"]
     if "parentId" in character:
         root.parent = parents[character["parentId"]]
         root.matrix_parent_inverse.identity()
@@ -101,7 +166,40 @@ def interpolate(owner, paths, keys, action_fcurves):
         curve.update()
 
 
+def bind_rotation(rig, joint, value):
+    binding = rig.get("filmie_joint_bindings", {}).get(joint)
+    if not binding:
+        return rig.pose.bones[joint], value
+    basis = Quaternion(binding["basis"])
+    return rig.pose.bones[binding["bone"]], basis @ Quaternion(value) @ basis.inverted()
+
+
+def apply_morphs(character, root, action_fcurves):
+    meshes = [obj for obj in [root, *root.children_recursive] if obj.type == "MESH"]
+    used = set()
+    for track in character.get("morphs", []):
+        matches = [obj for obj in meshes if obj.get("filmie_source_object", obj.name) == track["mesh"]]
+        if len(matches) != 1:
+            raise ValueError("Morph mesh must resolve uniquely: " + track["mesh"])
+        data = matches[0].data.shape_keys
+        target = data.key_blocks.get(track["target"]) if data else None
+        if not target or target == data.reference_key or not data.use_relative:
+            raise ValueError("Unknown or incompatible relative morph target: " + track["mesh"] + "/" + track["target"])
+        key = (data, target.name)
+        if key in used:
+            raise ValueError("Morph tracks conflict on shared mesh data: " + track["target"])
+        used.add(key)
+        keys = track["keys"]
+        if keys[0]["frame"] > 0:
+            keys = [{"frame": 0, "interpolation": "hold", "value": target.value}, *keys]
+        for key in keys:
+            target.value = key["value"]
+            target.keyframe_insert(data_path="value", frame=key["frame"] + 1)
+        interpolate(data, (target.path_from_id("value"),), keys, action_fcurves)
+
+
 def apply_poses(character, root, rig, action_fcurves):
+    apply_morphs(character, root, action_fcurves)
     if "sampledMotion" in character:
         apply_sampled_motion(character["sampledMotion"], root, rig, action_fcurves)
         return
@@ -114,12 +212,15 @@ def apply_poses(character, root, rig, action_fcurves):
                 root.keyframe_insert(data_path=channel, frame=key["frame"] + 1)
         interpolate(root, channels, root_keys, action_fcurves)
     for track in character["poses"]["joints"]:
-        bone = rig.pose.bones[track["joint"]]
-        bone.rotation_mode = "XYZ"
+        mapped = track["joint"] in rig.get("filmie_joint_bindings", {})
+        path = "rotation_quaternion" if mapped else "rotation_euler"
         for key in track["keys"]:
-            bone.rotation_euler = tuple(math.radians(value) for value in key["rotationDegrees"])
-            bone.keyframe_insert(data_path="rotation_euler", frame=key["frame"] + 1)
-        interpolate(rig, (bone.path_from_id("rotation_euler"),), track["keys"], action_fcurves)
+            euler = Euler(tuple(math.radians(value) for value in key["rotationDegrees"]), "XYZ")
+            bone, value = bind_rotation(rig, track["joint"], euler.to_quaternion())
+            bone.rotation_mode = "QUATERNION" if mapped else "XYZ"
+            setattr(bone, path, value if mapped else euler)
+            bone.keyframe_insert(data_path=path, frame=key["frame"] + 1)
+        interpolate(rig, (bone.path_from_id(path),), track["keys"], action_fcurves)
 
 
 def apply_sampled_motion(motion, root, rig, action_fcurves):
@@ -136,9 +237,9 @@ def apply_sampled_motion(motion, root, rig, action_fcurves):
     if "rootScale" in motion:
         key_channel(root, "scale", ((value,) * 3 for value in motion["rootScale"]))
     for track in motion["joints"]:
-        bone = rig.pose.bones[track["joint"]]
+        bone, _ = bind_rotation(rig, track["joint"], (1, 0, 0, 0))
         bone.rotation_mode = "QUATERNION"
-        key_channel(bone, "rotation_quaternion", track["rotations"])
+        key_channel(bone, "rotation_quaternion", (bind_rotation(rig, track["joint"], q)[1] for q in track["rotations"]))
 
     for owner in (root, rig):
         if owner.animation_data and owner.animation_data.action:

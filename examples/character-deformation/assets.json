@@ -1,0 +1,39 @@
+[
+  {
+    "assetId": "character.studio-performer",
+    "version": "1.0.0",
+    "type": "model",
+    "sourceUri": "performer.glb",
+    "contentHash": "82f572c72670243060b34c9c27dcdadac745d68a553f204120d3ac02448bc588",
+    "metadata": {
+      "rigProfile": "FilmieHumanoid",
+      "rigVersion": 1,
+      "rigJointMap": {
+        "pelvis": "Studio_pelvis",
+        "spine": "Studio_spine",
+        "chest": "Studio_chest",
+        "neck": "Studio_neck",
+        "head": "Studio_head",
+        "upper_arm.L": "Studio_upper_arm.L",
+        "forearm.L": "Studio_forearm.L",
+        "hand.L": "Studio_hand.L",
+        "thigh.L": "Studio_thigh.L",
+        "shin.L": "Studio_shin.L",
+        "foot.L": "Studio_foot.L",
+        "upper_arm.R": "Studio_upper_arm.R",
+        "forearm.R": "Studio_forearm.R",
+        "hand.R": "Studio_hand.R",
+        "thigh.R": "Studio_thigh.R",
+        "shin.R": "Studio_shin.R",
+        "foot.R": "Studio_foot.R"
+      }
+    },
+    "license": {
+      "name": "Filmie reference asset",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "Generated from the Filmie skinned mesh builder and authored with a chest morph in Blender"
+    }
+  }
+]

@@ -1,0 +1,370 @@
+{
+  "projectId": "filmie.character-deformation",
+  "version": "1.0.0",
+  "video": {
+    "resolution": {
+      "width": 320,
+      "height": 180
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    }
+  },
+  "renderPolicy": {
+    "outputDimensions": {
+      "width": 320,
+      "height": 180
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": {
+      "mode": "crf",
+      "value": 22
+    },
+    "renderer": {
+      "id": "blender",
+      "config": {
+        "engine": "BLENDER_EEVEE",
+        "samples": 4
+      }
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.skinned-performer",
+      "durationFrames": 20,
+      "visualDescription": "A skinned GLB performer raises and bends an arm while the chest morph swells and recovers.",
+      "composition": {
+        "framing": "Medium full-body performer",
+        "subjectPlacement": "Centered with room for the arm movement",
+        "cameraMovement": "Static",
+        "instructions": []
+      },
+      "requiredAssets": [
+        {
+          "assetId": "character.studio-performer",
+          "version": "1.0.0"
+        }
+      ],
+      "scene": {
+        "stylePreset": "stylized_3d",
+        "styleVersion": "1.0.0",
+        "world": {
+          "schemaVersion": 1,
+          "materials": [
+            {
+              "id": "floor",
+              "color": [0.18, 0.2, 0.21],
+              "roughness": 0.82,
+              "procedural": {
+                "kind": "checker",
+                "scale": 14,
+                "color": [0.37, 0.3, 0.22]
+              }
+            },
+            {
+              "id": "wall",
+              "color": [0.26, 0.29, 0.3],
+              "roughness": 0.85,
+              "procedural": {
+                "kind": "noise",
+                "scale": 22,
+                "color": [0.31, 0.37, 0.49]
+              }
+            }
+          ],
+          "entities": [
+            {
+              "id": "studio",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "room",
+                "dimensions": {
+                  "x": 5.6,
+                  "y": 5.8,
+                  "z": 3.1
+                },
+                "floor": {
+                  "thickness": 0.15,
+                  "materialId": "floor"
+                },
+                "walls": [
+                  {
+                    "side": "north",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "west",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "east",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "motionClips": [],
+        "characters": [
+          {
+            "id": "performer",
+            "transform": {
+              "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": -12
+              },
+              "scale": 1
+            },
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "source": {
+              "kind": "imported",
+              "asset": {
+                "assetId": "character.studio-performer",
+                "version": "1.0.0"
+              },
+              "body": {
+                "height": 1.72,
+                "shoulderWidth": 0.245,
+                "build": 1
+              },
+              "materials": [
+                {
+                  "id": "jacket",
+                  "color": [0.08, 0.38, 0.48],
+                  "roughness": 0.42,
+                  "procedural": {
+                    "kind": "noise",
+                    "scale": 32,
+                    "color": [0.16, 0.49, 0.55]
+                  }
+                }
+              ],
+              "materialOverrides": {
+                "mode": "slots",
+                "slots": [
+                  {
+                    "source": "Humanoid top",
+                    "materialId": "jacket"
+                  }
+                ]
+              }
+            },
+            "motion": [],
+            "poses": {
+              "root": [],
+              "joints": [
+                {
+                  "joint": "upper_arm.L",
+                  "keys": [
+                    {
+                      "frame": 0,
+                      "rotationDegrees": [-12, 0, -30],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 19,
+                      "rotationDegrees": [-20, 0, -78],
+                      "interpolation": "ease"
+                    }
+                  ]
+                },
+                {
+                  "joint": "head",
+                  "keys": [
+                    {
+                      "frame": 0,
+                      "rotationDegrees": [0, 0, 0],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 19,
+                      "rotationDegrees": [0, 12, 0],
+                      "interpolation": "ease"
+                    }
+                  ]
+                },
+                {
+                  "joint": "forearm.L",
+                  "keys": [
+                    {
+                      "frame": 0,
+                      "rotationDegrees": [-8, 0, 0],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 19,
+                      "rotationDegrees": [-78, 0, -10],
+                      "interpolation": "ease"
+                    }
+                  ]
+                }
+              ]
+            },
+            "deformation": {
+              "skinning": "preserve-volume",
+              "subdivision": 0
+            },
+            "morphs": [
+              {
+                "mesh": "Performer Surface",
+                "target": "ChestBreath",
+                "keys": [
+                  {
+                    "frame": 0,
+                    "value": 0,
+                    "interpolation": "ease"
+                  },
+                  {
+                    "frame": 10,
+                    "value": 1,
+                    "interpolation": "ease"
+                  },
+                  {
+                    "frame": 19,
+                    "value": 0,
+                    "interpolation": "ease"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "lights": [
+          {
+            "id": "study.key",
+            "type": "area",
+            "position": {
+              "x": -2.6,
+              "y": -2.7,
+              "z": 3.25
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 135,
+            "color": [1, 0.91, 0.82],
+            "size": 3
+          },
+          {
+            "id": "study.fill",
+            "type": "area",
+            "position": {
+              "x": 2.8,
+              "y": -1.85,
+              "z": 2.3
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 75,
+            "color": [0.83, 0.91, 1],
+            "size": 2.7
+          },
+          {
+            "id": "study.rim",
+            "type": "area",
+            "position": {
+              "x": 1.2,
+              "y": 1.55,
+              "z": 2.85
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 100,
+            "color": [1, 0.92, 0.78],
+            "size": 2
+          },
+          {
+            "id": "study.sun",
+            "type": "sun",
+            "energy": 0.35,
+            "angularDiameterRadians": 0.15,
+            "shadows": false,
+            "color": [0.74, 0.85, 1],
+            "position": {
+              "x": 1,
+              "y": -1,
+              "z": 2
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          }
+        ],
+        "camera": {
+          "type": "static",
+          "distance": 4.1,
+          "target": {
+            "x": 0,
+            "y": 0,
+            "z": 0.93
+          },
+          "focalLength": 46
+        },
+        "visualSettings": {
+          "saturation": 1.7,
+          "roughnessScale": 0.55,
+          "exposure": 0.2
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "durationFrames": 20,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [
+          {
+            "shotId": "shot.skinned-performer",
+            "startFrame": 0
+          }
+        ]
+      }
+    ],
+    "audioTracks": [],
+    "transitions": []
+  }
+}

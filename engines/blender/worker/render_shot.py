@@ -88,8 +88,14 @@ def instantiate_asset(asset, transform, entity_id, parent_collection=None, root_
         parent_collection = bpy.context.scene.collection
     if asset.get("format", "blend") != "blend":
         if root_marker:
-            raise ValueError("Rigged characters require a prepared Blender collection")
-        root = import_model(asset, parent_collection)
+            if asset["format"] != "glb":
+                raise ValueError("Rigged characters require a prepared collection or skinned GLB")
+            collection = bpy.data.collections.new("Filmie Imported Character")
+            parent_collection.children.link(collection)
+            parent_collection = collection
+        root = import_model(asset, parent_collection, character=bool(root_marker))
+        if root_marker:
+            root[root_marker] = True
         place_asset(root, transform, entity_id)
         return root, {}
     collection_name = asset.get("metadata", {}).get("blenderCollection")

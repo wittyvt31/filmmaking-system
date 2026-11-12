@@ -454,6 +454,67 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
   120_000,
 );
 
+it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
+  'renders the mapped GLB rig and morph deformation through Studio',
+  async () => {
+    const { path, revision, text } = await createProject(
+      'character-deformation',
+    );
+    expect(await request(path + '/validate', { text })).toEqual({
+      issues: [],
+      frames: 20,
+      shots: 1,
+    });
+    const queue = async () =>
+      (await request(path + '/runs', { revisionId: revision }, 202)) as Run;
+    const { run, outputs } = await waitForRun((await queue()).id, 120_000);
+    expect(run.status, run.error).toBe('succeeded');
+    expect(outputs.some((o) => o.name === 'master.mp4')).toBe(true);
+    const frame = outputs.find((o) => o.kind === 'image')!;
+    expect(
+      Buffer.from(await (await fetch(base + frame.url)).arrayBuffer())
+        .subarray(1, 4)
+        .toString(),
+    ).toBe('PNG');
+    const blend = outputs.find((o) => o.name.endsWith('/scene.blend'))!;
+    await promisify(execFile)(
+      defaultBlenderExecutable(),
+      [
+        '--background',
+        join(root, 'outputs', run.id, blend.name),
+        '--python-exit-code',
+        '1',
+        '--python-expr',
+        [
+          'import bpy, math',
+          'scene = bpy.context.scene',
+          'rig = next(o for o in scene.objects if o.get("filmie_rig_profile") == "FilmieHumanoid")',
+          'assert rig.data.bones["Studio_forearm.L"].parent.name == "Studio_upper_arm.L"',
+          'skin = next(o for o in scene.objects if o.get("filmie_example_tag") == "custom-skinned-reference")',
+          'assert all(bone.custom_shape is None for bone in rig.pose.bones)',
+          'assert skin.parent is not None and len(skin.data.vertices) > 1500',
+          'assert any(len(v.groups) > 1 for v in skin.data.vertices)',
+          'assert any(m.type == "ARMATURE" and m.object == rig and m.use_deform_preserve_volume for m in skin.modifiers)',
+          'assert any(s.material and s.material.name == "jacket" and any(n.bl_idname == "ShaderNodeHueSaturation" for n in s.material.node_tree.nodes) for s in skin.material_slots)',
+          'assert any(s.material and s.material.get("filmie_source_material") == "Humanoid skin" for s in skin.material_slots)',
+          'morph = skin.data.shape_keys.key_blocks["ChestBreath"]',
+          'assert max((a.co-b.co).length for a,b in zip(morph.data, skin.data.shape_keys.reference_key.data)) > .03',
+          'def evaluate(f):\n    scene.frame_set(f)\n    surface = skin.evaluated_get(bpy.context.evaluated_depsgraph_get())\n    return morph.value, rig.pose.bones["Studio_hand.L"].head.copy(), [tuple(v.co) for v in surface.data.vertices]',
+          'a, b, c = [evaluate(f) for f in (1,11,20)]',
+          'assert (a[0], b[0], c[0]) == (0,1,0)',
+          'assert (c[1]-a[1]).length > .1',
+          'assert max(math.dist(x,y) for x,y in zip(a[2],c[2])) > .1',
+          'assert evaluate(11) == b',
+        ].join('\n'),
+      ],
+      { timeout: 20_000, windowsHide: true },
+    );
+    const cached = (await waitForRun((await queue()).id, 30_000)).run;
+    expect(cached.cacheHits).toEqual({ shots: 1, assembly: true });
+  },
+  175_000,
+);
+
 it('loads the four visual treatments as one Studio catalog', async () => {
   const { path, text } = await createProject('visual-styles');
   expect(await request(path + '/validate', { text })).toEqual({

@@ -26,18 +26,22 @@ def create_armature(collection, bones):
 
 
 class SkinMesh:
-    def __init__(self):
+    def __init__(self, sides=20):
+        self.sides = sides
         self.vertices = []
         self.weights = []
         self.faces = []
         self.materials = []
 
-    def rings(self, sections, material):
-        sides = 12
+    def rings(self, sections, material, section_materials=None):
+        sides = self.sides
         start = len(self.vertices)
         for center, tangent, radius_x, radius_y, weights in sections:
             tangent = tangent.normalized()
-            across = tangent.cross(Vector((0, 1, 0))).normalized()
+            across = tangent.cross(Vector((0, 1, 0)))
+            if across.length < 1e-6:
+                across = tangent.cross(Vector((1, 0, 0)))
+            across.normalize()
             depth = tangent.cross(across)
             for side in range(sides):
                 angle = math.tau * side / sides
@@ -46,32 +50,48 @@ class SkinMesh:
                 self.weights.append(weights)
         end = len(self.vertices) - sides
         faces = [tuple(reversed(range(start, start + sides)))]
-        for ring in range(start, end, sides):
+        face_materials = [section_materials[0] if section_materials else material]
+        for index, ring in enumerate(range(start, end, sides)):
             for side in range(sides):
                 next_side = (side + 1) % sides
                 faces.append((ring + side, ring + next_side, ring + next_side + sides, ring + side + sides))
+                face_materials.append(section_materials[index + 1] if section_materials else material)
         faces.append(tuple(range(end, end + sides)))
+        face_materials.append(section_materials[-1] if section_materials else material)
         self.faces.extend(faces)
-        self.materials.extend([material] * len(faces))
+        self.materials.extend(face_materials)
 
-    def tube(self, names, bones, radii, material):
+    def tube(self, names, bones, radii, material, materials=None):
         sections = []
+        section_materials = []
         for index, name in enumerate(names):
             head, tail = (Vector(bones[name][key]) for key in ("head", "tail"))
             direction = tail - head
             if index == 0:
                 sections.append((head, direction, *radii[index], {name: 1.0}))
-            for fraction, weights in (
-                (0.25, {name: 1.0}), (0.75, {name: 1.0}),
-                (1, {name: 0.5, names[index + 1]: 0.5} if index + 1 < len(names) else {name: 1.0}),
-            ):
-                radius = tuple(a + fraction * (b - a) for a, b in zip(radii[index], radii[index + 1]))
+                section_materials.append(materials[index] if materials else material)
+            for fraction in (0.15, 0.34, 0.58, 0.82, 1):
+                weights = {name: 1.0}
+                neighbor = None
+                proximity = 0.0
+                if index > 0 and fraction < 0.34:
+                    neighbor = names[index - 1]
+                    proximity = 1 - fraction / 0.34
+                elif index + 1 < len(names) and fraction > 0.66:
+                    neighbor = names[index + 1]
+                    proximity = (fraction - 0.66) / 0.34
+                if neighbor is not None:
+                    weight = 0.5 * proximity**2 * (3 - 2 * proximity)
+                    weights = {name: 1 - weight, neighbor: weight}
+                fullness = 1 + 0.08 * math.sin(math.pi * fraction)
+                radius = tuple(fullness * (a + fraction * (b - a)) for a, b in zip(radii[index], radii[index + 1]))
                 tangent = direction
                 if fraction == 1 and index + 1 < len(names):
                     following = bones[names[index + 1]]
                     tangent = direction.normalized() + (Vector(following["tail"]) - Vector(following["head"])).normalized()
                 sections.append((head.lerp(tail, fraction), tangent, *radius, weights))
-        self.rings(sections, material)
+                section_materials.append(materials[index] if materials else material)
+        self.rings(sections, material, section_materials)
 
     def oval(self, center, radii, joint, material):
         sections = []
@@ -119,7 +139,7 @@ def generate_character(scene, character, name):
     height = body["height"]
     build = body["build"]
     bones = {bone["id"]: bone for bone in character["bones"]}
-    mesh = SkinMesh()
+    mesh = SkinMesh(character["source"].get("radialSegments", 20))
     def radius(width, depth):
         return (width * height * build, depth * height * build)
     mesh.tube(("pelvis", "spine", "chest"), bones, [
@@ -145,8 +165,10 @@ def generate_character(scene, character, name):
     for side in SIDES:
         upper, forearm, hand = ("upper_arm." + side, "forearm." + side, "hand." + side)
         thigh, shin, foot = ("thigh." + side, "shin." + side, "foot." + side)
-        mesh.tube((upper, forearm), bones, [radius(0.046, 0.049), radius(0.033, 0.033), radius(0.022, 0.023)], "top")
-        mesh.tube((hand,), bones, [radius(0.021, 0.023), radius(0.012, 0.016)], "skin")
+        mesh.tube((upper, forearm, hand), bones, [
+            radius(0.046, 0.049), radius(0.033, 0.033),
+            radius(0.022, 0.023), radius(0.012, 0.016),
+        ], "top", ("top", "top", "skin"))
         mesh.tube((thigh, shin), bones, [radius(0.064, 0.069), radius(0.047, 0.048), radius(0.029, 0.031)], "trousers")
         ankle = bones[foot]["head"]
         mesh.oval((ankle[0], -height * 0.043, height * 0.034), (height * 0.037, height * 0.074, height * 0.034), foot, "shoes")

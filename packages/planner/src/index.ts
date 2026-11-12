@@ -4,6 +4,7 @@ import {
   canonicalJsonSha256,
   MotionClipLibrarySchema,
   parseProjectManifest,
+  resolveRigJointMap,
   visualAssetReferences,
   type AssetVersionReference,
   type ProjectManifest,
@@ -265,13 +266,14 @@ export async function prepareProductionPlan(
           );
           if (
             !asset ||
-            modelImportFormat(asset) !== 'blend' ||
+            !['blend', 'glb'].includes(modelImportFormat(asset) ?? '') ||
             asset.metadata['rigProfile'] !== character.rig.profile ||
             asset.metadata['rigVersion'] !== character.rig.version
           )
             throw new Error(
-              `Character "${character.id}" requires a Blender model declaring ${character.rig.profile} v${character.rig.version} in rigProfile and rigVersion metadata`,
+              `Character "${character.id}" requires a prepared Blender collection or self-contained GLB declaring ${character.rig.profile} v${character.rig.version} in rigProfile and rigVersion metadata`,
             );
+          resolveRigJointMap(character, asset.metadata);
         }
         for (const reference of sceneModelReferences(shot)) {
           const asset = assets.find(

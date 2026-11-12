@@ -9,7 +9,8 @@ import {
   type SampledSkeletalMotion,
 } from './skeletal-motion.js';
 import { SceneTransformSchema } from './shared-internal.js';
-import { CharacterMaterialSchema } from './material.js';
+import { CharacterMaterialSchema, MaterialSchema } from './material.js';
+import { ImportedMaterialsSchema } from './geometry.js';
 
 type Vector = readonly [number, number, number];
 type Joint = { id: string; parent?: string; min: Vector; max: Vector };
@@ -57,6 +58,36 @@ export function findRigProfile(id: string, version: number) {
 const RigSchema = z
   .object({ profile: StableIdSchema, version: z.number().int().positive() })
   .strict();
+const sourceName = z.string().trim().min(1).max(256);
+export const RigJointMapSchema = z.record(StableIdSchema, sourceName);
+const RestPoint = z.tuple([
+  z.number().min(-10).max(10),
+  z.number().min(-10).max(10),
+  z.number().min(-10).max(10),
+]);
+const RestSkeletonSchema = z.record(
+  StableIdSchema,
+  z
+    .object({ head: RestPoint, tail: RestPoint })
+    .strict()
+    .refine(
+      ({ head, tail }) =>
+        Math.hypot(...head.map((v, i) => v - tail[i]!)) > 1e-5,
+      'Rest joint must have nonzero length',
+    ),
+);
+export function validateRigJointMap(
+  rig: z.infer<typeof RigSchema>,
+  mapping: z.infer<typeof RigJointMapSchema>,
+) {
+  const profile = findRigProfile(rig.profile, rig.version);
+  return (
+    !!profile &&
+    Object.keys(mapping).length === profile.joints.length &&
+    profile.joints.every(({ id }) => Object.hasOwn(mapping, id)) &&
+    new Set(Object.values(mapping)).size === profile.joints.length
+  );
+}
 const BodySchema = z
   .object({
     height: z.number().min(0.5).max(3),
@@ -77,6 +108,7 @@ const SourceSchema = z.discriminatedUnion('kind', [
     .object({
       kind: z.literal('procedural'),
       body: BodySchema,
+      radialSegments: z.number().int().min(12).max(48).optional(),
       appearance: z
         .object({
           skin: CharacterMaterialSchema,
@@ -93,6 +125,10 @@ const SourceSchema = z.discriminatedUnion('kind', [
       kind: z.literal('imported'),
       asset: AssetVersionReferenceSchema,
       body: BodySchema,
+      jointMap: RigJointMapSchema.optional(),
+      restSkeleton: RestSkeletonSchema.optional(),
+      materials: z.array(MaterialSchema).max(64).optional(),
+      materialOverrides: ImportedMaterialsSchema.optional(),
     })
     .strict(),
 ]);
@@ -144,6 +180,32 @@ export const RiggedCharacterSchema = z
     motion: z.array(MotionLayerSchema).max(64).default([]),
     constraints: z.array(SpatialConstraintSchema).max(32).default([]),
     locomotion: LocomotionSchema.optional(),
+    deformation: z
+      .object({
+        skinning: z.enum(['linear', 'preserve-volume']).optional(),
+        subdivision: z.number().int().min(0).max(2).optional(),
+      })
+      .strict()
+      .optional(),
+    morphs: z
+      .array(
+        z
+          .object({
+            mesh: sourceName,
+            target: sourceName,
+            keys: z
+              .array(
+                FrameSchema.extend({
+                  value: z.number().min(0).max(1),
+                }).strict(),
+              )
+              .min(1)
+              .max(1024),
+          })
+          .strict(),
+      )
+      .max(128)
+      .optional(),
     actions: z.tuple([]).default([]),
   })
   .strict()
@@ -155,6 +217,44 @@ export const RiggedCharacterSchema = z
       character.rig.version,
     );
     if (!profile) issue(['rig'], 'Unknown rig profile or version');
+    if (character.source.kind === 'imported') {
+      const { jointMap, restSkeleton, materials, materialOverrides } =
+        character.source;
+      if (jointMap && !validateRigJointMap(character.rig, jointMap))
+        issue(
+          ['source', 'jointMap'],
+          'Rig mapping must bind each profile joint to a distinct source bone',
+        );
+      if (
+        restSkeleton &&
+        (!profile ||
+          Object.keys(restSkeleton).length !== profile.joints.length ||
+          profile.joints.some(({ id }) => !Object.hasOwn(restSkeleton, id)))
+      )
+        issue(
+          ['source', 'restSkeleton'],
+          'Rest skeleton must describe exactly the profile joints',
+        );
+      const ids = new Set(materials?.map((m) => m.id));
+      if (ids.size !== (materials?.length ?? 0))
+        issue(['source', 'materials'], 'Duplicate character material ID');
+      const slots =
+        materialOverrides?.mode === 'slots' ? materialOverrides.slots : [];
+      if (new Set(slots.map((s) => s.source)).size !== slots.length)
+        issue(
+          ['source', 'materialOverrides'],
+          'Duplicate source material slot',
+        );
+      for (const id of materialOverrides?.mode === 'all'
+        ? [materialOverrides.materialId]
+        : slots.map((s) => s.materialId))
+        if (!ids.has(id))
+          issue(
+            ['source', 'materialOverrides'],
+            'Unknown character material ' + id,
+          );
+    } else if (character.morphs?.length)
+      issue(['morphs'], 'Morph targets require an imported character asset');
     const validateOrder = (
       keys: readonly { frame: number }[],
       path: (string | number)[],
@@ -168,6 +268,14 @@ export const RiggedCharacterSchema = z
       });
     };
     validateOrder(character.poses.root, ['poses', 'root']);
+    const morphTargets = new Set<string>();
+    character.morphs?.forEach((track, index) => {
+      const key = JSON.stringify([track.mesh, track.target]);
+      if (morphTargets.has(key))
+        issue(['morphs', index], 'Duplicate morph track');
+      morphTargets.add(key);
+      validateOrder(track.keys, ['morphs', index, 'keys']);
+    });
     const seen = new Set<string>();
     character.poses.joints.forEach((track, index) => {
       const path = ['poses', 'joints', index];
@@ -215,6 +323,21 @@ export const SceneCharacterSchema = z.union([
 export type RiggedCharacter = z.infer<typeof RiggedCharacterSchema>;
 export type SceneCharacter = z.infer<typeof SceneCharacterSchema>;
 
+export function resolveRigJointMap(
+  character: Pick<RiggedCharacter, 'rig' | 'source'>,
+  metadata: Readonly<Record<string, unknown>>,
+) {
+  if (character.source.kind !== 'imported') return undefined;
+  const candidate = character.source.jointMap ?? metadata['rigJointMap'];
+  if (candidate === undefined) return undefined;
+  const mapping = RigJointMapSchema.parse(candidate);
+  if (!validateRigJointMap(character.rig, mapping))
+    throw new TypeError(
+      'Rig mapping must bind each profile joint to a distinct source bone',
+    );
+  return mapping;
+}
+
 export function characterAsset(character: SceneCharacter) {
   if ('asset' in character) return character.asset;
   return character.source.kind === 'imported'
@@ -237,5 +360,7 @@ export interface PreparedCharacter {
     max: Vector;
   }[];
   poses: RiggedCharacter['poses'];
+  deformation?: NonNullable<RiggedCharacter['deformation']>;
+  morphs?: NonNullable<RiggedCharacter['morphs']>;
   sampledMotion?: SampledSkeletalMotion;
 }

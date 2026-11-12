@@ -23,14 +23,16 @@ def validate_glb(path):
                 raise ValueError("GLB must be self-contained; external buffers or textures are unsupported")
 
 
-def import_model(asset, destination):
+def import_model(asset, destination, character=False):
     path = asset["localPath"]
     format_name = asset["format"]
     before = set(bpy.data.objects)
     collections = set(bpy.data.collections)
     if format_name == "glb":
         validate_glb(path)
-        result = bpy.ops.import_scene.gltf(filepath=path)
+        # Importer-generated bone widgets belong to a hidden collection. Skip
+        # them so moving model objects into the destination never exposes them.
+        result = bpy.ops.import_scene.gltf(filepath=path, disable_bone_shape=True)
     elif format_name == "stl":
         result = bpy.ops.wm.stl_import(filepath=path)
     elif format_name == "ply":
@@ -40,6 +42,11 @@ def import_model(asset, destination):
     objects = sorted(set(bpy.data.objects) - before, key=lambda obj: obj.name)
     if "FINISHED" not in result or not any(obj.type == "MESH" for obj in objects):
         raise ValueError("Import did not produce a mesh for " + asset["assetId"])
+    if character:
+        for obj in objects:
+            obj.animation_data_clear()
+            if obj.type == "MESH" and obj.data.shape_keys:
+                obj.data.shape_keys.animation_data_clear()
     bpy.context.view_layer.update()
     root = bpy.data.objects.new(asset["assetId"], None)
     destination.objects.link(root)
@@ -67,40 +74,60 @@ def import_model(asset, destination):
 def instantiate_with_materials(instantiate, asset, transform, entity_id, collection, overrides, materials):
     if not overrides:
         return instantiate(asset, transform, entity_id, collection)[0]
+    root = capture_character_names(lambda: instantiate(asset, transform, entity_id, collection)[0], entity_id)
+    apply_material_overrides(root, entity_id, overrides, materials)
+    return root
+
+
+def capture_character_names(load, entity_id, capture_meshes=False):
     # Blender suffixes colliding datablock names. Temporarily reserve the source
     # names so slot rules refer to the file's names, including real numeric suffixes.
-    existing = [(mat, mat.name) for mat in bpy.data.materials]
-    existing_names = {name for _, name in existing}
-    for i, (material, _) in enumerate(existing):
-        material.name = f"__FilmieReserved__{i}__"
+    groups = [(bpy.data.materials, "filmie_source_material")]
+    if capture_meshes:
+        groups.append((bpy.data.objects, "filmie_source_object"))
+    reservations = []
+    for datablocks, key in groups:
+        existing = {item: item.name for item in datablocks}
+        names = set(existing.values())
+        prefix = "__FilmieReserved__"
+        while any(name.startswith(prefix) for name in names):
+            prefix += "_"
+        for i, item in enumerate(existing):
+            item.name = f"{prefix}{i}"
+        reservations.append((datablocks, key, existing, names))
     try:
-        root, _ = instantiate(asset, transform, entity_id, collection)
-        named = {slot["source"]: materials[slot["materialId"]] for slot in overrides.get("slots", [])}
-        replace_all = materials[overrides["materialId"]] if overrides["mode"] == "all" else None
-        matched = set()
-        for obj in [root, *root.children_recursive]:
-            if obj.type != "MESH":
-                continue
-            if not obj.material_slots and replace_all is not None:
-                # A shared source mesh may appear in multiple instances.
-                obj.data = obj.data.copy()
-                obj.data.materials.append(replace_all)
-            for slot in obj.material_slots:
-                name = slot.material.name if slot.material else None
-                replacement = replace_all if replace_all is not None else named.get(name)
-                if replacement is not None:
-                    if name in named:
-                        matched.add(name)
-                    slot.link = "OBJECT"
-                    slot.material = replacement
-        missing = sorted(set(named) - matched)
-        if missing:
-            raise ValueError(f"Unknown source materials on {entity_id}: {', '.join(missing)}")
-        return root
+        return load()
     finally:
-        reserved = {mat for mat, _ in existing}
-        for material in bpy.data.materials:
-            if material not in reserved and material.name in existing_names:
-                material.name = entity_id + "/" + material.name
-        for material, name in existing:
-            material.name = name
+        for datablocks, key, existing, names in reservations:
+            for item in list(datablocks):
+                if item in existing:
+                    continue
+                if key not in item:
+                    item[key] = item.name
+                if item.name in names:
+                    item.name = entity_id + "/" + item.name
+            for item, name in existing.items():
+                item.name = name
+
+
+def apply_material_overrides(root, entity_id, overrides, materials):
+    named = {slot["source"]: materials[slot["materialId"]] for slot in overrides.get("slots", [])}
+    replace_all = materials[overrides["materialId"]] if overrides["mode"] == "all" else None
+    matched = set()
+    for obj in [root, *root.children_recursive]:
+        if obj.type != "MESH":
+            continue
+        if not obj.material_slots and replace_all is not None:
+            obj.data = obj.data.copy()
+            obj.data.materials.append(replace_all)
+        for slot in obj.material_slots:
+            name = slot.material.get("filmie_source_material", slot.material.name) if slot.material else None
+            replacement = replace_all if replace_all is not None else named.get(name)
+            if replacement is not None:
+                if name in named:
+                    matched.add(name)
+                slot.link = "OBJECT"
+                slot.material = replacement
+    missing = sorted(set(named) - matched)
+    if missing:
+        raise ValueError(f"Unknown source materials on {entity_id}: {', '.join(missing)}")

@@ -262,11 +262,12 @@ export function visualAssetReferences(scene?: ShotScene) {
   if (!scene) return [];
   const materials = [
     ...(scene.world?.materials ?? []),
-    ...scene.characters.flatMap((character) =>
-      'source' in character && character.source.kind === 'procedural'
+    ...scene.characters.flatMap((character) => {
+      if (!('source' in character)) return [];
+      return character.source.kind === 'procedural'
         ? Object.values(character.source.appearance)
-        : [],
-    ),
+        : (character.source.materials ?? []);
+    }),
   ];
   const references = materials.flatMap((material) =>
     Object.values(material?.textures ?? {}).flatMap((texture) =>

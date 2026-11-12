@@ -13,6 +13,14 @@ export function prepareCharacter(
 ): PreparedCharacter {
   const profile = findRigProfile(character.rig.profile, character.rig.version);
   if (!profile) throw new TypeError('Unsupported character rig');
+  if (
+    character.morphs?.some(
+      (track) => track.keys.at(-1)!.frame >= durationFrames,
+    )
+  )
+    throw new TypeError(
+      'Morph keyframe is outside the shot for character ' + character.id,
+    );
   const { height, shoulderWidth, hipWidth, legLength, armLength } =
     character.source.body;
   const withBaseline = <T extends { frame: number }>(
@@ -71,7 +79,22 @@ export function prepareCharacter(
     transform: character.transform,
     rig: character.rig,
     source: character.source,
+    ...(character.deformation ? { deformation: character.deformation } : {}),
+    ...(character.morphs?.length
+      ? {
+          morphs: [...character.morphs].sort(
+            (a, b) =>
+              compareStrings(a.mesh, b.mesh) ||
+              compareStrings(a.target, b.target),
+          ),
+        }
+      : {}),
     bones: profile.joints.map((joint) => {
+      const authored =
+        character.source.kind === 'imported'
+          ? character.source.restSkeleton?.[joint.id]
+          : undefined;
+      if (authored) return { ...joint, ...authored };
       const segment = rest.get(joint.id);
       if (!segment) throw new Error('No rest definition for joint ' + joint.id);
       return { ...joint, head: segment[0], tail: segment[1] };

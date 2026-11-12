@@ -19,6 +19,7 @@ import {
   compareStrings,
   RenderPolicySchema,
   ShotSchema,
+  resolveRigJointMap,
   type ArtifactInspection,
   type ArtifactInspectionRequest,
   type CharacterMaterialSchema,
@@ -713,13 +714,10 @@ export class BlenderRendererAdapter implements RendererAdapter {
           metadata: asset.metadata,
         };
       };
-      const resolveModelAsset = (
-        reference: {
-          assetId: string;
-          version: string;
-        },
-        prepared = false,
-      ) => {
+      const resolveModelAsset = (reference: {
+        assetId: string;
+        version: string;
+      }) => {
         const asset = assetMap.get(assetKey(reference));
         if (!asset)
           throw new BlenderFailure(
@@ -727,10 +725,10 @@ export class BlenderRendererAdapter implements RendererAdapter {
             `Missing scene model ${reference.assetId}@${reference.version}`,
           );
         const format = modelImportFormat(asset);
-        if (!format || (prepared && format !== 'blend'))
+        if (!format)
           throw new BlenderFailure(
             'UNSUPPORTED_SETTINGS',
-            `Scene asset ${reference.assetId}@${reference.version} requires ${prepared ? 'a prepared Blender collection' : 'a prepared Blender collection, self-contained GLB, STL or PLY'}`,
+            `Scene asset ${reference.assetId}@${reference.version} requires a prepared Blender collection, self-contained GLB, STL or PLY`,
           );
         return { ...resolveAsset(reference), format };
       };
@@ -989,14 +987,46 @@ export class BlenderRendererAdapter implements RendererAdapter {
         characters: scene.characters.map((character) => {
           if ('asset' in character)
             return { ...character, asset: resolveModelAsset(character.asset) };
-          if (character.source.kind === 'imported')
+          if (character.source.kind === 'imported') {
+            const asset = resolveModelAsset(character.source.asset);
+            if (!['blend', 'glb'].includes(asset.format))
+              throw new BlenderFailure(
+                'INVALID_INSTRUCTIONS',
+                'Skeletal characters require a prepared Blender collection or skinned GLB',
+              );
+            const jointMap = resolveRigJointMap(character, asset.metadata);
+            const key = canonicalJsonSha256({
+              asset,
+              rendererVersion,
+              dependenciesHash,
+            });
             return {
               ...character,
               source: {
                 ...character.source,
-                asset: resolveModelAsset(character.source.asset, true),
+                asset,
+                ...(jointMap ? { jointMap } : {}),
+                ...(character.source.materials
+                  ? {
+                      materials:
+                        character.source.materials.map(resolveMaterial),
+                    }
+                  : {}),
               },
+              ...(asset.format === 'glb'
+                ? {
+                    cache: {
+                      key,
+                      path: resolve(
+                        request.cacheDirectory,
+                        'characters',
+                        key + '.blend',
+                      ),
+                    },
+                  }
+                : {}),
             };
+          }
           const source = {
             ...character.source,
             appearance: Object.fromEntries(
