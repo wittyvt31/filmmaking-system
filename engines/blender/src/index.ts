@@ -21,6 +21,7 @@ import {
   ShotSchema,
   type ArtifactInspection,
   type ArtifactInspectionRequest,
+  type CharacterMaterialSchema,
   type FailedRenderReceipt,
   type RendererAdapter,
   type RendererAssetInput,
@@ -660,6 +661,14 @@ export class BlenderRendererAdapter implements RendererAdapter {
       const compiledScene =
         request.scene ?? compileScene(shot, settings.frameRate);
       if (
+        compiledScene.style.shading === 'cel' &&
+        renderConfig.engine !== 'BLENDER_EEVEE'
+      )
+        throw new BlenderFailure(
+          'UNSUPPORTED_SETTINGS',
+          'Cel shading requires Blender EEVEE',
+        );
+      if (
         compiledScene.shotId !== shot.id ||
         compiledScene.durationFrames !== shot.durationFrames
       )
@@ -724,6 +733,43 @@ export class BlenderRendererAdapter implements RendererAdapter {
           );
         return resolveAsset(reference);
       };
+      const resolveImageAsset = (
+        reference: Parameters<typeof resolveAsset>[0],
+      ) => {
+        const resolved = resolveAsset(reference);
+        if (assetMap.get(assetKey(reference))?.type !== 'image')
+          throw new BlenderFailure(
+            'INVALID_INSTRUCTIONS',
+            `Visual asset ${reference.assetId}@${reference.version} must be an image`,
+          );
+        return resolved;
+      };
+      const resolveMaterial = <
+        T extends ReturnType<typeof CharacterMaterialSchema.parse>,
+      >(
+        material: T,
+      ) => ({
+        ...material,
+        ...(material.textures
+          ? {
+              textures: Object.fromEntries(
+                Object.entries(material.textures).flatMap(([slot, texture]) =>
+                  texture
+                    ? [
+                        [
+                          slot,
+                          {
+                            ...texture,
+                            asset: resolveImageAsset(texture.asset),
+                          },
+                        ],
+                      ]
+                    : [],
+                ),
+              ),
+            }
+          : {}),
+      });
       const workerHash = createHash('sha256')
         .update(await readFile(WORKER_PATH))
         .digest('hex');
@@ -742,6 +788,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
             'collection_cache.py',
             'semantic_rig.py',
             'physics_backend.py',
+            'visual_runtime.py',
           ].map(async (file) =>
             createHash('sha256')
               .update(await readFile(join(dirname(WORKER_PATH), file)))
@@ -875,6 +922,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
       const world = scene.world
         ? {
             ...scene.world,
+            materials: scene.world.materials.map(resolveMaterial),
             entities: scene.world.entities.map((entity) =>
               'asset' in entity
                 ? { ...entity, asset: resolveModelAsset(entity.asset) }
@@ -899,10 +947,24 @@ export class BlenderRendererAdapter implements RendererAdapter {
         randomSeed: request.randomSeed,
         chunkFrames: 12,
         outputDirectory: stagedDirectory,
-        style: {
-          ...scene.style,
-          boilFps: shot.scene?.styleOverrides?.boilFps ?? 12,
-        },
+        style: scene.style,
+        ...(scene.visualSettings
+          ? {
+              visualSettings: {
+                ...scene.visualSettings,
+                ...(scene.visualSettings.environment?.kind === 'image'
+                  ? {
+                      environment: {
+                        ...scene.visualSettings.environment,
+                        asset: resolveImageAsset(
+                          scene.visualSettings.environment.asset,
+                        ),
+                      },
+                    }
+                  : {}),
+              },
+            }
+          : {}),
         renderOverrides,
         animationLibraryVersion: scene.animationLibraryVersion,
         ...(scene.environment
@@ -932,15 +994,25 @@ export class BlenderRendererAdapter implements RendererAdapter {
                 asset: resolveModelAsset(character.source.asset),
               },
             };
+          const source = {
+            ...character.source,
+            appearance: Object.fromEntries(
+              Object.entries(character.source.appearance).flatMap(
+                ([slot, material]) =>
+                  material ? [[slot, resolveMaterial(material)]] : [],
+              ),
+            ),
+          };
           const key = canonicalJsonSha256({
             rig: character.rig,
             bones: character.bones,
-            source: character.source,
+            source,
             rendererVersion,
             dependenciesHash,
           });
           return {
             ...character,
+            source,
             cache: {
               key,
               path: resolve(

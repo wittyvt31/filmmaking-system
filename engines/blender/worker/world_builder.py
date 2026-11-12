@@ -4,24 +4,11 @@ import math
 
 import bpy
 from collection_cache import read_collection, write_collection
+from visual_runtime import build_material
 
 
 def coordinates(value):
     return tuple(float(value[axis]) for axis in ("x", "y", "z"))
-
-
-def build_material(spec):
-    material = bpy.data.materials.new(spec["id"])
-    color = (*spec["color"], 1.0)
-    material.diffuse_color = color
-    material.roughness = spec["roughness"]
-    material.metallic = spec["metallic"]
-    material.use_nodes = True
-    shader = material.node_tree.nodes.get("Principled BSDF")
-    shader.inputs["Base Color"].default_value = color
-    shader.inputs["Roughness"].default_value = spec["roughness"]
-    shader.inputs["Metallic"].default_value = spec["metallic"]
-    return material
 
 
 def box_mesh(dimensions, material):

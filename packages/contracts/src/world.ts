@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { AssetVersionReferenceSchema, StableIdSchema } from './identifiers.js';
-import { SceneTransformSchema, UnitColorSchema } from './shared-internal.js';
+import { SceneTransformSchema } from './shared-internal.js';
+import { MaterialSchema } from './material.js';
 import {
   ColliderSchema,
   PhysicsSettingsSchema,
@@ -9,16 +10,6 @@ import {
 } from './physics.js';
 
 const length = z.number().min(0.001).max(10_000);
-const fraction = z.number().min(0).max(1);
-
-const MaterialSchema = z
-  .object({
-    id: StableIdSchema,
-    color: UnitColorSchema,
-    roughness: fraction.default(0.65),
-    metallic: fraction.default(0),
-  })
-  .strict();
 
 const SurfaceSchema = z
   .object({

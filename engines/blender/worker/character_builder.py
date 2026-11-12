@@ -4,7 +4,7 @@ import math
 import bpy
 from mathutils import Vector
 
-from world_builder import build_material
+from visual_runtime import build_material
 
 SIDES = ("L", "R")
 

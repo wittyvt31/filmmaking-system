@@ -1,0 +1,17 @@
+[
+  {
+    "assetId": "texture.study-weave",
+    "version": "1.0.0",
+    "type": "image",
+    "sourceUri": "weave.png",
+    "contentHash": "44d9d3243148b8a4286e26a4a3e76fe0a6ebf7a192a66262af4e4c25e3dc0dca",
+    "metadata": {},
+    "license": {
+      "name": "Filmie reference asset",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "Generated stripe texture for the Filmie visual comparison"
+    }
+  }
+]

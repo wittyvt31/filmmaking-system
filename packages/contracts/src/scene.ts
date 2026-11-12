@@ -3,6 +3,7 @@ import { AssetVersionReferenceSchema, StableIdSchema } from './identifiers.js';
 import {
   CharcoalStyleOverridesSchema,
   STYLE_DEFINITION_REGISTRY,
+  VisualSettingsSchema,
 } from './style.js';
 import { SceneCharacterSchema } from './character.js';
 import { SkeletalClipSchema } from './skeletal-motion.js';
@@ -80,6 +81,7 @@ const SceneLightBaseSchema = z.object({
     .strict(),
   color: UnitColorSchema,
   energy: z.number().positive().max(100_000),
+  shadows: z.boolean().optional(),
 });
 const SceneLightSchema = z.discriminatedUnion('type', [
   SceneLightBaseSchema.extend({
@@ -93,6 +95,11 @@ const SceneLightSchema = z.discriminatedUnion('type', [
   SceneLightBaseSchema.extend({
     type: z.literal('spot'),
     coneAngleRadians: z.number().positive().max(Math.PI),
+    blend: z.number().min(0).max(1).optional(),
+  }).strict(),
+  SceneLightBaseSchema.extend({
+    type: z.literal('sun'),
+    angularDiameterRadians: z.number().min(0).max(Math.PI),
   }).strict(),
 ]);
 
@@ -103,6 +110,7 @@ export const ShotSceneSchema = z
     animationLibraryVersion:
       AssetVersionReferenceSchema.shape.version.default('1.0.0'),
     styleOverrides: CharcoalStyleOverridesSchema.optional(),
+    visualSettings: VisualSettingsSchema.optional(),
     motionLibraries: z.array(AssetVersionReferenceSchema).default([]),
     motionClips: z.array(SkeletalClipSchema).max(128).default([]),
     environment: AssetVersionReferenceSchema.optional(),
@@ -133,7 +141,7 @@ export const ShotSceneSchema = z
         path: ['world'],
         message: 'Specify exactly one of world or a prepared environment asset',
       });
-    const registered = STYLE_DEFINITION_REGISTRY.some(
+    const registered = STYLE_DEFINITION_REGISTRY.find(
       (definition) =>
         definition.id === scene.stylePreset &&
         definition.version === scene.styleVersion,
@@ -143,6 +151,32 @@ export const ShotSceneSchema = z
         code: 'custom',
         path: ['stylePreset'],
         message: `Unknown style/version "${scene.stylePreset}@${scene.styleVersion}"`,
+      });
+    if (registered?.shading !== 'charcoal' && scene.styleOverrides)
+      context.addIssue({
+        code: 'custom',
+        path: ['styleOverrides'],
+        message: 'Legacy style overrides require a charcoal profile',
+      });
+    if (
+      scene.visualSettings?.celBands !== undefined &&
+      registered?.shading !== 'cel'
+    )
+      context.addIssue({
+        code: 'custom',
+        path: ['visualSettings', 'celBands'],
+        message: 'Cel bands require the cel shading profile',
+      });
+    if (
+      (scene.visualSettings?.saturation !== undefined ||
+        scene.visualSettings?.roughnessScale !== undefined) &&
+      registered?.shading !== 'stylized'
+    )
+      context.addIssue({
+        code: 'custom',
+        path: ['visualSettings'],
+        message:
+          'Saturation and roughness scaling require the stylized 3D profile',
       });
     if (scene.styleVersion !== '2.0.0' && scene.styleOverrides) {
       const versionTwoOnly = [
@@ -222,3 +256,24 @@ export const ShotSceneSchema = z
   });
 
 export type ShotScene = z.infer<typeof ShotSceneSchema>;
+
+/** Visual dependencies are pinned in the same registry as other shot assets. */
+export function visualAssetReferences(scene?: ShotScene) {
+  if (!scene) return [];
+  const materials = [
+    ...(scene.world?.materials ?? []),
+    ...scene.characters.flatMap((character) =>
+      'source' in character && character.source.kind === 'procedural'
+        ? Object.values(character.source.appearance)
+        : [],
+    ),
+  ];
+  const references = materials.flatMap((material) =>
+    Object.values(material?.textures ?? {}).flatMap((texture) =>
+      texture ? [texture.asset] : [],
+    ),
+  );
+  if (scene.visualSettings?.environment?.kind === 'image')
+    references.push(scene.visualSettings.environment.asset);
+  return references;
+}

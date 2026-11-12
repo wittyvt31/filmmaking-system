@@ -4,6 +4,7 @@ import {
   canonicalJsonSha256,
   MotionClipLibrarySchema,
   parseProjectManifest,
+  visualAssetReferences,
   type AssetVersionReference,
   type ProjectManifest,
   type RenderPolicy,
@@ -93,6 +94,8 @@ function uniqueAssetReferences(
   for (const shot of manifest.shots) {
     for (const reference of shot.requiredAssets)
       references.set(referenceKey(reference), reference);
+    for (const reference of visualAssetReferences(shot.scene))
+      references.set(referenceKey(reference), reference);
     for (const cue of shot.audioCues ?? [])
       references.set(referenceKey(cue.asset), cue.asset);
     for (const reference of shot.scene?.motionLibraries ?? [])
@@ -139,7 +142,10 @@ function buildRenderPlan(
       role: 'intermediate-shot',
     };
     expectedArtifacts.push(output);
-    const references = shot.requiredAssets;
+    const references = [
+      ...shot.requiredAssets,
+      ...visualAssetReferences(shot.scene),
+    ];
     jobs.push({
       id: `render-shot:${shot.id}`,
       kind: 'render-shot',
@@ -213,6 +219,21 @@ export async function prepareProductionPlan(
     manifest.shots
       .filter((shot) => shot.scene !== undefined)
       .map(async (shot) => {
+        for (const reference of visualAssetReferences(shot.scene)) {
+          const asset = assets.find(
+            (candidate) => referenceKey(candidate) === referenceKey(reference),
+          );
+          if (asset?.type !== 'image')
+            throw new TypeError(
+              `Visual asset ${reference.assetId}@${reference.version} must be an image`,
+            );
+        }
+        if (
+          shot.scene?.stylePreset === 'cel_shading' &&
+          (manifest.renderPolicy.qualityProfile === 'flat' ||
+            manifest.renderPolicy.renderer.config.engine !== 'BLENDER_EEVEE')
+        )
+          throw new TypeError('Cel shading requires Blender EEVEE');
         for (const character of shot.scene?.characters ?? []) {
           if (!('source' in character) || character.source.kind !== 'imported')
             continue;

@@ -1,5 +1,36 @@
 import { z } from 'zod';
 import { UnitColorSchema } from './shared-internal.js';
+import { AssetVersionReferenceSchema } from './identifiers.js';
+
+export const VisualSettingsSchema = z
+  .object({
+    exposure: z.number().min(-10).max(10).optional(),
+    defaultLights: z.boolean().optional(),
+    environment: z
+      .discriminatedUnion('kind', [
+        z
+          .object({
+            kind: z.literal('color'),
+            color: UnitColorSchema,
+            strength: z.number().min(0).max(100),
+          })
+          .strict(),
+        z
+          .object({
+            kind: z.literal('image'),
+            asset: AssetVersionReferenceSchema,
+            strength: z.number().min(0).max(100),
+            rotationDegrees: z.number().min(-360).max(360).optional(),
+          })
+          .strict(),
+      ])
+      .optional(),
+    saturation: z.number().min(0).max(2).optional(),
+    roughnessScale: z.number().positive().max(4).optional(),
+    celBands: z.number().int().min(2).max(8).optional(),
+  })
+  .strict();
+export type VisualSettings = z.infer<typeof VisualSettingsSchema>;
 
 export const CharcoalStyleOverridesSchema = z
   .object({
@@ -66,8 +97,7 @@ export const StyleDefinitionSchema = z
   .object({
     id: z.string().regex(/^[a-z][a-z0-9_]*$/),
     version: z.string().regex(/^\d+\.\d+\.\d+$/),
-    renderer: z.literal('blender'),
-    parameters: z.record(z.string(), z.unknown()),
+    shading: z.enum(['physical', 'stylized', 'cel', 'charcoal']),
   })
   .strict();
 export type StyleDefinition = z.infer<typeof StyleDefinitionSchema>;
@@ -76,13 +106,26 @@ export const STYLE_DEFINITION_REGISTRY = [
   StyleDefinitionSchema.parse({
     id: 'charcoal_horror',
     version: '1.2.0',
-    renderer: 'blender',
-    parameters: {},
+    shading: 'charcoal',
   }),
   StyleDefinitionSchema.parse({
     id: 'charcoal_horror',
     version: '2.0.0',
-    renderer: 'blender',
-    parameters: {},
+    shading: 'charcoal',
+  }),
+  StyleDefinitionSchema.parse({
+    id: 'realistic_cgi',
+    version: '1.0.0',
+    shading: 'physical',
+  }),
+  StyleDefinitionSchema.parse({
+    id: 'stylized_3d',
+    version: '1.0.0',
+    shading: 'stylized',
+  }),
+  StyleDefinitionSchema.parse({
+    id: 'cel_shading',
+    version: '1.0.0',
+    shading: 'cel',
   }),
 ] as const;

@@ -13,6 +13,7 @@ from mathutils import Euler, Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from world_builder import build_world
+from visual_runtime import apply_material_style, configure_environment
 from physics_backend import apply_physics_bake, bake_physics
 from character_runtime import apply_poses, prepare_character
 from semantic_rig import RigCapabilityError, discover_controls, foot_ik, preflight_actions
@@ -124,13 +125,10 @@ def instantiate_asset(asset, transform, entity_id, parent_collection=None, root_
 
 def create_scene(spec):
     scene = bpy.context.scene
-    spec["style"]["seed"] = int(spec.get("randomSeed", 0))
-    spec["style"]["durationFrames"] = int(spec["durationFrames"])
-    spec["style"]["textureQuality"] = spec["renderConfig"].get("textures", "high")
-    spec["style"]["frameRate"] = (
-        float(spec["frameRate"]["numerator"]) / float(spec["frameRate"]["denominator"])
-    )
-    spec["style"].setdefault("boilFps", 12.0)
+    profile = spec["style"]
+    shading = profile["shading"]
+    style = profile.get("parameters", {})
+    visual = spec.get("visualSettings", {})
     for obj in list(scene.objects):
         bpy.data.objects.remove(obj, do_unlink=True)
     config = spec["renderConfig"]
@@ -196,46 +194,48 @@ def create_scene(spec):
     scene.render.image_settings.color_depth = "8"
     scene.render.filepath = os.path.join(spec["outputDirectory"], "frames", "frame_######")
     scene.render.use_file_extension = True
-    scene.view_settings.view_transform = "Standard"
-    scene.view_settings.look = "Medium High Contrast"
-    scene.view_settings.exposure = 0.25
-    scene.view_settings.gamma = 1.0
-    scene.world = bpy.data.worlds.new("Charcoal Horror World")
-    scene.world.color = (0.045, 0.04, 0.035)
+    configure_environment(scene, shading, visual)
     shadow_quality = spec.get("renderConfig", {}).get("shadows", "high")
+    if shading == "charcoal" and visual.get("defaultLights", True):
+        key_data = bpy.data.lights.new("Soft Sepia Key", type="AREA")
+        key_data.energy = float(style["lighting"]["keyEnergy"])
+        key_data.use_shadow = shadow_quality != "off"
+        key_data.shape = "DISK"
+        key_data.size = float(style["lighting"]["keySize"])
+        key_data.color = tuple(float(value) for value in style["lighting"]["keyColor"])
+        key = bpy.data.objects.new("Soft Sepia Key", key_data)
+        scene.collection.objects.link(key)
+        key_position = style["lighting"]["keyPosition"]
+        key.location = tuple(float(value) for value in key_position)
+        key.rotation_euler = (Vector((0.0, 0.0, 0.0)) - key.location).to_track_quat("-Z", "Y").to_euler()
+        flicker = random.Random(int(spec.get("randomSeed", 0)) ^ 0x5F3759DF)
+        for frame in range(1, int(spec["durationFrames"]) + 1, 3):
+            key_data.energy = float(style["lighting"]["keyEnergy"]) * (1.0 + flicker.uniform(-0.045, 0.045))
+            key_data.keyframe_insert(data_path="energy", frame=frame)
+        set_constant_interpolation(key_data, "energy")
 
-    key_data = bpy.data.lights.new("Soft Sepia Key", type="AREA")
-    key_data.energy = float(spec["style"]["lighting"]["keyEnergy"])
-    key_data.use_shadow = shadow_quality != "off"
-    key_data.shape = "DISK"
-    key_data.size = float(spec["style"]["lighting"]["keySize"])
-    key_data.color = tuple(float(value) for value in spec["style"]["lighting"]["keyColor"])
-    key = bpy.data.objects.new("Soft Sepia Key", key_data)
-    scene.collection.objects.link(key)
-    key_position = spec["style"]["lighting"]["keyPosition"]
-    key.location = tuple(float(value) for value in key_position)
-    key.rotation_euler = (Vector((0.0, 0.0, 0.0)) - key.location).to_track_quat("-Z", "Y").to_euler()
-    flicker = random.Random(int(spec.get("randomSeed", 0)) ^ 0x5F3759DF)
-    for frame in range(1, int(spec["durationFrames"]) + 1, 3):
-        key_data.energy = float(spec["style"]["lighting"]["keyEnergy"]) * (1.0 + flicker.uniform(-0.045, 0.045))
-        key_data.keyframe_insert(data_path="energy", frame=frame)
-    set_constant_interpolation(key_data, "energy")
-
-    fill_data = bpy.data.lights.new("Graphite bounce fill", type="AREA")
-    fill_data.energy = float(spec["style"]["lighting"]["keyEnergy"]) * 0.38
-    fill_data.use_shadow = shadow_quality == "high"
-    fill_data.size = 5.0
-    fill_data.color = (0.68, 0.65, 0.6)
-    fill = bpy.data.objects.new("Graphite bounce fill", fill_data)
-    scene.collection.objects.link(fill)
-    fill.location = (2.8, -2.0, 2.0)
-    fill.rotation_euler = (Vector((0.0, 0.0, 0.0)) - fill.location).to_track_quat("-Z", "Y").to_euler()
-
-    for light_spec in sorted(spec.get("lights", []), key=lambda item: item["id"]):
+        fill_data = bpy.data.lights.new("Graphite bounce fill", type="AREA")
+        fill_data.energy = float(style["lighting"]["keyEnergy"]) * 0.38
+        fill_data.use_shadow = shadow_quality == "high"
+        fill_data.size = 5.0
+        fill_data.color = (0.68, 0.65, 0.6)
+        fill = bpy.data.objects.new("Graphite bounce fill", fill_data)
+        scene.collection.objects.link(fill)
+        fill.location = (2.8, -2.0, 2.0)
+        fill.rotation_euler = (Vector((0.0, 0.0, 0.0)) - fill.location).to_track_quat("-Z", "Y").to_euler()
+    lights = spec.get("lights", [])
+    if shading != "charcoal" and visual.get("defaultLights", not lights):
+        lights = [*lights, {
+            "id": "studio.default", "type": "area", "energy": 140,
+            "size": 4, "color": (1, 0.95, 0.9),
+            "position": {"x": -2.5, "y": -3.5, "z": 4},
+            "target": {"x": 0, "y": 0, "z": 1},
+        }]
+    for light_spec in sorted(lights, key=lambda item: item["id"]):
         light_type = light_spec["type"].upper()
         light_data = bpy.data.lights.new("Prepared Light | " + light_spec["id"], type=light_type)
         light_data.energy = float(light_spec["energy"])
-        light_data.use_shadow = shadow_quality != "off" and shadow_quality == "high"
+        light_data.use_shadow = shadow_quality != "off" and light_spec.get("shadows", shadow_quality == "high")
         light_data.color = tuple(float(value) for value in light_spec["color"])
         if light_type == "AREA":
             light_data.shape = "DISK"
@@ -244,14 +244,17 @@ def create_scene(spec):
             light_data.shadow_soft_size = float(light_spec["radius"])
         elif light_type == "SPOT":
             light_data.spot_size = float(light_spec["coneAngleRadians"])
+            light_data.spot_blend = light_spec.get("blend", light_data.spot_blend)
+        elif light_type == "SUN":
+            light_data.angle = light_spec["angularDiameterRadians"]
         light_object = bpy.data.objects.new("Prepared Light | " + light_spec["id"], light_data)
         scene.collection.objects.link(light_object)
         light_object.location = tuple(float(light_spec["position"][axis]) for axis in ("x", "y", "z"))
         light_target = Vector(tuple(float(light_spec["target"][axis]) for axis in ("x", "y", "z")))
         light_object.rotation_euler = (light_target - light_object.location).to_track_quat("-Z", "Y").to_euler()
-        if spec["style"].get("version") == "2.0.0" and "lantern" in light_spec["id"].lower():
-            rate = float(spec["style"].get("frameRate", 30.0))
-            boil_rate = float(spec["style"].get("boilFps", 12.0))
+        if shading == "charcoal" and profile["version"] == "2.0.0" and "lantern" in light_spec["id"].lower():
+            rate = spec["frameRate"]["numerator"] / spec["frameRate"]["denominator"]
+            boil_rate = float(style.get("boilFps", 12.0))
             for frame in range(1, int(spec["durationFrames"]) + 1):
                 index = math.floor(frame * boil_rate / rate)
                 prior = math.floor((frame - 1) * boil_rate / rate)
@@ -337,6 +340,7 @@ def create_scene(spec):
     scene.frame_set(1)
     bpy.context.view_layer.update()
     scene.frame_set(1)
+    apply_material_style(scene, shading, visual)
     return scene, entity_roots, control_objects
 
 def bind_authoritative_rig(control_objects):

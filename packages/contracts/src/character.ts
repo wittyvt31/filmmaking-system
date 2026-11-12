@@ -8,7 +8,8 @@ import {
   MotionLayerSchema,
   type SampledSkeletalMotion,
 } from './skeletal-motion.js';
-import { SceneTransformSchema, UnitColorSchema } from './shared-internal.js';
+import { SceneTransformSchema } from './shared-internal.js';
+import { CharacterMaterialSchema } from './material.js';
 
 type Vector = readonly [number, number, number];
 type Joint = { id: string; parent?: string; min: Vector; max: Vector };
@@ -70,14 +71,6 @@ const BodySchema = z
     path: ['hipWidth'],
     message: 'Hip width must be at most 1.25 times shoulder width',
   });
-
-const CharacterMaterialSchema = z
-  .object({
-    color: UnitColorSchema,
-    roughness: z.number().min(0).max(1).default(0.72),
-    metallic: z.number().min(0).max(1).default(0),
-  })
-  .strict();
 
 const SourceSchema = z.discriminatedUnion('kind', [
   z

@@ -36,9 +36,12 @@ describe('renderer-independent scene compiler', () => {
     ).toMatchObject({
       id: 'charcoal_horror',
       version: '2.0.0',
-      edgeBreakup: 0.24,
-      shadowSmudge: 0.18,
-      paperWhitePoint: 0.78,
+      shading: 'charcoal',
+      parameters: {
+        edgeBreakup: 0.24,
+        shadowSmudge: 0.18,
+        paperWhitePoint: 0.78,
+      },
     });
     scene['stylePreset'] = 'unregistered_style';
     expect(() =>
