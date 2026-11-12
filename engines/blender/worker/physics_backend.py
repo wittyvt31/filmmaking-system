@@ -75,7 +75,69 @@ def _animation_poses(body, initial, frames, track):
             yield pose[0].lerp(target[0], t), pose[1].slerp(target[1], t)
 
 
-def bake_physics(scene, simulation, object_motion, frames):
+def _joint_object(scene, name, pose, left, right, kind, disable_collisions, constraints):
+    obj = bpy.data.objects.new(name, None)
+    scene.collection.objects.link(obj)
+    constraints.append(obj)
+    obj.rotation_mode = "QUATERNION"
+    obj.location, obj.rotation_quaternion = pose
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.rigidbody.constraint_add()
+    joint = obj.rigid_body_constraint
+    joint.type = kind
+    joint.object1, joint.object2 = left, right
+    joint.disable_collisions = disable_collisions
+    return obj, joint
+
+
+def _install_joint(scene, spec, endpoints, constraints, action_fcurves):
+    left, left_root = endpoints[spec["bodyA"]]
+    right, right_root = endpoints[spec["bodyB"]]
+    a = _compose(left_root, _pose(spec["anchorA"]))
+    b = _compose(right_root, _pose(spec["anchorB"]))
+    if (a[0] - b[0]).length > 1e-5 or abs(a[1].dot(b[1])) < 1 - 1e-6:
+        raise ValueError("Physics joint bind pose mismatch: " + spec["id"])
+    kind = spec["kind"]
+    constraint_type = "GENERIC"
+    if kind == "fixed" or (kind == "ball" and spec["maximum"] == 0):
+        constraint_type = "FIXED"
+    elif kind == "ball":
+        constraint_type = "POINT"
+    _, joint = _joint_object(scene, spec["id"], a, left, right, constraint_type,
+                             not spec["collideConnected"], constraints)
+    if constraint_type == "GENERIC":
+        for axis in "xyz":
+            for prefix, unlocked in (("lin", kind == "slider"), ("ang", kind == "hinge")):
+                movable = axis == "x" and unlocked
+                lower, upper = spec["minimum"], spec["maximum"]
+                if prefix == "ang":
+                    # Bullet's generic angular coordinate is A relative to B.
+                    lower, upper = -upper, -lower
+                setattr(joint, "use_limit_" + prefix + "_" + axis, True)
+                setattr(joint, "limit_" + prefix + "_" + axis + "_lower", lower if movable else 0)
+                setattr(joint, "limit_" + prefix + "_" + axis + "_upper", upper if movable else 0)
+    if "motor" in spec:
+        obj, motor = _joint_object(scene, spec["id"] + " motor", a, left, right, "MOTOR",
+                                   not spec["collideConnected"], constraints)
+        axis = "ang" if kind == "hinge" else "lin"
+        setattr(motor, "use_motor_" + axis, True)
+        setattr(motor, "motor_" + axis + "_max_impulse", spec["maxMotorImpulse"])
+        field = "motor_" + axis + "_target_velocity"
+        limit = spec["motor"]["maxRate"]
+        keys = {0: spec["motor"]["velocity"]}
+        keys.update({key["frame"]: key["velocity"] for key in spec["motorKeys"]})
+        for frame, velocity in sorted(keys.items()):
+            # Bullet motors drive A relative to B; Filmie describes B relative to A.
+            setattr(motor, field, -max(-limit, min(limit, velocity)))
+            if len(keys) > 1:
+                obj.keyframe_insert(data_path="rigid_body_constraint." + field, frame=frame + 1)
+        if len(keys) > 1:
+            for curve in action_fcurves(obj.animation_data.action):
+                for key in curve.keyframe_points:
+                    key.interpolation = "LINEAR"
+
+
+def bake_physics(scene, simulation, object_motion, frames, action_fcurves):
     """Return one world-space root pose per frame per moving entity."""
     if simulation["version"] != 1:
         raise ValueError("Unsupported physics simulation version")
@@ -94,27 +156,36 @@ def bake_physics(scene, simulation, object_motion, frames):
     tracks = {track["objectId"]: track["poses"] for track in object_motion}
     proxies = []
     active = {}
+    authored_poses = {}
+    endpoints = {}
+    constraints = []
     baked = {}
     try:
         for body in simulation["bodies"]:
             entity = body["entityId"]
             initial = _pose(body["initialPose"])
             properties = body["properties"]
+            poses = list(_animation_poses(body, initial, frames, tracks.get(entity))) if properties["mode"] != "static" else []
             for collider in body["colliders"]:
                 offset = _pose(collider["pose"])
                 proxy = _proxy(scene, collider, properties)
                 proxies.append(proxy)
-                proxy.location, proxy.rotation_quaternion = _compose(initial, offset)
+                bind_pose = poses[0] if poses else initial
+                proxy.location, proxy.rotation_quaternion = _compose(bind_pose, offset)
+                endpoints[entity] = (proxy, bind_pose)
                 if properties["mode"] == "static":
                     continue
                 active[entity] = (proxy, _inverse(offset))
                 baked[entity] = []
+                authored_poses[entity] = {}
                 modes = {change["frame"]: change["mode"] for change in body["transitions"]}
                 mode = properties["mode"]
                 previous_rotation = None
-                for frame, pose in enumerate(_animation_poses(body, initial, frames, tracks.get(entity))):
+                for frame, pose in enumerate(poses):
                     mode = modes.get(frame, mode)
                     proxy.rigid_body.kinematic = mode == "kinematic"
+                    if mode == "kinematic":
+                        authored_poses[entity][frame + 1] = pose
                     proxy.location, rotation = _compose(pose, offset)
                     if previous_rotation is not None:
                         rotation.make_compatible(previous_rotation)
@@ -123,11 +194,19 @@ def bake_physics(scene, simulation, object_motion, frames):
                     proxy.keyframe_insert(data_path="rigid_body.kinematic", frame=frame + 1)
                     proxy.keyframe_insert(data_path="location", frame=frame + 1)
                     proxy.keyframe_insert(data_path="rotation_quaternion", frame=frame + 1)
+                proxy.location, proxy.rotation_quaternion = _compose(bind_pose, offset)
+                proxy.rigid_body.kinematic = properties["mode"] == "kinematic"
+        bpy.context.view_layer.update()
+        for joint in simulation.get("joints", []):
+            _install_joint(scene, joint, endpoints, constraints, action_fcurves)
         # Bullet must see the entire timeline in order, even for a partial render.
         for frame in range(1, frames + 1):
             scene.frame_set(frame)
             depsgraph = bpy.context.evaluated_depsgraph_get()
             for entity, (proxy, inverse_offset) in active.items():
+                if frame in authored_poses[entity]:
+                    baked[entity].append(authored_poses[entity][frame])
+                    continue
                 matrix = proxy.evaluated_get(depsgraph).matrix_world
                 position, rotation = _compose(
                     (matrix.translation, matrix.to_quaternion()), inverse_offset
@@ -136,6 +215,8 @@ def bake_physics(scene, simulation, object_motion, frames):
         return baked
     finally:
         bpy.ops.rigidbody.world_remove()
+        for constraint in constraints:
+            bpy.data.objects.remove(constraint, do_unlink=True)
         for proxy in proxies:
             mesh = proxy.data
             bpy.data.objects.remove(proxy, do_unlink=True)

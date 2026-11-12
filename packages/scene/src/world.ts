@@ -247,6 +247,9 @@ export function compileWorld(world: World): CompiledWorld {
   const geometry = {
     schemaVersion: world.schemaVersion,
     ...(world.physics ? { physics: world.physics } : {}),
+    ...(world.joints?.length
+      ? { joints: [...world.joints].sort((a, b) => compareStrings(a.id, b.id)) }
+      : {}),
     materials: ordered(world.materials),
     ...(world.meshes?.length ? { meshes: ordered(world.meshes) } : {}),
     ...(world.assemblies?.length

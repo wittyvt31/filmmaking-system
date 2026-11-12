@@ -25,3 +25,4 @@ export * from './contact-response.js';
 export * from './retargeting.js';
 export * from './secondary-motion.js';
 export * from './articulated-dynamics.js';
+export * from './world-joints.js';

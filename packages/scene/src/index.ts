@@ -28,6 +28,7 @@ import { constrainMotion } from './spatial-constraints.js';
 import { compileInteractions } from './compile-interactions.js';
 import { compileContacts } from './compile-contacts.js';
 import { compilePhysics } from './physics.js';
+import { bakeCharacterFollowers } from './physics-followers.js';
 import { compileCinematography } from './cinematography.js';
 import { attachFacialRig, compileFacialPerformance } from './facial.js';
 export * from './collision.js';
@@ -48,7 +49,7 @@ export { prepareCharacter } from './character.js';
 export { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
 export { filmPlane, projectCameraPoint } from './camera-math.js';
 
-export const SCENE_COMPILER_VERSION = 'scene-compiler-v14';
+export const SCENE_COMPILER_VERSION = 'scene-compiler-v15';
 export const SEMANTIC_ANIMATION_LIBRARY_VERSION = '1.0.0';
 
 export type CompiledScene = CompiledSceneInstruction;
@@ -336,6 +337,13 @@ export function compileScene(
               );
               secondaryMotionTracks.push({
                 ownerId: character.id,
+                bindings: prepared.secondaryMotion.nodes
+                  .filter((node) => node.kind === 'attachment')
+                  .map((node) => ({
+                    nodeId: node.id,
+                    target: 'control',
+                    space: 'local',
+                  })),
                 frames: bakeSecondaryMotion({
                   config: {
                     frameCount: shot.durationFrames,
@@ -354,7 +362,15 @@ export function compileScene(
                 }),
               });
             }
-            return { ...prepared, sampledMotion: secondaryMotion };
+            return {
+              ...prepared,
+              sampledMotion: {
+                ...secondaryMotion,
+                joints: secondaryMotion.joints.filter((track) =>
+                  boneIds.has(track.joint),
+                ),
+              },
+            };
           })()
         : {
             ...character,
@@ -389,6 +405,18 @@ export function compileScene(
         const root = entity.secondaryMotion.nodes.find(
           (node) => !node.parentId,
         );
+        if (
+          !root ||
+          entity.secondaryMotion.nodes.filter((node) => !node.parentId)
+            .length !== 1
+        )
+          throw new TypeError(
+            'World secondary motion requires exactly one root on ' + entity.id,
+          );
+        const body = physics?.bodies.find(
+          (candidate) => candidate.entityId === entity.id,
+        );
+        const ownsRoot = !object && !body;
         if (root && object)
           object.forEach((pose, frame) =>
             authored.push({ nodeId: root.id, frame, pose }),
@@ -402,19 +430,46 @@ export function compileScene(
               solverIterations: entity.secondaryMotion.solverIterations,
               deterministicSeed: entity.secondaryMotion.deterministicSeed,
             },
-            nodes: entity.secondaryMotion.nodes,
+            nodes: entity.secondaryMotion.nodes.map((node) =>
+              node === root && !ownsRoot
+                ? {
+                    ...node,
+                    anchored: true,
+                    restPose: body?.initialPose ?? node.restPose,
+                  }
+                : node,
+            ),
             colliders: [
               ...entity.secondaryMotion.colliders,
               ...(world
-                ? worldCollisionProxies(world).filter(
-                    (proxy) => proxy.entityId !== entity.id,
-                  )
+                ? worldCollisionProxies(world)
+                    .filter(
+                      (proxy) =>
+                        proxy.entityId !== entity.id &&
+                        !physics?.bodies.some(
+                          (body) =>
+                            body.entityId === proxy.entityId &&
+                            body.properties.mode !== 'static',
+                        ),
+                    )
+                    .map(({ id, shape, pose }) => ({ id, shape, pose }))
                 : []),
             ],
           },
           authored,
         });
-        return [{ ownerId: entity.id, frames }];
+        const bindings: (typeof secondaryMotionTracks)[number]['bindings'] = [];
+        for (const node of entity.secondaryMotion.nodes) {
+          if (node !== root)
+            bindings.push({
+              nodeId: node.id,
+              target: 'control',
+              space: 'local',
+            });
+          else if (ownsRoot)
+            bindings.push({ nodeId: node.id, target: 'root', space: 'world' });
+        }
+        return [{ ownerId: entity.id, frames, bindings }];
       })
     : [];
   secondaryMotionTracks.push(...worldSecondaryMotion);
@@ -449,6 +504,8 @@ export function compileScene(
     protectedConstraints,
     facialRigs,
   );
+  if (physics)
+    bakeCharacterFollowers(physics, targetScene, shot.durationFrames);
   const cinematography =
     scene.camera.type === 'rigs'
       ? compileCinematography(
@@ -473,6 +530,9 @@ export function compileScene(
     ...(physics ? { physics } : {}),
     characters,
     ...(objectMotion ? { objectMotion } : {}),
+    ...(secondaryMotionTracks.length
+      ? { secondaryMotion: secondaryMotionTracks }
+      : {}),
     props: [...scene.props].sort((left, right) =>
       compareStrings(left.id, right.id),
     ),

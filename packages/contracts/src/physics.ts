@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { WorldPhysicalJoint } from './world-joints.js';
 import { StableIdSchema } from './identifiers.js';
 import { MotionVectorSchema } from './skeletal-motion.js';
 import { RigidTransformSchema, type RigidTransform } from './interactions.js';
@@ -45,6 +46,14 @@ export const RigidBodySchema = z
     linearDamping: fraction.default(0.04),
     angularDamping: fraction.default(0.1),
     releaseOnInteraction: z.boolean().default(false),
+    followCharacter: z
+      .object({
+        characterId: StableIdSchema,
+        joint: StableIdSchema.optional(),
+        offset: RigidTransformSchema,
+      })
+      .strict()
+      .optional(),
     transitions: z
       .array(z.object({ frame, mode: movableMode }).strict())
       .max(128)
@@ -75,15 +84,17 @@ export type RigidBody = z.infer<typeof RigidBodySchema>;
 export interface PhysicsSimulation {
   version: 1;
   settings: PhysicsSettings;
+  joints?: WorldPhysicalJoint[];
   bodies: {
     entityId: string;
     initialPose: RigidTransform;
     properties: Omit<
       RigidBody,
-      'keyframes' | 'transitions' | 'releaseOnInteraction'
+      'keyframes' | 'transitions' | 'releaseOnInteraction' | 'followCharacter'
     >;
     colliders: CollisionProxy[];
     transitions: RigidBody['transitions'];
     keyframes: RigidBody['keyframes'];
+    followCharacter?: NonNullable<RigidBody['followCharacter']>;
   }[];
 }

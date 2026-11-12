@@ -968,3 +968,12 @@ it('validates the skeletal retargeting reference in Studio', async () => {
     shots: 1,
   });
 });
+
+it('loads and validates the articulated dynamics Studio reference', async () => {
+  const { path, text } = await createProject('articulated-dynamics');
+  expect(await request(path + '/validate', { text })).toEqual({
+    issues: [],
+    frames: 90,
+    shots: 1,
+  });
+});

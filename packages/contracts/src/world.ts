@@ -1,4 +1,8 @@
 import { z } from 'zod';
+import {
+  WorldPhysicalJointSchema,
+  type WorldPhysicalJoint,
+} from './world-joints.js';
 import { AssetVersionReferenceSchema, StableIdSchema } from './identifiers.js';
 import { SceneTransformSchema } from './shared-internal.js';
 import { MaterialSchema } from './material.js';
@@ -187,6 +191,7 @@ export const WorldSchema = z
   .object({
     schemaVersion: z.literal(1),
     physics: PhysicsSettingsSchema.optional(),
+    joints: z.array(WorldPhysicalJointSchema).max(512).optional(),
     materials: z.array(MaterialSchema).max(256).default([]),
     meshes: z.array(MeshDefinitionSchema).max(256).optional(),
     assemblies: z.array(AssemblyDefinitionSchema).max(128).optional(),
@@ -354,5 +359,6 @@ export interface CompiledWorld {
   assemblies?: NonNullable<World['assemblies']>;
   entities: CompiledWorldEntity[];
   physics?: PhysicsSettings;
+  joints?: WorldPhysicalJoint[];
   sha256: string;
 }

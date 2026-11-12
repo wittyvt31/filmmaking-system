@@ -9,7 +9,7 @@ import traceback
 import struct
 
 import bpy
-from mathutils import Euler, Matrix, Vector
+from mathutils import Euler, Matrix, Quaternion, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from world_builder import build_world
@@ -909,27 +909,58 @@ def apply_motion_curves(spec, control_objects, entity_roots):
             control.keyframe_insert(data_path=property_name, frame=frame)
 
 def apply_secondary_motion(spec, control_objects, entity_roots):
+    scene = bpy.context.scene
     for track in spec.get("secondaryMotion", []):
         owner_id = track["ownerId"]
-        frames = track["frames"]
-        for frame_data in frames:
-            frame = int(frame_data["frame"]) + 1
-            for pose in frame_data["poses"]:
-                node_id = pose["nodeId"]
+        root = entity_roots[owner_id]
+        bindings = {}
+        for binding in track["bindings"]:
+            node_id = binding["nodeId"]
+            if binding["target"] == "root":
+                control = root
+            else:
                 control = control_objects.get(owner_id, {}).get(node_id)
-                if control is None and pose["local"]["position"] == pose["world"]["position"]:
-                    control = entity_roots.get(owner_id)
                 if control is None:
-                    raise RuntimeError(
-                        "Secondary motion requires missing semantic control "
-                        + owner_id + "/" + node_id
-                    )
-                value = pose["local"] if control_objects.get(owner_id, {}).get(node_id) else pose["world"]
-                control.location = tuple(float(component) for component in value["position"])
+                    matches = [obj for obj in root.children_recursive
+                               if node_id in (obj.get("filmie_world_part"), obj.get("filmie_control_id"))]
+                    if len(matches) != 1:
+                        raise RuntimeError(f"Secondary motion requires one control {owner_id}/{node_id}")
+                    control = matches[0]
+                if control == root:
+                    raise RuntimeError(f"Secondary control {owner_id}/{node_id} aliases its owner root")
+            if any(obj == control for obj, _ in bindings.values()):
+                raise RuntimeError(f"Multiple secondary tracks resolve to {control.name}")
+            bindings[node_id] = control, binding["space"]
+        previous = {}
+        parented_world = any(space == "world" and control.parent for control, space in bindings.values())
+        for frame_data in track["frames"]:
+            frame = int(frame_data["frame"]) + 1
+            if parented_world:
+                scene.frame_set(frame)
+            for pose in frame_data["poses"]:
+                if pose["nodeId"] not in bindings:
+                    continue
+                control, space = bindings[pose["nodeId"]]
+                value = pose[space]
+                location, rotation = Vector(value["position"]), Quaternion(value["rotation"])
+                if space == "world" and control.parent:
+                    parent = control.parent.matrix_world @ control.matrix_parent_inverse
+                    location = parent.inverted() @ location
+                    rotation = parent.to_quaternion().inverted() @ rotation
+                if control.name in previous:
+                    rotation.make_compatible(previous[control.name])
+                previous[control.name] = rotation.copy()
+                control.location = location
                 control.rotation_mode = "QUATERNION"
-                control.rotation_quaternion = tuple(float(component) for component in value["rotation"])
+                control.rotation_quaternion = rotation
                 control.keyframe_insert(data_path="location", frame=frame)
                 control.keyframe_insert(data_path="rotation_quaternion", frame=frame)
+        for control, _ in bindings.values():
+            for curve in action_fcurves(control.animation_data.action):
+                if curve.data_path in ("location", "rotation_quaternion"):
+                    for key in curve.keyframe_points:
+                        key.interpolation = "LINEAR"
+    scene.frame_set(1)
 
 def main():
     spec = read_spec()
@@ -948,9 +979,10 @@ def main():
     try:
         apply_actions(spec, entity_roots, control_objects)
         apply_motion_curves(spec, control_objects, entity_roots)
-        apply_secondary_motion(spec, control_objects, entity_roots)
+        roots = {obj["filmie_entity_id"]: obj for obj in scene.objects if "filmie_entity_id" in obj}
+        apply_secondary_motion(spec, control_objects, roots | entity_roots)
         if spec.get("physics"):
-            baked = bake_physics(scene, spec["physics"], spec.get("objectMotion", []), int(spec["durationFrames"]))
+            baked = bake_physics(scene, spec["physics"], spec.get("objectMotion", []), int(spec["durationFrames"]), action_fcurves)
             apply_physics_bake(scene, baked, action_fcurves)
     except RuntimeError as error:
         raise RigCapabilityError("Could not prepare semantic animation: " + str(error)) from error

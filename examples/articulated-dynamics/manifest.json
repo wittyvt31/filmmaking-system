@@ -1,0 +1,401 @@
+{
+  "projectId": "filmie.articulated-dynamics",
+  "version": "1.0.0",
+  "video": {
+    "resolution": {
+      "width": 320,
+      "height": 180
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    }
+  },
+  "renderPolicy": {
+    "outputDimensions": {
+      "width": 320,
+      "height": 180
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": {
+      "mode": "crf",
+      "value": 22
+    },
+    "renderer": {
+      "id": "blender",
+      "config": {
+        "engine": "BLENDER_EEVEE",
+        "samples": 4
+      }
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.joints",
+      "durationFrames": 90,
+      "visualDescription": "A held hatch releases onto a stop while a motor moves a carriage along its rail.",
+      "composition": {
+        "framing": "Wide mechanical study",
+        "subjectPlacement": "Hatch left and carriage right",
+        "cameraMovement": "Static",
+        "instructions": []
+      },
+      "requiredAssets": [],
+      "scene": {
+        "stylePreset": "stylized_3d",
+        "styleVersion": "1.0.0",
+        "lights": [
+          {
+            "id": "study.key",
+            "type": "area",
+            "position": {
+              "x": -2.6,
+              "y": -2.7,
+              "z": 3.25
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 135,
+            "color": [1, 0.91, 0.82],
+            "size": 3
+          },
+          {
+            "id": "study.fill",
+            "type": "area",
+            "position": {
+              "x": 2.8,
+              "y": -1.85,
+              "z": 2.3
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 75,
+            "color": [0.83, 0.91, 1],
+            "size": 2.7
+          },
+          {
+            "id": "study.rim",
+            "type": "area",
+            "position": {
+              "x": 1.2,
+              "y": 1.55,
+              "z": 2.85
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 100,
+            "color": [1, 0.92, 0.78],
+            "size": 2
+          },
+          {
+            "id": "study.sun",
+            "type": "sun",
+            "energy": 0.35,
+            "angularDiameterRadians": 0.15,
+            "shadows": false,
+            "color": [0.74, 0.85, 1],
+            "position": {
+              "x": 1,
+              "y": -1,
+              "z": 2
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          }
+        ],
+        "camera": {
+          "type": "static",
+          "distance": 6,
+          "target": {
+            "x": 0,
+            "y": 0,
+            "z": 0.85
+          },
+          "focalLength": 40
+        },
+        "world": {
+          "schemaVersion": 1,
+          "physics": {
+            "substeps": 8,
+            "solverIterations": 35
+          },
+          "materials": [
+            {
+              "id": "base",
+              "color": [0.23, 0.27, 0.31],
+              "roughness": 0.8
+            },
+            {
+              "id": "hatch",
+              "color": [0.82, 0.3, 0.12],
+              "roughness": 0.48
+            },
+            {
+              "id": "carriage",
+              "color": [0.13, 0.56, 0.74],
+              "roughness": 0.45
+            }
+          ],
+          "entities": [
+            {
+              "id": "floor",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": -0.1
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 6,
+                  "y": 4,
+                  "z": 0.2
+                },
+                "materialId": "base"
+              }
+            },
+            {
+              "id": "hinge-post",
+              "transform": {
+                "position": {
+                  "x": -1.25,
+                  "y": 0,
+                  "z": 0.78
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.7,
+                  "y": 0.18,
+                  "z": 0.18
+                },
+                "materialId": "base"
+              }
+            },
+            {
+              "id": "hatch",
+              "transform": {
+                "position": {
+                  "x": -1.25,
+                  "y": -0.48,
+                  "z": 0.78
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.65,
+                  "y": 0.96,
+                  "z": 0.09
+                },
+                "materialId": "hatch"
+              },
+              "physics": {
+                "mode": "kinematic",
+                "transitions": [
+                  {
+                    "frame": 12,
+                    "mode": "dynamic"
+                  }
+                ],
+                "angularDamping": 0.7
+              }
+            },
+            {
+              "id": "stop",
+              "transform": {
+                "position": {
+                  "x": -1.25,
+                  "y": -0.42,
+                  "z": 0.19
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.55,
+                  "y": 0.28,
+                  "z": 0.38
+                },
+                "materialId": "base"
+              }
+            },
+            {
+              "id": "rail",
+              "transform": {
+                "position": {
+                  "x": 1,
+                  "y": 0,
+                  "z": 0.25
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 2,
+                  "y": 0.28,
+                  "z": 0.15
+                },
+                "materialId": "base"
+              }
+            },
+            {
+              "id": "carriage",
+              "transform": {
+                "position": {
+                  "x": 1,
+                  "y": 0,
+                  "z": 0.47
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.38,
+                  "y": 0.42,
+                  "z": 0.28
+                },
+                "materialId": "carriage"
+              },
+              "physics": {
+                "mode": "dynamic",
+                "linearDamping": 0.2
+              }
+            }
+          ],
+          "joints": [
+            {
+              "id": "hatch-hinge",
+              "kind": "hinge",
+              "bodyA": "hinge-post",
+              "bodyB": "hatch",
+              "anchorA": {
+                "position": [0, 0, 0],
+                "rotation": [1, 0, 0, 0]
+              },
+              "anchorB": {
+                "position": [0, 0.48, 0],
+                "rotation": [1, 0, 0, 0]
+              },
+              "minimum": -0.25,
+              "maximum": 1.3
+            },
+            {
+              "id": "carriage-slider",
+              "kind": "slider",
+              "bodyA": "rail",
+              "bodyB": "carriage",
+              "anchorA": {
+                "position": [0, 0, 0.22],
+                "rotation": [1, 0, 0, 0]
+              },
+              "anchorB": {
+                "position": [0, 0, 0],
+                "rotation": [1, 0, 0, 0]
+              },
+              "minimum": -0.65,
+              "maximum": 0.32,
+              "motor": {
+                "velocity": 0.55,
+                "maxRate": 0.8
+              },
+              "maxMotorImpulse": 8,
+              "motorKeys": [
+                {
+                  "frame": 30,
+                  "velocity": 0.55
+                },
+                {
+                  "frame": 42,
+                  "velocity": -0.55
+                },
+                {
+                  "frame": 67,
+                  "velocity": -0.55
+                },
+                {
+                  "frame": 77,
+                  "velocity": 0
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "durationFrames": 90,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [
+          {
+            "shotId": "shot.joints",
+            "startFrame": 0
+          }
+        ]
+      }
+    ],
+    "audioTracks": [],
+    "transitions": []
+  }
+}

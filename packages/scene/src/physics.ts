@@ -6,7 +6,11 @@ import {
   type PhysicsSimulation,
 } from '@filmmaking/contracts';
 import { worldCollisionProxies, worldEntityTransforms } from './collision.js';
-import { composeTransform, inverseTransform } from './rigid-transforms.js';
+import {
+  composeTransform,
+  inverseTransform,
+  angularDistance,
+} from './rigid-transforms.js';
 
 export function compilePhysics(
   world: CompiledWorld | undefined,
@@ -16,6 +20,7 @@ export function compilePhysics(
   if (
     !world ||
     (!world.physics &&
+      !world.joints?.length &&
       !world.entities.some(
         ({ physics }) =>
           physics &&
@@ -49,6 +54,7 @@ export function compilePhysics(
       transitions,
       keyframes,
       releaseOnInteraction,
+      followCharacter,
       ...properties
     } = entity.physics ?? RigidBodySchema.parse({});
     const binding = bindings.get(entity.id);
@@ -56,6 +62,18 @@ export function compilePhysics(
     const fail = (message: string): never => {
       throw new TypeError(`Physics body ${entity.id}: ${message}`);
     };
+    if (
+      followCharacter &&
+      (mode !== 'kinematic' ||
+        binding ||
+        keyframes.length ||
+        releaseOnInteraction ||
+        transitions.length > 1 ||
+        transitions.some((t) => t.mode !== 'dynamic'))
+    )
+      fail(
+        'character following requires exclusive kinematic ownership with at most one dynamic release',
+      );
     if (!colliders.length) {
       if (
         mode !== 'static' ||
@@ -134,6 +152,7 @@ export function compilePhysics(
       })),
       transitions: schedule,
       keyframes: keys,
+      ...(followCharacter ? { followCharacter } : {}),
     });
   }
   if (
@@ -141,7 +160,47 @@ export function compilePhysics(
     250_000
   )
     throw new TypeError('Physics simulation exceeds the motion sample budget');
+  const bodyById = new Map(bodies.map((body) => [body.entityId, body]));
+  const jointIds = new Set<string>();
+  for (const joint of world.joints ?? []) {
+    const a = bodyById.get(joint.bodyA);
+    const b = bodyById.get(joint.bodyB);
+    const label = 'Physics joint ' + joint.id + ': ';
+    if (jointIds.has(joint.id))
+      throw new TypeError(label + 'duplicate joint ID');
+    jointIds.add(joint.id);
+    if (!a || !b || a.colliders.length !== 1 || b.colliders.length !== 1)
+      throw new TypeError(
+        label + 'each endpoint requires exactly one collision proxy',
+      );
+    if (a.properties.mode === 'static' && b.properties.mode === 'static')
+      throw new TypeError(label + 'requires at least one moving body');
+    if (joint.motorKeys.some(({ frame }) => frame >= frames))
+      throw new TypeError(label + 'motor key is outside the shot');
+    if (joint.minimum > 0 || joint.maximum < 0)
+      throw new TypeError(
+        label + 'limits must include the bind coordinate zero',
+      );
+    const bind = (body: typeof a, anchor: typeof joint.anchorA) =>
+      composeTransform(
+        body.keyframes[0]?.frame === 0
+          ? body.keyframes[0].pose
+          : body.initialPose,
+        anchor,
+      );
+    const left = bind(a, joint.anchorA);
+    const right = bind(b, joint.anchorB);
+    if (
+      Math.hypot(...left.position.map((v, i) => v - right.position[i]!)) >
+        1e-5 ||
+      angularDistance(left.rotation, right.rotation) > 1e-5
+    )
+      throw new TypeError(
+        label + 'anchors must share a world pose at bind time',
+      );
+  }
   return {
+    ...(world.joints?.length ? { joints: world.joints } : {}),
     version: 1,
     settings: world.physics ?? PhysicsSettingsSchema.parse({}),
     bodies,

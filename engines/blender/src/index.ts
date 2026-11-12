@@ -1042,6 +1042,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
           };
         }),
         objectMotion: scene.objectMotion ?? [],
+        secondaryMotion: scene.secondaryMotion ?? [],
         ...(scene.physics ? { physics: scene.physics } : {}),
         props: scene.props.map((prop) => ({
           ...prop,

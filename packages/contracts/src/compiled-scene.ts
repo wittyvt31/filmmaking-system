@@ -25,6 +25,11 @@ export interface CompiledSceneInstruction {
   objectMotion?: { objectId: string; poses: RigidTransform[] }[];
   secondaryMotion?: {
     ownerId: string;
+    bindings: {
+      nodeId: string;
+      target: 'root' | 'control';
+      space: 'world' | 'local';
+    }[];
     frames: SecondaryMotionFrame[];
   }[];
   characters: (
