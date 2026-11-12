@@ -302,7 +302,7 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
 );
 
 it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
-  'renders coordinated partner contacts and reuses the Studio cache',
+  'renders coordinated partner contacts and reactions and reuses the Studio cache',
   async () => {
     const { path, revision, text } = await createProject('humanoid-animation');
     const input = JSON.parse(text);
@@ -362,6 +362,18 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
           'scene.frame_set(61)',
           'error = (anchor(a, "hand.R") - anchor(b, "chest", (-0.13,-0.15,0.15))).length',
           'assert error < 0.022, error',
+          'def response(frame):\n    scene.frame_set(frame+1)\n    return b.matrix_world.translation.copy(), anchor(b, "foot.R"), anchor(b, "foot.L")',
+          'before = response(60)',
+          'peak = response(66)',
+          'swing = response(69)',
+          'plant = response(73)',
+          'recovery = response(82)',
+          'assert peak[0].x - before[0].x > 0.025',
+          'assert swing[1].z - before[1].z > 0.025',
+          'assert plant[1].x - before[1].x > 0.025',
+          'assert (plant[2] - before[2]).length < 0.015',
+          'assert abs(recovery[0].x - before[0].x) < 0.012',
+          'assert (recovery[1] - before[1]).length < 0.012',
           'end = hands(95)',
           'assert (end[0] - end[1]).length > 0.5',
           'assert (hands(35)[0] - high[0]).length < 1e-6',

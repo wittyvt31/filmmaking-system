@@ -10,14 +10,60 @@ import {
   solveContactFrame,
   bakeContactGraph,
   compileScene,
+  forwardKinematics,
   type ContactParticipant,
 } from '@filmmaking/scene';
+
+it('compiles the calculated shove and lets authored offsets replace it', () => {
+  const manifest = JSON.parse(
+    readFileSync('examples/humanoid-animation/manifest.json', 'utf8'),
+  );
+  const shot = ShotSchema.parse(manifest.shots.at(-1));
+  const fps = { numerator: 30, denominator: 1 };
+  const generated = compileScene(shot, fps);
+  const receiver = generated.characters.find((c) => c.id === 'partner-b')!;
+  if (!('bones' in receiver)) throw new Error('Expected a compiled rig');
+  const motion = receiver.sampledMotion!;
+  expect(motion.rootPosition![66]![0]).toBeGreaterThan(
+    motion.rootPosition![60]![0] + 0.025,
+  );
+  const tailAt = (frame: number) =>
+    forwardKinematics(
+      receiver,
+      new Map(motion.joints.map((t) => [t.joint, t.rotations[frame]!])),
+    ).get('foot.R')!.tail[2];
+  expect(tailAt(69) - tailAt(60)).toBeGreaterThan(0.025);
+  shot.scene!.contactResponse!.authored = [
+    {
+      entityId: 'partner-b',
+      keys: [
+        { frame: 60, offset: [0, 0, 0] },
+        { frame: 66, offset: [0.015, 0, 0] },
+        { frame: 82, offset: [0, 0, 0] },
+      ],
+    },
+  ];
+  const authored = compileScene(shot, fps);
+  const replacement = authored.characters.find((c) => c.id === 'partner-b')!;
+  if (!('bones' in replacement)) throw new Error('Expected a compiled rig');
+  expect(replacement.sampledMotion!.rootPosition![66]![0]).toBeCloseTo(
+    0.525,
+    8,
+  );
+  expect(authored.sha256).not.toBe(generated.sha256);
+  expect(authored.world?.sha256).toBe(generated.world?.sha256);
+  shot.scene!.contactResponse!.loads[0]!.contactId = 'missing-contact';
+  expect(() => compileScene(shot, fps)).toThrow(
+    'Unknown response contact missing-contact',
+  );
+});
 
 it('bakes the reference while preserving locomotion, authored joints and world identity', () => {
   const manifest = JSON.parse(
     readFileSync('examples/humanoid-animation/manifest.json', 'utf8'),
   );
   const shot = ShotSchema.parse(manifest.shots.at(-1));
+  delete shot.scene!.contactResponse;
   const actor = shot.scene!.characters[0]!;
   if (!('source' in actor)) throw new Error('Expected a skeletal character');
   actor.poses.joints.push({

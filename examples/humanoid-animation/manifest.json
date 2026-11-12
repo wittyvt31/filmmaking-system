@@ -2493,13 +2493,8 @@
                   "yawDegrees": -90
                 },
                 {
-                  "frame": 59,
+                  "frame": 83,
                   "position": [0.51, -0.21, 0],
-                  "yawDegrees": -90
-                },
-                {
-                  "frame": 75,
-                  "position": [0.67, -0.21, 0],
                   "yawDegrees": -90
                 },
                 {
@@ -2638,6 +2633,38 @@
               "blendInFrames": 8,
               "blendOutFrames": 7,
               "positionTolerance": 0.016
+            }
+          ]
+        },
+        "contactResponse": {
+          "characters": [
+            {
+              "entityId": "partner-a",
+              "massKg": 70,
+              "rootLocked": true
+            },
+            {
+              "entityId": "partner-b",
+              "massKg": 60,
+              "recoveryFrequencyHz": 0.85,
+              "supportRadiusMeters": 0.012,
+              "maxDisplacementMeters": 0.05,
+              "stagger": {
+                "effector": "foot.R",
+                "chainRoot": "thigh.R",
+                "swingSeconds": 0.17,
+                "holdSeconds": 0.1,
+                "clearanceMeters": 0.05
+              }
+            }
+          ],
+          "loads": [
+            {
+              "contactId": "shove",
+              "impactFrame": 60,
+              "direction": [-1, 0, 0],
+              "impulseNewtonSeconds": 29,
+              "durationSeconds": 0.1
             }
           ]
         }

@@ -2,6 +2,8 @@ import {
   compareStrings,
   type CompiledSceneInstruction,
   type PreparedCharacter,
+  type Rational,
+  type MotionVector,
   type SampledSkeletalMotion,
   type ShotScene,
   type SpatialConstraint,
@@ -13,7 +15,8 @@ import {
 } from './collision.js';
 import { solveContactFrame, type ContactParticipant } from './contact-graph.js';
 import { identity, sameHemisphere } from './motion-math.js';
-import { composeTransform } from './rigid-transforms.js';
+import { composeTransform, inverseTransform } from './rigid-transforms.js';
+import { compileReactions } from './compile-reactions.js';
 
 /** Preserve the effector's entire inherited transform when another pass owns it. */
 function lockEffector(
@@ -34,8 +37,11 @@ export function compileContacts(
   protectedConstraints: ReadonlyMap<string, readonly SpatialConstraint[]>,
   world: CompiledSceneInstruction['world'],
   physics: CompiledSceneInstruction['physics'],
+  rate: Rational,
 ) {
   const graph = scene.contactGraph;
+  if (scene.contactResponse && !graph?.contacts.length)
+    throw new TypeError('Contact response requires a contact graph');
   if (!graph?.contacts.length) return;
   const ids = new Set(
     graph.contacts.flatMap(({ a, b }) => [a.entityId, b.entityId]),
@@ -81,6 +87,7 @@ export function compileContacts(
   const participant = (
     character: PreparedCharacter,
     frame: number,
+    allowFootAdjustment = false,
   ): ContactParticipant => {
     const base = character.sampledMotion;
     const root = sceneTransformPose(character.transform);
@@ -92,7 +99,11 @@ export function compileContacts(
     if (parent) root.position = scaleVector(root.position, parent.scale);
     const locks = new Set(character.poses.joints.map(({ joint }) => joint));
     for (const c of protectedConstraints.get(character.id) ?? [])
-      if (frame >= c.startFrame && frame <= c.endFrame)
+      if (
+        frame >= c.startFrame &&
+        frame <= c.endFrame &&
+        !(allowFootAdjustment && c.id.startsWith('locomotion.'))
+      )
         lockEffector(character, c.effector, locks);
     for (const interaction of scene.interactions)
       if (interaction.characterId === character.id)
@@ -109,24 +120,74 @@ export function compileContacts(
       lockedJoints: locks,
     };
   };
-  for (let frame = 0; frame < frames; frame++) {
-    if (
-      frame !== 0 &&
-      !graph.contacts.some((c) => frame >= c.startFrame && frame <= c.endFrame)
-    )
-      continue;
-    const result = solveContactFrame(
-      graph,
-      actors.map((c) => participant(c, frame)),
-      frame,
-    );
+  const solve = (base: ContactParticipant[], frame: number) => {
+    const result = solveContactFrame(graph, base, frame);
     if (!result.success) {
       const errors = result.contacts.filter((c) => !c.satisfied);
       throw new TypeError(
         `Contact graph unsatisfied at frame ${frame}: ${JSON.stringify(errors)}`,
       );
     }
-    for (const [id, rotations] of result.rotations) {
+    return result.rotations;
+  };
+  const reactions =
+    scene.contactResponse &&
+    compileReactions(
+      scene.contactResponse,
+      graph,
+      frames,
+      rate,
+      (frame) => actors.map((c) => participant(c, frame, true)),
+      (frame) => {
+        const base = actors.map((c) => participant(c, frame));
+        const rotations = solve(base, frame);
+        return base.map((p) => ({
+          ...p,
+          rotations: rotations.get(p.character.id)!,
+        }));
+      },
+      protectedConstraints,
+      new Set(scene.interactions.map((i) => i.characterId)),
+    );
+  const rootTracks = new Map<string, MotionVector[]>();
+  for (let frame = 0; frame < frames; frame++) {
+    const active = graph.contacts.some(
+      (c) => frame >= c.startFrame && frame <= c.endFrame,
+    );
+    if (frame !== 0 && !active && !reactions) continue;
+    const base = actors.map((c) => participant(c, frame));
+    const poses = reactions ? reactions(frame, base) : base;
+    for (const [i, p] of poses.entries()) {
+      if (
+        p.root === base[i]!.root ||
+        p.root.position.every(
+          (value, axis) => value === base[i]!.root.position[axis],
+        )
+      )
+        continue;
+      const c = p.character;
+      const parent = c.parentId ? worldTransforms.get(c.parentId) : undefined;
+      const position = parent
+        ? scaleVector(
+            composeTransform(inverseTransform(parent.pose), p.root).position,
+            1 / parent.scale,
+          )
+        : p.root.position;
+      if (!rootTracks.has(c.id)) {
+        const fallback = sceneTransformPose(c.transform).position;
+        rootTracks.set(
+          c.id,
+          c.sampledMotion?.rootPosition?.slice() ??
+            Array.from({ length: frames }, () => fallback),
+        );
+      }
+      rootTracks.get(c.id)![frame] = position;
+    }
+    const rotationsById =
+      active || frame === 0
+        ? solve(poses, frame)
+        : new Map(poses.map((p) => [p.character.id, p.rotations]));
+    for (const [id, rotations] of rotationsById) {
       const joints = tracks.get(id)!;
       for (const [joint, rotation] of rotations) {
         if (!joints.has(joint))
@@ -142,9 +203,11 @@ export function compileContacts(
     const joints = [...tracks.get(character.id)!].sort(([a], [b]) =>
       compareStrings(a, b),
     );
-    if (!joints.length) continue;
+    const rootPosition = rootTracks.get(character.id);
+    if (!joints.length && !rootPosition) continue;
     const motion: SampledSkeletalMotion = {
       ...character.sampledMotion,
+      ...(rootPosition ? { rootPosition } : {}),
       joints: [],
     };
     for (const [joint, rotations] of joints) {

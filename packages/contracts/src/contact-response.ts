@@ -88,3 +88,42 @@ export const ContactResponseRequestSchema = z
 export type ContactResponseRequest = z.infer<
   typeof ContactResponseRequestSchema
 >;
+
+/** Shot settings refer to an existing contact. Explicit world offsets override
+ * the generated root displacement for their character during the keyed interval. */
+export const SceneContactResponseSchema = z
+  .object({
+    characters: z.array(CharacterResponseSchema).min(1).max(128),
+    loads: z
+      .array(
+        ContactLoadSchema.omit({ contact: true }).extend({
+          contactId: StableIdSchema,
+          impactFrame: z.number().int().nonnegative().safe().optional(),
+        }),
+      )
+      .max(256),
+    authored: z
+      .array(
+        z
+          .object({
+            entityId: StableIdSchema,
+            keys: z
+              .array(
+                z
+                  .object({
+                    frame: z.number().int().nonnegative().safe(),
+                    offset: MotionVectorSchema.refine(
+                      (v) => Math.hypot(...v) <= 10,
+                    ),
+                  })
+                  .strict(),
+              )
+              .min(2)
+              .max(512),
+          })
+          .strict(),
+      )
+      .max(128)
+      .default([]),
+  })
+  .strict();

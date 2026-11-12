@@ -146,6 +146,7 @@ export function createContactResponseEvaluator(
   input: unknown,
   rate: Rational,
   sampleAuthored: (frame: number) => readonly ContactParticipant[],
+  sampleImpact = sampleAuthored,
 ) {
   const request = ContactResponseRequestSchema.parse(input);
   if (
@@ -166,7 +167,7 @@ export function createContactResponseEvaluator(
         throw new TypeError(
           'Contact force duration exceeds its active interval',
         );
-      const sampled = sampleAuthored(load.contact.startFrame);
+      const sampled = sampleImpact(load.contact.startFrame);
       // Validate rigs, chains and roots through the shared solver without moving the authored poses.
       solveContactFrame(
         { version: 1, contacts: [load.contact] },

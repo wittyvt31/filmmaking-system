@@ -346,6 +346,7 @@ export function compileScene(
     protectedConstraints,
     world,
     physics,
+    frameRate,
   );
   const withoutHash = {
     version: SCENE_COMPILER_VERSION,

@@ -10,6 +10,7 @@ import { SceneTransformSchema, UnitColorSchema } from './shared-internal.js';
 import { WorldSchema } from './world.js';
 import { ObjectInteractionSchema } from './interactions.js';
 import { ContactGraphSchema } from './contact-graph.js';
+import { SceneContactResponseSchema } from './contact-response.js';
 
 const SceneCameraTargetSchema = z
   .object({
@@ -109,6 +110,7 @@ export const ShotSceneSchema = z
     characters: z.array(SceneCharacterSchema).default([]),
     interactions: z.array(ObjectInteractionSchema).max(32).default([]),
     contactGraph: ContactGraphSchema.optional(),
+    contactResponse: SceneContactResponseSchema.optional(),
     props: z
       .array(
         z
