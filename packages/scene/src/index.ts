@@ -389,3 +389,4 @@ export function compileScene(
     sha256: canonicalJsonSha256(withoutHash),
   };
 }
+export * from './retargeting.js';
