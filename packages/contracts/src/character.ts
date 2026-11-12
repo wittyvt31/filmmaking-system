@@ -13,6 +13,10 @@ import { CharacterMaterialSchema, MaterialSchema } from './material.js';
 import { ImportedMaterialsSchema } from './geometry.js';
 import { FacialPerformanceSchema } from './facial.js';
 import { RetargetProfileSchema } from './retargeting.js';
+import {
+  SecondaryMotionConfigurationSchema,
+  type SecondaryMotionConfiguration,
+} from './secondary-motion.js';
 
 type Vector = readonly [number, number, number];
 type Joint = { id: string; parent?: string; min: Vector; max: Vector };
@@ -221,6 +225,7 @@ export const RiggedCharacterSchema = z
       )
       .max(128)
       .optional(),
+    secondaryMotion: SecondaryMotionConfigurationSchema.optional(),
     actions: z.tuple([]).default([]),
   })
   .strict()
@@ -379,4 +384,5 @@ export interface PreparedCharacter {
   morphs?: NonNullable<RiggedCharacter['morphs']>;
   facialBoneMap?: Record<string, string>;
   sampledMotion?: SampledSkeletalMotion;
+  secondaryMotion?: SecondaryMotionConfiguration;
 }

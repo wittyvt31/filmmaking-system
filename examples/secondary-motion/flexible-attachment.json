@@ -1,0 +1,32 @@
+{
+  "nodes": [
+    {
+      "id": "head",
+      "kind": "skeletal-control",
+      "restPose": {
+        "position": [0, 0, 0.1],
+        "rotation": [1, 0, 0, 0]
+      },
+      "anchored": true
+    },
+    {
+      "id": "antenna",
+      "parentId": "head",
+      "kind": "attachment",
+      "restPose": {
+        "position": [0, 0, 0.18],
+        "rotation": [1, 0, 0, 0]
+      },
+      "massKg": 0.25,
+      "stiffness": 24,
+      "damping": 2.5,
+      "gravity": [0, 0, -9.81],
+      "drag": 0.08,
+      "radius": 0.015
+    }
+  ],
+  "colliders": [],
+  "substeps": 4,
+  "solverIterations": 4,
+  "deterministicSeed": 7
+}

@@ -347,15 +347,15 @@ importers:
       '@filmmaking/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@filmmaking/secondary-motion':
+        specifier: workspace:*
+        version: link:../secondary-motion
 
   packages/secondary-motion:
     dependencies:
       '@filmmaking/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@filmmaking/scene':
-        specifier: workspace:*
-        version: link:../scene
 
   packages/timeline:
     dependencies:

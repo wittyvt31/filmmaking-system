@@ -7,7 +7,12 @@ import {
   type Rational,
   type Shot,
   type SpatialConstraint,
+  type RigidTransform,
 } from '@filmmaking/contracts';
+import {
+  bakeSecondaryMotion,
+  bakeSecondarySkeletalMotion,
+} from '@filmmaking/secondary-motion';
 import { compileWorld } from './world.js';
 import { compileStyle } from './visual.js';
 export {
@@ -28,6 +33,8 @@ import { attachFacialRig, compileFacialPerformance } from './facial.js';
 export * from './collision.js';
 export { compilePhysics } from './physics.js';
 import { sampleLocomotion } from './locomotion.js';
+import { worldCollisionProxies } from './collision.js';
+import { withinLimits } from './motion-math.js';
 export { sampleLocomotion } from './locomotion.js';
 export * from './interactions.js';
 export * from './contact-graph.js';
@@ -41,7 +48,7 @@ export { prepareCharacter } from './character.js';
 export { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
 export { filmPlane, projectCameraPoint } from './camera-math.js';
 
-export const SCENE_COMPILER_VERSION = 'scene-compiler-v13';
+export const SCENE_COMPILER_VERSION = 'scene-compiler-v14';
 export const SEMANTIC_ANIMATION_LIBRARY_VERSION = '1.0.0';
 
 export type CompiledScene = CompiledSceneInstruction;
@@ -185,6 +192,9 @@ export function compileScene(
     shot.durationFrames,
   );
   const protectedConstraints = new Map<string, SpatialConstraint[]>();
+  const secondaryMotionTracks: NonNullable<
+    CompiledSceneInstruction['secondaryMotion']
+  > = [];
   const characters = [...scene.characters]
     .map((character) =>
       'source' in character
@@ -243,7 +253,108 @@ export function compileScene(
               interactions.get(character.id),
               new Set(locomotion.contacts.map((contact) => contact.id)),
             );
-            return sampledMotion ? { ...prepared, sampledMotion } : prepared;
+            if (!prepared.secondaryMotion) {
+              return sampledMotion ? { ...prepared, sampledMotion } : prepared;
+            }
+            const boneIds = new Set(prepared.bones.map((bone) => bone.id));
+            for (const node of prepared.secondaryMotion.nodes)
+              if (
+                (node.kind === 'skeletal-control' || node.kind === 'chain') &&
+                !boneIds.has(node.id)
+              )
+                throw new TypeError(
+                  `Secondary motion node "${node.id}" is not a joint on character "${character.id}"`,
+                );
+            const baseMotion = sampledMotion ?? {
+              joints: prepared.secondaryMotion.nodes.map((node) => ({
+                joint: node.id,
+                rotations: Array.from(
+                  { length: shot.durationFrames },
+                  () => [1, 0, 0, 0] as [number, number, number, number],
+                ),
+              })),
+            };
+            const sampledJoints = new Set(
+              baseMotion.joints.map((track) => track.joint),
+            );
+            const withSecondaryJoints = {
+              ...baseMotion,
+              joints: [
+                ...baseMotion.joints,
+                ...prepared.secondaryMotion.nodes
+                  .filter((node) => !sampledJoints.has(node.id))
+                  .map((node) => ({
+                    joint: node.id,
+                    rotations: Array.from(
+                      { length: shot.durationFrames },
+                      () => [1, 0, 0, 0] as [number, number, number, number],
+                    ),
+                  })),
+              ],
+            };
+            const secondaryMotion = bakeSecondarySkeletalMotion(
+              withSecondaryJoints,
+              prepared.secondaryMotion,
+              frameRate,
+            );
+            for (const track of secondaryMotion.joints) {
+              const bone = prepared.bones.find(
+                (candidate) => candidate.id === track.joint,
+              );
+              if (
+                bone &&
+                track.rotations.some(
+                  (rotation) => !withinLimits(rotation, bone.min, bone.max),
+                )
+              )
+                throw new TypeError(
+                  `Secondary motion exceeds joint limits on "${track.joint}" for character "${character.id}"`,
+                );
+            }
+            if (
+              prepared.secondaryMotion.nodes.some(
+                (node) => node.kind === 'attachment',
+              )
+            ) {
+              const rotations = new Map(
+                secondaryMotion.joints.map((track) => [
+                  track.joint,
+                  track.rotations,
+                ]),
+              );
+              const authored = prepared.secondaryMotion.nodes.flatMap(
+                (node) => {
+                  const values = rotations.get(node.id);
+                  return values
+                    ? values.map((rotation, frame) => ({
+                        nodeId: node.id,
+                        frame,
+                        pose: { position: node.restPose.position, rotation },
+                      }))
+                    : [];
+                },
+              );
+              secondaryMotionTracks.push({
+                ownerId: character.id,
+                frames: bakeSecondaryMotion({
+                  config: {
+                    frameCount: shot.durationFrames,
+                    settings: {
+                      frameRate,
+                      substeps: prepared.secondaryMotion.substeps,
+                      solverIterations:
+                        prepared.secondaryMotion.solverIterations,
+                      deterministicSeed:
+                        prepared.secondaryMotion.deterministicSeed,
+                    },
+                    nodes: prepared.secondaryMotion.nodes,
+                    colliders: prepared.secondaryMotion.colliders,
+                  },
+                  authored,
+                }),
+              });
+            }
+            return { ...prepared, sampledMotion: secondaryMotion };
           })()
         : {
             ...character,
@@ -255,6 +366,58 @@ export function compileScene(
           },
     )
     .sort((left, right) => compareStrings(left.id, right.id));
+  const worldSecondaryMotion = world
+    ? world.entities.flatMap((entity) => {
+        if (!entity.secondaryMotion) return [];
+        const nodeIds = new Set(
+          entity.secondaryMotion.nodes.map((node) => node.id),
+        );
+        for (const node of entity.secondaryMotion.nodes) {
+          if (node.parentId && !nodeIds.has(node.parentId))
+            throw new TypeError(
+              `Secondary motion node "${node.id}" on "${entity.id}" has an unknown parent`,
+            );
+        }
+        const object = [...interactions.values()].find(
+          (driver) => driver.track.objectId === entity.id,
+        )?.track.poses;
+        const authored: {
+          nodeId: string;
+          frame: number;
+          pose: RigidTransform;
+        }[] = [];
+        const root = entity.secondaryMotion.nodes.find(
+          (node) => !node.parentId,
+        );
+        if (root && object)
+          object.forEach((pose, frame) =>
+            authored.push({ nodeId: root.id, frame, pose }),
+          );
+        const frames = bakeSecondaryMotion({
+          config: {
+            frameCount: shot.durationFrames,
+            settings: {
+              frameRate,
+              substeps: entity.secondaryMotion.substeps,
+              solverIterations: entity.secondaryMotion.solverIterations,
+              deterministicSeed: entity.secondaryMotion.deterministicSeed,
+            },
+            nodes: entity.secondaryMotion.nodes,
+            colliders: [
+              ...entity.secondaryMotion.colliders,
+              ...(world
+                ? worldCollisionProxies(world).filter(
+                    (proxy) => proxy.entityId !== entity.id,
+                  )
+                : []),
+            ],
+          },
+          authored,
+        });
+        return [{ ownerId: entity.id, frames }];
+      })
+    : [];
+  secondaryMotionTracks.push(...worldSecondaryMotion);
   compileContacts(
     scene,
     shot.durationFrames,
@@ -275,6 +438,9 @@ export function compileScene(
     ...(world ? { world } : {}),
     ...(physics ? { physics } : {}),
     ...(objectMotion ? { objectMotion } : {}),
+    ...(secondaryMotionTracks.length
+      ? { secondaryMotion: secondaryMotionTracks }
+      : {}),
   };
   compileFacialPerformance(
     scene,

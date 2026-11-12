@@ -13,6 +13,7 @@ import {
   RigidBodySchema,
   type PhysicsSettings,
 } from './physics.js';
+import { SecondaryMotionConfigurationSchema } from './secondary-motion.js';
 
 const length = z.number().min(0.001).max(10_000);
 
@@ -69,6 +70,7 @@ const EntitySchema = z
     parentId: StableIdSchema.optional(),
     transform: SceneTransformSchema,
     physics: RigidBodySchema.optional(),
+    secondaryMotion: SecondaryMotionConfigurationSchema.optional(),
     colliders: z.array(ColliderSchema).min(1).max(64).optional(),
     geometry: z.discriminatedUnion('kind', [
       z.object({ kind: z.literal('group') }).strict(),

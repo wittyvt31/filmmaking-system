@@ -14,6 +14,7 @@
     "typecheck": "tsc -b --pretty"
   },
   "dependencies": {
-    "@filmmaking/contracts": "workspace:*"
+    "@filmmaking/contracts": "workspace:*",
+    "@filmmaking/secondary-motion": "workspace:*"
   }
 }

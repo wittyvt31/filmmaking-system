@@ -908,6 +908,29 @@ def apply_motion_curves(spec, control_objects, entity_roots):
             setattr(control, property_name, value)
             control.keyframe_insert(data_path=property_name, frame=frame)
 
+def apply_secondary_motion(spec, control_objects, entity_roots):
+    for track in spec.get("secondaryMotion", []):
+        owner_id = track["ownerId"]
+        frames = track["frames"]
+        for frame_data in frames:
+            frame = int(frame_data["frame"]) + 1
+            for pose in frame_data["poses"]:
+                node_id = pose["nodeId"]
+                control = control_objects.get(owner_id, {}).get(node_id)
+                if control is None and pose["local"]["position"] == pose["world"]["position"]:
+                    control = entity_roots.get(owner_id)
+                if control is None:
+                    raise RuntimeError(
+                        "Secondary motion requires missing semantic control "
+                        + owner_id + "/" + node_id
+                    )
+                value = pose["local"] if control_objects.get(owner_id, {}).get(node_id) else pose["world"]
+                control.location = tuple(float(component) for component in value["position"])
+                control.rotation_mode = "QUATERNION"
+                control.rotation_quaternion = tuple(float(component) for component in value["rotation"])
+                control.keyframe_insert(data_path="location", frame=frame)
+                control.keyframe_insert(data_path="rotation_quaternion", frame=frame)
+
 def main():
     spec = read_spec()
     spec.setdefault("renderConfig", {
@@ -925,6 +948,7 @@ def main():
     try:
         apply_actions(spec, entity_roots, control_objects)
         apply_motion_curves(spec, control_objects, entity_roots)
+        apply_secondary_motion(spec, control_objects, entity_roots)
         if spec.get("physics"):
             baked = bake_physics(scene, spec["physics"], spec.get("objectMotion", []), int(spec["durationFrames"]))
             apply_physics_bake(scene, baked, action_fcurves)

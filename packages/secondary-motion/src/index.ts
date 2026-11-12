@@ -7,16 +7,13 @@ import type {
   SecondaryMotionBake,
   SecondaryMotionFrame,
   SecondaryMotionNode,
+  SecondaryMotionConfiguration,
   SecondaryMotionSettings,
 } from '@filmmaking/contracts';
-import { SecondaryMotionBakeSchema } from '@filmmaking/contracts';
 import {
-  composeTransform,
-  inverseTransform,
-  rotateVector,
-  overlapsSphere,
-} from '@filmmaking/scene';
-import { identity, multiply } from '@filmmaking/scene';
+  SecondaryMotionBakeSchema,
+  type SampledSkeletalMotion,
+} from '@filmmaking/contracts';
 
 export type { SecondaryMotionFrame };
 export type SecondaryMotionInput = {
@@ -32,6 +29,81 @@ type State = {
 };
 
 const zero: MotionVector = [0, 0, 0];
+const identity: MotionQuaternion = [1, 0, 0, 0];
+const multiply = (
+  a: MotionQuaternion,
+  b: MotionQuaternion,
+): MotionQuaternion => {
+  const [w, x, y, z] = a;
+  const [v, i, j, k] = b;
+  const result: MotionQuaternion = [
+    w * v - x * i - y * j - z * k,
+    w * i + x * v + y * k - z * j,
+    w * j - x * k + y * v + z * i,
+    w * k + x * j - y * i + z * v,
+  ];
+  return normalize(result);
+};
+const rotateVector = (q: MotionQuaternion, v: MotionVector): MotionVector => {
+  const [w, x, y, z] = q;
+  const [a, b, c] = v;
+  const tx = 2 * (y * c - z * b);
+  const ty = 2 * (z * a - x * c);
+  const tz = 2 * (x * b - y * a);
+  return [
+    a + w * tx + y * tz - z * ty,
+    b + w * ty + z * tx - x * tz,
+    c + w * tz + x * ty - y * tx,
+  ];
+};
+const composeTransform = (
+  a: RigidTransform,
+  b: RigidTransform,
+): RigidTransform => ({
+  position: add(a.position, rotateVector(a.rotation, b.position)),
+  rotation: multiply(a.rotation, b.rotation),
+});
+function overlapsSphere(
+  proxy: CollisionProxy,
+  center: MotionVector,
+  radius: number,
+): boolean {
+  const point = rotateVector(
+    conjugate(proxy.pose.rotation),
+    subtract(center, proxy.pose.position),
+  );
+  const [x, y, z] = point;
+  switch (proxy.shape.kind) {
+    case 'box': {
+      const shape = proxy.shape;
+      return (
+        Math.hypot(
+          ...point.map((value, index) =>
+            Math.max(0, Math.abs(value) - shape.dimensions[index]! / 2),
+          ),
+        ) <= radius
+      );
+    }
+    case 'sphere':
+      return Math.hypot(x, y, z) <= proxy.shape.radius + radius;
+    case 'cylinder':
+      return (
+        Math.hypot(
+          Math.max(0, Math.hypot(x, y) - proxy.shape.radius),
+          Math.max(0, Math.abs(z) - proxy.shape.height / 2),
+        ) <= radius
+      );
+    case 'capsule':
+      return (
+        Math.hypot(
+          x,
+          y,
+          Math.max(0, Math.abs(z) - proxy.shape.segmentLength / 2),
+        ) <=
+        proxy.shape.radius + radius
+      );
+  }
+}
 const add = (a: readonly number[], b: readonly number[]): MotionVector => [
   a[0]! + b[0]!,
   a[1]! + b[1]!,
@@ -256,25 +328,40 @@ export function bakeSecondaryMotion(
         state.rotation = [...targetWorld.rotation];
         state.angularVelocity = [...zero];
       }
-      if (node.motionLimit) {
-        const localPosition = parent
-          ? rotateVector(
-              conjugate(parent.rotation),
-              subtract(state.position, parent.position),
-            )
-          : state.position;
-        const limited = localPosition.map((value, index) =>
-          clamp(
-            value,
-            node.motionLimit!.min[index]!,
-            node.motionLimit!.max[index]!,
-          ),
-        ) as MotionVector;
-        state.position = parent
-          ? add(parent.position, rotateVector(parent.rotation, limited))
-          : limited;
+      for (
+        let iteration = 0;
+        iteration < config.settings.solverIterations;
+        iteration += 1
+      ) {
+        if (node.motionLimit) {
+          const localPosition = parent
+            ? rotateVector(
+                conjugate(parent.rotation),
+                subtract(state.position, parent.position),
+              )
+            : state.position;
+          const limited = localPosition.map((value, index) =>
+            clamp(
+              value,
+              node.motionLimit!.min[index]!,
+              node.motionLimit!.max[index]!,
+            ),
+          ) as MotionVector;
+          state.position = parent
+            ? add(parent.position, rotateVector(parent.rotation, limited))
+            : limited;
+        }
+        const resolved = resolveCollision(
+          state.position,
+          node.radius,
+          colliders,
+        );
+        const unchanged = resolved.every(
+          (value, index) => value === state.position[index],
+        );
+        state.position = resolved;
+        if (unchanged) break;
       }
-      state.position = resolveCollision(state.position, node.radius, colliders);
       const local = parent
         ? {
             position: rotateVector(
@@ -315,6 +402,73 @@ export function bakeSecondaryMotionByFrame(
       frame,
     ]),
   );
+}
+
+export function bakeSecondarySkeletalMotion(
+  motion: SampledSkeletalMotion,
+  configuration: SecondaryMotionConfiguration,
+  frameRate: SecondaryMotionSettings['frameRate'],
+): SampledSkeletalMotion {
+  const durationFrames = motion.joints.reduce(
+    (length, track) => Math.max(length, track.rotations.length),
+    Math.max(
+      motion.rootPosition?.length ?? 0,
+      motion.rootRotation?.length ?? 0,
+      motion.rootScale?.length ?? 0,
+    ),
+  );
+  if (!durationFrames) return motion;
+  const rotations = new Map(
+    motion.joints.map((track) => [track.joint, track.rotations]),
+  );
+  const nodes = configuration.nodes.filter((node) => rotations.has(node.id));
+  if (!nodes.length) return motion;
+  const authored: SecondaryMotionAuthoredPose[] = [];
+  for (const node of nodes) {
+    const values = rotations.get(node.id)!;
+    for (let frame = 0; frame < durationFrames; frame += 1) {
+      authored.push({
+        nodeId: node.id,
+        frame,
+        pose: {
+          position: node.restPose.position,
+          rotation: values[frame] ?? node.restPose.rotation,
+        },
+      });
+    }
+  }
+  const baked = bakeSecondaryMotion({
+    config: {
+      frameCount: durationFrames,
+      settings: {
+        frameRate,
+        substeps: configuration.substeps,
+        solverIterations: configuration.solverIterations,
+        deterministicSeed: configuration.deterministicSeed,
+      },
+      nodes,
+      colliders: configuration.colliders,
+    },
+    authored,
+  });
+  const bakedRotations = new Map(
+    nodes.map((node) => [
+      node.id,
+      baked.map(
+        (frame) =>
+          frame.poses.find((pose) => pose.nodeId === node.id)!.local.rotation,
+      ),
+    ]),
+  );
+  return {
+    ...motion,
+    joints: motion.joints.map((track) => ({
+      ...track,
+      ...(bakedRotations.has(track.joint)
+        ? { rotations: bakedRotations.get(track.joint)! }
+        : {}),
+    })),
+  };
 }
 
 export const solveSecondaryMotion = bakeSecondaryMotion;

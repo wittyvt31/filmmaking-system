@@ -89,6 +89,9 @@ export function prepareCharacter(
           ),
         }
       : {}),
+    ...(character.secondaryMotion
+      ? { secondaryMotion: character.secondaryMotion }
+      : {}),
     bones: profile.joints.map((joint) => {
       const authored =
         character.source.kind === 'imported'

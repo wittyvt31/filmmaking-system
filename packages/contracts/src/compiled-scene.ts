@@ -9,6 +9,7 @@ import type { RigidTransform } from './interactions.js';
 import type { PhysicsSimulation } from './physics.js';
 import type { PreparedCharacter, SceneCharacter } from './character.js';
 import type { CompiledCinematography } from './cinematography.js';
+import type { SecondaryMotionFrame } from './secondary-motion.js';
 
 export interface CompiledSceneInstruction {
   version: string;
@@ -22,6 +23,10 @@ export interface CompiledSceneInstruction {
   world?: CompiledWorld;
   physics?: PhysicsSimulation;
   objectMotion?: { objectId: string; poses: RigidTransform[] }[];
+  secondaryMotion?: {
+    ownerId: string;
+    frames: SecondaryMotionFrame[];
+  }[];
   characters: (
     Extract<SceneCharacter, { asset: unknown }> | PreparedCharacter
   )[];

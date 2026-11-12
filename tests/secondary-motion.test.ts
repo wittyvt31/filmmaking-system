@@ -1,12 +1,16 @@
 import { expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import {
+  ProjectManifestSchema,
   SecondaryMotionBakeSchema,
+  SecondaryMotionConfigurationSchema,
   type RigidTransform,
 } from '@filmmaking/contracts';
 import {
   bakeSecondaryMotion,
   bakeSecondaryMotionByFrame,
 } from '@filmmaking/secondary-motion';
+import { compileScene } from '@filmmaking/scene';
 
 const pose = (x: number, y = 0, z = 0): RigidTransform => ({
   position: [x, y, z],
@@ -74,4 +78,66 @@ it('honors explicit overrides and exposes frame-addressable results', () => {
     frames.get(5)!.poses.find((item) => item.nodeId === 'tip')!.local.position,
   ).toEqual([3, 0, 0]);
   expect(frames.size).toBe(12);
+});
+
+it('compiles character secondary motion after authored skeletal evaluation', () => {
+  const manifest = ProjectManifestSchema.parse(
+    JSON.parse(
+      readFileSync('examples/humanoid-animation/manifest.json', 'utf8'),
+    ),
+  );
+  const shot = manifest.shots[0]!;
+  const character = shot.scene!.characters[0]!;
+  if (!('source' in character))
+    throw new Error('Expected rigged reference character');
+  character.secondaryMotion = {
+    nodes: [
+      {
+        id: 'head',
+        kind: 'skeletal-control',
+        restPose: pose(0),
+        anchored: true,
+      },
+    ],
+    colliders: [],
+    substeps: 2,
+    solverIterations: 2,
+    deterministicSeed: 11,
+  };
+  character.poses.joints = [
+    {
+      joint: 'head',
+      keys: [
+        {
+          frame: 0,
+          rotationDegrees: [0, 0, 0],
+          interpolation: 'hold',
+        },
+        {
+          frame: 1,
+          rotationDegrees: [0, 10, 0],
+          interpolation: 'linear',
+        },
+      ],
+    },
+  ];
+  const first = compileScene(shot, manifest.video.frameRate);
+  const second = compileScene(shot, manifest.video.frameRate);
+  expect(first).toEqual(second);
+  expect(first.characters[0]).toMatchObject({
+    sampledMotion: {
+      joints: expect.arrayContaining([
+        expect.objectContaining({ joint: 'head' }),
+      ]),
+    },
+  });
+});
+
+it('keeps the flexible attachment reference manifest-shaped', () => {
+  const reference = JSON.parse(
+    readFileSync('examples/secondary-motion/flexible-attachment.json', 'utf8'),
+  ) as unknown;
+  expect(
+    SecondaryMotionConfigurationSchema.parse(reference).nodes,
+  ).toHaveLength(2);
 });

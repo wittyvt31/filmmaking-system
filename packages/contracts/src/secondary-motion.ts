@@ -55,6 +55,37 @@ export const SecondaryMotionSettingsSchema = z
   })
   .strict();
 
+export const SecondaryMotionConfigurationSchema = z
+  .object({
+    nodes: z.array(SecondaryMotionNodeSchema).max(1024),
+    colliders: z.array(ColliderSchema).max(4096).default([]),
+    substeps: z.number().int().min(1).max(64).default(4),
+    solverIterations: z.number().int().min(1).max(32).default(4),
+    deterministicSeed: z.number().int().safe().default(0),
+  })
+  .strict()
+  .superRefine((configuration, context) => {
+    const ids = new Set<string>();
+    configuration.nodes.forEach((node, index) => {
+      if (ids.has(node.id))
+        context.addIssue({
+          code: 'custom',
+          path: ['nodes', index, 'id'],
+          message: 'Duplicate secondary motion node ID',
+        });
+      ids.add(node.id);
+    });
+    configuration.nodes.forEach((node, index) => {
+      if (node.parentId && !ids.has(node.parentId))
+        context.addIssue({
+          code: 'custom',
+          path: ['nodes', index, 'parentId'],
+          message:
+            'Secondary motion node parent must be in the same configuration',
+        });
+    });
+  });
+
 export const SecondaryMotionBakeSchema = z
   .object({
     frameCount: z.number().int().nonnegative().safe(),
@@ -71,6 +102,9 @@ export type SecondaryMotionOverride = z.infer<
 export type SecondaryMotionNode = z.infer<typeof SecondaryMotionNodeSchema>;
 export type SecondaryMotionSettings = z.infer<
   typeof SecondaryMotionSettingsSchema
+>;
+export type SecondaryMotionConfiguration = z.infer<
+  typeof SecondaryMotionConfigurationSchema
 >;
 export type SecondaryMotionBake = z.infer<typeof SecondaryMotionBakeSchema>;
 export type SecondaryMotionAuthoredPose = {
