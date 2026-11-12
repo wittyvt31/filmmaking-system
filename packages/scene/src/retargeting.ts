@@ -145,9 +145,20 @@ export function retargetFrame(
   const posed = sourceFK(sourceRotations),
     rotations = new Map<string, Q>();
   const c = profile.coordinateRotation;
+  const targetBones = new Map(target.bones.map((bone) => [bone.id, bone]));
+  const mappings = new Map(
+    profile.joints.map((mapping) => [mapping.target, mapping]),
+  );
+  const deformations = new Map<string, Q>();
   const ordered = [...targetRest.keys()]; // FK emits parents before children.
   for (const id of ordered) {
-    const mapping = profile.joints.find((j) => j.target === id);
+    const bone = targetBones.get(id)!;
+    const restOrientation = targetRest.get(id)!.rotation;
+    const inherited = multiply(
+      bone.parent ? deformations.get(bone.parent)! : identity,
+      restOrientation,
+    );
+    const mapping = mappings.get(id);
     const track = target.poses.joints.find((t) => t.joint === id);
     const authored =
       options.authored?.get(id) ??
@@ -173,12 +184,17 @@ export function retargetFrame(
       );
       const desired = multiply(
         multiply(multiply(c, deformation), conjugate(c)),
-        targetRest.get(id)!.rotation,
+        restOrientation,
       );
-      const inherited = targetFK(rotations).get(id)!.rotation;
       rotations.set(id, multiply(conjugate(inherited), desired));
     }
-    const bone = target.bones.find((b) => b.id === id)!;
+    deformations.set(
+      id,
+      multiply(
+        multiply(inherited, rotations.get(id) ?? identity),
+        conjugate(restOrientation),
+      ),
+    );
     if (!withinLimits(rotations.get(id) ?? identity, bone.min, bone.max))
       diagnostics.push({
         code: 'joint-limit',

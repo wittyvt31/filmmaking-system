@@ -93,3 +93,5 @@ pnpm check
 ```
 
 Production packages use ESM and strict TypeScript. Validate schema changes, preserve exact asset identities, include pixel-affecting values in render fingerprints, spawn tools with argument arrays, and reject unsupported instructions explicitly.
+
+In Studio, choose the `skeletal-retargeting` catalog to transfer one clip from a taller procedural humanoid to a skinned GLB with different proportions and leg rest axes. Define reusable `scene.retargetProfiles` with the clip rig, its complete rest skeleton, and a versioned semantic mapping. Select a profile with `character.retargetProfileId`. Motion layers and masks use the source rig's joint names. The mapping converts root offsets before applying target placement, and target authored poses override matching channels. The target's world-space constraints, locomotion, and interactions run on the transferred pose. Use joint-only clips when locomotion owns the root trajectory. Imported assets still use their own `source.jointMap` and `source.restSkeleton` for Blender binding.

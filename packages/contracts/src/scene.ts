@@ -5,7 +5,10 @@ import {
   STYLE_DEFINITION_REGISTRY,
   VisualSettingsSchema,
 } from './style.js';
-import { SceneCharacterSchema } from './character.js';
+import {
+  SceneCharacterSchema,
+  SceneRetargetProfileSchema,
+} from './character.js';
 import { SkeletalClipSchema } from './skeletal-motion.js';
 import { SceneTransformSchema, UnitColorSchema } from './shared-internal.js';
 import { WorldSchema } from './world.js';
@@ -115,6 +118,7 @@ export const ShotSceneSchema = z
     visualSettings: VisualSettingsSchema.optional(),
     motionLibraries: z.array(AssetVersionReferenceSchema).default([]),
     motionClips: z.array(SkeletalClipSchema).max(128).default([]),
+    retargetProfiles: z.array(SceneRetargetProfileSchema).max(32).optional(),
     facialRigs: z.array(FacialRigSchema).max(32).optional(),
     environment: AssetVersionReferenceSchema.optional(),
     world: WorldSchema.optional(),

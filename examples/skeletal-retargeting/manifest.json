@@ -1,0 +1,849 @@
+{
+  "projectId": "filmie.skeletal-retargeting",
+  "version": "1.0.0",
+  "video": {
+    "resolution": {
+      "width": 320,
+      "height": 180
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    }
+  },
+  "renderPolicy": {
+    "outputDimensions": {
+      "width": 320,
+      "height": 180
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": {
+      "mode": "crf",
+      "value": 22
+    },
+    "renderer": {
+      "id": "blender",
+      "config": {
+        "engine": "BLENDER_EEVEE",
+        "samples": 4
+      }
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.facial-study",
+      "durationFrames": 20,
+      "visualDescription": "One authored arm gesture transferred from a tall procedural performer to a shorter skinned GLB character with planted feet.",
+      "composition": {
+        "framing": "Full-body two shot",
+        "subjectPlacement": "Side by side",
+        "cameraMovement": "Static",
+        "instructions": []
+      },
+      "requiredAssets": [
+        {
+          "assetId": "character.facial-performer",
+          "version": "1.0.0"
+        }
+      ],
+      "scene": {
+        "stylePreset": "stylized_3d",
+        "styleVersion": "1.0.0",
+        "world": {
+          "schemaVersion": 1,
+          "materials": [
+            {
+              "id": "floor",
+              "color": [0.18, 0.2, 0.21],
+              "roughness": 0.82,
+              "procedural": {
+                "kind": "checker",
+                "scale": 14,
+                "color": [0.37, 0.3, 0.22]
+              }
+            },
+            {
+              "id": "wall",
+              "color": [0.26, 0.29, 0.3],
+              "roughness": 0.85,
+              "procedural": {
+                "kind": "noise",
+                "scale": 22,
+                "color": [0.31, 0.37, 0.49]
+              }
+            }
+          ],
+          "entities": [
+            {
+              "id": "studio",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "room",
+                "dimensions": {
+                  "x": 5.6,
+                  "y": 5.8,
+                  "z": 3.1
+                },
+                "floor": {
+                  "thickness": 0.15,
+                  "materialId": "floor"
+                },
+                "walls": [
+                  {
+                    "side": "north",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "west",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "east",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "motionClips": [
+          {
+            "id": "gesture.shared",
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "duration": 0.6333333333333333,
+            "rootPosition": [
+              {
+                "time": 0,
+                "value": [0, 0, 0]
+              },
+              {
+                "time": 0.6333333333333333,
+                "value": [0.012, 0, -0.02]
+              }
+            ],
+            "joints": [
+              {
+                "joint": "upper_arm.L",
+                "keys": [
+                  {
+                    "time": 0,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease"
+                  },
+                  {
+                    "time": 0.6333333333333333,
+                    "value": [-28, 12, -50]
+                  }
+                ]
+              },
+              {
+                "joint": "forearm.L",
+                "keys": [
+                  {
+                    "time": 0,
+                    "value": [0, 0, 0],
+                    "interpolation": "ease"
+                  },
+                  {
+                    "time": 0.6333333333333333,
+                    "value": [-38, 0, 0]
+                  }
+                ]
+              },
+              {
+                "joint": "thigh.L",
+                "keys": [
+                  {
+                    "time": 0,
+                    "value": [0, 0, 0]
+                  },
+                  {
+                    "time": 0.6333333333333333,
+                    "value": [5, 0, 0]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "characters": [
+          {
+            "id": "performer",
+            "transform": {
+              "position": {
+                "x": 0.85,
+                "y": 0,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": -12
+              },
+              "scale": 1
+            },
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "source": {
+              "kind": "imported",
+              "asset": {
+                "assetId": "character.facial-performer",
+                "version": "1.0.0"
+              },
+              "body": {
+                "height": 1.72,
+                "shoulderWidth": 0.245,
+                "build": 1
+              },
+              "materials": [
+                {
+                  "id": "jacket",
+                  "color": [0.08, 0.38, 0.48],
+                  "roughness": 0.42,
+                  "procedural": {
+                    "kind": "noise",
+                    "scale": 32,
+                    "color": [0.16, 0.49, 0.55]
+                  }
+                }
+              ],
+              "materialOverrides": {
+                "mode": "slots",
+                "slots": [
+                  {
+                    "source": "Humanoid top",
+                    "materialId": "jacket"
+                  }
+                ]
+              },
+              "restSkeleton": {
+                "pelvis": {
+                  "head": [0, 0, 0.8428],
+                  "tail": [0, 0, 1.001728]
+                },
+                "spine": {
+                  "head": [0, 0, 1.001728],
+                  "tail": [0, 0, 1.189036]
+                },
+                "chest": {
+                  "head": [0, 0, 1.189036],
+                  "tail": [0, 0, 1.4103999999999999]
+                },
+                "neck": {
+                  "head": [0, 0, 1.4103999999999999],
+                  "tail": [0, 0, 1.505]
+                },
+                "head": {
+                  "head": [0, 0, 1.505],
+                  "tail": [0, 0, 1.72]
+                },
+                "upper_arm.L": {
+                  "head": [0.2107, 0, 1.3932],
+                  "tail": [0.32252751999999996, 0, 1.1515662620687055]
+                },
+                "forearm.L": {
+                  "head": [0.32252751999999996, 0, 1.1515662620687055],
+                  "tail": [0.42395247999999996, 0, 0.9324100811542754]
+                },
+                "hand.L": {
+                  "head": [0.42395247999999996, 0, 0.9324100811542754],
+                  "tail": [0.470764, 0, 0.8312610745783845]
+                },
+                "thigh.L": {
+                  "head": [0.1548, 0, 0.8428],
+                  "tail": [0.1548, -0.02408, 0.47729999999999995]
+                },
+                "shin.L": {
+                  "head": [0.1548, -0.02408, 0.47729999999999995],
+                  "tail": [0.1548, 0, 0.1118]
+                },
+                "foot.L": {
+                  "head": [0.1548, 0, 0.1118],
+                  "tail": [0.1548, -0.18059999999999998, 0.043000000000000003]
+                },
+                "upper_arm.R": {
+                  "head": [-0.2107, 0, 1.3932],
+                  "tail": [-0.32252751999999996, 0, 1.1515662620687055]
+                },
+                "forearm.R": {
+                  "head": [-0.32252751999999996, 0, 1.1515662620687055],
+                  "tail": [-0.42395247999999996, 0, 0.9324100811542754]
+                },
+                "hand.R": {
+                  "head": [-0.42395247999999996, 0, 0.9324100811542754],
+                  "tail": [-0.470764, 0, 0.8312610745783845]
+                },
+                "thigh.R": {
+                  "head": [-0.1548, 0, 0.8428],
+                  "tail": [-0.1548, -0.02408, 0.47729999999999995]
+                },
+                "shin.R": {
+                  "head": [-0.1548, -0.02408, 0.47729999999999995],
+                  "tail": [-0.1548, 0, 0.1118]
+                },
+                "foot.R": {
+                  "head": [-0.1548, 0, 0.1118],
+                  "tail": [-0.1548, -0.18059999999999998, 0.043000000000000003]
+                }
+              }
+            },
+            "motion": [
+              {
+                "id": "gesture",
+                "startFrame": 0,
+                "endFrame": 19,
+                "source": {
+                  "kind": "clip",
+                  "clipId": "gesture.shared"
+                }
+              }
+            ],
+            "poses": {
+              "root": [],
+              "joints": []
+            },
+            "deformation": {
+              "skinning": "preserve-volume",
+              "subdivision": 0
+            },
+            "facial": {
+              "rigId": "face.study",
+              "layers": [
+                {
+                  "kind": "expression",
+                  "expression": "warm",
+                  "startFrame": 0,
+                  "endFrame": 20,
+                  "fadeInFrames": 3,
+                  "fadeOutFrames": 3,
+                  "priority": 20
+                }
+              ],
+              "speech": [
+                {
+                  "kind": "phoneme",
+                  "id": "AA",
+                  "startFrame": 2,
+                  "endFrame": 9,
+                  "fadeInFrames": 1,
+                  "fadeOutFrames": 2
+                },
+                {
+                  "kind": "viseme",
+                  "id": "round",
+                  "startFrame": 7,
+                  "endFrame": 15,
+                  "fadeInFrames": 2,
+                  "fadeOutFrames": 2
+                }
+              ],
+              "blinks": [
+                {
+                  "control": "blink",
+                  "startFrame": 8,
+                  "closeFrames": 2,
+                  "holdFrames": 1,
+                  "openFrames": 2
+                }
+              ],
+              "gaze": [],
+              "overrides": [
+                {
+                  "control": "smile",
+                  "keys": [
+                    {
+                      "frame": 14,
+                      "value": 0.3
+                    },
+                    {
+                      "frame": 19,
+                      "value": 0
+                    }
+                  ]
+                }
+              ]
+            },
+            "retargetProfileId": "tall-to-performer",
+            "constraints": [
+              {
+                "id": "plant.L",
+                "effector": "foot.L",
+                "chainRoot": "thigh.L",
+                "space": "world",
+                "target": [
+                  0.9638683972319058, -0.20883818643111435, 0.04299999999999993
+                ],
+                "startFrame": 0,
+                "endFrame": 19,
+                "tolerance": 0.004
+              },
+              {
+                "id": "plant.R",
+                "effector": "foot.R",
+                "chainRoot": "thigh.R",
+                "space": "world",
+                "target": [
+                  0.6610339000447196, -0.1444687269539361, 0.04299999999999993
+                ],
+                "startFrame": 0,
+                "endFrame": 19,
+                "tolerance": 0.004
+              }
+            ]
+          },
+          {
+            "id": "partner",
+            "transform": {
+              "position": {
+                "x": -0.85,
+                "y": 0,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": -12
+              },
+              "scale": 1
+            },
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "source": {
+              "kind": "procedural",
+              "body": {
+                "height": 2.05,
+                "shoulderWidth": 0.31,
+                "build": 1,
+                "armLength": 0.42,
+                "legLength": 0.57
+              },
+              "appearance": {
+                "skin": {
+                  "color": [0.66, 0.39, 0.24]
+                },
+                "top": {
+                  "color": [0.18, 0.43, 0.68],
+                  "roughness": 0.36,
+                  "metallic": 0.08
+                },
+                "trousers": {
+                  "color": [0.24, 0.19, 0.13]
+                },
+                "shoes": {
+                  "color": [0.055, 0.043, 0.033],
+                  "emission": {
+                    "color": [0.13, 0.38, 0.7],
+                    "strength": 0.15
+                  },
+                  "opacity": 0.97,
+                  "transmission": 0.08
+                },
+                "hair": {
+                  "color": [0.065, 0.045, 0.032]
+                }
+              }
+            },
+            "motion": [
+              {
+                "id": "gesture",
+                "startFrame": 0,
+                "endFrame": 19,
+                "source": {
+                  "kind": "clip",
+                  "clipId": "gesture.shared"
+                }
+              }
+            ],
+            "poses": {
+              "root": [],
+              "joints": []
+            }
+          }
+        ],
+        "lights": [
+          {
+            "id": "study.key",
+            "type": "area",
+            "position": {
+              "x": -2.6,
+              "y": -2.7,
+              "z": 3.25
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 135,
+            "color": [1, 0.91, 0.82],
+            "size": 3
+          },
+          {
+            "id": "study.fill",
+            "type": "area",
+            "position": {
+              "x": 2.8,
+              "y": -1.85,
+              "z": 2.3
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 75,
+            "color": [0.83, 0.91, 1],
+            "size": 2.7
+          },
+          {
+            "id": "study.rim",
+            "type": "area",
+            "position": {
+              "x": 1.2,
+              "y": 1.55,
+              "z": 2.85
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 100,
+            "color": [1, 0.92, 0.78],
+            "size": 2
+          },
+          {
+            "id": "study.sun",
+            "type": "sun",
+            "energy": 0.35,
+            "angularDiameterRadians": 0.15,
+            "shadows": false,
+            "color": [0.74, 0.85, 1],
+            "position": {
+              "x": 1,
+              "y": -1,
+              "z": 2
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          }
+        ],
+        "camera": {
+          "type": "static",
+          "distance": 5.4,
+          "target": {
+            "x": 0,
+            "y": 0,
+            "z": 1.05
+          },
+          "focalLength": 37
+        },
+        "visualSettings": {
+          "saturation": 1.7,
+          "roughnessScale": 0.55,
+          "exposure": 0.2
+        },
+        "facialRigs": [
+          {
+            "id": "face.study",
+            "bones": [
+              {
+                "id": "face.jaw",
+                "source": "DemoJaw",
+                "parent": "head",
+                "head": [0, -0.043000000000000003, 1.58412],
+                "tail": [0, -0.1118, 1.54112],
+                "min": [-30, -10, -10],
+                "max": [35, 10, 10]
+              },
+              {
+                "id": "face.eye.L",
+                "source": "DemoEyeL",
+                "parent": "head",
+                "head": [0.04128, -0.08428000000000001, 1.61852],
+                "tail": [0.04128, -0.1634, 1.61852],
+                "min": [-50, -50, -50],
+                "max": [50, 50, 50]
+              },
+              {
+                "id": "face.eye.R",
+                "source": "DemoEyeR",
+                "parent": "head",
+                "head": [-0.04128, -0.08428000000000001, 1.61852],
+                "tail": [-0.04128, -0.1634, 1.61852],
+                "min": [-50, -50, -50],
+                "max": [50, 50, 50]
+              }
+            ],
+            "controls": {
+              "smile": [
+                {
+                  "kind": "morph",
+                  "mesh": "Facial Surface",
+                  "target": "Smile"
+                }
+              ],
+              "round": [
+                {
+                  "kind": "morph",
+                  "mesh": "Facial Surface",
+                  "target": "Round"
+                }
+              ],
+              "blink": [
+                {
+                  "kind": "morph",
+                  "mesh": "Facial Surface",
+                  "target": "Blink"
+                }
+              ],
+              "jaw": [
+                {
+                  "kind": "bone",
+                  "joint": "face.jaw",
+                  "rotationDegrees": [22, 0, 0]
+                }
+              ]
+            },
+            "expressions": {
+              "warm": {
+                "smile": 0.75
+              }
+            },
+            "visemes": {
+              "open": {
+                "jaw": 0.9
+              },
+              "round": {
+                "jaw": 0.28,
+                "round": 0.8
+              }
+            },
+            "phonemes": {
+              "AA": "open",
+              "OO": "round"
+            }
+          }
+        ],
+        "retargetProfiles": [
+          {
+            "id": "tall-to-performer",
+            "sourceRig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "sourceRest": {
+              "pelvis": {
+                "head": [0, 0, 1.1684999999999999],
+                "tail": [0, 0, 1.3119999999999996]
+              },
+              "spine": {
+                "head": [0, 0, 1.3119999999999996],
+                "tail": [0, 0, 1.4811249999999998]
+              },
+              "chest": {
+                "head": [0, 0, 1.4811249999999998],
+                "tail": [0, 0, 1.6809999999999998]
+              },
+              "neck": {
+                "head": [0, 0, 1.6809999999999998],
+                "tail": [0, 0, 1.7937499999999997]
+              },
+              "head": {
+                "head": [0, 0, 1.7937499999999997],
+                "tail": [0, 0, 2.05]
+              },
+              "upper_arm.L": {
+                "head": [0.31775, 0, 1.6604999999999999],
+                "tail": [0.47324659999999996, 0, 1.3245073508416592]
+              },
+              "forearm.L": {
+                "head": [0.47324659999999996, 0, 1.3245073508416592],
+                "tail": [0.6142784, 0, 1.0197698318375825]
+              },
+              "hand.L": {
+                "head": [0.6142784, 0, 1.0197698318375825],
+                "tail": [0.6793699999999999, 0, 0.8791217461433932]
+              },
+              "thigh.L": {
+                "head": [0.18449999999999997, 0, 1.1684999999999999],
+                "tail": [0.18449999999999997, -0.0287, 0.650875]
+              },
+              "shin.L": {
+                "head": [0.18449999999999997, -0.0287, 0.650875],
+                "tail": [0.18449999999999997, 0, 0.13324999999999998]
+              },
+              "foot.L": {
+                "head": [0.18449999999999997, 0, 0.13324999999999998],
+                "tail": [0.18449999999999997, -0.21524999999999997, 0.05125]
+              },
+              "upper_arm.R": {
+                "head": [-0.31775, 0, 1.6604999999999999],
+                "tail": [-0.47324659999999996, 0, 1.3245073508416592]
+              },
+              "forearm.R": {
+                "head": [-0.47324659999999996, 0, 1.3245073508416592],
+                "tail": [-0.6142784, 0, 1.0197698318375825]
+              },
+              "hand.R": {
+                "head": [-0.6142784, 0, 1.0197698318375825],
+                "tail": [-0.6793699999999999, 0, 0.8791217461433932]
+              },
+              "thigh.R": {
+                "head": [-0.18449999999999997, 0, 1.1684999999999999],
+                "tail": [-0.18449999999999997, -0.0287, 0.650875]
+              },
+              "shin.R": {
+                "head": [-0.18449999999999997, -0.0287, 0.650875],
+                "tail": [-0.18449999999999997, 0, 0.13324999999999998]
+              },
+              "foot.R": {
+                "head": [-0.18449999999999997, 0, 0.13324999999999998],
+                "tail": [-0.18449999999999997, -0.21524999999999997, 0.05125]
+              }
+            },
+            "mapping": {
+              "version": 1,
+              "translationScale": 0.84,
+              "joints": [
+                {
+                  "semantic": "pelvis",
+                  "source": "pelvis",
+                  "target": "pelvis"
+                },
+                {
+                  "semantic": "spine",
+                  "source": "spine",
+                  "target": "spine"
+                },
+                {
+                  "semantic": "chest",
+                  "source": "chest",
+                  "target": "chest"
+                },
+                {
+                  "semantic": "neck",
+                  "source": "neck",
+                  "target": "neck"
+                },
+                {
+                  "semantic": "head",
+                  "source": "head",
+                  "target": "head"
+                },
+                {
+                  "semantic": "upper_arm.L",
+                  "source": "upper_arm.L",
+                  "target": "upper_arm.L"
+                },
+                {
+                  "semantic": "forearm.L",
+                  "source": "forearm.L",
+                  "target": "forearm.L"
+                },
+                {
+                  "semantic": "hand.L",
+                  "source": "hand.L",
+                  "target": "hand.L"
+                },
+                {
+                  "semantic": "thigh.L",
+                  "source": "thigh.L",
+                  "target": "thigh.L"
+                },
+                {
+                  "semantic": "shin.L",
+                  "source": "shin.L",
+                  "target": "shin.L"
+                },
+                {
+                  "semantic": "foot.L",
+                  "source": "foot.L",
+                  "target": "foot.L"
+                },
+                {
+                  "semantic": "upper_arm.R",
+                  "source": "upper_arm.R",
+                  "target": "upper_arm.R"
+                },
+                {
+                  "semantic": "forearm.R",
+                  "source": "forearm.R",
+                  "target": "forearm.R"
+                },
+                {
+                  "semantic": "hand.R",
+                  "source": "hand.R",
+                  "target": "hand.R"
+                },
+                {
+                  "semantic": "thigh.R",
+                  "source": "thigh.R",
+                  "target": "thigh.R"
+                },
+                {
+                  "semantic": "shin.R",
+                  "source": "shin.R",
+                  "target": "shin.R"
+                },
+                {
+                  "semantic": "foot.R",
+                  "source": "foot.R",
+                  "target": "foot.R"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "timeline": {
+    "durationFrames": 20,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [
+          {
+            "shotId": "shot.facial-study",
+            "startFrame": 0
+          }
+        ]
+      }
+    ],
+    "audioTracks": [],
+    "transitions": []
+  }
+}

@@ -960,3 +960,11 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
   },
   45_000,
 );
+it('validates the skeletal retargeting reference in Studio', async () => {
+  const { path, text } = await createProject('skeletal-retargeting');
+  expect(await request(path + '/validate', { text })).toEqual({
+    issues: [],
+    frames: 20,
+    shots: 1,
+  });
+});

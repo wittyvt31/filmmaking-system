@@ -12,6 +12,7 @@ import { SceneTransformSchema } from './shared-internal.js';
 import { CharacterMaterialSchema, MaterialSchema } from './material.js';
 import { ImportedMaterialsSchema } from './geometry.js';
 import { FacialPerformanceSchema } from './facial.js';
+import { RetargetProfileSchema } from './retargeting.js';
 
 type Vector = readonly [number, number, number];
 type Joint = { id: string; parent?: string; min: Vector; max: Vector };
@@ -77,6 +78,17 @@ const RestSkeletonSchema = z.record(
       'Rest joint must have nonzero length',
     ),
 );
+/** Reusable clip-space rest skeleton and source-to-target mapping. */
+export const SceneRetargetProfileSchema = z
+  .object({
+    id: StableIdSchema,
+    sourceRig: RigSchema,
+    sourceRest: RestSkeletonSchema,
+    mapping: RetargetProfileSchema,
+  })
+  .strict();
+export type SceneRetargetProfile = z.infer<typeof SceneRetargetProfileSchema>;
+
 export function validateRigJointMap(
   rig: z.infer<typeof RigSchema>,
   mapping: z.infer<typeof RigJointMapSchema>,
@@ -178,6 +190,7 @@ export const RiggedCharacterSchema = z
     rig: RigSchema,
     source: SourceSchema,
     poses: PosesSchema.default({ root: [], joints: [] }),
+    retargetProfileId: StableIdSchema.optional(),
     motion: z.array(MotionLayerSchema).max(64).default([]),
     constraints: z.array(SpatialConstraintSchema).max(32).default([]),
     locomotion: LocomotionSchema.optional(),

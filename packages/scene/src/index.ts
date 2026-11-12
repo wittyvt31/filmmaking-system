@@ -16,6 +16,7 @@ export {
   STYLE_DEFINITIONS,
   resolveCharcoalHorrorStyle,
 } from './visual.js';
+import { sampleRetargetedMotion } from './compile-retargeting.js';
 import { prepareCharacter } from './character.js';
 import { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
 import { constrainMotion } from './spatial-constraints.js';
@@ -39,7 +40,7 @@ export { prepareCharacter } from './character.js';
 export { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
 export { filmPlane, projectCameraPoint } from './camera-math.js';
 
-export const SCENE_COMPILER_VERSION = 'scene-compiler-v12';
+export const SCENE_COMPILER_VERSION = 'scene-compiler-v13';
 export const SEMANTIC_ANIMATION_LIBRARY_VERSION = '1.0.0';
 
 export type CompiledScene = CompiledSceneInstruction;
@@ -58,6 +59,11 @@ export function compileScene(
   const facialRigs = new Map(scene.facialRigs?.map((rig) => [rig.id, rig]));
   if (facialRigs.size !== (scene.facialRigs?.length ?? 0))
     throw new TypeError('Duplicate facial rig ID');
+  const retargetProfiles = new Map(
+    scene.retargetProfiles?.map((profile) => [profile.id, profile]),
+  );
+  if (retargetProfiles.size !== (scene.retargetProfiles?.length ?? 0))
+    throw new TypeError('Duplicate retarget profile ID');
   const skeletalClips = motionLibrary(scene.motionClips);
   const style = compileStyle(scene);
   if (scene.animationLibraryVersion !== SEMANTIC_ANIMATION_LIBRARY_VERSION)
@@ -191,16 +197,32 @@ export function compileScene(
                 );
               attachFacialRig(prepared, rig);
             }
+            const profile = character.retargetProfileId
+              ? retargetProfiles.get(character.retargetProfileId)
+              : undefined;
+            if (character.retargetProfileId && !profile)
+              throw new TypeError(
+                'Unknown retarget profile ' + character.retargetProfileId,
+              );
             const locomotion = sampleLocomotion(
               prepared,
               character.locomotion,
-              sampleCharacterMotion(
-                prepared,
-                character.motion,
-                skeletalClips,
-                shot.durationFrames,
-                frameRate,
-              ),
+              profile
+                ? sampleRetargetedMotion(
+                    prepared,
+                    character.motion,
+                    profile,
+                    skeletalClips,
+                    shot.durationFrames,
+                    frameRate,
+                  )
+                : sampleCharacterMotion(
+                    prepared,
+                    character.motion,
+                    skeletalClips,
+                    shot.durationFrames,
+                    frameRate,
+                  ),
               shot.durationFrames,
               frameRate,
               world,
