@@ -214,13 +214,14 @@ def bake_physics(scene, simulation, object_motion, frames, action_fcurves):
                 baked[entity].append((position, rotation))
         return baked
     finally:
-        bpy.ops.rigidbody.world_remove()
         for constraint in constraints:
             bpy.data.objects.remove(constraint, do_unlink=True)
         for proxy in proxies:
             mesh = proxy.data
             bpy.data.objects.remove(proxy, do_unlink=True)
             bpy.data.meshes.remove(mesh)
+        if scene.rigidbody_world is not None:
+            bpy.ops.rigidbody.world_remove()
         scene.frame_set(1)
 
 
