@@ -20,6 +20,7 @@ import {
   RenderPolicySchema,
   ShotSchema,
   resolveRigJointMap,
+  resolveShotRenderDimensions,
   type ArtifactInspection,
   type ArtifactInspectionRequest,
   type CharacterMaterialSchema,
@@ -577,42 +578,10 @@ export class BlenderRendererAdapter implements RendererAdapter {
         ...settings.qualityOverrides,
         ...shot.renderOverrides,
       };
-      const finalScale = Math.max(
-        1,
-        1920 / settings.outputDimensions.width,
-        1080 / settings.outputDimensions.height,
+      const renderDimensions = resolveShotRenderDimensions(
+        settings,
+        shot.renderOverrides,
       );
-      const profileDimensions =
-        settings.qualityProfile === 'draft' ||
-        settings.qualityProfile === 'flat'
-          ? { width: 854, height: 480 }
-          : settings.qualityProfile === 'preview'
-            ? { width: 1280, height: 720 }
-            : settings.qualityProfile === 'final'
-              ? {
-                  width:
-                    Math.ceil(
-                      (settings.outputDimensions.width * finalScale) / 2,
-                    ) * 2,
-                  height:
-                    Math.ceil(
-                      (settings.outputDimensions.height * finalScale) / 2,
-                    ) * 2,
-                }
-              : settings.outputDimensions;
-      const scaleOverride = renderOverrides.width
-        ? renderOverrides.width / profileDimensions.width
-        : renderOverrides.height
-          ? renderOverrides.height / profileDimensions.height
-          : 1;
-      const renderDimensions = {
-        width:
-          renderOverrides.width ??
-          Math.ceil((profileDimensions.width * scaleOverride) / 2) * 2,
-        height:
-          renderOverrides.height ??
-          Math.ceil((profileDimensions.height * scaleOverride) / 2) * 2,
-      };
       const renderConfig = {
         engine:
           settings.qualityProfile === 'flat'
@@ -660,7 +629,22 @@ export class BlenderRendererAdapter implements RendererAdapter {
           `Blender worker was not found at ${WORKER_PATH}`,
         );
       const compiledScene =
-        request.scene ?? compileScene(shot, settings.frameRate);
+        request.scene ??
+        compileScene(
+          shot,
+          settings.frameRate,
+          [],
+          renderDimensions.width / renderDimensions.height,
+        );
+      if (
+        compiledScene.cinematography &&
+        compiledScene.cinematography.aspect !==
+          renderDimensions.width / renderDimensions.height
+      )
+        throw new BlenderFailure(
+          'INVALID_INSTRUCTIONS',
+          'Compiled camera projection does not match render aspect',
+        );
       if (
         compiledScene.style.shading === 'cel' &&
         renderConfig.engine !== 'BLENDER_EEVEE'
@@ -789,6 +773,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
             'physics_backend.py',
             'visual_runtime.py',
             'geometry_builder.py',
+            'camera_runtime.py',
             'model_import.py',
           ].map(async (file) =>
             createHash('sha256')
@@ -1063,6 +1048,9 @@ export class BlenderRendererAdapter implements RendererAdapter {
           asset: resolveModelAsset(prop.asset),
         })),
         lights: scene.lights,
+        ...(scene.cinematography
+          ? { cinematography: scene.cinematography }
+          : {}),
         camera: scene.camera,
         cameraKeyframes: scene.cameraKeyframes,
         actions: scene.actions,

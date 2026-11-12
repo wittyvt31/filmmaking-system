@@ -13,6 +13,7 @@ from mathutils import Euler, Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from world_builder import build_world
+from camera_runtime import install_cameras
 from model_import import import_model
 from visual_runtime import apply_material_style, configure_environment
 from physics_backend import apply_physics_bake, bake_physics
@@ -292,7 +293,6 @@ def create_scene(spec):
              "rotationDegrees": {"x": 0.0, "y": 0.0, "z": 0.0}, "scale": 1.0},
             "Environment",
         )
-    initial_focal_length = float(spec["cameraKeyframes"][0].get("focalLength", 50.0))
     entity_roots = {}
     control_objects = {}
     scene["filmie_character_cache_hits"] = 0
@@ -333,27 +333,31 @@ def create_scene(spec):
             for point in curve.keyframe_points:
                 point.interpolation = "LINEAR"
 
-    camera_data = bpy.data.cameras.new("Cinematic Camera")
-    camera_data.type = "PERSP"
-    camera_data.lens = initial_focal_length
-    camera = bpy.data.objects.new("Cinematic Camera", camera_data)
-    scene.collection.objects.link(camera)
-    scene.camera = camera
-    for keyframe in spec["cameraKeyframes"]:
-        frame = int(keyframe["frame"])
-        if "position" in keyframe and "target" in keyframe:
-            camera.location = tuple(float(keyframe["position"][axis]) for axis in ("x", "y", "z"))
-            target = Vector(tuple(float(keyframe["target"][axis]) for axis in ("x", "y", "z")))
-        else:
-            target = Vector(tuple(float(spec["camera"]["target"][axis]) for axis in ("x", "y", "z")))
-            distance = float(keyframe["distance"])
-            camera.location = (target.x, target.y - distance, target.z)
-        camera.rotation_euler = (target - camera.location).to_track_quat("-Z", "Y").to_euler()
-        camera.keyframe_insert(data_path="location", frame=frame)
-        camera.keyframe_insert(data_path="rotation_euler", frame=frame)
-        if "focalLength" in keyframe:
-            camera_data.lens = float(keyframe["focalLength"])
-            camera_data.keyframe_insert(data_path="lens", frame=frame)
+    if "cinematography" in spec:
+        install_cameras(scene, spec["cinematography"], action_fcurves)
+    else:
+        initial_focal_length = float(spec["cameraKeyframes"][0].get("focalLength", 50.0))
+        camera_data = bpy.data.cameras.new("Cinematic Camera")
+        camera_data.type = "PERSP"
+        camera_data.lens = initial_focal_length
+        camera = bpy.data.objects.new("Cinematic Camera", camera_data)
+        scene.collection.objects.link(camera)
+        scene.camera = camera
+        for keyframe in spec["cameraKeyframes"]:
+            frame = int(keyframe["frame"])
+            if "position" in keyframe and "target" in keyframe:
+                camera.location = tuple(float(keyframe["position"][axis]) for axis in ("x", "y", "z"))
+                target = Vector(tuple(float(keyframe["target"][axis]) for axis in ("x", "y", "z")))
+            else:
+                target = Vector(tuple(float(spec["camera"]["target"][axis]) for axis in ("x", "y", "z")))
+                distance = float(keyframe["distance"])
+                camera.location = (target.x, target.y - distance, target.z)
+            camera.rotation_euler = (target - camera.location).to_track_quat("-Z", "Y").to_euler()
+            camera.keyframe_insert(data_path="location", frame=frame)
+            camera.keyframe_insert(data_path="rotation_euler", frame=frame)
+            if "focalLength" in keyframe:
+                camera_data.lens = float(keyframe["focalLength"])
+                camera_data.keyframe_insert(data_path="lens", frame=frame)
     scene.frame_set(1)
     bpy.context.view_layer.update()
     scene.frame_set(1)

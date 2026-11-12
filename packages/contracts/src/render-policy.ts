@@ -141,3 +141,40 @@ export type Rational = z.infer<typeof RationalSchema>;
 export type VideoSettings = z.infer<typeof VideoSettingsSchema>;
 export type RenderPolicy = z.infer<typeof RenderPolicySchema>;
 export type RendererSelection = z.infer<typeof RendererSelectionSchema>;
+
+/** Projection and rasterization must use the same dimensions before encoding. */
+export function resolveShotRenderDimensions(
+  policy: Pick<
+    RenderPolicy,
+    'outputDimensions' | 'qualityProfile' | 'qualityOverrides'
+  >,
+  shotOverrides?: RenderPolicy['qualityOverrides'],
+) {
+  const overrides = { ...policy.qualityOverrides, ...shotOverrides };
+  const dimensions = policy.outputDimensions;
+  const finalScale = Math.max(
+    1,
+    1920 / dimensions.width,
+    1080 / dimensions.height,
+  );
+  const base =
+    policy.qualityProfile === 'draft' || policy.qualityProfile === 'flat'
+      ? { width: 854, height: 480 }
+      : policy.qualityProfile === 'preview'
+        ? { width: 1280, height: 720 }
+        : policy.qualityProfile === 'final'
+          ? {
+              width: Math.ceil((dimensions.width * finalScale) / 2) * 2,
+              height: Math.ceil((dimensions.height * finalScale) / 2) * 2,
+            }
+          : dimensions;
+  const scale = overrides.width
+    ? overrides.width / base.width
+    : overrides.height
+      ? overrides.height / base.height
+      : 1;
+  return {
+    width: overrides.width ?? Math.ceil((base.width * scale) / 2) * 2,
+    height: overrides.height ?? Math.ceil((base.height * scale) / 2) * 2,
+  };
+}

@@ -64,9 +64,11 @@ export function validateManifestSceneInstructions(
         entityIds.add(entityId);
       }
       if (
-        shot.scene.camera.type !== 'static' &&
-        shot.scene.camera.startFrame + shot.scene.camera.durationFrames >
-          shot.durationFrames
+        shot.scene.camera.type === 'rigs'
+          ? !cameraFitsShot(shot.scene.camera, shot.durationFrames)
+          : shot.scene.camera.type !== 'static' &&
+            shot.scene.camera.startFrame + shot.scene.camera.durationFrames >
+              shot.durationFrames
       ) {
         issue(
           ['shots', shotIndex, 'scene', 'camera'],
@@ -324,3 +326,4 @@ export function validateManifestSceneInstructions(
   });
 }
 import { characterAsset } from './character.js';
+import { cameraFitsShot } from './cinematography.js';

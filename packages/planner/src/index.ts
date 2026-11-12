@@ -5,6 +5,7 @@ import {
   MotionClipLibrarySchema,
   parseProjectManifest,
   resolveRigJointMap,
+  resolveShotRenderDimensions,
   visualAssetReferences,
   type AssetVersionReference,
   type ProjectManifest,
@@ -307,9 +308,18 @@ export async function prepareProductionPlan(
             return parsed;
           }),
         );
+        const { width, height } = resolveShotRenderDimensions(
+          manifest.renderPolicy,
+          shot.renderOverrides,
+        );
         return [
           shot.id,
-          compileScene(shot, manifest.video.frameRate, libraries),
+          compileScene(
+            shot,
+            manifest.video.frameRate,
+            libraries,
+            width / height,
+          ),
         ] as const;
       }),
   );

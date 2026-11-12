@@ -12,6 +12,7 @@ import { WorldSchema } from './world.js';
 import { ObjectInteractionSchema } from './interactions.js';
 import { ContactGraphSchema } from './contact-graph.js';
 import { SceneContactResponseSchema } from './contact-response.js';
+import { CinematographySchema } from './cinematography.js';
 
 const SceneCameraTargetSchema = z
   .object({
@@ -131,7 +132,7 @@ export const ShotSceneSchema = z
       )
       .default([]),
     lights: z.array(SceneLightSchema).default([]),
-    camera: SceneCameraSchema,
+    camera: z.union([SceneCameraSchema, CinematographySchema]),
   })
   .strict()
   .superRefine((scene, context) => {

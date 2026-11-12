@@ -1,0 +1,622 @@
+{
+  "projectId": "filmie.cinematography",
+  "version": "1.0.0",
+  "video": {
+    "resolution": {
+      "width": 320,
+      "height": 180
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    }
+  },
+  "renderPolicy": {
+    "outputDimensions": {
+      "width": 320,
+      "height": 180
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": {
+      "mode": "crf",
+      "value": 22
+    },
+    "renderer": {
+      "id": "blender",
+      "config": {
+        "engine": "BLENDER_EEVEE",
+        "samples": 4
+      }
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.camera-study",
+      "durationFrames": 24,
+      "visualDescription": "Three independently animated cameras follow a moving performer in one continuous scene.",
+      "composition": {
+        "framing": "Headroom, orbit and crane, and a tracking handheld cut",
+        "subjectPlacement": "Center",
+        "cameraMovement": "Static",
+        "instructions": []
+      },
+      "requiredAssets": [],
+      "scene": {
+        "stylePreset": "stylized_3d",
+        "styleVersion": "1.0.0",
+        "world": {
+          "schemaVersion": 1,
+          "materials": [
+            {
+              "id": "floor",
+              "color": [0.18, 0.2, 0.21],
+              "roughness": 0.82,
+              "procedural": {
+                "kind": "checker",
+                "scale": 14,
+                "color": [0.37, 0.3, 0.22]
+              }
+            },
+            {
+              "id": "wall",
+              "color": [0.26, 0.29, 0.3],
+              "roughness": 0.85,
+              "procedural": {
+                "kind": "noise",
+                "scale": 22,
+                "color": [0.31, 0.37, 0.49]
+              }
+            }
+          ],
+          "entities": [
+            {
+              "id": "studio",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "room",
+                "dimensions": {
+                  "x": 5.6,
+                  "y": 5.8,
+                  "z": 3.1
+                },
+                "floor": {
+                  "thickness": 0.15,
+                  "materialId": "floor"
+                },
+                "walls": [
+                  {
+                    "side": "north",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "west",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "east",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "motionClips": [],
+        "characters": [
+          {
+            "id": "performer",
+            "transform": {
+              "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": -12
+              },
+              "scale": 1
+            },
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "source": {
+              "kind": "procedural",
+              "body": {
+                "height": 1.72,
+                "shoulderWidth": 0.245,
+                "build": 1
+              },
+              "appearance": {
+                "skin": {
+                  "color": [0.66, 0.39, 0.24]
+                },
+                "top": {
+                  "color": [0.18, 0.43, 0.68],
+                  "roughness": 0.36,
+                  "metallic": 0.08
+                },
+                "trousers": {
+                  "color": [0.24, 0.19, 0.13]
+                },
+                "shoes": {
+                  "color": [0.055, 0.043, 0.033],
+                  "emission": {
+                    "color": [0.13, 0.38, 0.7],
+                    "strength": 0.15
+                  },
+                  "opacity": 0.97,
+                  "transmission": 0.08
+                },
+                "hair": {
+                  "color": [0.065, 0.045, 0.032]
+                }
+              }
+            },
+            "motion": [],
+            "poses": {
+              "root": [
+                {
+                  "frame": 0,
+                  "transform": {
+                    "position": {
+                      "x": -0.13,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "rotationDegrees": {
+                      "x": 0,
+                      "y": 0,
+                      "z": -12
+                    },
+                    "scale": 1
+                  },
+                  "interpolation": "ease"
+                },
+                {
+                  "frame": 23,
+                  "transform": {
+                    "position": {
+                      "x": 0.24,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "rotationDegrees": {
+                      "x": 0,
+                      "y": 0,
+                      "z": -12
+                    },
+                    "scale": 1
+                  },
+                  "interpolation": "ease"
+                }
+              ],
+              "joints": [
+                {
+                  "joint": "upper_arm.L",
+                  "keys": [
+                    {
+                      "frame": 0,
+                      "rotationDegrees": [-12, 0, -30],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 23,
+                      "rotationDegrees": [-20, 0, -78],
+                      "interpolation": "ease"
+                    }
+                  ]
+                },
+                {
+                  "joint": "head",
+                  "keys": [
+                    {
+                      "frame": 0,
+                      "rotationDegrees": [0, 0, 0],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 23,
+                      "rotationDegrees": [0, 12, 0],
+                      "interpolation": "ease"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "lights": [
+          {
+            "id": "study.key",
+            "type": "area",
+            "position": {
+              "x": -2.6,
+              "y": -2.7,
+              "z": 3.25
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 135,
+            "color": [1, 0.91, 0.82],
+            "size": 3
+          },
+          {
+            "id": "study.fill",
+            "type": "area",
+            "position": {
+              "x": 2.8,
+              "y": -1.85,
+              "z": 2.3
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 75,
+            "color": [0.83, 0.91, 1],
+            "size": 2.7
+          },
+          {
+            "id": "study.rim",
+            "type": "area",
+            "position": {
+              "x": 1.2,
+              "y": 1.55,
+              "z": 2.85
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 100,
+            "color": [1, 0.92, 0.78],
+            "size": 2
+          },
+          {
+            "id": "study.sun",
+            "type": "sun",
+            "energy": 0.35,
+            "angularDiameterRadians": 0.15,
+            "shadows": false,
+            "color": [0.74, 0.85, 1],
+            "position": {
+              "x": 1,
+              "y": -1,
+              "z": 2
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          }
+        ],
+        "camera": {
+          "type": "rigs",
+          "rigs": [
+            {
+              "id": "dolly",
+              "position": [
+                {
+                  "frame": 0,
+                  "value": [-0.25, -4.8, 1.05]
+                }
+              ],
+              "framing": {
+                "target": {
+                  "kind": "entity",
+                  "entityId": "performer",
+                  "joint": "head",
+                  "offset": [0, 0.11, 0]
+                },
+                "x": 0.57,
+                "headroom": 0.15
+              },
+              "optics": {
+                "focalLength": 40,
+                "sensor": {
+                  "width": 36,
+                  "height": 24,
+                  "fit": "horizontal"
+                },
+                "depthOfField": true,
+                "aperture": 2.4,
+                "blades": 7,
+                "focus": {
+                  "kind": "target",
+                  "target": {
+                    "kind": "entity",
+                    "entityId": "performer",
+                    "offset": [0, 0, 0.92]
+                  }
+                }
+              },
+              "behaviors": [
+                {
+                  "kind": "dolly",
+                  "keys": [
+                    {
+                      "frame": 0,
+                      "value": 0,
+                      "interpolation": "ease-in-out"
+                    },
+                    {
+                      "frame": 7,
+                      "value": 0.35
+                    }
+                  ]
+                }
+              ],
+              "visibility": [
+                {
+                  "target": {
+                    "kind": "entity",
+                    "entityId": "performer",
+                    "offset": [0, 0, 0.01]
+                  },
+                  "margin": 0.015,
+                  "occlusion": "proxies"
+                }
+              ]
+            },
+            {
+              "id": "orbit",
+              "position": [
+                {
+                  "frame": 0,
+                  "value": [0, -4.65, 1.05]
+                }
+              ],
+              "lookAt": {
+                "kind": "entity",
+                "entityId": "performer",
+                "offset": [0, 0, 0.92]
+              },
+              "optics": {
+                "focalLengthKeys": [
+                  {
+                    "frame": 8,
+                    "value": 39,
+                    "interpolation": "ease-in-out"
+                  },
+                  {
+                    "frame": 15,
+                    "value": 43
+                  }
+                ],
+                "focus": {
+                  "kind": "target",
+                  "target": {
+                    "kind": "entity",
+                    "entityId": "performer",
+                    "joint": "head",
+                    "offset": [0, 0.11, 0]
+                  }
+                }
+              },
+              "behaviors": [
+                {
+                  "kind": "tracking",
+                  "target": {
+                    "kind": "entity",
+                    "entityId": "performer",
+                    "offset": [0, 0, 0.92]
+                  }
+                },
+                {
+                  "kind": "orbit",
+                  "target": {
+                    "kind": "entity",
+                    "entityId": "performer",
+                    "offset": [0, 0, 0.92]
+                  },
+                  "keys": [
+                    {
+                      "frame": 8,
+                      "value": -28,
+                      "interpolation": "ease-in-out"
+                    },
+                    {
+                      "frame": 15,
+                      "value": 29
+                    }
+                  ]
+                },
+                {
+                  "kind": "crane",
+                  "keys": [
+                    {
+                      "frame": 8,
+                      "value": 0,
+                      "interpolation": "ease-in-out"
+                    },
+                    {
+                      "frame": 15,
+                      "value": 0.52
+                    }
+                  ]
+                }
+              ],
+              "visibility": [
+                {
+                  "target": {
+                    "kind": "entity",
+                    "entityId": "performer",
+                    "joint": "head",
+                    "offset": [0, 0.11, 0]
+                  },
+                  "margin": 0.03
+                },
+                {
+                  "target": {
+                    "kind": "entity",
+                    "entityId": "performer",
+                    "offset": [0, 0, 0.01]
+                  },
+                  "margin": 0.03
+                }
+              ]
+            },
+            {
+              "id": "handheld",
+              "position": [
+                {
+                  "frame": 16,
+                  "value": [1.18, -3.9, 1.5],
+                  "outControl": [0.75, -4.1, 1.55],
+                  "easing": [0.3, 0.0, 0.7, 1]
+                },
+                {
+                  "frame": 23,
+                  "value": [-0.36, -4.55, 1.2],
+                  "inControl": [0.05, -4.75, 1.4]
+                }
+              ],
+              "lookAt": {
+                "kind": "entity",
+                "entityId": "performer",
+                "joint": "chest",
+                "offset": [0, 0.02, 0]
+              },
+              "optics": {
+                "focalLength": 38,
+                "sensor": {
+                  "width": 36,
+                  "height": 23,
+                  "fit": "vertical"
+                },
+                "depthOfField": true,
+                "aperture": 3.1,
+                "focus": {
+                  "kind": "target",
+                  "target": {
+                    "kind": "entity",
+                    "entityId": "performer",
+                    "joint": "head",
+                    "offset": [0, 0.11, 0]
+                  }
+                }
+              },
+              "behaviors": [
+                {
+                  "kind": "pan",
+                  "keys": [
+                    {
+                      "frame": 16,
+                      "value": -3,
+                      "interpolation": "ease-in-out"
+                    },
+                    {
+                      "frame": 23,
+                      "value": 3
+                    }
+                  ]
+                },
+                {
+                  "kind": "tilt",
+                  "keys": [
+                    {
+                      "frame": 16,
+                      "value": 1,
+                      "interpolation": "ease-in-out"
+                    },
+                    {
+                      "frame": 23,
+                      "value": -2
+                    }
+                  ]
+                },
+                {
+                  "kind": "handheld",
+                  "seed": 112,
+                  "positionAmplitude": 0.035,
+                  "rotationAmplitude": 0.65,
+                  "frequencyHz": 2.2
+                }
+              ],
+              "visibility": [
+                {
+                  "target": {
+                    "kind": "entity",
+                    "entityId": "performer",
+                    "joint": "head",
+                    "offset": [0, 0.11, 0]
+                  },
+                  "margin": 0.035
+                }
+              ]
+            }
+          ],
+          "cuts": [
+            {
+              "cameraId": "dolly",
+              "startFrame": 0,
+              "endFrame": 8
+            },
+            {
+              "cameraId": "orbit",
+              "startFrame": 8,
+              "endFrame": 16
+            },
+            {
+              "cameraId": "handheld",
+              "startFrame": 16,
+              "endFrame": 24
+            }
+          ]
+        },
+        "visualSettings": {
+          "saturation": 1.7,
+          "roughnessScale": 0.55,
+          "exposure": 0.2
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "durationFrames": 24,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [
+          {
+            "shotId": "shot.camera-study",
+            "startFrame": 0
+          }
+        ]
+      }
+    ],
+    "audioTracks": [],
+    "transitions": []
+  }
+}

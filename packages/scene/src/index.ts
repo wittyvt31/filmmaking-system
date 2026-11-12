@@ -22,6 +22,7 @@ import { constrainMotion } from './spatial-constraints.js';
 import { compileInteractions } from './compile-interactions.js';
 import { compileContacts } from './compile-contacts.js';
 import { compilePhysics } from './physics.js';
+import { compileCinematography } from './cinematography.js';
 export * from './collision.js';
 export { compilePhysics } from './physics.js';
 import { sampleLocomotion } from './locomotion.js';
@@ -35,6 +36,7 @@ export { constrainMotion, forwardKinematics } from './spatial-constraints.js';
 export { compileWorld } from './world.js';
 export { prepareCharacter } from './character.js';
 export { motionLibrary, sampleCharacterMotion } from './skeletal-motion.js';
+export { filmPlane, projectCameraPoint } from './camera-math.js';
 
 export const SCENE_COMPILER_VERSION = 'scene-compiler-v12';
 export const SEMANTIC_ANIMATION_LIBRARY_VERSION = '1.0.0';
@@ -45,6 +47,7 @@ export function compileScene(
   shotInput: Shot,
   frameRate: Rational,
   motionClipLibraries: readonly MotionClipLibrary[] = [],
+  renderAspect = 16 / 9,
 ): CompiledScene {
   const shot: Shot = shotInput;
   if (!shot.scene) {
@@ -226,6 +229,27 @@ export function compileScene(
     physics,
     frameRate,
   );
+  const objectMotion = interactions.size
+    ? [...interactions.values()]
+        .map(({ track }) => track)
+        .sort((a, b) => compareStrings(a.objectId, b.objectId))
+    : undefined;
+  const cinematography =
+    scene.camera.type === 'rigs'
+      ? compileCinematography(
+          scene.camera,
+          {
+            characters,
+            props: scene.props,
+            ...(world ? { world } : {}),
+            ...(physics ? { physics } : {}),
+            ...(objectMotion ? { objectMotion } : {}),
+          },
+          shot.durationFrames,
+          frameRate,
+          renderAspect,
+        )
+      : undefined;
   const withoutHash = {
     version: SCENE_COMPILER_VERSION,
     shotId: shot.id,
@@ -239,13 +263,7 @@ export function compileScene(
     ...(world ? { world } : {}),
     ...(physics ? { physics } : {}),
     characters,
-    ...(interactions.size
-      ? {
-          objectMotion: [...interactions.values()]
-            .map(({ track }) => track)
-            .sort((a, b) => compareStrings(a.objectId, b.objectId)),
-        }
-      : {}),
+    ...(objectMotion ? { objectMotion } : {}),
     props: [...scene.props].sort((left, right) =>
       compareStrings(left.id, right.id),
     ),
@@ -253,8 +271,10 @@ export function compileScene(
       compareStrings(left.id, right.id),
     ),
     camera: scene.camera,
+    ...(cinematography ? { cinematography } : {}),
     cameraKeyframes: (() => {
       const camera = scene.camera;
+      if (camera.type === 'rigs') return [];
       const keyframe = (
         frame: number,
         target: { x: number; y: number; z: number },

@@ -8,6 +8,7 @@ import type { StyleDefinition, VisualSettings } from './style.js';
 import type { RigidTransform } from './interactions.js';
 import type { PhysicsSimulation } from './physics.js';
 import type { PreparedCharacter, SceneCharacter } from './character.js';
+import type { CompiledCinematography } from './cinematography.js';
 
 export interface CompiledSceneInstruction {
   version: string;
@@ -27,6 +28,7 @@ export interface CompiledSceneInstruction {
   props: z.infer<typeof ShotSceneSchema>['props'];
   lights: z.infer<typeof ShotSceneSchema>['lights'];
   camera: z.infer<typeof ShotSceneSchema>['camera'];
+  cinematography?: CompiledCinematography;
   cameraKeyframes: {
     frame: number;
     distance: number;

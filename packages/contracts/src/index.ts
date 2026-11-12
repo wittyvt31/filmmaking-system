@@ -1,6 +1,7 @@
 export * from './style.js';
 export * from './material.js';
 export * from './geometry.js';
+export * from './cinematography.js';
 export * from './identifiers.js';
 export * from './render-policy.js';
 export * from './motion.js';

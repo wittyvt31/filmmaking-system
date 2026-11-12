@@ -13,6 +13,10 @@ Run `pnpm web` and open [Filmie Studio](http://127.0.0.1:4173). Create a project
 
 The web app stores project revisions and run history in `.filmie/`, writes outputs to `renders/web/`, and shares the production cache with the CLI. Set `FILMIE_WEB_PORT` to change the port or `FILMIE_WEB_CATALOGS` to use another folder of prepared projects, each with a `manifest.json` and `assets.json`. Keep the catalog asset files available for reruns.
 
+Create a Studio project from `cinematography` to see a dolly, an orbit and crane, and a handheld tracking cut around one animated performer. Use `scene.camera.type: "rigs"` to define independently animated cameras and reuse their IDs in `cuts`. The cuts are zero-based, start-inclusive and end-exclusive, and together cover the shot. Position keys use world metres and can supply absolute Bézier handles. Orientation keys use WXYZ quaternions with local −Z forward and +Y up. Alternatively, aim at a world point or a compiled entity or skeletal joint. Behaviors layer world-space or camera-relative motion onto the rig, and seeded handheld motion repeats for the same input.
+
+Optics control focal length, sensor fit and size, aperture, clipping, and depth of field. Focus can use distance keys or track a target. Framing places a selected anchor at normalized screen coordinates with the origin at the lower left. For headroom, select a head anchor and supply its desired distance from the top edge. Add visibility anchors for other parts of the subject. Visibility checks the frame and clipping planes, with optional occlusion checks against static world collision proxies. Targets must have compiler-known transforms; runtime physics and legacy renderer-only animation are outside this tracking mode.
+
 ## Run the reference project
 
 ```powershell

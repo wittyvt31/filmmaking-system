@@ -1,12 +1,12 @@
 import { execFile } from 'node:child_process';
-import { mkdtemp, readdir, rm } from 'node:fs/promises';
+import { mkdtemp, readdir, readFile, rm } from 'node:fs/promises';
 import { promisify } from 'node:util';
 import { defaultBlenderExecutable } from '@filmmaking/engine-blender';
 import { RiggedCharacterSchema } from '@filmmaking/contracts';
 import { prepareCharacter } from '@filmmaking/scene';
 import { once } from 'node:events';
 import { tmpdir } from 'node:os';
-import { basename, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import type { Server } from 'node:http';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { createFilmieServer } from '../apps/web-api/src/server.js';
@@ -513,6 +513,87 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
     expect(cached.cacheHits).toEqual({ shots: 1, assembly: true });
   },
   175_000,
+);
+
+it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
+  'renders and verifies cinematography cuts through Studio',
+  async () => {
+    const { path, revision, text } = await createProject('cinematography');
+    expect(await request(path + '/validate', { text })).toEqual({
+      issues: [],
+      frames: 24,
+      shots: 1,
+    });
+    const input = JSON.parse(text);
+    input.video.resolution = { width: 160, height: 90 };
+    input.renderPolicy.outputDimensions = input.video.resolution;
+    input.renderPolicy.renderer.config.samples = 1;
+    const saved = (await request(
+      path + '/revisions',
+      { text: JSON.stringify(input), baseRevisionId: revision },
+      201,
+    )) as ProjectSummary;
+    const queue = async () =>
+      (await request(
+        path + '/runs',
+        { revisionId: saved.revisions[0]!.id },
+        202,
+      )) as Run;
+    const { run, outputs } = await waitForRun((await queue()).id, 150_000);
+    expect(run.status, run.error).toBe('succeeded');
+    expect(outputs.some((o) => o.name === 'master.mp4')).toBe(true);
+    expect(outputs.some((o) => o.kind === 'image')).toBe(true);
+    const blend = outputs.find((o) => o.name.endsWith('/scene.blend'))!;
+    const blendPath = join(root, 'outputs', run.id, blend.name);
+    const pixels = await Promise.all(
+      [1, 8, 9, 17].map((frame) =>
+        readFile(
+          join(
+            dirname(blendPath),
+            'frames',
+            `frame_${String(frame).padStart(6, '0')}.png`,
+          ),
+        ),
+      ),
+    );
+    expect(new Set(pixels.map((p) => p.toString('base64'))).size).toBe(4);
+    await promisify(execFile)(
+      defaultBlenderExecutable(),
+      [
+        '--background',
+        blendPath,
+        '--python-exit-code',
+        '1',
+        '--python-expr',
+        [
+          'import bpy, math',
+          'from mathutils import Vector',
+          'from bpy_extras.object_utils import world_to_camera_view',
+          'scene = bpy.context.scene',
+          'rig = next(o for o in scene.objects if o.type == "ARMATURE")',
+          'actor = rig.parent',
+          'assert len([o for o in scene.objects if o.type == "CAMERA"]) == 3',
+          'def camera(frame):\n    scene.frame_set(frame)\n    return scene.camera',
+          'assert [camera(f)["filmie_camera_id"] for f in (1, 8, 9, 16, 17, 24, 1)] == ["dolly","dolly","orbit","orbit","handheld","handheld","dolly"]',
+          'dolly = camera(4)',
+          'head = rig.matrix_world @ (rig.pose.bones["head"].matrix @ Vector((0,.11,0)))',
+          'screen = world_to_camera_view(scene, dolly, head)',
+          'assert math.isclose(screen.x,.57,abs_tol=1e-5) and math.isclose(screen.y,.85,abs_tol=1e-5), tuple(screen)',
+          'focus = actor.matrix_world @ Vector((0,0,.92))',
+          'assert math.isclose(dolly.data.dof.focus_distance,-(dolly.matrix_world.inverted() @ focus).z,abs_tol=1e-5)',
+          'assert dolly.data.dof.use_dof and dolly.data.dof.aperture_blades == 7',
+          'first = camera(9).matrix_world.translation.copy()',
+          'assert (camera(16).matrix_world.translation-first).length > 1.0',
+          'assert math.isclose(scene.camera.data.lens,43,abs_tol=1e-5)',
+          'assert camera(17).data.sensor_fit == "VERTICAL" and camera(17).data.sensor_height == 23',
+        ].join('\n'),
+      ],
+      { timeout: 20_000, windowsHide: true },
+    );
+    const cached = (await waitForRun((await queue()).id, 30_000)).run;
+    expect(cached.cacheHits).toEqual({ shots: 1, assembly: true });
+  },
+  190_000,
 );
 
 it('loads the four visual treatments as one Studio catalog', async () => {
