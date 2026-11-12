@@ -579,3 +579,4 @@ export function compileScene(
   };
 }
 export * from './retargeting.js';
+export * from './articulated-dynamics.js';

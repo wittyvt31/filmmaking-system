@@ -24,3 +24,4 @@ export * from './contact-graph.js';
 export * from './contact-response.js';
 export * from './retargeting.js';
 export * from './secondary-motion.js';
+export * from './articulated-dynamics.js';
