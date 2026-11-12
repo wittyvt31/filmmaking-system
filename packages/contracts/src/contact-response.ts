@@ -23,18 +23,28 @@ export const ContactLoadSchema = z
 export const CharacterResponseSchema = z
   .object({
     entityId: StableIdSchema,
-    massKg: z.number().positive().max(10000),
-    recoveryFrequencyHz: z.number().positive().max(30).default(2),
+    massKg: z.number().min(0.001).max(10000),
+    recoveryFrequencyHz: z.number().min(0.01).max(30).default(2),
     maxDisplacementMeters: z.number().positive().max(10).default(0.5),
     /** Horizontal support radius around the authored root. Exceeding it requests a step. */
     supportRadiusMeters: z.number().positive().max(5).default(0.15),
     rootLocked: z.boolean().default(false),
+    stagger: z
+      .object({
+        effector: StableIdSchema,
+        chainRoot: StableIdSchema,
+        swingSeconds: z.number().min(0.05).max(2).default(0.2),
+        holdSeconds: z.number().nonnegative().max(4).default(0.25),
+        clearanceMeters: z.number().positive().max(1).default(0.07),
+      })
+      .strict()
+      .optional(),
     joints: z
       .array(
         z
           .object({
             joint: StableIdSchema,
-            inertiaKgMetersSquared: z.number().positive().max(10000),
+            inertiaKgMetersSquared: z.number().min(0.000001).max(10000),
             maxRecoilDegrees: z.number().positive().max(90).default(15),
           })
           .strict(),

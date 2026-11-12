@@ -121,3 +121,52 @@ it('matches physical time across frame rates and releases sustained force', () =
   expect(a(6)[1]!.displacement).toEqual(b(12)[1]!.displacement);
   expect(a(120)[1]!.displacement[0]).toBeLessThan(1e-8);
 });
+
+it('provides a lifted step, fixed plant and recovery without modifying locked foot chains', () => {
+  const r = request();
+  Object.assign(r.characters[1]!, {
+    stagger: { effector: 'foot.R', chainRoot: 'thigh.R' },
+  });
+  const rate = { numerator: 30, denominator: 1 };
+  const evaluate = createContactResponseEvaluator(r, rate, participants);
+  const stance = evaluate(14)[1]!.staggerFoot!;
+  expect(stance.phase).toBe('plant');
+  expect(evaluate(16)[1]!.staggerFoot).toEqual(stance);
+  expect(evaluate(8)[1]!.staggerFoot!.position[2]).toBeGreaterThan(
+    stance.position[2] + 0.05,
+  );
+  expect(evaluate(22)[1]!.staggerFoot!.phase).toBe('recover');
+  expect(evaluate(30)[1]!.staggerFoot).toBeUndefined();
+  expect(evaluate(14)[1]!.staggerFoot).toEqual(stance);
+  const locked = createContactResponseEvaluator(r, rate, () =>
+    participants().map((p) => ({
+      ...p,
+      lockedJoints: new Set(['shin.R']),
+    })),
+  )(14)[1]!;
+  expect(locked.staggerFoot).toBeUndefined();
+  expect(locked.constrained).toContain('authored-stagger-chain');
+});
+
+it('turns off-centre load into joint recoil and preserves a locked authored pose', () => {
+  const r = request();
+  Object.assign(r.characters[1]!, {
+    joints: [
+      { joint: 'upper_arm.R', inertiaKgMetersSquared: 2, maxRecoilDegrees: 6 },
+    ],
+  });
+  const rate = { numerator: 30, denominator: 1 };
+  const free = createContactResponseEvaluator(r, rate, participants)(5)[1]!;
+  const rotation = free.rotations.get('upper_arm.R')!;
+  const angle = (2 * Math.acos(rotation[0]) * 180) / Math.PI;
+  expect(angle).toBeGreaterThan(1);
+  expect(angle).toBeLessThanOrEqual(6.00001);
+  const locked = createContactResponseEvaluator(r, rate, () =>
+    participants().map((p) => ({
+      ...p,
+      lockedJoints: new Set(['upper_arm.R']),
+    })),
+  )(5)[1]!;
+  expect(locked.rotations.has('upper_arm.R')).toBe(false);
+  expect(locked.constrained).toContain('authored-joint:upper_arm.R');
+});
