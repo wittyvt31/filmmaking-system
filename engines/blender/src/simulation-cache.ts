@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { mkdtemp, readFile, rm, writeFile, copyFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
   canonicalJsonSha256,
@@ -71,6 +71,7 @@ export async function simulationDependency(
   };
 }
 type Dependency = NonNullable<Awaited<ReturnType<typeof simulationDependency>>>;
+const inFlight = new Map<string, Promise<void>>();
 
 async function validArtifact(
   path: string,
@@ -106,24 +107,16 @@ async function validArtifact(
   }
 }
 
-export async function prepareSimulation(
+async function bakeSimulation(
   dependency: Dependency,
   cache: ArtifactCache,
-  workDirectory: string,
   run: (args: string[]) => Promise<void>,
-  signal?: AbortSignal,
 ) {
-  signal?.throwIfAborted();
   const { fingerprint, input, workerPath } = dependency;
-  const path = join(workDirectory, 'simulation.json');
-  if (
-    (await cache.restore(fingerprint, artifactType, path)) &&
-    (await validArtifact(path, dependency))
-  ) {
-    signal?.throwIfAborted();
-    return { path, cacheHit: true };
-  }
-  const scratch = await mkdtemp(join(workDirectory, 'simulation-'));
+  await mkdir(cache.directory, { recursive: true });
+  const scratch = await mkdtemp(
+    join(cache.directory, `simulation-${fingerprint}-`),
+  );
   try {
     const specPath = join(scratch, 'spec.json');
     const result = join(scratch, 'simulation.json');
@@ -139,14 +132,52 @@ export async function prepareSimulation(
       specPath,
       result,
     ]);
-    signal?.throwIfAborted();
     if (!(await validArtifact(result, dependency)))
       throw new Error('Incomplete or invalid Bullet simulation artifact');
-    signal?.throwIfAborted();
     await cache.store(fingerprint, artifactType, result);
-    await copyFile(result, path);
-    return { path, cacheHit: false };
   } finally {
     await rm(scratch, { recursive: true, force: true });
   }
+}
+
+export async function prepareSimulation(
+  dependency: Dependency,
+  cache: ArtifactCache,
+  workDirectory: string,
+  run: (args: string[]) => Promise<void>,
+  signal?: AbortSignal,
+) {
+  signal?.throwIfAborted();
+  const { fingerprint } = dependency;
+  const path = join(workDirectory, 'simulation.json');
+  if (
+    (await cache.restore(fingerprint, artifactType, path)) &&
+    (await validArtifact(path, dependency))
+  ) {
+    signal?.throwIfAborted();
+    return { path, cacheHit: true };
+  }
+  let task = inFlight.get(fingerprint);
+  let cacheHit = true;
+  if (!task) {
+    cacheHit = false;
+    task = bakeSimulation(dependency, cache, run);
+    inFlight.set(fingerprint, task);
+    void task.then(
+      () => {
+        if (inFlight.get(fingerprint) === task) inFlight.delete(fingerprint);
+      },
+      () => {
+        if (inFlight.get(fingerprint) === task) inFlight.delete(fingerprint);
+      },
+    );
+  }
+  await task;
+  signal?.throwIfAborted();
+  if (
+    !(await cache.restore(fingerprint, artifactType, path)) ||
+    !(await validArtifact(path, dependency))
+  )
+    throw new Error('Simulation cache entry was not available after baking');
+  return { path, cacheHit };
 }

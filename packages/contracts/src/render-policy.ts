@@ -76,6 +76,14 @@ export const RenderQualityOverridesSchema = z
   })
   .strict();
 
+export const RenderExecutionSchema = z
+  .object({
+    shotConcurrency: z.number().int().min(1).max(16).default(1),
+    frameWorkers: z.number().int().min(1).max(16).default(1),
+    retryAttempts: z.number().int().min(1).max(3).default(1),
+  })
+  .strict();
+
 export const QualityProfilePostProcessingSchema = z
   .object({
     glow: z.boolean().optional(),
@@ -115,6 +123,7 @@ export const RenderPolicySchema = z
       })
       .strict()
       .optional(),
+    execution: RenderExecutionSchema.optional(),
     renderer: RendererSelectionSchema,
   })
   .strict()
@@ -141,6 +150,7 @@ export type Rational = z.infer<typeof RationalSchema>;
 export type VideoSettings = z.infer<typeof VideoSettingsSchema>;
 export type RenderPolicy = z.infer<typeof RenderPolicySchema>;
 export type RendererSelection = z.infer<typeof RendererSelectionSchema>;
+export type RenderExecution = z.infer<typeof RenderExecutionSchema>;
 
 /** Projection and rasterization must use the same dimensions before encoding. */
 export function resolveShotRenderDimensions(

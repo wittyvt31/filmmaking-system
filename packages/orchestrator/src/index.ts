@@ -68,6 +68,9 @@ export interface ProductionOptions {
   signal?: AbortSignal;
   onLog?: (line: string) => void;
   onShotProgress?: (completed: number, total: number) => void;
+  shotConcurrency?: number;
+  frameWorkers?: number;
+  retryAttempts?: number;
 }
 
 export interface ProductionResult {
@@ -459,7 +462,7 @@ export async function executeProduction(
     }[] = [];
     const shotJobs = prepared.renderPlan.jobs.filter(asShotJob);
     options.onShotProgress?.(0, shotJobs.length);
-    for (const job of shotJobs) {
+    const renderShot = async (job: (typeof shotJobs)[number]) => {
       const shot = prepared.manifest.shots.find(
         (candidate) => candidate.id === job.shotId,
       );
@@ -490,6 +493,9 @@ export async function executeProduction(
       const assets = prepared.assets.filter((asset) =>
         refs.has(`${asset.assetId}\u0000${asset.version}`),
       );
+      const frameWorkers =
+        options.frameWorkers ??
+        prepared.manifest.renderPolicy.execution?.frameWorkers;
       await log(`Rendering shot ${shot.id} (${shot.durationFrames} frames).`);
       const result = await options.renderer.renderShot({
         jobId: job.id,
@@ -516,6 +522,7 @@ export async function executeProduction(
         receiptPath,
         ...(options.timeoutMs ? { timeoutMs: options.timeoutMs } : {}),
         ...(options.signal ? { signal: options.signal } : {}),
+        ...(frameWorkers === undefined ? {} : { frameWorkers }),
       });
       if (result.status === 'failure') {
         await log(
@@ -524,6 +531,7 @@ export async function executeProduction(
         throw new ProductionError(
           'render-shots',
           `Shot ${shot.id} failed: ${result.error.message}`,
+          result.error,
         );
       }
       if (
@@ -616,8 +624,7 @@ export async function executeProduction(
           `Shot ${shot.id} video ${encodedCacheHit ? 'encoding cache hit' : 'encoded'}; SHA-256 ${shotChecksum}.`,
         );
       }
-      shotArtifacts[shot.id] = outputPath;
-      shotReceipts.push({
+      const receipt = {
         shotId: shot.id,
         fingerprint: result.receipt.fingerprint,
         receiptPath,
@@ -629,11 +636,89 @@ export async function executeProduction(
           renderer: result.receipt.renderer,
           metrics: result.receipt.metrics,
         },
-      });
+      };
       await log(
         `Shot ${shot.id} ${result.cacheHit ? 'cache hit' : 'rendered'}; SHA-256 ${shotChecksum || 'missing'}.`,
       );
-      options.onShotProgress?.(shotReceipts.length, shotJobs.length);
+      return { shotId: shot.id, outputPath, receipt };
+    };
+
+    const configuredConcurrency =
+      options.shotConcurrency ??
+      prepared.manifest.renderPolicy.execution?.shotConcurrency ??
+      1;
+    const retryAttempts =
+      options.retryAttempts ??
+      prepared.manifest.renderPolicy.execution?.retryAttempts ??
+      1;
+    if (
+      !Number.isSafeInteger(configuredConcurrency) ||
+      configuredConcurrency < 1 ||
+      configuredConcurrency > 16
+    )
+      throw new ProductionError(
+        'render-shots',
+        'Shot concurrency must be an integer from 1 to 16.',
+      );
+    if (
+      !Number.isSafeInteger(retryAttempts) ||
+      retryAttempts < 1 ||
+      retryAttempts > 3
+    )
+      throw new ProductionError(
+        'render-shots',
+        'Retry attempts must be an integer from 1 to 3.',
+      );
+
+    const completed = new Array<Awaited<ReturnType<typeof renderShot>>>(
+      shotJobs.length,
+    );
+    let nextJob = 0;
+    let completedCount = 0;
+    const worker = async () => {
+      for (;;) {
+        const index = nextJob++;
+        if (index >= shotJobs.length) return;
+        const job = shotJobs[index]!;
+        let lastError: unknown;
+        for (let attempt = 1; attempt <= retryAttempts; attempt += 1) {
+          if (options.signal?.aborted)
+            throw new ProductionError('render-shots', 'Production cancelled.');
+          try {
+            completed[index] = await renderShot(job);
+            lastError = undefined;
+            break;
+          } catch (error) {
+            lastError = error;
+            const cause =
+              error instanceof ProductionError ? error.cause : undefined;
+            const retryable =
+              typeof cause === 'object' &&
+              cause !== null &&
+              'retryable' in cause &&
+              cause.retryable === true;
+            if (!retryable || attempt === retryAttempts) throw error;
+            await log(
+              `Retrying shot ${job.shotId} (${attempt + 1}/${retryAttempts}).`,
+            );
+          }
+        }
+        if (lastError) throw lastError;
+        completedCount += 1;
+        options.onShotProgress?.(completedCount, shotJobs.length);
+      }
+    };
+    await Promise.all(
+      Array.from(
+        { length: Math.min(configuredConcurrency, shotJobs.length) },
+        () => worker(),
+      ),
+    );
+    for (const item of completed) {
+      if (!item)
+        throw new ProductionError('render-shots', 'Shot result missing.');
+      shotArtifacts[item.shotId] = item.outputPath;
+      shotReceipts.push(item.receipt);
     }
 
     const assemblyFingerprint = createAssemblyFingerprint({

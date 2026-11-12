@@ -1207,11 +1207,17 @@ export class BlenderRendererAdapter implements RendererAdapter {
       const startedRender = Date.now();
       let processResult: ProcessResult;
       let workerResult: WorkerResult | null;
-      if (this.workers === 1) {
+      const workers = request.frameWorkers ?? this.workers;
+      if (!Number.isSafeInteger(workers) || workers < 1 || workers > 16)
+        throw new BlenderFailure(
+          'INVALID_INSTRUCTIONS',
+          'Frame worker count must be an integer from 1 to 16',
+        );
+      if (workers === 1) {
         processResult = await spawnWorker();
         workerResult = await readWorkerResult();
       } else {
-        const rangeCount = Math.min(this.workers, shot.durationFrames);
+        const rangeCount = Math.min(workers, shot.durationFrames);
         const ranges = Array.from({ length: rangeCount }, (_, index) => {
           const start =
             Math.floor((index * shot.durationFrames) / rangeCount) + 1;

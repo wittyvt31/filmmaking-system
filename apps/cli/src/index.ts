@@ -230,34 +230,44 @@ projectOptions(
     (value: string) => Number.parseInt(value, 10),
     1,
   )
-  .action(async ({ project, output, cache, seed, timeout, workers }) => {
-    const cancellation = new AbortController();
-    const abort = () => cancellation.abort();
-    process.once('SIGINT', abort);
-    process.once('SIGTERM', abort);
-    try {
-      const renderer = new BlenderRendererAdapter({ workers });
-      const ffmpegPath = process.env['FILMIE_FFMPEG'] ?? 'ffmpeg';
-      const ffprobePath = process.env['FILMIE_FFPROBE'] ?? 'ffprobe';
-      const result = await executeProduction({
-        projectDirectory: project,
-        outputDirectory: output,
-        cacheDirectory: cache,
-        renderer,
-        media: new FfmpegMediaEngine({ ffmpegPath, ffprobePath }),
-        randomSeed: seed,
-        timeoutMs: timeout,
-        signal: cancellation.signal,
-        onLog: (line) => process.stdout.write(`${line}\n`),
-      });
-      process.stdout.write(
-        `\nProduction successful. Master: ${result.masterPath}\nSummary: ${result.summaryPath}\n`,
-      );
-    } finally {
-      process.removeListener('SIGINT', abort);
-      process.removeListener('SIGTERM', abort);
-    }
-  });
+  .option(
+    '--shot-workers <count>',
+    'Concurrent shot jobs',
+    (value: string) => Number.parseInt(value, 10),
+    1,
+  )
+  .action(
+    async ({ project, output, cache, seed, timeout, workers, shotWorkers }) => {
+      const cancellation = new AbortController();
+      const abort = () => cancellation.abort();
+      process.once('SIGINT', abort);
+      process.once('SIGTERM', abort);
+      try {
+        const renderer = new BlenderRendererAdapter({ workers });
+        const ffmpegPath = process.env['FILMIE_FFMPEG'] ?? 'ffmpeg';
+        const ffprobePath = process.env['FILMIE_FFPROBE'] ?? 'ffprobe';
+        const result = await executeProduction({
+          projectDirectory: project,
+          outputDirectory: output,
+          cacheDirectory: cache,
+          renderer,
+          media: new FfmpegMediaEngine({ ffmpegPath, ffprobePath }),
+          randomSeed: seed,
+          timeoutMs: timeout,
+          signal: cancellation.signal,
+          shotConcurrency: shotWorkers,
+          frameWorkers: workers,
+          onLog: (line) => process.stdout.write(`${line}\n`),
+        });
+        process.stdout.write(
+          `\nProduction successful. Master: ${result.masterPath}\nSummary: ${result.summaryPath}\n`,
+        );
+      } finally {
+        process.removeListener('SIGINT', abort);
+        process.removeListener('SIGTERM', abort);
+      }
+    },
+  );
 
 projectOptions(
   cli
