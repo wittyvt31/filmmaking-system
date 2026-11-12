@@ -508,6 +508,11 @@ export async function executeProduction(
           safeProjectName(prepared.manifest.projectId),
           'shots',
         ),
+        simulationCacheDirectory: join(
+          cacheDirectory,
+          safeProjectName(prepared.manifest.projectId),
+          'simulations',
+        ),
         receiptPath,
         ...(options.timeoutMs ? { timeoutMs: options.timeoutMs } : {}),
         ...(options.signal ? { signal: options.signal } : {}),

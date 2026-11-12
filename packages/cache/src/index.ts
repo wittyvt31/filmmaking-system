@@ -26,6 +26,8 @@ import {
   type RenderOutputChecksum,
 } from '@filmmaking/contracts';
 
+type CacheArtifactType = RenderArtifactType | 'simulation/physics+json';
+
 interface CacheFileRecord {
   relativePath: string;
   sha256: string;
@@ -35,7 +37,7 @@ interface CacheFileRecord {
 interface CacheMetadata {
   version: 1;
   fingerprint: string;
-  artifactType: RenderArtifactType;
+  artifactType: CacheArtifactType;
   isDirectory: boolean;
   payloadName: string;
   files: CacheFileRecord[];
@@ -137,7 +139,7 @@ function isMetadata(value: unknown): value is CacheMetadata {
 async function validEntry(
   entry: string,
   fingerprint: string,
-  artifactType: RenderArtifactType,
+  artifactType: CacheArtifactType,
 ): Promise<boolean> {
   try {
     const entryInfo = await lstat(entry);
@@ -179,7 +181,7 @@ export class ArtifactCache {
 
   async restore(
     fingerprint: string,
-    artifactType: RenderArtifactType,
+    artifactType: CacheArtifactType,
     outputPath: string,
   ): Promise<CachedArtifact | null> {
     const entry = this.entryPath(fingerprint);
@@ -264,7 +266,7 @@ export class ArtifactCache {
 
   async store(
     fingerprint: string,
-    artifactType: RenderArtifactType,
+    artifactType: CacheArtifactType,
     sourcePath: string,
   ): Promise<CachedArtifact> {
     const entry = this.entryPath(fingerprint);

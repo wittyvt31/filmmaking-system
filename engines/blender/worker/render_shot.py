@@ -16,7 +16,8 @@ from world_builder import build_world
 from camera_runtime import install_cameras
 from model_import import import_model
 from visual_runtime import apply_material_style, configure_environment
-from physics_backend import apply_physics_bake, bake_physics
+from physics_backend import apply_physics_bake
+from animation_curves import action_fcurves
 from character_runtime import apply_poses, prepare_character
 from semantic_rig import RigCapabilityError, discover_controls, foot_ik, preflight_actions
 
@@ -42,17 +43,6 @@ def remove_volatile_png_metadata(path):
     with open(temporary, "wb") as stream:
         stream.write(b"".join(chunks))
     os.replace(temporary, path)
-
-def action_fcurves(action):
-    """Return FCurves for a Blender 5.x layered action, with a legacy fallback."""
-    if hasattr(action, "fcurves"):
-        return list(action.fcurves)
-    curves = []
-    for layer in getattr(action, "layers", []):
-        for strip in getattr(layer, "strips", []):
-            for channel_bag in getattr(strip, "channelbags", []):
-                curves.extend(getattr(channel_bag, "fcurves", []))
-    return curves
 
 def set_constant_interpolation(owner, data_path=None):
     """Set CONSTANT interpolation without relying on the removed Action.fcurves."""
@@ -981,8 +971,14 @@ def main():
         apply_motion_curves(spec, control_objects, entity_roots)
         roots = {obj["filmie_entity_id"]: obj for obj in scene.objects if "filmie_entity_id" in obj}
         apply_secondary_motion(spec, control_objects, roots | entity_roots)
-        if spec.get("physics"):
-            baked = bake_physics(scene, spec["physics"], spec.get("objectMotion", []), int(spec["durationFrames"]), action_fcurves)
+        if spec.get("simulationArtifact"):
+            with open(spec["simulationArtifact"], "r", encoding="utf-8") as stream:
+                artifact = json.load(stream)
+            if (artifact["fingerprint"] != spec["simulationFingerprint"] or
+                    artifact["frameCount"] != spec["durationFrames"] or artifact["space"] != "world"):
+                raise ValueError("Simulation artifact does not match shot dependencies")
+            baked = {entity: [(Vector(pose["position"]), Quaternion(pose["rotation"])) for pose in poses]
+                     for entity, poses in artifact["tracks"].items()}
             apply_physics_bake(scene, baked, action_fcurves)
     except RuntimeError as error:
         raise RigCapabilityError("Could not prepare semantic animation: " + str(error)) from error

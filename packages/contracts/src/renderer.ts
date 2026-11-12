@@ -42,6 +42,7 @@ export interface RenderShotRequest {
   artifact: RenderArtifactRequest;
   randomSeed: number;
   cacheDirectory: string;
+  simulationCacheDirectory?: string;
   receiptPath?: string;
   timeoutMs?: number;
   signal?: AbortSignal;

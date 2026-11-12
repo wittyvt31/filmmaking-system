@@ -38,6 +38,7 @@ import {
 import { AssetRegistryError, modelImportFormat } from '@filmmaking/assets';
 import { ArtifactCache } from '@filmmaking/cache';
 import { compileScene, SCENE_COMPILER_VERSION } from '@filmmaking/scene';
+import { prepareSimulation, simulationDependency } from './simulation-cache.js';
 
 export const EXPECTED_BLENDER_VERSION = '5.2.3';
 const RENDERER_ID = 'blender';
@@ -376,6 +377,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
   readonly defaultSamples: number | undefined;
   readonly workers: number;
   #versionPromise: Promise<string> | undefined;
+  #buildIdentity = '';
 
   constructor(
     config: {
@@ -418,6 +420,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
             'UNSUPPORTED_SETTINGS',
             `Expected Blender ${EXPECTED_BLENDER_VERSION}, found ${match[1]}`,
           );
+        this.#buildIdentity = result.stdout.trim();
         return match[1];
       })
       .catch((error: unknown) => {
@@ -771,6 +774,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
             'collection_cache.py',
             'semantic_rig.py',
             'physics_backend.py',
+            'animation_curves.py',
             'visual_runtime.py',
             'geometry_builder.py',
             'camera_runtime.py',
@@ -785,6 +789,11 @@ export class BlenderRendererAdapter implements RendererAdapter {
         compilerVersion: SCENE_COMPILER_VERSION,
       });
       const rendererVersion = await this.#inspectVersion();
+      const simulation = await simulationDependency(
+        compiledScene,
+        dirname(WORKER_PATH),
+        this.#buildIdentity,
+      );
       fingerprint = canonicalJsonSha256({
         shot,
         compiledScene,
@@ -803,6 +812,9 @@ export class BlenderRendererAdapter implements RendererAdapter {
           ),
         renderer: { id: RENDERER_ID, version: rendererVersion },
         dependenciesHash,
+        ...(simulation
+          ? { simulationFingerprint: simulation.fingerprint }
+          : {}),
         renderSettings: {
           outputDimensions: renderDimensions,
           frameRate: settings.frameRate,
@@ -905,6 +917,47 @@ export class BlenderRendererAdapter implements RendererAdapter {
       await mkdir(frameDirectory, { recursive: true });
       const specPath = join(workDirectory, 'worker-spec.json');
       const scene = compiledScene;
+      const baked = simulation
+        ? await prepareSimulation(
+            simulation,
+            request.simulationCacheDirectory
+              ? new ArtifactCache(request.simulationCacheDirectory)
+              : cache,
+            workDirectory,
+            async (args) => {
+              const result = await spawnCapture(this.executablePath, args, {
+                ...(request.timeoutMs === undefined
+                  ? {}
+                  : { timeoutMs: request.timeoutMs }),
+                ...(request.signal ? { signal: request.signal } : {}),
+              });
+              lastProcessResult = result;
+              if (result.stdout.trim())
+                logs.push(...result.stdout.trim().split(/\r?\n/).slice(-100));
+              if (result.stderr.trim())
+                logs.push(...result.stderr.trim().split(/\r?\n/).slice(-100));
+              if (result.timedOut || result.interrupted || result.code !== 0)
+                throw new BlenderFailure(
+                  result.timedOut
+                    ? 'TIMEOUT'
+                    : result.interrupted
+                      ? 'INTERRUPTED'
+                      : 'RENDER_CRASHED',
+                  `Bullet simulation failed (exit ${result.code}, signal ${result.signal})`,
+                );
+            },
+            request.signal,
+          )
+        : undefined;
+      if (baked && simulation) {
+        metrics['simulationFingerprint'] = simulation.fingerprint;
+        metrics['simulationCacheHit'] = baked.cacheHit;
+        logs.push(
+          baked.cacheHit
+            ? 'Bullet simulation cache hit'
+            : 'Bullet simulation baked',
+        );
+      }
       const world = scene.world
         ? {
             ...scene.world,
@@ -1043,7 +1096,12 @@ export class BlenderRendererAdapter implements RendererAdapter {
         }),
         objectMotion: scene.objectMotion ?? [],
         secondaryMotion: scene.secondaryMotion ?? [],
-        ...(scene.physics ? { physics: scene.physics } : {}),
+        ...(baked && simulation
+          ? {
+              simulationArtifact: baked.path,
+              simulationFingerprint: simulation.fingerprint,
+            }
+          : {}),
         props: scene.props.map((prop) => ({
           ...prop,
           asset: resolveModelAsset(prop.asset),
