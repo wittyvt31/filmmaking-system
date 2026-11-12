@@ -12,6 +12,7 @@ import {
 import {
   AssetRegistry,
   resolveAssetFiles,
+  modelImportFormat,
   type ResolvedAsset,
 } from '@filmmaking/assets';
 import { compileTimeline, type CompiledTimeline } from '@filmmaking/timeline';
@@ -106,6 +107,27 @@ function uniqueAssetReferences(
       compareStrings(left.assetId, right.assetId) ||
       compareStrings(left.version, right.version),
   );
+}
+
+function sceneModelReferences(shot: ProjectManifest['shots'][number]) {
+  const scene = shot.scene;
+  if (!scene) return [];
+  return [
+    ...(scene.environment ? [scene.environment] : []),
+    ...scene.props.map((prop) => prop.asset),
+    ...(scene.world?.entities.flatMap((entity) =>
+      entity.geometry.kind === 'asset' ? [entity.geometry.asset] : [],
+    ) ?? []),
+    ...scene.characters
+      .map((c) =>
+        'source' in c
+          ? c.source.kind === 'imported'
+            ? c.source.asset
+            : undefined
+          : c.asset,
+      )
+      .filter((asset): asset is AssetVersionReference => asset !== undefined),
+  ];
 }
 
 function audioAssetReferences(
@@ -242,9 +264,8 @@ export async function prepareProductionPlan(
             (candidate) => referenceKey(candidate) === referenceKey(reference),
           );
           if (
-            asset?.type !== 'model' ||
-            typeof asset.metadata['blenderCollection'] !== 'string' ||
-            !asset.metadata['blenderCollection'].trim() ||
+            !asset ||
+            modelImportFormat(asset) !== 'blend' ||
             asset.metadata['rigProfile'] !== character.rig.profile ||
             asset.metadata['rigVersion'] !== character.rig.version
           )
@@ -252,19 +273,13 @@ export async function prepareProductionPlan(
               `Character "${character.id}" requires a Blender model declaring ${character.rig.profile} v${character.rig.version} in rigProfile and rigVersion metadata`,
             );
         }
-        for (const entity of shot.scene?.world?.entities ?? []) {
-          if (entity.geometry.kind !== 'asset') continue;
-          const reference = entity.geometry.asset;
+        for (const reference of sceneModelReferences(shot)) {
           const asset = assets.find(
             (candidate) => referenceKey(candidate) === referenceKey(reference),
           );
-          if (
-            asset?.type !== 'model' ||
-            typeof asset.metadata['blenderCollection'] !== 'string' ||
-            !asset.metadata['blenderCollection'].trim()
-          )
+          if (!asset || !modelImportFormat(asset))
             throw new Error(
-              `World entity "${entity.id}" requires a prepared Blender model collection for ${reference.assetId}@${reference.version}`,
+              `Scene model ${reference.assetId}@${reference.version} requires a prepared Blender collection, self-contained GLB, STL or PLY`,
             );
         }
         const libraries = await Promise.all(

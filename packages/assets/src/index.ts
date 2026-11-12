@@ -2,7 +2,7 @@ import { createReadStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { isAbsolute, resolve, win32 } from 'node:path';
+import { extname, isAbsolute, resolve, win32 } from 'node:path';
 import {
   compareStrings,
   AssetVersionReferenceSchema,
@@ -66,6 +66,25 @@ export const AssetVersionSchema = z
 
 export type AssetVersion = z.infer<typeof AssetVersionSchema>;
 export type ResolvedAsset = AssetVersion & { localPath: string };
+
+export function modelImportFormat(asset: {
+  type: string;
+  metadata: Record<string, unknown>;
+  localPath: string;
+}) {
+  if (asset.type !== 'model') return undefined;
+  const extension = extname(asset.localPath).toLowerCase();
+  if (
+    extension === '.blend' &&
+    typeof asset.metadata['blenderCollection'] === 'string' &&
+    asset.metadata['blenderCollection'].trim()
+  )
+    return 'blend';
+  if (extension === '.glb') return 'glb';
+  if (extension === '.stl') return 'stl';
+  if (extension === '.ply') return 'ply';
+  return undefined;
+}
 
 export type AssetRegistryErrorCode =
   | 'ASSET_VERSION_EXISTS'

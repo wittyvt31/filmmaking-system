@@ -388,6 +388,72 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
   225_000,
 );
 
+it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
+  'renders and caches the geometry workshop through Studio',
+  async () => {
+    const { path, revision, text } = await createProject('geometry-workshop');
+    expect(await request(path + '/validate', { text })).toEqual({
+      issues: [],
+      frames: 4,
+      shots: 1,
+    });
+    const queue = async () =>
+      (await request(path + '/runs', { revisionId: revision }, 202)) as Run;
+    const { run, outputs } = await waitForRun((await queue()).id, 80_000);
+    expect(run.status, run.error).toBe('succeeded');
+    expect(outputs.some((output) => output.name === 'master.mp4')).toBe(true);
+    const frame = outputs.find((output) => output.kind === 'image')!;
+    const png = Buffer.from(
+      await (await fetch(base + frame.url)).arrayBuffer(),
+    );
+    expect(png.subarray(1, 4).toString()).toBe('PNG');
+    const blend = outputs.find((output) =>
+      output.name.endsWith('/scene.blend'),
+    )!;
+    await promisify(execFile)(
+      defaultBlenderExecutable(),
+      [
+        '--background',
+        join(root, 'outputs', run.id, blend.name),
+        '--python-exit-code',
+        '1',
+        '--python-expr',
+        [
+          'import bpy, math',
+          'scene = bpy.context.scene',
+          'entities = {obj.get("filmie_entity_id"): obj for obj in scene.objects if obj.get("filmie_entity_id")}',
+          'def part(id):\n    return entities[id].children[0]',
+          'assert len(part("arch").data.vertices) == 132',
+          'assert len(part("trim").data.vertices) == 264',
+          'assert len(part("plaza").data.vertices) == 12',
+          'assert len(part("backdrop").data.polygons) == 2',
+          'assert part("column-left").data == part("column-right").data',
+          'assert math.isclose(part("column-left").dimensions.z, 1.10, abs_tol=1e-5)',
+          'def pedestal(id):\n    return next(obj for obj in entities[id].children if obj.get("filmie_world_part") == "base")',
+          'left, right = pedestal("display-left"), pedestal("display-right")',
+          'assert left.data == right.data and left.children[0].children[0].data == right.children[0].children[0].data',
+          'assert math.isclose(left.children[0].children[0].matrix_world.translation.z, 0.62, abs_tol=1e-5)',
+          'original, painted = [entities[id] for id in ("artifact-original", "artifact-painted")]',
+          'assert original.parent == entities["display-left"] and painted.parent == entities["display-right"]',
+          'assert original["filmie_model_format"] == "glb" and original["filmie_model_version"] == "1.0.0"',
+          'mount = next(obj for obj in original.children if obj.get("catalogTag") == "workshop-original")',
+          'assert math.isclose(mount.location.x, 0.10, abs_tol=1e-5)',
+          'gem = next(obj for obj in mount.children if obj.type == "MESH")',
+          'assert len(gem.data.vertices) == 4 and abs(gem.rotation_quaternion.angle) > 0.4',
+          'coated = next(obj for obj in painted.children_recursive if obj.type == "MESH")',
+          'assert not gem.material_slots[0].material.get("filmie_surface")',
+          'assert coated.material_slots[0].material.name == "ceramic"',
+        ].join('\n'),
+      ],
+      { timeout: 20_000, windowsHide: true },
+    );
+    const cached = (await waitForRun((await queue()).id, 25_000)).run;
+    expect(cached.status, cached.error).toBe('succeeded');
+    expect(cached.cacheHits).toEqual({ shots: 1, assembly: true });
+  },
+  120_000,
+);
+
 it('loads the four visual treatments as one Studio catalog', async () => {
   const { path, text } = await createProject('visual-styles');
   expect(await request(path + '/validate', { text })).toEqual({

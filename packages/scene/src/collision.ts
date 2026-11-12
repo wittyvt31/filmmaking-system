@@ -83,23 +83,44 @@ export function scaleShape(shape: ColliderShape, scale: number): ColliderShape {
 
 export function worldCollisionProxies(world?: CompiledWorld): CollisionProxy[] {
   const transforms = worldEntityTransforms(world);
+  const meshes = new Map(world?.meshes?.map((mesh) => [mesh.id, mesh.shape]));
   return (world?.entities ?? []).flatMap((entity) => {
     const { pose, scale } = transforms.get(entity.id)!;
+    const mesh = 'meshId' in entity ? meshes.get(entity.meshId) : undefined;
+    const primitive: ColliderShape | undefined =
+      mesh?.kind === 'box'
+        ? { kind: 'box', dimensions: mesh.dimensions }
+        : mesh?.kind === 'sphere'
+          ? { kind: 'sphere', radius: mesh.radius }
+          : mesh?.kind === 'cylinder'
+            ? { kind: 'cylinder', radius: mesh.radius, height: mesh.height }
+            : undefined;
     const colliders =
       entity.colliders ??
-      ('boxes' in entity
-        ? entity.boxes.map((box) => ({
-            id: box.id,
-            shape: {
-              kind: 'box' as const,
-              dimensions: coordinates(box.dimensions),
+      (primitive
+        ? [
+            {
+              id: 'body',
+              shape: primitive,
+              pose: {
+                position: [0, 0, 0] as MotionVector,
+                rotation: quaternion([0, 0, 0]),
+              },
             },
-            pose: {
-              position: coordinates(box.position),
-              rotation: quaternion([0, 0, box.rotationDegrees ?? 0]),
-            },
-          }))
-        : []);
+          ]
+        : 'boxes' in entity
+          ? entity.boxes.map((box) => ({
+              id: box.id,
+              shape: {
+                kind: 'box' as const,
+                dimensions: coordinates(box.dimensions),
+              },
+              pose: {
+                position: coordinates(box.position),
+                rotation: quaternion([0, 0, box.rotationDegrees ?? 0]),
+              },
+            }))
+          : []);
     return colliders.map((collider) => ({
       id: collider.id,
       entityId: entity.id,

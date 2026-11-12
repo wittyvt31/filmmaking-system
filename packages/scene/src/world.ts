@@ -197,7 +197,17 @@ function compileEntity({
 }: WorldEntity): CompiledWorldEntity {
   switch (geometry.kind) {
     case 'asset':
-      return { ...entity, asset: geometry.asset };
+      return {
+        ...entity,
+        asset: geometry.asset,
+        ...(geometry.materialOverrides
+          ? { materialOverrides: geometry.materialOverrides }
+          : {}),
+      };
+    case 'mesh':
+      return { ...entity, meshId: geometry.meshId };
+    case 'assembly':
+      return { ...entity, assemblyId: geometry.assemblyId };
     case 'group':
       return { ...entity, boxes: [] };
     case 'room':
@@ -219,20 +229,35 @@ function compileEntity({
 
 // A scene compiler supplies a validated world. Keep the resulting geometry local
 // to each entity so hierarchy, rotation and scale remain explicit.
-export function compileWorld(world: World): CompiledWorld {
-  const children = new Map<string | undefined, WorldEntity[]>();
-  for (const entity of ordered(world.entities)) {
+function hierarchyOrder<
+  T extends { id: string; parentId?: string | undefined },
+>(items: readonly T[]) {
+  const children = new Map<string | undefined, T[]>();
+  for (const entity of ordered(items)) {
     const siblings = children.get(entity.parentId) ?? [];
     siblings.push(entity);
     children.set(entity.parentId, siblings);
   }
   const queue = [...(children.get(undefined) ?? [])];
   for (const entity of queue) queue.push(...(children.get(entity.id) ?? []));
+  return queue;
+}
+
+export function compileWorld(world: World): CompiledWorld {
   const geometry = {
     schemaVersion: world.schemaVersion,
     ...(world.physics ? { physics: world.physics } : {}),
     materials: ordered(world.materials),
-    entities: queue.map(compileEntity),
+    ...(world.meshes?.length ? { meshes: ordered(world.meshes) } : {}),
+    ...(world.assemblies?.length
+      ? {
+          assemblies: ordered(world.assemblies).map((a) => ({
+            ...a,
+            parts: hierarchyOrder(a.parts),
+          })),
+        }
+      : {}),
+    entities: hierarchyOrder(world.entities).map(compileEntity),
   };
   return { ...geometry, sha256: canonicalJsonSha256(geometry) };
 }

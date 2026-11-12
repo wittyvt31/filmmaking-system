@@ -5,6 +5,8 @@ import math
 import bpy
 from collection_cache import read_collection, write_collection
 from visual_runtime import build_material
+from geometry_builder import build_mesh
+from model_import import instantiate_with_materials
 
 
 def coordinates(value):
@@ -29,23 +31,43 @@ def box_mesh(dimensions, material):
     return mesh
 
 
+def place(obj, transform):
+    obj.location = coordinates(transform["position"])
+    obj.rotation_euler = tuple(math.radians(value) for value in coordinates(transform["rotationDegrees"]))
+    obj.scale = (float(transform["scale"]),) * 3
+
+
 def populate_collection(scene, world, instantiate_asset, name):
     collection = bpy.data.collections.new(name)
     scene.collection.children.link(collection)
     materials = {item["id"]: build_material(item) for item in world["materials"]}
+    definitions = {item["id"]: item for item in world.get("meshes", [])}
+    assemblies = {item["id"]: item["parts"] for item in world.get("assemblies", [])}
+    mesh_library = {}
+
+    def instance(part_id, mesh_id, parent, transform=None):
+        if mesh_id not in mesh_library:
+            definition = definitions[mesh_id]
+            mesh_library[mesh_id] = build_mesh(definition, materials[definition["materialId"]])
+        obj = bpy.data.objects.new(parent.name + "/" + part_id, mesh_library[mesh_id])
+        collection.objects.link(obj)
+        obj.parent = parent
+        if transform:
+            place(obj, transform)
+        obj["filmie_world_part"] = part_id
+        return obj
     roots = {}
     meshes = {}
     for entity in world["entities"]:
         entity_id = entity["id"]
         transform = entity["transform"]
         if "asset" in entity:
-            root, _ = instantiate_asset(entity["asset"], transform, entity_id, collection)
+            root = instantiate_with_materials(instantiate_asset, entity["asset"], transform, entity_id,
+                                              collection, entity.get("materialOverrides"), materials)
         else:
             root = bpy.data.objects.new(entity_id, None)
             collection.objects.link(root)
-            root.location = coordinates(transform["position"])
-            root.rotation_euler = tuple(math.radians(value) for value in coordinates(transform["rotationDegrees"]))
-            root.scale = (float(transform["scale"]),) * 3
+            place(root, transform)
         if "parentId" in entity:
             root.parent = roots[entity["parentId"]]
         root["filmie_entity_id"] = entity_id
@@ -53,6 +75,13 @@ def populate_collection(scene, world, instantiate_asset, name):
             if name in entity.get("physics", {}):
                 root["filmie_physics_" + name] = entity["physics"][name]
         roots[entity_id] = root
+        if "meshId" in entity:
+            instance("body", entity["meshId"], root)
+        if "assemblyId" in entity:
+            parts = {}
+            for part in assemblies[entity["assemblyId"]]:
+                parent = parts[part["parentId"]] if "parentId" in part else root
+                parts[part["id"]] = instance(part["id"], part["meshId"], parent, part["transform"])
         for box in entity.get("boxes", []):
             dimensions = coordinates(box["dimensions"])
             key = (dimensions, box["materialId"])

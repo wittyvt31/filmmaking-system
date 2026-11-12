@@ -33,7 +33,7 @@ import {
   type RenderShotResult,
   type SuccessfulRenderReceipt,
 } from '@filmmaking/contracts';
-import { AssetRegistryError } from '@filmmaking/assets';
+import { AssetRegistryError, modelImportFormat } from '@filmmaking/assets';
 import { ArtifactCache } from '@filmmaking/cache';
 import { compileScene, SCENE_COMPILER_VERSION } from '@filmmaking/scene';
 
@@ -713,25 +713,26 @@ export class BlenderRendererAdapter implements RendererAdapter {
           metadata: asset.metadata,
         };
       };
-      const resolveModelAsset = (reference: {
-        assetId: string;
-        version: string;
-      }) => {
+      const resolveModelAsset = (
+        reference: {
+          assetId: string;
+          version: string;
+        },
+        prepared = false,
+      ) => {
         const asset = assetMap.get(assetKey(reference));
         if (!asset)
           throw new BlenderFailure(
             'MISSING_ASSET',
             `Missing scene model ${reference.assetId}@${reference.version}`,
           );
-        if (
-          asset.type !== 'model' ||
-          typeof asset.metadata['blenderCollection'] !== 'string'
-        )
+        const format = modelImportFormat(asset);
+        if (!format || (prepared && format !== 'blend'))
           throw new BlenderFailure(
             'UNSUPPORTED_SETTINGS',
-            `Scene asset ${reference.assetId}@${reference.version} must be a prepared Blender model collection`,
+            `Scene asset ${reference.assetId}@${reference.version} requires ${prepared ? 'a prepared Blender collection' : 'a prepared Blender collection, self-contained GLB, STL or PLY'}`,
           );
-        return resolveAsset(reference);
+        return { ...resolveAsset(reference), format };
       };
       const resolveImageAsset = (
         reference: Parameters<typeof resolveAsset>[0],
@@ -789,6 +790,8 @@ export class BlenderRendererAdapter implements RendererAdapter {
             'semantic_rig.py',
             'physics_backend.py',
             'visual_runtime.py',
+            'geometry_builder.py',
+            'model_import.py',
           ].map(async (file) =>
             createHash('sha256')
               .update(await readFile(join(dirname(WORKER_PATH), file)))
@@ -991,7 +994,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
               ...character,
               source: {
                 ...character.source,
-                asset: resolveModelAsset(character.source.asset),
+                asset: resolveModelAsset(character.source.asset, true),
               },
             };
           const source = {

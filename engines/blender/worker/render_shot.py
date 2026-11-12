@@ -13,6 +13,7 @@ from mathutils import Euler, Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from world_builder import build_world
+from model_import import import_model
 from visual_runtime import apply_material_style, configure_environment
 from physics_backend import apply_physics_bake, bake_physics
 from character_runtime import apply_poses, prepare_character
@@ -82,7 +83,15 @@ def read_spec():
         return json.load(stream)
 
 def instantiate_asset(asset, transform, entity_id, parent_collection=None, root_marker=None):
-    """Append one immutable Blender model collection and apply its scene transform."""
+    """Load a pinned model and apply its manifest transform."""
+    if parent_collection is None:
+        parent_collection = bpy.context.scene.collection
+    if asset.get("format", "blend") != "blend":
+        if root_marker:
+            raise ValueError("Rigged characters require a prepared Blender collection")
+        root = import_model(asset, parent_collection)
+        place_asset(root, transform, entity_id)
+        return root, {}
     collection_name = asset.get("metadata", {}).get("blenderCollection")
     if not collection_name:
         raise RuntimeError(
@@ -97,8 +106,6 @@ def instantiate_asset(asset, transform, entity_id, parent_collection=None, root_
     collection = destination.collections[0]
     if collection is None:
         raise RuntimeError("Blender could not append asset collection " + collection_name)
-    if parent_collection is None:
-        parent_collection = bpy.context.scene.collection
     parent_collection.children.link(collection)
     root = next(
         (obj for obj in collection.all_objects if obj.get("filmie_asset_id") == asset["assetId"]
@@ -107,6 +114,14 @@ def instantiate_asset(asset, transform, entity_id, parent_collection=None, root_
     )
     if root is None:
         raise RuntimeError("Generated asset has no root object: " + asset["assetId"])
+    place_asset(root, transform, entity_id)
+    for armature in collection.all_objects:
+        if armature.type == "ARMATURE":
+            armature["filmie_character_id"] = entity_id
+    return root, discover_controls(collection, asset["metadata"], entity_id)
+
+
+def place_asset(root, transform, entity_id):
     position = transform["position"]
     rotation = transform["rotationDegrees"]
     root.location = (
@@ -118,10 +133,6 @@ def instantiate_asset(asset, transform, entity_id, parent_collection=None, root_
     root.scale = (float(transform["scale"]),) * 3
     root.name = entity_id
     root["filmie_entity_id"] = entity_id
-    for armature in collection.all_objects:
-        if armature.type == "ARMATURE":
-            armature["filmie_character_id"] = entity_id
-    return root, discover_controls(collection, asset["metadata"], entity_id)
 
 def create_scene(spec):
     scene = bpy.context.scene

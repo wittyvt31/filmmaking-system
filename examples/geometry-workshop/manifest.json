@@ -1,0 +1,635 @@
+{
+  "projectId": "filmie.geometry-workshop",
+  "version": "1.0.0",
+  "video": {
+    "resolution": {
+      "width": 320,
+      "height": 180
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    }
+  },
+  "renderPolicy": {
+    "outputDimensions": {
+      "width": 320,
+      "height": 180
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": {
+      "mode": "crf",
+      "value": 22
+    },
+    "renderer": {
+      "id": "blender",
+      "config": {
+        "engine": "BLENDER_EEVEE",
+        "samples": 4
+      }
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.geometry-workshop",
+      "durationFrames": 4,
+      "visualDescription": "A curved exhibition arch, two shared pedestal assemblies, and original and overridden GLB displays.",
+      "composition": {
+        "framing": "Full view of the exhibition",
+        "subjectPlacement": "Two artifacts beneath the arch",
+        "cameraMovement": "Static",
+        "instructions": []
+      },
+      "requiredAssets": [
+        {
+          "assetId": "model.workshop-artifact",
+          "version": "1.0.0"
+        }
+      ],
+      "scene": {
+        "stylePreset": "realistic_cgi",
+        "styleVersion": "1.0.0",
+        "world": {
+          "schemaVersion": 1,
+          "materials": [
+            {
+              "id": "ceramic",
+              "color": [0.08, 0.44, 0.5],
+              "roughness": 0.27
+            },
+            {
+              "id": "bronze",
+              "color": [0.55, 0.3, 0.09],
+              "metallic": 0.65
+            },
+            {
+              "id": "stone",
+              "color": [0.42, 0.36, 0.3],
+              "procedural": {
+                "kind": "noise",
+                "scale": 11,
+                "color": [0.24, 0.22, 0.2]
+              }
+            }
+          ],
+          "meshes": [
+            {
+              "id": "arch",
+              "materialId": "ceramic",
+              "shape": {
+                "kind": "sweep",
+                "path": {
+                  "kind": "bezier",
+                  "start": [-1.35, 0.95, 1.07],
+                  "segments": [
+                    {
+                      "control1": [-1.35, 0.95, 2.03],
+                      "control2": [-0.72, 0.95, 2.3],
+                      "end": [0, 0.95, 2.3]
+                    },
+                    {
+                      "control1": [0.72, 0.95, 2.3],
+                      "control2": [1.35, 0.95, 2.03],
+                      "end": [1.35, 0.95, 1.07]
+                    }
+                  ]
+                },
+                "profile": [
+                  [-0.13, -0.14],
+                  [0.13, -0.14],
+                  [0.13, 0.14],
+                  [-0.13, 0.14]
+                ],
+                "up": [0, 1, 0]
+              }
+            },
+            {
+              "id": "rail",
+              "materialId": "bronze",
+              "shape": {
+                "kind": "curve",
+                "path": {
+                  "kind": "bezier",
+                  "start": [-1.35, 0.95, 1.07],
+                  "segments": [
+                    {
+                      "control1": [-1.35, 0.95, 2.03],
+                      "control2": [-0.72, 0.95, 2.3],
+                      "end": [0, 0.95, 2.3]
+                    },
+                    {
+                      "control1": [0.72, 0.95, 2.3],
+                      "control2": [1.35, 0.95, 2.03],
+                      "end": [1.35, 0.95, 1.07]
+                    }
+                  ]
+                },
+                "radius": 0.035,
+                "sides": 8
+              }
+            },
+            {
+              "id": "pillar",
+              "materialId": "ceramic",
+              "shape": {
+                "kind": "cylinder",
+                "radius": 0.14,
+                "height": 1.1
+              }
+            },
+            {
+              "id": "base",
+              "materialId": "stone",
+              "shape": {
+                "kind": "cylinder",
+                "radius": 0.29,
+                "height": 0.16
+              }
+            },
+            {
+              "id": "stem",
+              "materialId": "bronze",
+              "shape": {
+                "kind": "cone",
+                "radius": 0.2,
+                "height": 0.44
+              }
+            },
+            {
+              "id": "cap",
+              "materialId": "stone",
+              "shape": {
+                "kind": "sphere",
+                "radius": 0.23
+              }
+            },
+            {
+              "id": "floor",
+              "materialId": "stone",
+              "shape": {
+                "kind": "extrusion",
+                "polygon": [
+                  [-2, -1.9],
+                  [2, -1.9],
+                  [2.4, -1.3],
+                  [2.4, 1.6],
+                  [-2.4, 1.6],
+                  [-2.4, -1.3]
+                ],
+                "depth": 0.12
+              }
+            },
+            {
+              "id": "panel",
+              "materialId": "ceramic",
+              "shape": {
+                "kind": "indexed",
+                "vertices": [
+                  [-1.9, 1.5, 0],
+                  [1.9, 1.5, 0],
+                  [1.9, 1.5, 2.7],
+                  [-1.9, 1.5, 2.7]
+                ],
+                "triangles": [
+                  [0, 1, 2],
+                  [0, 2, 3]
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "id": "display",
+              "parts": [
+                {
+                  "id": "base",
+                  "meshId": "base",
+                  "transform": {
+                    "position": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0.08
+                    },
+                    "rotationDegrees": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "scale": 1
+                  }
+                },
+                {
+                  "id": "stem",
+                  "meshId": "stem",
+                  "transform": {
+                    "position": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0.28
+                    },
+                    "rotationDegrees": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "scale": 1
+                  },
+                  "parentId": "base"
+                },
+                {
+                  "id": "cap",
+                  "meshId": "cap",
+                  "transform": {
+                    "position": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0.26
+                    },
+                    "rotationDegrees": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "scale": 1
+                  },
+                  "parentId": "stem"
+                }
+              ]
+            }
+          ],
+          "entities": [
+            {
+              "id": "plaza",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": -0.12
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "mesh",
+                "meshId": "floor"
+              },
+              "colliders": [
+                {
+                  "id": "floor-proxy",
+                  "shape": {
+                    "kind": "box",
+                    "dimensions": [4, 3.5, 0.12]
+                  },
+                  "pose": {
+                    "position": [0, -0.15, 0.06],
+                    "rotation": [1, 0, 0, 0]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "backdrop",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "mesh",
+                "meshId": "panel"
+              }
+            },
+            {
+              "id": "exhibit",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "group"
+              }
+            },
+            {
+              "id": "arch",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "mesh",
+                "meshId": "arch"
+              },
+              "parentId": "exhibit"
+            },
+            {
+              "id": "trim",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": -0.16,
+                  "z": 0.07
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "mesh",
+                "meshId": "rail"
+              },
+              "parentId": "exhibit"
+            },
+            {
+              "id": "column-left",
+              "transform": {
+                "position": {
+                  "x": -1.35,
+                  "y": 0.95,
+                  "z": 0.54
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "mesh",
+                "meshId": "pillar"
+              },
+              "parentId": "exhibit"
+            },
+            {
+              "id": "column-right",
+              "transform": {
+                "position": {
+                  "x": 1.35,
+                  "y": 0.95,
+                  "z": 0.54
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "mesh",
+                "meshId": "pillar"
+              },
+              "parentId": "exhibit"
+            },
+            {
+              "id": "display-left",
+              "transform": {
+                "position": {
+                  "x": -0.63,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "assembly",
+                "assemblyId": "display"
+              },
+              "parentId": "exhibit"
+            },
+            {
+              "id": "display-right",
+              "transform": {
+                "position": {
+                  "x": 0.63,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "assembly",
+                "assemblyId": "display"
+              },
+              "parentId": "exhibit"
+            },
+            {
+              "id": "artifact-original",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0.84
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "asset",
+                "asset": {
+                  "assetId": "model.workshop-artifact",
+                  "version": "1.0.0"
+                }
+              },
+              "parentId": "display-left"
+            },
+            {
+              "id": "artifact-painted",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0.84
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "asset",
+                "asset": {
+                  "assetId": "model.workshop-artifact",
+                  "version": "1.0.0"
+                },
+                "materialOverrides": {
+                  "mode": "slots",
+                  "slots": [
+                    {
+                      "source": "bronze",
+                      "materialId": "ceramic"
+                    }
+                  ]
+                }
+              },
+              "parentId": "display-right"
+            }
+          ]
+        },
+        "motionClips": [],
+        "characters": [],
+        "lights": [
+          {
+            "id": "study.key",
+            "type": "area",
+            "position": {
+              "x": -2.6,
+              "y": -2.7,
+              "z": 3.25
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 135,
+            "color": [1, 0.91, 0.82],
+            "size": 3
+          },
+          {
+            "id": "study.fill",
+            "type": "area",
+            "position": {
+              "x": 2.8,
+              "y": -1.85,
+              "z": 2.3
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 75,
+            "color": [0.83, 0.91, 1],
+            "size": 2.7
+          },
+          {
+            "id": "study.rim",
+            "type": "area",
+            "position": {
+              "x": 1.2,
+              "y": 1.55,
+              "z": 2.85
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 100,
+            "color": [1, 0.92, 0.78],
+            "size": 2
+          },
+          {
+            "id": "study.sun",
+            "type": "sun",
+            "energy": 0.35,
+            "angularDiameterRadians": 0.15,
+            "shadows": false,
+            "color": [0.74, 0.85, 1],
+            "position": {
+              "x": 1,
+              "y": -1,
+              "z": 2
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          }
+        ],
+        "camera": {
+          "type": "static",
+          "distance": 6.8,
+          "target": {
+            "x": 0,
+            "y": 0.35,
+            "z": 1.1
+          },
+          "focalLength": 43
+        },
+        "visualSettings": {
+          "environment": {
+            "kind": "color",
+            "color": [0.28, 0.31, 0.39],
+            "strength": 0.6
+          },
+          "exposure": 0.15
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "durationFrames": 4,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [
+          {
+            "shotId": "shot.geometry-workshop",
+            "startFrame": 0
+          }
+        ]
+      }
+    ],
+    "audioTracks": [],
+    "transitions": []
+  }
+}

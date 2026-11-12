@@ -3,6 +3,11 @@ import { AssetVersionReferenceSchema, StableIdSchema } from './identifiers.js';
 import { SceneTransformSchema } from './shared-internal.js';
 import { MaterialSchema } from './material.js';
 import {
+  AssemblyDefinitionSchema,
+  ImportedMaterialsSchema,
+  MeshDefinitionSchema,
+} from './geometry.js';
+import {
   ColliderSchema,
   PhysicsSettingsSchema,
   RigidBodySchema,
@@ -78,7 +83,12 @@ const EntitySchema = z
         .object({
           kind: z.literal('asset'),
           asset: AssetVersionReferenceSchema,
+          materialOverrides: ImportedMaterialsSchema.optional(),
         })
+        .strict(),
+      z.object({ kind: z.literal('mesh'), meshId: StableIdSchema }).strict(),
+      z
+        .object({ kind: z.literal('assembly'), assemblyId: StableIdSchema })
         .strict(),
       RoomSchema,
     ]),
@@ -176,6 +186,8 @@ export const WorldSchema = z
     schemaVersion: z.literal(1),
     physics: PhysicsSettingsSchema.optional(),
     materials: z.array(MaterialSchema).max(256).default([]),
+    meshes: z.array(MeshDefinitionSchema).max(256).optional(),
+    assemblies: z.array(AssemblyDefinitionSchema).max(128).optional(),
     entities: z.array(EntitySchema).min(1).max(2048),
   })
   .strict()
@@ -189,6 +201,44 @@ export const WorldSchema = z
       materials.add(id);
     });
     const entities = new Map<string, number>();
+    const meshes = new Set<string>();
+    (world.meshes ?? []).forEach((mesh, i) => {
+      if (meshes.has(mesh.id)) issue(['meshes', i, 'id'], 'Duplicate mesh ID');
+      meshes.add(mesh.id);
+      if (!materials.has(mesh.materialId))
+        issue(['meshes', i, 'materialId'], 'Unknown mesh material');
+    });
+    const assemblies = new Set<string>();
+    (world.assemblies ?? []).forEach((assembly, i) => {
+      if (assemblies.has(assembly.id))
+        issue(['assemblies', i, 'id'], 'Duplicate assembly ID');
+      assemblies.add(assembly.id);
+      const parts = new Map(assembly.parts.map((part) => [part.id, part]));
+      if (parts.size !== assembly.parts.length)
+        issue(['assemblies', i, 'parts'], 'Duplicate assembly part ID');
+      const checked = new Set<string>();
+      for (const [j, part] of assembly.parts.entries()) {
+        const path = ['assemblies', i, 'parts', j];
+        if (!meshes.has(part.meshId))
+          issue([...path, 'meshId'], 'Unknown assembly mesh');
+        if (part.parentId && !parts.has(part.parentId))
+          issue([...path, 'parentId'], 'Unknown assembly parent');
+        const chain = new Set<string>();
+        for (
+          let id: string | undefined = part.id;
+          id && !checked.has(id);
+          id = parts.get(id)?.parentId
+        ) {
+          if (chain.has(id)) {
+            issue([...path, 'parentId'], 'Assembly hierarchy contains a cycle');
+            break;
+          }
+          chain.add(id);
+        }
+        for (const id of chain) checked.add(id);
+      }
+    });
+    let instances = 0;
     world.entities.forEach((entity, index) => {
       if (entities.has(entity.id))
         issue(['entities', index, 'id'], 'Duplicate world entity ID');
@@ -206,11 +256,48 @@ export const WorldSchema = z
       };
       if (entity.geometry.kind === 'box')
         material(entity.geometry.materialId, ['materialId']);
+      if (
+        entity.geometry.kind === 'mesh' &&
+        !meshes.has(entity.geometry.meshId)
+      )
+        issue([...base, 'meshId'], 'Unknown world mesh');
+      if (entity.geometry.kind === 'assembly') {
+        const assemblyId = entity.geometry.assemblyId;
+        const assembly = world.assemblies?.find(
+          (item) => item.id === assemblyId,
+        );
+        if (!assembly) issue([...base, 'assemblyId'], 'Unknown world assembly');
+        else instances += assembly.parts.length;
+      }
+      if (entity.geometry.kind === 'asset') {
+        const overrides = entity.geometry.materialOverrides;
+        if (overrides?.mode === 'all')
+          material(overrides.materialId, ['materialOverrides', 'materialId']);
+        if (overrides?.mode === 'slots') {
+          const slots = new Set<string>();
+          overrides.slots.forEach((slot, i) => {
+            if (slots.has(slot.source))
+              issue(
+                [...base, 'materialOverrides', 'slots', i, 'source'],
+                'Duplicate source material slot name',
+              );
+            slots.add(slot.source);
+            material(slot.materialId, [
+              'materialOverrides',
+              'slots',
+              i,
+              'materialId',
+            ]);
+          });
+        }
+      }
       if (entity.geometry.kind === 'room')
         validateRoom(entity.geometry, material, (path, message) =>
           issue([...base, ...path], message),
         );
     });
+    if (instances > 16384)
+      issue(['entities'], 'World exceeds 16,384 assembly part instances');
     const visited = new Set<string>();
     world.entities.forEach((entity, index) => {
       if (entity.parentId && !entities.has(entity.parentId))
@@ -250,12 +337,19 @@ export interface WorldBox {
 export type CompiledWorldEntity = Omit<WorldEntity, 'geometry'> &
   (
     | { boxes: WorldBox[] }
-    | { asset: z.infer<typeof AssetVersionReferenceSchema> }
+    | { meshId: string }
+    | { assemblyId: string }
+    | {
+        asset: z.infer<typeof AssetVersionReferenceSchema>;
+        materialOverrides?: z.infer<typeof ImportedMaterialsSchema>;
+      }
   );
 
 export interface CompiledWorld {
   schemaVersion: 1;
   materials: World['materials'];
+  meshes?: NonNullable<World['meshes']>;
+  assemblies?: NonNullable<World['assemblies']>;
   entities: CompiledWorldEntity[];
   physics?: PhysicsSettings;
   sha256: string;

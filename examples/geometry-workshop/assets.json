@@ -1,0 +1,19 @@
+[
+  {
+    "assetId": "model.workshop-artifact",
+    "version": "1.0.0",
+    "type": "model",
+    "sourceUri": "artifact.glb",
+    "contentHash": "bb6907e75b6f1e6acc82070cca014d79e6efb26aa8f06612a1872e55b0d7f89c",
+    "metadata": {
+      "assetKind": "prop"
+    },
+    "license": {
+      "name": "Filmie reference asset",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "Generated original geometric artifact for the geometry workshop"
+    }
+  }
+]
