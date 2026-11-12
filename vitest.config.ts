@@ -9,6 +9,9 @@ export default defineConfig({
       '@filmmaking/timeline': resolve('packages/timeline/src/index.ts'),
       '@filmmaking/planner': resolve('packages/planner/src/index.ts'),
       '@filmmaking/scene': resolve('packages/scene/src/index.ts'),
+      '@filmmaking/secondary-motion': resolve(
+        'packages/secondary-motion/src/index.ts',
+      ),
       '@filmmaking/cache': resolve('packages/cache/src/index.ts'),
       '@filmmaking/engine-blender': resolve('engines/blender/src/index.ts'),
       '@filmmaking/orchestrator': resolve('packages/orchestrator/src/index.ts'),

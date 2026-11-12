@@ -23,3 +23,4 @@ export * from './physics.js';
 export * from './contact-graph.js';
 export * from './contact-response.js';
 export * from './retargeting.js';
+export * from './secondary-motion.js';

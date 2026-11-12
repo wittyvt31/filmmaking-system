@@ -6,6 +6,7 @@
     { "path": "./packages/timeline" },
     { "path": "./packages/planner" },
     { "path": "./packages/scene" },
+    { "path": "./packages/secondary-motion" },
     { "path": "./packages/cache" },
     { "path": "./packages/media" },
     { "path": "./engines/blender" },
