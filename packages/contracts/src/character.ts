@@ -11,6 +11,7 @@ import {
 import { SceneTransformSchema } from './shared-internal.js';
 import { CharacterMaterialSchema, MaterialSchema } from './material.js';
 import { ImportedMaterialsSchema } from './geometry.js';
+import { FacialPerformanceSchema } from './facial.js';
 
 type Vector = readonly [number, number, number];
 type Joint = { id: string; parent?: string; min: Vector; max: Vector };
@@ -180,6 +181,7 @@ export const RiggedCharacterSchema = z
     motion: z.array(MotionLayerSchema).max(64).default([]),
     constraints: z.array(SpatialConstraintSchema).max(32).default([]),
     locomotion: LocomotionSchema.optional(),
+    facial: FacialPerformanceSchema.optional(),
     deformation: z
       .object({
         skinning: z.enum(['linear', 'preserve-volume']).optional(),
@@ -362,5 +364,6 @@ export interface PreparedCharacter {
   poses: RiggedCharacter['poses'];
   deformation?: NonNullable<RiggedCharacter['deformation']>;
   morphs?: NonNullable<RiggedCharacter['morphs']>;
+  facialBoneMap?: Record<string, string>;
   sampledMotion?: SampledSkeletalMotion;
 }

@@ -47,7 +47,18 @@ function basis(head: readonly number[], tail: readonly number[]): Q {
     length = Math.hypot(...d);
   if (!length) throw new TypeError('Zero-length IK bone');
   const y = d[1] / length;
-  if (y < -0.99999999) return [0, 1, 0, 0];
+  if (y < -0.99999999) {
+    // Blender's zero-roll convention uses a Z half-turn at exactly -Y.
+    const sideways = Math.hypot(d[0], d[2]);
+    if (sideways / length < 1e-10) return [0, 0, 0, 1];
+    const sine = Math.sqrt((1 - y) / 2);
+    return [
+      sideways / (2 * length * sine),
+      (d[2] * sine) / sideways,
+      0,
+      (-d[0] * sine) / sideways,
+    ];
+  }
   const q: Q = [1 + y, d[2] / length, 0, -d[0] / length];
   const n = Math.hypot(...q);
   return q.map((v) => v / n) as Q;

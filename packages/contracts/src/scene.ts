@@ -13,6 +13,7 @@ import { ObjectInteractionSchema } from './interactions.js';
 import { ContactGraphSchema } from './contact-graph.js';
 import { SceneContactResponseSchema } from './contact-response.js';
 import { CinematographySchema } from './cinematography.js';
+import { FacialRigSchema } from './facial.js';
 
 const SceneCameraTargetSchema = z
   .object({
@@ -114,6 +115,7 @@ export const ShotSceneSchema = z
     visualSettings: VisualSettingsSchema.optional(),
     motionLibraries: z.array(AssetVersionReferenceSchema).default([]),
     motionClips: z.array(SkeletalClipSchema).max(128).default([]),
+    facialRigs: z.array(FacialRigSchema).max(32).optional(),
     environment: AssetVersionReferenceSchema.optional(),
     world: WorldSchema.optional(),
     characters: z.array(SceneCharacterSchema).default([]),

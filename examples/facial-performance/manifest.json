@@ -1,0 +1,623 @@
+{
+  "projectId": "filmie.facial-performance",
+  "version": "1.0.0",
+  "video": {
+    "resolution": {
+      "width": 320,
+      "height": 180
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    }
+  },
+  "renderPolicy": {
+    "outputDimensions": {
+      "width": 320,
+      "height": 180
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": {
+      "mode": "crf",
+      "value": 22
+    },
+    "renderer": {
+      "id": "blender",
+      "config": {
+        "engine": "BLENDER_EEVEE",
+        "samples": 4
+      }
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.facial-study",
+      "durationFrames": 20,
+      "visualDescription": "An authored facial study with expression layers, lip-sync symbols, a blink, and head and eye tracking.",
+      "composition": {
+        "framing": "Facial performance study",
+        "subjectPlacement": "Performer in close-up",
+        "cameraMovement": "Static",
+        "instructions": []
+      },
+      "requiredAssets": [
+        {
+          "assetId": "character.facial-performer",
+          "version": "1.0.0"
+        }
+      ],
+      "scene": {
+        "stylePreset": "stylized_3d",
+        "styleVersion": "1.0.0",
+        "world": {
+          "schemaVersion": 1,
+          "materials": [
+            {
+              "id": "floor",
+              "color": [0.18, 0.2, 0.21],
+              "roughness": 0.82,
+              "procedural": {
+                "kind": "checker",
+                "scale": 14,
+                "color": [0.37, 0.3, 0.22]
+              }
+            },
+            {
+              "id": "wall",
+              "color": [0.26, 0.29, 0.3],
+              "roughness": 0.85,
+              "procedural": {
+                "kind": "noise",
+                "scale": 22,
+                "color": [0.31, 0.37, 0.49]
+              }
+            }
+          ],
+          "entities": [
+            {
+              "id": "studio",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "room",
+                "dimensions": {
+                  "x": 5.6,
+                  "y": 5.8,
+                  "z": 3.1
+                },
+                "floor": {
+                  "thickness": 0.15,
+                  "materialId": "floor"
+                },
+                "walls": [
+                  {
+                    "side": "north",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "west",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "east",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "motionClips": [],
+        "characters": [
+          {
+            "id": "performer",
+            "transform": {
+              "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": -12
+              },
+              "scale": 1
+            },
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "source": {
+              "kind": "imported",
+              "asset": {
+                "assetId": "character.facial-performer",
+                "version": "1.0.0"
+              },
+              "body": {
+                "height": 1.72,
+                "shoulderWidth": 0.245,
+                "build": 1
+              },
+              "materials": [
+                {
+                  "id": "jacket",
+                  "color": [0.08, 0.38, 0.48],
+                  "roughness": 0.42,
+                  "procedural": {
+                    "kind": "noise",
+                    "scale": 32,
+                    "color": [0.16, 0.49, 0.55]
+                  }
+                }
+              ],
+              "materialOverrides": {
+                "mode": "slots",
+                "slots": [
+                  {
+                    "source": "Humanoid top",
+                    "materialId": "jacket"
+                  }
+                ]
+              }
+            },
+            "motion": [],
+            "poses": {
+              "root": [],
+              "joints": [
+                {
+                  "joint": "upper_arm.L",
+                  "keys": [
+                    {
+                      "frame": 0,
+                      "rotationDegrees": [-12, 0, -30],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 19,
+                      "rotationDegrees": [-20, 0, -78],
+                      "interpolation": "ease"
+                    }
+                  ]
+                },
+                {
+                  "joint": "forearm.L",
+                  "keys": [
+                    {
+                      "frame": 0,
+                      "rotationDegrees": [-8, 0, 0],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 19,
+                      "rotationDegrees": [-78, 0, -10],
+                      "interpolation": "ease"
+                    }
+                  ]
+                }
+              ]
+            },
+            "deformation": {
+              "skinning": "preserve-volume",
+              "subdivision": 0
+            },
+            "facial": {
+              "rigId": "face.study",
+              "layers": [
+                {
+                  "kind": "expression",
+                  "expression": "warm",
+                  "startFrame": 0,
+                  "endFrame": 20,
+                  "fadeInFrames": 3,
+                  "fadeOutFrames": 3,
+                  "priority": 20
+                }
+              ],
+              "speech": [
+                {
+                  "kind": "phoneme",
+                  "id": "AA",
+                  "startFrame": 2,
+                  "endFrame": 9,
+                  "fadeInFrames": 1,
+                  "fadeOutFrames": 2
+                },
+                {
+                  "kind": "viseme",
+                  "id": "round",
+                  "startFrame": 7,
+                  "endFrame": 15,
+                  "fadeInFrames": 2,
+                  "fadeOutFrames": 2
+                }
+              ],
+              "blinks": [
+                {
+                  "control": "blink",
+                  "startFrame": 8,
+                  "closeFrames": 2,
+                  "holdFrames": 1,
+                  "openFrames": 2
+                }
+              ],
+              "gaze": [
+                {
+                  "joint": "head",
+                  "target": {
+                    "kind": "entity",
+                    "entityId": "partner",
+                    "joint": "head"
+                  },
+                  "forward": [0, 0, 1],
+                  "startFrame": 0,
+                  "endFrame": 20,
+                  "weight": 0.55
+                },
+                {
+                  "joint": "face.eye.L",
+                  "target": {
+                    "kind": "entity",
+                    "entityId": "partner",
+                    "joint": "head"
+                  },
+                  "forward": [0, 1, 0],
+                  "startFrame": 0,
+                  "endFrame": 14
+                },
+                {
+                  "joint": "face.eye.R",
+                  "target": {
+                    "kind": "entity",
+                    "entityId": "partner",
+                    "joint": "head"
+                  },
+                  "forward": [0, 1, 0],
+                  "startFrame": 0,
+                  "endFrame": 14
+                },
+                {
+                  "joint": "face.eye.L",
+                  "target": {
+                    "kind": "point",
+                    "position": [-0.3, -2, 1.6]
+                  },
+                  "forward": [0, 1, 0],
+                  "startFrame": 12,
+                  "endFrame": 20,
+                  "fadeInFrames": 2,
+                  "priority": 60
+                },
+                {
+                  "joint": "face.eye.R",
+                  "target": {
+                    "kind": "point",
+                    "position": [-0.3, -2, 1.6]
+                  },
+                  "forward": [0, 1, 0],
+                  "startFrame": 12,
+                  "endFrame": 20,
+                  "fadeInFrames": 2,
+                  "priority": 60
+                }
+              ],
+              "overrides": [
+                {
+                  "control": "smile",
+                  "keys": [
+                    {
+                      "frame": 14,
+                      "value": 0.3
+                    },
+                    {
+                      "frame": 19,
+                      "value": 0
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "partner",
+            "transform": {
+              "position": {
+                "x": 0.8,
+                "y": -1.7,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": -12
+              },
+              "scale": 1
+            },
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "source": {
+              "kind": "procedural",
+              "body": {
+                "height": 1.72,
+                "shoulderWidth": 0.245,
+                "build": 1
+              },
+              "appearance": {
+                "skin": {
+                  "color": [0.66, 0.39, 0.24]
+                },
+                "top": {
+                  "color": [0.18, 0.43, 0.68],
+                  "roughness": 0.36,
+                  "metallic": 0.08
+                },
+                "trousers": {
+                  "color": [0.24, 0.19, 0.13]
+                },
+                "shoes": {
+                  "color": [0.055, 0.043, 0.033],
+                  "emission": {
+                    "color": [0.13, 0.38, 0.7],
+                    "strength": 0.15
+                  },
+                  "opacity": 0.97,
+                  "transmission": 0.08
+                },
+                "hair": {
+                  "color": [0.065, 0.045, 0.032]
+                }
+              }
+            },
+            "motion": [],
+            "poses": {
+              "root": [
+                {
+                  "frame": 0,
+                  "transform": {
+                    "position": {
+                      "x": 0.55,
+                      "y": -1.7,
+                      "z": 0
+                    },
+                    "rotationDegrees": {
+                      "x": 0,
+                      "y": 0,
+                      "z": -12
+                    },
+                    "scale": 1
+                  },
+                  "interpolation": "linear"
+                },
+                {
+                  "frame": 19,
+                  "transform": {
+                    "position": {
+                      "x": 1.2,
+                      "y": -1.7,
+                      "z": 0
+                    },
+                    "rotationDegrees": {
+                      "x": 0,
+                      "y": 0,
+                      "z": -12
+                    },
+                    "scale": 1
+                  },
+                  "interpolation": "linear"
+                }
+              ],
+              "joints": []
+            }
+          }
+        ],
+        "lights": [
+          {
+            "id": "study.key",
+            "type": "area",
+            "position": {
+              "x": -2.6,
+              "y": -2.7,
+              "z": 3.25
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 135,
+            "color": [1, 0.91, 0.82],
+            "size": 3
+          },
+          {
+            "id": "study.fill",
+            "type": "area",
+            "position": {
+              "x": 2.8,
+              "y": -1.85,
+              "z": 2.3
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 75,
+            "color": [0.83, 0.91, 1],
+            "size": 2.7
+          },
+          {
+            "id": "study.rim",
+            "type": "area",
+            "position": {
+              "x": 1.2,
+              "y": 1.55,
+              "z": 2.85
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "energy": 100,
+            "color": [1, 0.92, 0.78],
+            "size": 2
+          },
+          {
+            "id": "study.sun",
+            "type": "sun",
+            "energy": 0.35,
+            "angularDiameterRadians": 0.15,
+            "shadows": false,
+            "color": [0.74, 0.85, 1],
+            "position": {
+              "x": 1,
+              "y": -1,
+              "z": 2
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          }
+        ],
+        "camera": {
+          "type": "static",
+          "distance": 1.9,
+          "target": {
+            "x": 0,
+            "y": 0,
+            "z": 1.53
+          },
+          "focalLength": 75
+        },
+        "visualSettings": {
+          "saturation": 1.7,
+          "roughnessScale": 0.55,
+          "exposure": 0.2
+        },
+        "facialRigs": [
+          {
+            "id": "face.study",
+            "bones": [
+              {
+                "id": "face.jaw",
+                "source": "DemoJaw",
+                "parent": "head",
+                "head": [0, -0.043000000000000003, 1.58412],
+                "tail": [0, -0.1118, 1.54112],
+                "min": [-30, -10, -10],
+                "max": [35, 10, 10]
+              },
+              {
+                "id": "face.eye.L",
+                "source": "DemoEyeL",
+                "parent": "head",
+                "head": [0.04128, -0.08428000000000001, 1.61852],
+                "tail": [0.04128, -0.1634, 1.61852],
+                "min": [-50, -50, -50],
+                "max": [50, 50, 50]
+              },
+              {
+                "id": "face.eye.R",
+                "source": "DemoEyeR",
+                "parent": "head",
+                "head": [-0.04128, -0.08428000000000001, 1.61852],
+                "tail": [-0.04128, -0.1634, 1.61852],
+                "min": [-50, -50, -50],
+                "max": [50, 50, 50]
+              }
+            ],
+            "controls": {
+              "smile": [
+                {
+                  "kind": "morph",
+                  "mesh": "Facial Surface",
+                  "target": "Smile"
+                }
+              ],
+              "round": [
+                {
+                  "kind": "morph",
+                  "mesh": "Facial Surface",
+                  "target": "Round"
+                }
+              ],
+              "blink": [
+                {
+                  "kind": "morph",
+                  "mesh": "Facial Surface",
+                  "target": "Blink"
+                }
+              ],
+              "jaw": [
+                {
+                  "kind": "bone",
+                  "joint": "face.jaw",
+                  "rotationDegrees": [22, 0, 0]
+                }
+              ]
+            },
+            "expressions": {
+              "warm": {
+                "smile": 0.75
+              }
+            },
+            "visemes": {
+              "open": {
+                "jaw": 0.9
+              },
+              "round": {
+                "jaw": 0.28,
+                "round": 0.8
+              }
+            },
+            "phonemes": {
+              "AA": "open",
+              "OO": "round"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "timeline": {
+    "durationFrames": 20,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [
+          {
+            "shotId": "shot.facial-study",
+            "startFrame": 0
+          }
+        ]
+      }
+    ],
+    "audioTracks": [],
+    "transitions": []
+  }
+}

@@ -60,6 +60,10 @@ An imported character references a pinned model with `rigProfile: "FilmieHumanoi
 
 The Studio `character-deformation` catalog demonstrates a skinned GLB with renamed bones, an articulated arm bend, and an animated chest morph. Use `morphs` to key a relative target on a named source mesh with zero-based frames and weights from 0 to 1. Filmie supplies the pose and morph tracks at runtime and clears embedded character animation. Set `deformation.skinning` to linear or preserve-volume and optionally add surface subdivision after skinning. Imported material slots can keep their source materials or use `source.materialOverrides` with Filmie material definitions in `source.materials`. Procedural characters use denser skinned loops, continuous arm and hand surfaces, and configurable radial segments.
 
+The Studio `facial-performance` catalog demonstrates a mapped jaw and eyes, a smile, a blink, and authored lip-sync. Share named definitions in `scene.facialRigs` and select one with a character's `facial.rigId`. A control can drive named mesh morphs, mapped facial bone rotations, or both. Facial bones declare source names, canonical parents, rest axes, and limits. Expressions and visemes are named sets of control weights. Speech cues select a viseme directly or map an authored phoneme to one. Cue and layer intervals use zero-based frames with an exclusive end, and the manifest supplies the speech timing.
+
+Facial layers support keyed weights, fades, and additive or replacement blending. Higher priorities apply later, and authored control overrides apply last. Direct skeletal pose and morph tracks keep ownership of their channels. Gaze can aim head or eye joints at a world point or a compiled entity or joint, using the specified local forward axis. It respects joint limits and uses target poses before facial animation so characters can track one another without a dependency cycle.
+
 ## Architecture
 
 - `packages/contracts`: validated manifest, scene, render, timeline, receipt, and serialization contracts.

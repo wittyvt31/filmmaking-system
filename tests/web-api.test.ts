@@ -596,6 +596,15 @@ it.skipIf(process.env['FILMIE_WEB_REAL_RENDER'] !== '1')(
   190_000,
 );
 
+it('validates the facial performance catalog in Studio', async () => {
+  const { path, text } = await createProject('facial-performance');
+  expect(await request(path + '/validate', { text })).toEqual({
+    issues: [],
+    frames: 20,
+    shots: 1,
+  });
+});
+
 it('loads the four visual treatments as one Studio catalog', async () => {
   const { path, text } = await createProject('visual-styles');
   expect(await request(path + '/validate', { text })).toEqual({

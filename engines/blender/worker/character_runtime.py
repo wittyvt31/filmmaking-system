@@ -29,7 +29,7 @@ def validate_rig(root, collection, character):
         raise ValueError("Character must have exactly one armature: " + character["id"])
     rig = armatures[0]
     source = character["source"]
-    mapped = source.get("jointMap", {})
+    mapped = {**source.get("jointMap", {}), **character.get("facialBoneMap", {})}
     adaptive = source["kind"] == "imported" and (
         source["asset"].get("format") == "glb" or mapped or source.get("restSkeleton"))
     identity = Matrix.Identity(4)
@@ -45,6 +45,8 @@ def validate_rig(root, collection, character):
         raise ValueError("Character armature requires a positive uniform scale and no shear")
     bindings = {}
     mapped_names = {mapped.get(b["id"], b["id"]) for b in character["bones"]}
+    if len(mapped_names) != len(character["bones"]):
+        raise ValueError("Body and facial bindings must resolve distinct source bones")
     for expected in character["bones"]:
         name = mapped.get(expected["id"], expected["id"])
         joint = rig.data.bones.get(name)

@@ -23,7 +23,7 @@ export function axisAngle(axis: V, radians: number): Q {
   const v = scale(axis, Math.sin(radians / 2));
   return [Math.cos(radians / 2), ...v];
 }
-function rotateTo(a: V, b: V): Q {
+export function rotateTo(a: V, b: V): Q {
   const d = dot(a, b);
   const axis = cross(a, b);
   const length = Math.hypot(...axis);

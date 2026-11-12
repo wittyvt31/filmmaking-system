@@ -1,0 +1,20 @@
+[
+  {
+    "assetId": "character.facial-performer",
+    "version": "1.0.0",
+    "type": "model",
+    "sourceUri": "performer.glb",
+    "contentHash": "c083ac511cbaa6d5747885cb7bd8013a9389402de81c01c49be8b0d55585d23f",
+    "metadata": {
+      "rigProfile": "FilmieHumanoid",
+      "rigVersion": 1
+    },
+    "license": {
+      "name": "Filmie reference asset",
+      "restrictions": []
+    },
+    "provenance": {
+      "source": "Filmie procedural reference with authored jaw, eyes, and expression morphs"
+    }
+  }
+]

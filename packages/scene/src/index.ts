@@ -23,6 +23,7 @@ import { compileInteractions } from './compile-interactions.js';
 import { compileContacts } from './compile-contacts.js';
 import { compilePhysics } from './physics.js';
 import { compileCinematography } from './cinematography.js';
+import { attachFacialRig, compileFacialPerformance } from './facial.js';
 export * from './collision.js';
 export { compilePhysics } from './physics.js';
 import { sampleLocomotion } from './locomotion.js';
@@ -54,6 +55,9 @@ export function compileScene(
     throw new TypeError(`Shot "${shot.id}" has no structured scene`);
   }
   const scene = ShotSceneSchema.parse(shot.scene);
+  const facialRigs = new Map(scene.facialRigs?.map((rig) => [rig.id, rig]));
+  if (facialRigs.size !== (scene.facialRigs?.length ?? 0))
+    throw new TypeError('Duplicate facial rig ID');
   const skeletalClips = motionLibrary(scene.motionClips);
   const style = compileStyle(scene);
   if (scene.animationLibraryVersion !== SEMANTIC_ANIMATION_LIBRARY_VERSION)
@@ -179,6 +183,14 @@ export function compileScene(
       'source' in character
         ? (() => {
             const prepared = prepareCharacter(character, shot.durationFrames);
+            if (character.facial) {
+              const rig = facialRigs.get(character.facial.rigId);
+              if (!rig)
+                throw new TypeError(
+                  'Unknown facial rig ' + character.facial.rigId,
+                );
+              attachFacialRig(prepared, rig);
+            }
             const locomotion = sampleLocomotion(
               prepared,
               character.locomotion,
@@ -197,7 +209,7 @@ export function compileScene(
               ...character.constraints,
               ...locomotion.contacts,
             ];
-            if (scene.contactGraph)
+            if (scene.contactGraph || character.facial)
               protectedConstraints.set(character.id, constraints);
             const sampledMotion = constrainMotion(
               prepared,
@@ -234,17 +246,25 @@ export function compileScene(
         .map(({ track }) => track)
         .sort((a, b) => compareStrings(a.objectId, b.objectId))
     : undefined;
+  const targetScene = {
+    characters,
+    props: scene.props,
+    ...(world ? { world } : {}),
+    ...(physics ? { physics } : {}),
+    ...(objectMotion ? { objectMotion } : {}),
+  };
+  compileFacialPerformance(
+    scene,
+    targetScene,
+    shot.durationFrames,
+    protectedConstraints,
+    facialRigs,
+  );
   const cinematography =
     scene.camera.type === 'rigs'
       ? compileCinematography(
           scene.camera,
-          {
-            characters,
-            props: scene.props,
-            ...(world ? { world } : {}),
-            ...(physics ? { physics } : {}),
-            ...(objectMotion ? { objectMotion } : {}),
-          },
+          targetScene,
           shot.durationFrames,
           frameRate,
           renderAspect,
