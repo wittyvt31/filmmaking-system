@@ -22,9 +22,9 @@ const active = (run: Run) =>
   run.status === 'queued' || run.status === 'running';
 
 function Studio() {
-  const [workspace, setWorkspace] = useState<'production' | 'assets' | 'library'>(
-    'production',
-  );
+  const [workspace, setWorkspace] = useState<
+    'production' | 'assets' | 'library'
+  >('production');
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [catalogs, setCatalogs] = useState<string[]>([]);
   const [project, setProject] = useState<ProjectSummary>();

@@ -79,7 +79,11 @@ export function createFilmieServer(options: {
     options.catalogsDirectory,
     store,
   );
-  const externalLibrary = new ExternalLibraryService(options.dataDirectory, store, assetStudio);
+  const externalLibrary = new ExternalLibraryService(
+    options.dataDirectory,
+    store,
+    assetStudio,
+  );
   const server = createServer((request, response) => {
     response.setHeader('X-Content-Type-Options', 'nosniff');
     response.setHeader(
@@ -129,27 +133,48 @@ export function createFilmieServer(options: {
       if (resource === 'external-library') {
         if (method === 'GET' && !action) {
           if (id === 'config') return json(response, externalLibrary.config());
-          if (id === 'assets') return json(response, { assets: externalLibrary.list({
-            ...(url.searchParams.get('universe') ? { universeId: url.searchParams.get('universe')! } : {}),
-            ...(url.searchParams.get('theme') ? { theme: url.searchParams.get('theme')! } : {}),
-          }) });
-          if (id === 'universes') return json(response, { universes: externalLibrary.universes() });
-          if (id === 'worlds') return json(response, { worlds: externalLibrary.worlds() });
+          if (id === 'assets')
+            return json(response, {
+              assets: externalLibrary.list({
+                ...(url.searchParams.get('universe')
+                  ? { universeId: url.searchParams.get('universe')! }
+                  : {}),
+                ...(url.searchParams.get('theme')
+                  ? { theme: url.searchParams.get('theme')! }
+                  : {}),
+              }),
+            });
+          if (id === 'universes')
+            return json(response, { universes: externalLibrary.universes() });
+          if (id === 'worlds')
+            return json(response, { worlds: externalLibrary.worlds() });
         }
         if (method === 'GET' && id === 'world' && action && rest.length === 1)
-          return json(response, { world: externalLibrary.getWorld(action, rest[0]!) });
+          return json(response, {
+            world: externalLibrary.getWorld(action, rest[0]!),
+          });
         if (method === 'POST' && !action) {
           const payload = await body(request);
-          if (id === 'inspect') return json(response, await externalLibrary.inspect(field(payload, 'filename')));
-          if (id === 'import') return json(response, await externalLibrary.publish(payload), 201);
-          if (id === 'universe') return json(response, externalLibrary.saveUniverse(payload), 201);
-          if (id === 'world') return json(response, externalLibrary.saveWorld(payload), 201);
+          if (id === 'inspect')
+            return json(
+              response,
+              await externalLibrary.inspect(field(payload, 'filename')),
+            );
+          if (id === 'import')
+            return json(response, await externalLibrary.publish(payload), 201);
+          if (id === 'universe')
+            return json(response, externalLibrary.saveUniverse(payload), 201);
+          if (id === 'world')
+            return json(response, externalLibrary.saveWorld(payload), 201);
           if (id === 'apply-world')
-            return json(response, externalLibrary.applyWorld(
-              field(payload, 'projectId'),
-              field(payload, 'worldId'),
-              field(payload, 'version'),
-            ));
+            return json(
+              response,
+              externalLibrary.applyWorld(
+                field(payload, 'projectId'),
+                field(payload, 'worldId'),
+                field(payload, 'version'),
+              ),
+            );
         }
       }
       if (resource === 'asset-studio') {
