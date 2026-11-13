@@ -46,6 +46,7 @@ export function LibraryStudio({
   const [licenseName, setLicenseName] = useState('');
   const [themes, setThemes] = useState('horror');
   const [inspection, setInspection] = useState<LibraryInspection>();
+  const [rigMapJson, setRigMapJson] = useState('');
   const [universe, setUniverse] = useState<VisualUniverse>({
     id: 'stylized-horror',
     name: 'Stylized Horror',
@@ -189,6 +190,7 @@ export function LibraryStudio({
             <button disabled={busy || !stage} onClick={() => void perform(async () => {
               const data = await api<LibraryInspection>('external-library/inspect', { filename: stage });
               setInspection(data);
+              setRigMapJson(JSON.stringify(data.character.suggestedJointMap, null, 2));
               setNotice('GLB inspected. Review rig and facial diagnostics below.');
             })}>Inspect staged GLB</button>
             <button className="primary" disabled={busy || !stage || !licenseName.trim()} onClick={() => void perform(async () => {
@@ -196,6 +198,9 @@ export function LibraryStudio({
                 filename: stage, assetId, version, category, universeId: filterUniverse,
                 themes: themes.split(',').map((value) => value.trim()).filter(Boolean),
                 sourceProvider: provider, ...(sourceUrl.trim() ? { sourceUrl } : {}),
+                ...(category === 'character' && rigMapJson.trim() && Object.keys(JSON.parse(rigMapJson) as object).length
+                  ? { rigJointMap: JSON.parse(rigMapJson) as Record<string, string> }
+                  : {}),
                 license: { name: licenseName, restrictions: [] }, preview: false,
               });
               setInspection(undefined);
@@ -209,9 +214,18 @@ export function LibraryStudio({
               <p>Rig: {inspection.character.status}; {inspection.character.skeletonCount} skeleton(s), {inspection.character.boneCount} bones</p>
               <p>Facial controls: {inspection.character.facial} ({inspection.character.morphTargetCount} morph targets)</p>
               {inspection.character.issues.map((issue) => <p key={issue} className="muted">{issue}</p>)}
-              <details>
-                <summary>Suggested joint mappings (review required)</summary>
-                <pre>{JSON.stringify(inspection.character.suggestedJointMap, null, 2)}</pre>
+              <details open>
+                <summary>Editable humanoid bone map (optional, required for mapped animation)</summary>
+                <p className="muted">Validate every source bone and rest pose in Blender. A full bone-name map is still not a runtime deformation guarantee.</p>
+                <textarea
+                  aria-label="Rig joint map JSON"
+                  rows={8}
+                  value={rigMapJson}
+                  onChange={(event) => setRigMapJson(event.target.value)}
+                />
+                <button onClick={() => setRigMapJson(JSON.stringify(inspection.character.suggestedJointMap, null, 2))}>
+                  Restore suggested mapping
+                </button>
               </details>
             </div>
           )}
