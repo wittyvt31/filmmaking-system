@@ -41,6 +41,11 @@ import { compileScene, SCENE_COMPILER_VERSION } from '@filmmaking/scene';
 import { prepareSimulation, simulationDependency } from './simulation-cache.js';
 
 export const EXPECTED_BLENDER_VERSION = '5.2.3';
+export {
+  assetFactoryFormat,
+  convertAssetToGlb,
+  type AssetFactoryReport,
+} from './asset-factory.js';
 const RENDERER_ID = 'blender';
 const ENGINE_PACKAGE_DIRECTORY = resolve(
   dirname(fileURLToPath(import.meta.url)),

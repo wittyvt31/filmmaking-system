@@ -9,6 +9,10 @@ import {
   normalizeGlbFile,
   validateAssetDescriptor,
 } from '@filmmaking/assets';
+import {
+  assetFactoryFormat,
+  convertAssetToGlb,
+} from '../engines/blender/src/asset-factory.js';
 import { expect, it } from 'vitest';
 
 function glb(json: Record<string, unknown>): Uint8Array {
@@ -345,6 +349,33 @@ it('rejects ambiguous node transforms instead of rewriting them', async () => {
     expect(result.diagnostics.map((item) => item.code)).toContain(
       'AMBIGUOUS_NODE_TRANSFORM',
     );
+  } finally {
+    await rm(temporary, { recursive: true, force: true });
+  }
+});
+
+it('converts GLB through the existing canonicalization path and detects formats', async () => {
+  expect(assetFactoryFormat('character.gltf')).toBe('gltf');
+  expect(assetFactoryFormat('character.fbx')).toBe('fbx');
+  expect(assetFactoryFormat('character.obj')).toBe('obj');
+  expect(assetFactoryFormat('character.blend')).toBe('blend');
+  expect(assetFactoryFormat('character.usd')).toBeUndefined();
+  const temporary = await mkdtemp(join(tmpdir(), 'filmie-asset-factory-'));
+  try {
+    const inputPath = join(temporary, 'input.glb');
+    const outputPath = join(temporary, 'output.glb');
+    await writeFile(
+      inputPath,
+      glb({ scenes: [{ nodes: [0] }], nodes: [{ name: 'Root' }] }),
+    );
+    const result = await convertAssetToGlb({
+      inputPath,
+      outputPath,
+    });
+    expect(result.status).toBe('converted');
+    expect(result.sourceFormat).toBe('glb');
+    expect(result.outputSha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(result.after?.nodes[0]?.name).toBe('Root');
   } finally {
     await rm(temporary, { recursive: true, force: true });
   }

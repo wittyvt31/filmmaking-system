@@ -11,7 +11,10 @@ import {
   prepareProductionPackage,
 } from '@filmmaking/orchestrator';
 import { FfmpegMediaEngine } from '@filmmaking/media';
-import { BlenderRendererAdapter } from '@filmmaking/engine-blender';
+import {
+  BlenderRendererAdapter,
+  convertAssetToGlb,
+} from '@filmmaking/engine-blender';
 import { inspectGlbFile, normalizeGlbFile } from '@filmmaking/assets';
 
 const cli = createCommand('filmie')
@@ -185,6 +188,36 @@ cli
       resolve(output),
       descriptorInput,
     );
+    printJson(report);
+    if (report.status === 'rejected') process.exitCode = 1;
+  });
+
+cli
+  .command('convert-asset')
+  .description('Convert GLB, glTF, FBX, OBJ, or .blend input into a GLB.')
+  .requiredOption('--input <path>', 'Source asset path')
+  .requiredOption('--output <path>', 'Self-contained GLB output path')
+  .option(
+    '--descriptor <path>',
+    'Optional authored, versioned asset descriptor JSON',
+  )
+  .option('--blender <path>', 'Blender executable override')
+  .option(
+    '--timeout <milliseconds>',
+    'Optional Blender conversion timeout',
+    (value: string) => Number.parseInt(value, 10),
+  )
+  .action(async ({ input, output, descriptor, blender, timeout }) => {
+    const descriptorInput = descriptor
+      ? JSON.parse(await readFile(resolve(descriptor), 'utf8'))
+      : undefined;
+    const report = await convertAssetToGlb({
+      inputPath: input,
+      outputPath: output,
+      ...(descriptorInput === undefined ? {} : { descriptor: descriptorInput }),
+      ...(blender === undefined ? {} : { blenderPath: blender }),
+      ...(timeout === undefined ? {} : { timeoutMs: timeout }),
+    });
     printJson(report);
     if (report.status === 'rejected') process.exitCode = 1;
   });
