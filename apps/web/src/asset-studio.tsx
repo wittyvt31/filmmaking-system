@@ -687,20 +687,24 @@ export function AssetStudio({
                 <span>{definition.meshes.length} meshes</span>
                 <span>{definition.joints.length} joints</span>
               </div>
-              <details className="asset-joint-list">
+              <details className="asset-joint-list" open>
                 <summary>Articulation ({definition.joints.length})</summary>
+                <button disabled={busy} onClick={addJoint}>+ Add joint to selected child</button>
                 {definition.joints.map((joint) => (
-                  <div key={joint.id}>
+                  <button
+                    key={joint.id}
+                    aria-pressed={selectedJointId === joint.id}
+                    onClick={() => {
+                      setSelectedJointId(joint.id);
+                      setSelected(joint.childPartId);
+                    }}
+                  >
                     <strong>{joint.id}</strong>
                     <small>
                       {joint.type} · {joint.parentPartId} → {joint.childPartId}
                     </small>
-                  </div>
+                  </button>
                 ))}
-                <p className="muted">
-                  Adjust detailed joint limits and semantic mappings in Advanced
-                  JSON.
-                </p>
               </details>
             </aside>
 
@@ -1037,6 +1041,9 @@ export function AssetStudio({
                   </label>
                   {material && (
                     <>
+                      <button onClick={duplicateMaterial} disabled={busy}>
+                        + Make independent material
+                      </button>
                       <label>
                         Color
                         <input
@@ -1083,6 +1090,140 @@ export function AssetStudio({
                 <p className="muted">
                   Select a part to edit its geometry and materials.
                 </p>
+              )}
+              {selectedJoint && (
+                <section className="asset-joint-editor">
+                  <h3>Articulation · {selectedJoint.id}</h3>
+                  <label>
+                    Joint type
+                    <select
+                      value={selectedJoint.type}
+                      onChange={(event) =>
+                        editJoint((current) => ({
+                          ...current,
+                          type: event.target.value as typeof current.type,
+                        }))
+                      }
+                    >
+                      {['revolute', 'prismatic', 'fixed', 'continuous'].map((kind) => (
+                        <option value={kind} key={kind}>{kind}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Parent part
+                    <select
+                      value={selectedJoint.parentPartId}
+                      onChange={(event) =>
+                        editJoint((current) => ({
+                          ...current,
+                          parentPartId: event.target.value,
+                        }))
+                      }
+                    >
+                      {definition.parts
+                        .filter((item) => item.id !== selectedJoint.childPartId)
+                        .map((item) => (
+                          <option key={item.id} value={item.id}>{item.id}</option>
+                        ))}
+                    </select>
+                  </label>
+                  <label>
+                    Child part
+                    <select
+                      value={selectedJoint.childPartId}
+                      onChange={(event) =>
+                        editJoint((current) => ({
+                          ...current,
+                          childPartId: event.target.value,
+                        }))
+                      }
+                    >
+                      {definition.parts
+                        .filter((item) => item.id !== selectedJoint.parentPartId)
+                        .map((item) => (
+                          <option key={item.id} value={item.id}>{item.id}</option>
+                        ))}
+                    </select>
+                  </label>
+                  {selectedJoint.type !== 'fixed' && (
+                    <>
+                      <h3>Joint axis</h3>
+                      <div className="asset-vector">
+                        {axes.map((axis, index) => (
+                          <label key={axis}>
+                            {axis.toUpperCase()}
+                            <input
+                              type="number"
+                              step="0.1"
+                              value={selectedJoint.axis?.[index] ?? (axis === 'z' ? 1 : 0)}
+                              onChange={(event) =>
+                                editJoint((current) => {
+                                  const vector = [...(current.axis ?? [0, 0, 1])] as [number, number, number];
+                                  vector[index] = Number(event.target.value);
+                                  return { ...current, axis: vector };
+                                })
+                              }
+                            />
+                          </label>
+                        ))}
+                      </div>
+                      <h3>Joint limits</h3>
+                      <div className="asset-vector">
+                        {(['lower', 'upper'] as const).map((bound) => (
+                          <label key={bound}>
+                            {bound}
+                            <input
+                              type="number"
+                              step="0.1"
+                              value={selectedJoint.limits?.[bound] ?? 0}
+                              onChange={(event) =>
+                                editJoint((current) => ({
+                                  ...current,
+                                  limits: {
+                                    ...current.limits,
+                                    [bound]: Number(event.target.value),
+                                  },
+                                }))
+                              }
+                            />
+                          </label>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                  <label>
+                    Default joint value
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={selectedJoint.defaultValue}
+                      onChange={(event) =>
+                        editJoint((current) => ({
+                          ...current,
+                          defaultValue: Number(event.target.value),
+                        }))
+                      }
+                    />
+                  </label>
+                  <label>
+                    Control channel ID
+                    <input
+                      value={selectedJoint.controlId ?? ''}
+                      onChange={(event) =>
+                        editJoint((current) => {
+                          const { controlId: _unused, ...withoutControl } = current;
+                          return event.target.value
+                            ? { ...withoutControl, controlId: event.target.value }
+                            : withoutControl;
+                        })
+                      }
+                    />
+                  </label>
+                  <button className="asset-remove" disabled={busy} onClick={removeJoint}>
+                    Remove joint
+                  </button>
+                </section>
               )}
             </aside>
           </div>
