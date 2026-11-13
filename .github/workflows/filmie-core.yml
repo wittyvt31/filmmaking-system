@@ -28,11 +28,13 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Check affected TypeScript projects
-        run: pnpm exec tsc -b packages/contracts packages/assets packages/scene engines/blender apps/cli --pretty false
+        run: pnpm exec tsc -b packages/contracts packages/assets packages/scene engines/blender apps/cli apps/web-api apps/web --pretty false
       - name: Test asset and articulation contracts
         run: pnpm exec vitest run tests/asset-descriptor.test.ts --reporter=dot
+      - name: Bundle browser workspaces
+        run: pnpm --filter @filmmaking/web build
       - name: Check Python asset workers compile
         run: python3 -m py_compile engines/blender/worker/procedural_asset.py engines/blender/worker/asset_preview.py engines/blender/worker/model_import.py
       - name: Check formatting of asset pipeline
         run: |
-          pnpm exec prettier --check packages/scene/src/articulated-kinematics.ts packages/scene/src/index.ts engines/blender/src/index.ts engines/blender/src/procedural-assets.ts apps/cli/src/index.ts tests/asset-descriptor.test.ts examples/asset-lab/crane.definition.json
+          pnpm exec prettier --check packages/scene/src/articulated-kinematics.ts packages/scene/src/index.ts engines/blender/src/index.ts engines/blender/src/procedural-assets.ts apps/cli/src/index.ts tests/asset-descriptor.test.ts examples/asset-lab/crane.definition.json apps/web/src/api.ts apps/web/src/main.tsx apps/web/src/asset-studio.tsx apps/web/src/asset-viewport.tsx apps/web/src/app.css apps/web-api/src/server.ts apps/web-api/src/asset-studio.ts apps/web-api/src/types.ts
