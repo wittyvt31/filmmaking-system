@@ -75,6 +75,9 @@ export {
   GlbInspectionError,
   inspectGlbBytes,
   inspectGlbFile,
+  validateAssetDescriptor,
+  type DescriptorValidation,
+  type GlbDiagnostic,
   type GlbAssetInspection,
 } from './glb-inspector.js';
 

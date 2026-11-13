@@ -159,7 +159,30 @@ export interface GlbAssetInspection {
     unknown: string[];
     unsupported: string[];
   };
+  animationCompatibility: {
+    status: 'verified' | 'unknown' | 'unsupported';
+    verified: string[];
+    unknown: string[];
+    unsupported: string[];
+  };
+  structuralDiagnostics: GlbDiagnostic[];
+  descriptorValidation?: DescriptorValidation;
   descriptor?: AssetDescriptor;
+}
+
+export interface GlbDiagnostic {
+  severity: 'error' | 'warning' | 'info';
+  code: string;
+  path: string;
+  message: string;
+}
+
+export interface DescriptorValidation {
+  status: 'valid' | 'invalid';
+  diagnostics: GlbDiagnostic[];
+  verifiedReferences: string[];
+  unknownCapabilities: string[];
+  unsupportedCapabilities: string[];
 }
 
 export class GlbInspectionError extends Error {
@@ -239,6 +262,293 @@ function parseGlb(bytes: Uint8Array): {
   }
   if (!json) throw new GlbInspectionError('GLB does not contain a JSON chunk.');
   return { json, byteLength, jsonChunkLength, binaryChunkLength };
+}
+
+function diagnostic(
+  severity: GlbDiagnostic['severity'],
+  code: string,
+  path: string,
+  message: string,
+): GlbDiagnostic {
+  return { severity, code, path, message };
+}
+
+function resolveNamed(
+  target: string,
+  entries: readonly { index: number; name?: string | undefined }[],
+): { index?: number; ambiguous: boolean } {
+  const matches = entries.filter((entry) => entry.name === target);
+  return {
+    ...(matches.length === 1 ? { index: matches[0]!.index } : {}),
+    ambiguous: matches.length > 1,
+  };
+}
+
+export function validateAssetDescriptor(
+  inspection: Omit<GlbAssetInspection, 'descriptorValidation' | 'descriptor'>,
+  descriptorInput: unknown,
+): DescriptorValidation {
+  const descriptor = AssetDescriptorSchema.parse(descriptorInput);
+  const diagnostics: GlbDiagnostic[] = [];
+  const verifiedReferences: string[] = [];
+  const nodeEntries = inspection.nodes;
+  const materialEntries = inspection.materials;
+  const nodeByName = (target: string, path: string) => {
+    const resolved = resolveNamed(target, nodeEntries);
+    if (resolved.ambiguous) {
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'AMBIGUOUS_NODE_REFERENCE',
+          path,
+          `Node reference "${target}" matches multiple GLB nodes.`,
+        ),
+      );
+      return undefined;
+    }
+    if (resolved.index === undefined) {
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'MISSING_NODE_REFERENCE',
+          path,
+          `Node reference "${target}" was not found in the GLB.`,
+        ),
+      );
+      return undefined;
+    }
+    verifiedReferences.push(path);
+    return resolved.index;
+  };
+  const seenHandles = new Set<string>();
+  const seenJoints = new Set<string>();
+  const skeletonJointIndices = new Set(
+    inspection.skeletons.flatMap((skeleton) => skeleton.joints),
+  );
+
+  for (const [index, handle] of descriptor.handles.entries()) {
+    const path = `handles[${index}]`;
+    if (seenHandles.has(handle.id))
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'DUPLICATE_HANDLE_ID',
+          `${path}.id`,
+          `Handle id "${handle.id}" is declared more than once.`,
+        ),
+      );
+    seenHandles.add(handle.id);
+    if (handle.kind === 'material') {
+      const resolved = resolveNamed(handle.target, materialEntries);
+      if (resolved.ambiguous)
+        diagnostics.push(
+          diagnostic(
+            'error',
+            'AMBIGUOUS_MATERIAL_REFERENCE',
+            `${path}.target`,
+            `Material reference "${handle.target}" matches multiple GLB materials.`,
+          ),
+        );
+      else if (resolved.index === undefined)
+        diagnostics.push(
+          diagnostic(
+            'error',
+            'MISSING_MATERIAL_REFERENCE',
+            `${path}.target`,
+            `Material reference "${handle.target}" was not found in the GLB.`,
+          ),
+        );
+      else verifiedReferences.push(`${path}.target`);
+    } else {
+      const nodeIndex = nodeByName(handle.target, `${path}.target`);
+      if (
+        nodeIndex !== undefined &&
+        handle.kind === 'bone' &&
+        !skeletonJointIndices.has(nodeIndex)
+      )
+        diagnostics.push(
+          diagnostic(
+            'error',
+            'NODE_NOT_SKELETON_JOINT',
+            `${path}.target`,
+            `Bone handle "${handle.target}" does not resolve to a skin joint.`,
+          ),
+        );
+    }
+  }
+
+  for (const [index, joint] of descriptor.articulation.joints.entries()) {
+    const path = `articulation.joints[${index}]`;
+    if (seenJoints.has(joint.id))
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'DUPLICATE_JOINT_ID',
+          `${path}.id`,
+          `Joint id "${joint.id}" is declared more than once.`,
+        ),
+      );
+    seenJoints.add(joint.id);
+    nodeByName(joint.parent, `${path}.parent`);
+    nodeByName(joint.child, `${path}.child`);
+    if (
+      (joint.type === 'hinge' || joint.type === 'slider') &&
+      (!joint.axis ||
+        joint.axis.every((component) => component === 0) ||
+        !joint.axis.every(Number.isFinite))
+    )
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'INVALID_JOINT_AXIS',
+          `${path}.axis`,
+          `${joint.type} joints require a finite, non-zero axis.`,
+        ),
+      );
+    if (
+      joint.limits &&
+      joint.limits.lower !== undefined &&
+      joint.limits.upper !== undefined &&
+      joint.limits.lower > joint.limits.upper
+    )
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'INVALID_JOINT_LIMITS',
+          `${path}.limits`,
+          'Joint lower limit must not exceed the upper limit.',
+        ),
+      );
+    if (joint.type === 'fixed' && (joint.axis || joint.limits))
+      diagnostics.push(
+        diagnostic(
+          'warning',
+          'UNSUPPORTED_FIXED_JOINT_CONSTRAINT',
+          path,
+          'Fixed joints do not use axis or scalar limits in the GLB descriptor.',
+        ),
+      );
+  }
+
+  for (const [index, socket] of descriptor.sockets.entries()) {
+    nodeByName(socket.node, `sockets[${index}].node`);
+    if (
+      socket.rotation.length !== 4 ||
+      socket.rotation.every((component) => component === 0)
+    )
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'INVALID_SOCKET_ROTATION',
+          `sockets[${index}].rotation`,
+          'Socket rotation must be a non-zero quaternion.',
+        ),
+      );
+  }
+
+  for (const [index, collider] of descriptor.colliders.entries()) {
+    const nodeIndex = nodeByName(collider.node, `colliders[${index}].node`);
+    if (nodeIndex !== undefined && collider.shape === 'mesh') {
+      const node = inspection.nodes.find(
+        (candidate) => candidate.index === nodeIndex,
+      );
+      if (node?.mesh === undefined)
+        diagnostics.push(
+          diagnostic(
+            'error',
+            'COLLIDER_MESH_MISSING',
+            `colliders[${index}].node`,
+            'Mesh collider target does not reference a GLB mesh node.',
+          ),
+        );
+    }
+    if (
+      (collider.shape === 'box' && !collider.size) ||
+      ((collider.shape === 'capsule' || collider.shape === 'cylinder') &&
+        (collider.radius === undefined || collider.height === undefined)) ||
+      (collider.shape === 'sphere' && collider.radius === undefined)
+    )
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'INVALID_COLLIDER_GEOMETRY',
+          `colliders[${index}]`,
+          `Collider shape "${collider.shape}" is missing required dimensions.`,
+        ),
+      );
+  }
+
+  for (const [index, material] of descriptor.materials.entries()) {
+    if (!material.name) {
+      diagnostics.push(
+        diagnostic(
+          'warning',
+          'UNVERIFIED_MATERIAL_MAPPING',
+          `materials[${index}]`,
+          'Material semantic declaration has no GLB material name to verify.',
+        ),
+      );
+      continue;
+    }
+    const resolved = resolveNamed(material.name, materialEntries);
+    if (resolved.ambiguous)
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'AMBIGUOUS_MATERIAL_REFERENCE',
+          `materials[${index}].name`,
+          `Material name "${material.name}" matches multiple GLB materials.`,
+        ),
+      );
+    else if (resolved.index === undefined)
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'MISSING_MATERIAL_REFERENCE',
+          `materials[${index}].name`,
+          `Material name "${material.name}" was not found in the GLB.`,
+        ),
+      );
+    else verifiedReferences.push(`materials[${index}].name`);
+  }
+
+  if (descriptor.rig.skeletons !== inspection.skeletons.length)
+    diagnostics.push(
+      diagnostic(
+        'error',
+        'SKELETON_COUNT_MISMATCH',
+        'rig.skeletons',
+        `Descriptor declares ${descriptor.rig.skeletons} skeletons but the GLB contains ${inspection.skeletons.length}.`,
+      ),
+    );
+  if (
+    descriptor.rig.bones !== 0 &&
+    descriptor.rig.bones !== skeletonJointIndices.size
+  )
+    diagnostics.push(
+      diagnostic(
+        'error',
+        'BONE_COUNT_MISMATCH',
+        'rig.bones',
+        `Descriptor declares ${descriptor.rig.bones} bones but the GLB contains ${skeletonJointIndices.size} unique joints.`,
+      ),
+    );
+  for (const [index, rootNode] of descriptor.rig.rootNodes.entries())
+    nodeByName(rootNode, `rig.rootNodes[${index}]`);
+
+  return {
+    status: diagnostics.some((item) => item.severity === 'error')
+      ? 'invalid'
+      : 'valid',
+    diagnostics,
+    verifiedReferences,
+    unknownCapabilities: [
+      'runtime-animation-evaluation',
+      'semantic-handle-behavior',
+      'collision-geometry-equivalence',
+    ],
+    unsupportedCapabilities: [],
+  };
 }
 
 export function inspectGlbBytes(
@@ -422,7 +732,155 @@ export function inspectGlbBytes(
     'sockets',
     'material-semantics',
   ];
-  return {
+  const structuralDiagnostics: GlbDiagnostic[] = [];
+  const nodeCount = nodes.length;
+  for (const [index, node] of nodes.entries()) {
+    for (const child of node.children) {
+      if (child < 0 || child >= nodeCount)
+        structuralDiagnostics.push(
+          diagnostic(
+            'error',
+            'INVALID_NODE_CHILD_REFERENCE',
+            `nodes[${index}].children`,
+            `Node child index ${child} is outside the GLB node array.`,
+          ),
+        );
+    }
+    if (
+      node.mesh !== undefined &&
+      (node.mesh < 0 || node.mesh >= meshes.length)
+    )
+      structuralDiagnostics.push(
+        diagnostic(
+          'error',
+          'INVALID_NODE_MESH_REFERENCE',
+          `nodes[${index}].mesh`,
+          `Mesh index ${node.mesh} is outside the GLB mesh array.`,
+        ),
+      );
+    if (
+      node.skin !== undefined &&
+      (node.skin < 0 || node.skin >= skeletons.length)
+    )
+      structuralDiagnostics.push(
+        diagnostic(
+          'error',
+          'INVALID_NODE_SKIN_REFERENCE',
+          `nodes[${index}].skin`,
+          `Skin index ${node.skin} is outside the GLB skin array.`,
+        ),
+      );
+  }
+  for (const [index, mesh] of meshes.entries())
+    for (const [primitiveIndex, primitive] of mesh.primitives.entries())
+      if (
+        primitive.material !== undefined &&
+        (primitive.material < 0 || primitive.material >= materials.length)
+      )
+        structuralDiagnostics.push(
+          diagnostic(
+            'error',
+            'INVALID_PRIMITIVE_MATERIAL_REFERENCE',
+            `meshes[${index}].primitives[${primitiveIndex}].material`,
+            `Material index ${primitive.material} is outside the GLB material array.`,
+          ),
+        );
+  for (const [index, texture] of array(root.textures).entries()) {
+    const textureRecord = record(texture);
+    const source = textureRecord.source;
+    if (
+      Number.isInteger(source) &&
+      ((source as number) < 0 ||
+        (source as number) >= array(root.images).length)
+    )
+      structuralDiagnostics.push(
+        diagnostic(
+          'error',
+          'INVALID_TEXTURE_IMAGE_REFERENCE',
+          `textures[${index}].source`,
+          `Image index ${source as number} is outside the GLB image array.`,
+        ),
+      );
+  }
+  for (const [index, skeleton] of skeletons.entries())
+    for (const joint of skeleton.joints)
+      if (joint < 0 || joint >= nodeCount)
+        structuralDiagnostics.push(
+          diagnostic(
+            'error',
+            'INVALID_SKELETON_JOINT_REFERENCE',
+            `skins[${index}].joints`,
+            `Skeleton joint index ${joint} is outside the GLB node array.`,
+          ),
+        );
+  const supportedAnimationPaths = new Set([
+    'translation',
+    'rotation',
+    'scale',
+    'weights',
+  ]);
+  const animationIssues = animations.flatMap((animation) =>
+    animation.channels.flatMap((channel, channelIndex) => {
+      const issues: GlbDiagnostic[] = [];
+      if (channel.sampler < 0 || channel.sampler >= animation.samplers.length)
+        issues.push(
+          diagnostic(
+            'error',
+            'INVALID_ANIMATION_SAMPLER_REFERENCE',
+            `animations[${animation.index}].channels[${channelIndex}].sampler`,
+            `Animation sampler index ${channel.sampler} is invalid.`,
+          ),
+        );
+      if (
+        channel.node !== undefined &&
+        (channel.node < 0 || channel.node >= nodeCount)
+      )
+        issues.push(
+          diagnostic(
+            'error',
+            'INVALID_ANIMATION_NODE_REFERENCE',
+            `animations[${animation.index}].channels[${channelIndex}].target.node`,
+            `Animation target node index ${channel.node} is invalid.`,
+          ),
+        );
+      if (channel.path && !supportedAnimationPaths.has(channel.path))
+        issues.push(
+          diagnostic(
+            'warning',
+            'UNSUPPORTED_ANIMATION_PATH',
+            `animations[${animation.index}].channels[${channelIndex}].target.path`,
+            `Animation target path "${channel.path}" is not supported by Filmie compatibility checks.`,
+          ),
+        );
+      return issues;
+    }),
+  );
+  structuralDiagnostics.push(...animationIssues);
+  const animationHasErrors = animationIssues.some(
+    (item) => item.severity === 'error',
+  );
+  const animationCompatibility =
+    animations.length === 0
+      ? {
+          status: 'unknown' as const,
+          verified: [],
+          unknown: ['animation-data', 'runtime-animation-evaluation'],
+          unsupported: [],
+        }
+      : animationHasErrors
+        ? {
+            status: 'unsupported' as const,
+            verified: [],
+            unknown: ['runtime-animation-evaluation'],
+            unsupported: ['invalid-animation-references'],
+          }
+        : {
+            status: 'unknown' as const,
+            verified: ['animation.target-nodes', 'animation.channels'],
+            unknown: ['animation-data', 'runtime-animation-evaluation'],
+            unsupported: [],
+          };
+  const inspection: GlbAssetInspection = {
     format: 'glb',
     version: 2,
     byteLength: parsed.byteLength,
@@ -484,7 +942,7 @@ export function inspectGlbBytes(
       ...(root.extras !== undefined ? { extras: root.extras } : {}),
     },
     capabilities: {
-      verified,
+      verified: verified.filter((item) => item !== 'animations'),
       unknown: descriptor
         ? unknown.filter(
             (item) => !descriptor.capabilities.verified.includes(item),
@@ -492,8 +950,16 @@ export function inspectGlbBytes(
         : unknown,
       unsupported: [],
     },
+    animationCompatibility,
+    structuralDiagnostics,
     ...(descriptor ? { descriptor } : {}),
   };
+  if (descriptor)
+    inspection.descriptorValidation = validateAssetDescriptor(
+      inspection,
+      descriptor,
+    );
+  return inspection;
 }
 
 export async function inspectGlbFile(
