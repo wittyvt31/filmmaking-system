@@ -8,6 +8,7 @@ import {
   AssetRegistry,
   inspectGlbBytes,
   normalizeGlbFile,
+  resolveAssetSemanticHandles,
   validateAssetDescriptor,
 } from '@filmmaking/assets';
 import {
@@ -121,6 +122,7 @@ it('reports verified GLB structure without inferring semantic mappings', () => {
     mesh: 0,
     skin: 0,
   });
+
   expect(report.meshes[0]?.primitives[0]?.attributes).toEqual({ POSITION: 0 });
   expect(report.materials[0]?.baseColorFactor).toEqual([1, 0, 0, 1]);
   expect(report.skeletons[0]?.joints).toEqual([0, 1]);
@@ -131,6 +133,82 @@ it('reports verified GLB structure without inferring semantic mappings', () => {
   });
   expect(report.capabilities.verified).toContain('node.transforms');
   expect(report.capabilities.unknown).toContain('semantic.handle-mapping');
+});
+
+it('resolves indexed semantic handles and capability mappings deterministically', () => {
+  const report = inspectGlbBytes(
+    glb({
+      scenes: [{ nodes: [0] }],
+      nodes: [{ name: 'Root', mesh: 0 }, { name: 'Socket' }],
+      meshes: [{ primitives: [{ attributes: { POSITION: 0 } }] }],
+    }),
+    {
+      schemaVersion: 1,
+      handles: [
+        {
+          id: 'hero.attach',
+          kind: 'attachment-socket',
+          target: { nodeIndex: 1, path: 'nodes[1]' },
+          space: 'local',
+        },
+      ],
+      capabilities: {
+        verified: ['attachment'],
+        requirements: ['attachment'],
+        mappings: [{ capability: 'attachment', handle: 'hero.attach' }],
+      },
+      provenance: { source: 'test' },
+    },
+  );
+  expect(report.descriptorValidation?.status).toBe('valid');
+  expect(report.descriptorValidation?.resolvedHandles).toEqual([
+    {
+      id: 'hero.attach',
+      kind: 'attachment-socket',
+      nodeIndex: 1,
+      space: 'local',
+    },
+  ]);
+});
+
+it('rejects semantic handles that use ambiguous name targets during publishing', async () => {
+  const temporary = await mkdtemp(join(tmpdir(), 'filmie-asset-publish-'));
+  try {
+    const inputPath = join(temporary, 'input.glb');
+    await writeFile(
+      inputPath,
+      glb({
+        scenes: [{ nodes: [0] }],
+        nodes: [{ name: 'Root', mesh: 0 }],
+        meshes: [{ primitives: [{ attributes: { POSITION: 0 } }] }],
+      }),
+    );
+    const result = await publishAsset({
+      inputPath,
+      descriptor: {
+        schemaVersion: 1,
+        assetId: 'legacy.semantic',
+        assetVersion: '1.0.0',
+        handles: [
+          { id: 'pivot', kind: 'pivot', target: 'Root', space: 'local' },
+        ],
+        capabilities: {
+          verified: ['pivot'],
+          requirements: ['pivot'],
+          mappings: [{ capability: 'pivot', handle: 'pivot' }],
+        },
+        provenance: { source: 'test' },
+      },
+      registryPath: join(temporary, 'assets.json'),
+      license: { name: 'test', restrictions: [] },
+    });
+    expect(result.status).toBe('rejected');
+    expect(result.diagnostics.map((item) => item.code)).toContain(
+      'NON_DETERMINISTIC_HANDLE_TARGET',
+    );
+  } finally {
+    await rm(temporary, { recursive: true, force: true });
+  }
 });
 
 it('validates authored references separately from runtime animation support', () => {
@@ -424,6 +502,7 @@ it('publishes deterministic content-addressed assets and reuses registry entries
     });
     expect(asset.contentHash).toMatch(/^[a-f0-9]{64}$/);
     expect(asset.descriptor?.assetId).toBe('published.model');
+    expect(resolveAssetSemanticHandles(asset)).toEqual([]);
   } finally {
     await rm(temporary, { recursive: true, force: true });
   }

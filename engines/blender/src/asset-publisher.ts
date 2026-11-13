@@ -56,6 +56,10 @@ function stableJson(value: unknown): string {
   return JSON.stringify(value);
 }
 
+function descriptorSha256(descriptor: unknown): string {
+  return sha256(new TextEncoder().encode(stableJson(descriptor)));
+}
+
 function validateInspection(report: AssetFactoryReport) {
   const inspection = report.after;
   const errors = [...report.errors];
@@ -88,6 +92,23 @@ function validateInspection(report: AssetFactoryReport) {
         'Published model assets must contain mesh geometry.',
       ),
     );
+  const descriptor = inspection.descriptor;
+  if (descriptor) {
+    for (const [index, handle] of descriptor.handles.entries()) {
+      if (
+        descriptor.capabilities.verified.length > 0 &&
+        handle.kind !== 'material' &&
+        typeof handle.target === 'string'
+      )
+        errors.push(
+          diagnostic(
+            'NON_DETERMINISTIC_HANDLE_TARGET',
+            `descriptor.handles[${index}].target`,
+            'Published semantic handles must use a nodeIndex target instead of a runtime object name.',
+          ),
+        );
+    }
+  }
   for (const [index, node] of inspection.nodes.entries()) {
     const transform = [
       ...(node.translation ?? []),
@@ -303,6 +324,13 @@ export async function publishAsset(options: {
         };
     }
     const registry = new AssetRegistry(registryInput);
+    const resolvedHandles =
+      conversion.after?.descriptorValidation?.resolvedHandles ?? [];
+    const publishedDescriptor = {
+      ...descriptor,
+      resolvedHandles,
+    };
+    const descriptorHash = descriptorSha256(publishedDescriptor);
     const reference = {
       assetId: descriptor.assetId,
       version: descriptor.assetVersion,
@@ -317,7 +345,7 @@ export async function publishAsset(options: {
     if (existing) {
       if (
         existing.contentHash !== conversionSha256 ||
-        stableJson(existing.descriptor) !== stableJson(descriptor)
+        existing.metadata['descriptorSha256'] !== descriptorHash
       )
         return {
           ...base,
@@ -360,6 +388,9 @@ export async function publishAsset(options: {
         sourceFormat,
         sourceSha256: conversion.sourceSha256,
         conversionSha256,
+        descriptorSha256: descriptorHash,
+        semanticHandles: resolvedHandles,
+        capabilities: publishedDescriptor.capabilities,
         diagnosticReport: relativeUri(
           registryDirectory,
           resolve(
@@ -375,7 +406,7 @@ export async function publishAsset(options: {
           ? { acquiredAt: descriptor.provenance.importedAt }
           : {}),
       },
-      descriptor,
+      descriptor: publishedDescriptor,
     });
     const nextRegistry = [...registry.list(), asset];
     await mkdir(registryDirectory, { recursive: true });

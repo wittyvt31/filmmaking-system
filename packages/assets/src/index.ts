@@ -69,8 +69,17 @@ export const AssetVersionSchema = z
 
 export type AssetVersion = z.infer<typeof AssetVersionSchema>;
 export type ResolvedAsset = AssetVersion & { localPath: string };
+export type ResolvedSemanticHandle = NonNullable<
+  AssetDescriptor['resolvedHandles']
+>[number];
 export { AssetDescriptorSchema };
 export type { AssetDescriptor };
+
+export function resolveAssetSemanticHandles(
+  asset: Pick<AssetVersion, 'descriptor'>,
+): readonly ResolvedSemanticHandle[] {
+  return asset.descriptor?.resolvedHandles ?? [];
+}
 export {
   GlbInspectionError,
   inspectGlbBytes,

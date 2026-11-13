@@ -184,6 +184,13 @@ export interface DescriptorValidation {
   status: 'valid' | 'invalid';
   diagnostics: GlbDiagnostic[];
   verifiedReferences: string[];
+  resolvedHandles: {
+    id: string;
+    kind: string;
+    nodeIndex?: number;
+    materialIndex?: number;
+    space: 'local' | 'parent' | 'world';
+  }[];
   unknownCapabilities: string[];
   unsupportedCapabilities: string[];
 }
@@ -308,6 +315,7 @@ export function validateAssetDescriptor(
   const descriptor = AssetDescriptorSchema.parse(descriptorInput);
   const diagnostics: GlbDiagnostic[] = [];
   const verifiedReferences: string[] = [];
+  const resolvedHandles: DescriptorValidation['resolvedHandles'] = [];
   const nodeEntries = inspection.nodes;
   const materialEntries = inspection.materials;
   const nodeByName = (target: string, path: string) => {
@@ -337,6 +345,35 @@ export function validateAssetDescriptor(
     verifiedReferences.push(path);
     return resolved.index;
   };
+  const nodeByTarget = (
+    target: string | { nodeIndex: number; path?: string | undefined },
+    path: string,
+  ) => {
+    if (typeof target === 'string') return nodeByName(target, path);
+    const node = nodeEntries.find((entry) => entry.index === target.nodeIndex);
+    if (!node) {
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'MISSING_NODE_REFERENCE',
+          path,
+          `Node index ${target.nodeIndex} was not found in the GLB.`,
+        ),
+      );
+      return undefined;
+    }
+    if (target.path && target.path !== `nodes[${target.nodeIndex}]`)
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'INCOMPATIBLE_NODE_PATH',
+          `${path}.path`,
+          `Node path "${target.path}" does not identify nodes[${target.nodeIndex}].`,
+        ),
+      );
+    verifiedReferences.push(path);
+    return node.index;
+  };
   const seenHandles = new Set<string>();
   const seenJoints = new Set<string>();
   const skeletonJointIndices = new Set(
@@ -356,6 +393,17 @@ export function validateAssetDescriptor(
       );
     seenHandles.add(handle.id);
     if (handle.kind === 'material') {
+      if (typeof handle.target !== 'string') {
+        diagnostics.push(
+          diagnostic(
+            'error',
+            'INCOMPATIBLE_HANDLE_TARGET',
+            `${path}.target`,
+            'Material handles must target a material name.',
+          ),
+        );
+        continue;
+      }
       const resolved = resolveNamed(handle.target, materialEntries);
       if (resolved.ambiguous)
         diagnostics.push(
@@ -375,9 +423,17 @@ export function validateAssetDescriptor(
             `Material reference "${handle.target}" was not found in the GLB.`,
           ),
         );
-      else verifiedReferences.push(`${path}.target`);
+      else {
+        verifiedReferences.push(`${path}.target`);
+        resolvedHandles.push({
+          id: handle.id,
+          kind: handle.kind,
+          materialIndex: resolved.index,
+          space: handle.space,
+        });
+      }
     } else {
-      const nodeIndex = nodeByName(handle.target, `${path}.target`);
+      const nodeIndex = nodeByTarget(handle.target, `${path}.target`);
       if (
         nodeIndex !== undefined &&
         handle.kind === 'bone' &&
@@ -391,7 +447,127 @@ export function validateAssetDescriptor(
             `Bone handle "${handle.target}" does not resolve to a skin joint.`,
           ),
         );
+      if (nodeIndex !== undefined)
+        resolvedHandles.push({
+          id: handle.id,
+          kind: handle.kind,
+          nodeIndex,
+          space: handle.space,
+        });
     }
+  }
+
+  const seenCapabilities = new Set<string>();
+  const seenMappings = new Set<string>();
+  for (const [
+    index,
+    capability,
+  ] of descriptor.capabilities.verified.entries()) {
+    if (seenCapabilities.has(capability))
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'DUPLICATE_CAPABILITY',
+          `capabilities.verified[${index}]`,
+          `Capability "${capability}" is declared more than once.`,
+        ),
+      );
+    seenCapabilities.add(capability);
+  }
+  for (const capability of descriptor.capabilities.unsupported) {
+    if (descriptor.capabilities.verified.includes(capability))
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'CONFLICTING_CAPABILITY',
+          'capabilities',
+          `Capability "${capability}" is both verified and unsupported.`,
+        ),
+      );
+  }
+  const handlesById = new Map(
+    descriptor.handles.map((handle) => [handle.id, handle]),
+  );
+  for (const [index, mapping] of descriptor.capabilities.mappings.entries()) {
+    const path = `capabilities.mappings[${index}]`;
+    const key = `${mapping.capability}\u0000${mapping.handle}`;
+    if (seenMappings.has(key))
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'DUPLICATE_CAPABILITY_MAPPING',
+          path,
+          `Capability mapping "${mapping.capability}" to "${mapping.handle}" is duplicated.`,
+        ),
+      );
+    seenMappings.add(key);
+    const handle = handlesById.get(mapping.handle);
+    if (!handle)
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'MISSING_CAPABILITY_HANDLE',
+          `${path}.handle`,
+          `Capability mapping references unknown handle "${mapping.handle}".`,
+        ),
+      );
+    if (
+      mapping.required &&
+      !descriptor.capabilities.verified.includes(mapping.capability)
+    )
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'UNVERIFIED_CAPABILITY_MAPPING',
+          `${path}.capability`,
+          `Required mapping capability "${mapping.capability}" is not verified.`,
+        ),
+      );
+    if (descriptor.capabilities.unsupported.includes(mapping.capability))
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'UNSUPPORTED_CAPABILITY_MAPPING',
+          `${path}.capability`,
+          `Capability "${mapping.capability}" is declared unsupported.`,
+        ),
+      );
+    if (handle && mapping.space && handle.space !== mapping.space)
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'CAPABILITY_SPACE_MISMATCH',
+          `${path}.space`,
+          `Capability mapping space "${mapping.space}" does not match handle space "${handle.space}".`,
+        ),
+      );
+  }
+  for (const [
+    index,
+    capability,
+  ] of descriptor.capabilities.requirements.entries()) {
+    if (!descriptor.capabilities.verified.includes(capability))
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'MISSING_REQUIRED_CAPABILITY',
+          `capabilities.requirements[${index}]`,
+          `Required capability "${capability}" is not verified.`,
+        ),
+      );
+    if (
+      !descriptor.capabilities.mappings.some(
+        (mapping) => mapping.capability === capability && mapping.required,
+      )
+    )
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'MISSING_REQUIRED_CAPABILITY_MAPPING',
+          `capabilities.requirements[${index}]`,
+          `Required capability "${capability}" has no required handle mapping.`,
+        ),
+      );
   }
 
   for (const [index, joint] of descriptor.articulation.joints.entries()) {
@@ -559,6 +735,7 @@ export function validateAssetDescriptor(
       : 'valid',
     diagnostics,
     verifiedReferences,
+    resolvedHandles,
     unknownCapabilities: [
       'runtime-animation-evaluation',
       'semantic-handle-behavior',
