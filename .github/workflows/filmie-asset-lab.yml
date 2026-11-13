@@ -46,7 +46,7 @@ jobs:
       - name: Generate, validate, publish and reimport preview
         run: |
           mkdir -p renders/asset-lab
-          printf '%s\\n' '#!/bin/sh' 'exec xvfb-run -a blender "$@"' > /tmp/filmie-blender
+          printf '%s\n' '#!/bin/sh' 'exec xvfb-run -a blender "$@"' > /tmp/filmie-blender
           chmod +x /tmp/filmie-blender
           node apps/cli/dist/index.js build-procedural-asset \
             --definition examples/asset-lab/crane.definition.json \
