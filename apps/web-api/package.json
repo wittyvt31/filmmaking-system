@@ -13,6 +13,7 @@
     "@filmmaking/planner": "workspace:*",
     "@filmmaking/orchestrator": "workspace:*",
     "@filmmaking/engine-blender": "workspace:*",
-    "@filmmaking/media": "workspace:*"
+    "@filmmaking/media": "workspace:*",
+    "zod": "4.6.7"
   }
 }
