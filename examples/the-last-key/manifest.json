@@ -425,7 +425,20 @@
                     }
                   }
                 ]
-              }
+              },
+              "colliders": [
+                {
+                  "id": "vault.key.collider",
+                  "shape": {
+                    "kind": "box",
+                    "dimensions": [
+                      0.22,
+                      0.032,
+                      0.035
+                    ]
+                  }
+                }
+              ]
             },
             {
               "id": "vault.key.bow.left",
@@ -600,7 +613,20 @@
                     }
                   }
                 ]
-              }
+              },
+              "colliders": [
+                {
+                  "id": "vault.key.bow.left.collider",
+                  "shape": {
+                    "kind": "box",
+                    "dimensions": [
+                      0.025,
+                      0.14,
+                      0.035
+                    ]
+                  }
+                }
+              ]
             },
             {
               "id": "vault.key.bow.top",
@@ -775,7 +801,20 @@
                     }
                   }
                 ]
-              }
+              },
+              "colliders": [
+                {
+                  "id": "vault.key.bow.top.collider",
+                  "shape": {
+                    "kind": "box",
+                    "dimensions": [
+                      0.14,
+                      0.025,
+                      0.035
+                    ]
+                  }
+                }
+              ]
             },
             {
               "id": "vault.key.bow.bottom",
@@ -950,7 +989,20 @@
                     }
                   }
                 ]
-              }
+              },
+              "colliders": [
+                {
+                  "id": "vault.key.bow.bottom.collider",
+                  "shape": {
+                    "kind": "box",
+                    "dimensions": [
+                      0.14,
+                      0.025,
+                      0.035
+                    ]
+                  }
+                }
+              ]
             },
             {
               "id": "vault.key.bow.right",
@@ -1125,7 +1177,20 @@
                     }
                   }
                 ]
-              }
+              },
+              "colliders": [
+                {
+                  "id": "vault.key.bow.right.collider",
+                  "shape": {
+                    "kind": "box",
+                    "dimensions": [
+                      0.025,
+                      0.14,
+                      0.035
+                    ]
+                  }
+                }
+              ]
             },
             {
               "id": "vault.key.tooth.outer",
@@ -1300,7 +1365,20 @@
                     }
                   }
                 ]
-              }
+              },
+              "colliders": [
+                {
+                  "id": "vault.key.tooth.outer.collider",
+                  "shape": {
+                    "kind": "box",
+                    "dimensions": [
+                      0.032,
+                      0.085,
+                      0.035
+                    ]
+                  }
+                }
+              ]
             },
             {
               "id": "vault.key.tooth.inner",
@@ -1475,7 +1553,20 @@
                     }
                   }
                 ]
-              }
+              },
+              "colliders": [
+                {
+                  "id": "vault.key.tooth.inner.collider",
+                  "shape": {
+                    "kind": "box",
+                    "dimensions": [
+                      0.028,
+                      0.07,
+                      0.035
+                    ]
+                  }
+                }
+              ]
             },
             {
               "id": "vault.door.frame",
@@ -1626,7 +1717,20 @@
                     }
                   }
                 ]
-              }
+              },
+              "colliders": [
+                {
+                  "id": "vault.door.collider",
+                  "shape": {
+                    "kind": "box",
+                    "dimensions": [
+                      2.15,
+                      0.22,
+                      2.65
+                    ]
+                  }
+                }
+              ]
             },
             {
               "id": "vault.door.plate",
@@ -1752,7 +1856,20 @@
                     }
                   }
                 ]
-              }
+              },
+              "colliders": [
+                {
+                  "id": "vault.door.plate.collider",
+                  "shape": {
+                    "kind": "box",
+                    "dimensions": [
+                      0.8,
+                      0.08,
+                      0.8
+                    ]
+                  }
+                }
+              ]
             },
             {
               "id": "vault.arch.left",
