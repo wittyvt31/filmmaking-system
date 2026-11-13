@@ -10,6 +10,7 @@ import type {
 import { JsonEditor } from './editor.js';
 import { api, RequestError } from './api.js';
 import { AssetStudio } from './asset-studio.js';
+import { LibraryStudio } from './library-studio.js';
 
 const projectPath = (id: string) => 'projects/' + id;
 const time = (value: string) =>
@@ -21,7 +22,7 @@ const active = (run: Run) =>
   run.status === 'queued' || run.status === 'running';
 
 function Studio() {
-  const [workspace, setWorkspace] = useState<'production' | 'assets'>(
+  const [workspace, setWorkspace] = useState<'production' | 'assets' | 'library'>(
     'production',
   );
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
@@ -232,6 +233,12 @@ function Studio() {
           >
             Asset Studio
           </button>
+          <button
+            aria-pressed={workspace === 'library'}
+            onClick={() => setWorkspace('library')}
+          >
+            Library &amp; Worlds
+          </button>
         </nav>
         <span className="local">Local workspace</span>
       </header>
@@ -241,8 +248,16 @@ function Studio() {
           <button onClick={() => setError('')}>Dismiss</button>
         </div>
       )}
-      <main className={workspace === 'assets' ? 'asset-main' : undefined}>
-        {workspace === 'assets' ? (
+      <main className={workspace !== 'production' ? 'asset-main' : undefined}>
+        {workspace === 'library' ? (
+          <LibraryStudio
+            projects={projects}
+            onApplied={(id) => {
+              if (project?.id !== id) return;
+              void open(id).catch(report);
+            }}
+          />
+        ) : workspace === 'assets' ? (
           <AssetStudio
             projects={projects}
             onAttached={(id) => {
