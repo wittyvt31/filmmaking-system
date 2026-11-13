@@ -263,6 +263,29 @@ function exportedNodeIndices(
     throw new Error(
       `Exported GLB is missing procedural part mappings (${mapping.size}/${expected.size})`,
     );
+  // A procedural artifact contains only its authored root and parts. Factory
+  // startup objects, stray geometry and duplicate scenes must never be
+  // published as part of the immutable model.
+  const authoredNodes = new Set([roots[0]!.index, ...mapping.values()]);
+  const unexpected = inspection.nodes.filter(
+    (node) => !authoredNodes.has(node.index),
+  );
+  if (unexpected.length)
+    throw new Error(
+      `Exported GLB contains ${unexpected.length} unexpected node(s): ${unexpected.map((node) => node.name ?? String(node.index)).join(', ')}`,
+    );
+  if (
+    inspection.scenes.length !== 1 ||
+    inspection.scenes[0]!.nodes.length !== 1 ||
+    inspection.scenes[0]!.nodes[0] !== roots[0]!.index
+  )
+    throw new Error(
+      'Exported GLB must contain exactly one scene with the marked procedural root.',
+    );
+  for (const [partId, index] of mapping) {
+    if (inspection.nodes[index]?.mesh === undefined)
+      throw new Error(`Exported procedural part "${partId}" has no geometry.`);
+  }
   const childrenByNode = new Map(
     inspection.nodes.map((node) => [node.index, new Set(node.children)]),
   );
