@@ -54,6 +54,8 @@ export { publishAsset, type AssetPublishReport } from './asset-publisher.js';
 export {
   buildProceduralAsset,
   proceduralAssetDescriptor,
+  renderAssetPreview,
+  type ProceduralAssetPreviewReport,
 } from './procedural-assets.js';
 const RENDERER_ID = 'blender';
 const ENGINE_PACKAGE_DIRECTORY = resolve(
