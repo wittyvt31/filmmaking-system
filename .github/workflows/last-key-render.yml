@@ -42,10 +42,14 @@ jobs:
       - name: Install Blender and media tools
         run: |
           sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y blender ffmpeg python3-numpy python3-pil libegl1 libgl1-mesa-dri xvfb xauth
-          printf '%s\n' '#!/bin/sh' 'exec xvfb-run -a blender "$@"' > /tmp/filmie-blender
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y ffmpeg libegl1 libgl1-mesa-dri xvfb xauth libxi6 libxrender1
+          curl -fL --retry 3 --retry-delay 2 -o /tmp/blender-5.2.3-linux-x64.tar.xz https://download.blender.org/release/Blender5.2/blender-5.2.3-linux-x64.tar.xz
+          curl -fL --retry 3 -o /tmp/blender-5.2.3.sha256 https://download.blender.org/release/Blender5.2/blender-5.2.3.sha256
+          (cd /tmp && grep 'blender-5.2.3-linux-x64.tar.xz' blender-5.2.3.sha256 | sha256sum -c -)
+          tar -xJf /tmp/blender-5.2.3-linux-x64.tar.xz -C /tmp
+          printf '%s\n' '#!/bin/sh' 'exec xvfb-run -a /tmp/blender-5.2.3-linux-x64/blender "$@"' > /tmp/filmie-blender
           chmod +x /tmp/filmie-blender
-          blender --version | head -n 2
+          /tmp/blender-5.2.3-linux-x64/blender --version | head -n 2
       - name: Build production runtime
         run: pnpm exec tsc -b --pretty false
       - name: Select render profile and validate assets
