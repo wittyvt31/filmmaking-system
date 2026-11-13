@@ -59,7 +59,7 @@ jobs:
               exit 1
             }
           python3 - <<'PY'
-          import glob, json
+          import glob, json, struct
           from pathlib import Path
           result = json.loads(Path("renders/asset-lab/build.json").read_text())
           assert result["build"]["status"] == "published", result
@@ -69,7 +69,13 @@ jobs:
           assets = json.loads(Path("renders/asset-lab/assets.json").read_text())
           assert len(assets) == 1 and assets[0]["assetId"] == "filmie.demo.crane"
           assert len(assets[0]["descriptor"]["resolvedHandles"]) >= 6
-          assert len(glob.glob("renders/asset-lab/artifacts/*.glb")) == 1
+          glbs = glob.glob("renders/asset-lab/artifacts/*.glb")
+          assert len(glbs) == 1
+          glb = Path(glbs[0]).read_bytes()
+          json_size = struct.unpack_from("<I", glb, 12)[0]
+          document = json.loads(glb[20:20 + json_size])
+          assert len(document["nodes"]) == 7, [node.get("name") for node in document["nodes"]]
+          assert len(document["scenes"]) == 1 and len(document["scenes"][0]["nodes"]) == 1
           print("Asset Lab: published GLB, semantic mappings and reimported PNG verified.")
           PY
       - name: Confirm immutable publishing is reusable
