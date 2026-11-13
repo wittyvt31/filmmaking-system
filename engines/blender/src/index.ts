@@ -39,7 +39,7 @@ import { AssetRegistryError, modelImportFormat } from '@filmmaking/assets';
 import { ArtifactCache } from '@filmmaking/cache';
 import {
   compileScene,
-  evaluateArticulatedKinematics,
+  createArticulatedKinematicsEvaluator,
   SCENE_COMPILER_VERSION,
 } from '@filmmaking/scene';
 import { prepareSimulation, simulationDependency } from './simulation-cache.js';
@@ -1015,20 +1015,6 @@ export class BlenderRendererAdapter implements RendererAdapter {
             'INVALID_INSTRUCTIONS',
             `Articulated entity "${track.objectId}" requires a published semantic descriptor`,
           );
-        const valueAt = (
-          keys: readonly { frame: number; value: number }[],
-          frame: number,
-        ) => {
-          const right = keys.find((key) => key.frame >= frame);
-          const left = [...keys].reverse().find((key) => key.frame <= frame);
-          if (!left) return keys[0]!.value;
-          if (!right || right.frame === left.frame) return left.value;
-          return (
-            left.value +
-            ((right.value - left.value) * (frame - left.frame)) /
-              (right.frame - left.frame)
-          );
-        };
         const knownControls = new Set([
           ...asset.descriptor.articulation.joints.map((joint) => joint.id),
           ...asset.descriptor.articulation.controls.map(
@@ -1041,18 +1027,36 @@ export class BlenderRendererAdapter implements RendererAdapter {
               'INVALID_INSTRUCTIONS',
               `Articulated control "${control.id}" is not declared by ${reference.assetId}@${reference.version}`,
             );
+
+        // Compile the descriptor and joint graph once per asset instance.
+        // The keys are ordered by the scene contract, so a cursor avoids
+        // searching and reversing every control track for every frame.
+        const evaluate = createArticulatedKinematicsEvaluator(asset.descriptor);
+        const samplers = track.controls.map((control) => ({
+          id: control.id,
+          keys: control.keys,
+          index: 0,
+        }));
+        const controls: Record<string, number> = {};
         const frames = [];
         for (let frame = 0; frame < shot.durationFrames; frame += 1) {
-          const controls = Object.fromEntries(
-            track.controls.map((control) => [
-              control.id,
-              valueAt(control.keys, frame),
-            ]),
-          );
-          const evaluated = evaluateArticulatedKinematics(
-            asset.descriptor,
-            controls,
-          );
+          for (const sampler of samplers) {
+            const { keys } = sampler;
+            while (
+              sampler.index + 1 < keys.length &&
+              keys[sampler.index + 1]!.frame <= frame
+            )
+              sampler.index += 1;
+            const left = keys[sampler.index]!;
+            const right = keys[sampler.index + 1];
+            controls[sampler.id] =
+              !right || frame <= left.frame
+                ? left.value
+                : left.value +
+                  ((right.value - left.value) * (frame - left.frame)) /
+                    (right.frame - left.frame);
+          }
+          const evaluated = evaluate(controls);
           frames.push({
             frame: frame + 1,
             nodes: evaluated.nodeTransforms,
