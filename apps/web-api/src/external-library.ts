@@ -327,7 +327,11 @@ export class ExternalLibraryService {
         artifactDirectory: join(this.root, 'artifacts'),
         reportDirectory: join(this.root, 'reports'),
         metadata,
-        license: request.license,
+        license: {
+          name: request.license.name,
+          restrictions: request.license.restrictions,
+          ...(request.license.url ? { url: request.license.url } : {}),
+        },
       });
       if (result.status === 'rejected')
         throw new ApiError(422, result.message + ': ' + result.diagnostics.map((diagnostic) => diagnostic.message).join('; '));
