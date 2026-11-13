@@ -10,6 +10,7 @@ import sys
 import bpy
 from mathutils import Vector
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from model_import import import_model
 
 
