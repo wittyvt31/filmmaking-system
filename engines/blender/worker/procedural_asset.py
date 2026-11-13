@@ -48,19 +48,35 @@ def main():
     root = bpy.data.objects.new(definition["assetId"], None)
     bpy.context.scene.collection.objects.link(root)
     parts = {}
-    sorted_parts = sorted(definition["parts"], key=lambda item: item["id"])
-    for index, part in enumerate(sorted_parts, start=1):
-        obj = bpy.data.objects.new(part["id"], meshes[part["meshId"]])
-        bpy.context.scene.collection.objects.link(obj)
-        parent = parts.get(part.get("parentId"), root)
-        if parent is None:
-            raise ValueError("Unknown procedural parent: " + part["parentId"])
-        obj.parent = parent
-        apply_transform(obj, part["transform"])
-        obj["filmie_procedural_part_id"] = part["id"]
-        obj["filmie_glb_node_index"] = index
-        parts[part["id"]] = obj
+    pending = {
+        part["id"]: part
+        for part in definition["parts"]
+    }
+    ordered_parts = []
+    while pending:
+        ready = [
+            part
+            for part in pending.values()
+            if not part.get("parentId") or part["parentId"] in parts
+        ]
+        if not ready:
+            raise ValueError("Procedural part hierarchy contains a cycle")
+        for part in sorted(ready, key=lambda item: item["id"]):
+            ordered_parts.append(part)
+            del pending[part["id"]]
+            parent_id = part.get("parentId")
+            parent = parts.get(parent_id, root)
+            if parent is None:
+                raise ValueError("Unknown procedural parent: " + parent_id)
+            obj = bpy.data.objects.new(part["id"], meshes[part["meshId"]])
+            bpy.context.scene.collection.objects.link(obj)
+            obj.parent = parent
+            apply_transform(obj, part["transform"])
+            obj["filmie_procedural_part_id"] = part["id"]
+            obj["filmieProceduralPartId"] = part["id"]
+            parts[part["id"]] = obj
     root["filmie_procedural_asset_id"] = definition["assetId"]
+    root["filmieProceduralRoot"] = True
     root["filmie_procedural_definition_sha256"] = spec["definitionSha256"]
     bpy.context.scene.unit_settings.system = "METRIC"
     bpy.context.scene.unit_settings.scale_length = 1.0
@@ -82,7 +98,7 @@ def main():
         + json.dumps(
             {
                 "assetId": definition["assetId"],
-                "partCount": len(sorted_parts),
+                "partCount": len(ordered_parts),
                 "meshCount": len(meshes),
             },
             sort_keys=True,

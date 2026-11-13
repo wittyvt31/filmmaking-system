@@ -83,10 +83,19 @@ def import_model(asset, destination, character=False):
         for obj in objects:
             for key in marker_keys:
                 marker = obj.get(key)
-                if isinstance(marker, int):
+                if isinstance(marker, (int, float)) and int(marker) == marker:
                     if marker in objects_by_node_index and objects_by_node_index[marker] != obj:
                         raise ValueError("Duplicate deterministic GLB node mapping: " + str(marker))
                     objects_by_node_index[marker] = obj
+                    break
+        objects_by_part_id = {}
+        for obj in objects:
+            for key in ("filmieProceduralPartId", "filmie_procedural_part_id"):
+                part_id = obj.get(key)
+                if isinstance(part_id, str):
+                    if part_id in objects_by_part_id and objects_by_part_id[part_id] != obj:
+                        raise ValueError("Duplicate deterministic procedural part mapping: " + part_id)
+                    objects_by_part_id[part_id] = obj
                     break
         nodes = document.get("nodes", [])
         for handle in descriptor.get("resolvedHandles", []):
@@ -99,6 +108,14 @@ def import_model(asset, destination, character=False):
                     + handle.get("id", "unknown")
                 )
             mapped = objects_by_node_index.get(node_index)
+            if mapped is None and 0 <= node_index < len(nodes):
+                extras = nodes[node_index].get("extras", {})
+                if isinstance(extras, dict):
+                    part_id = extras.get("filmieProceduralPartId") or extras.get(
+                        "filmie_procedural_part_id"
+                    )
+                    if isinstance(part_id, str):
+                        mapped = objects_by_part_id.get(part_id)
             if mapped is None:
                 raise ValueError(
                     "GLB lacks deterministic semantic node metadata for handle: "

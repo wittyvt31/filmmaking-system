@@ -8,6 +8,7 @@ import {
   type AssetDescriptor,
   type ProceduralAssetDefinition,
 } from '@filmmaking/contracts';
+import { inspectGlbFile } from '@filmmaking/assets';
 import { publishAsset, type AssetPublishReport } from './asset-publisher.js';
 import { defaultBlenderExecutable, runBlenderProcess } from './index.js';
 
@@ -17,6 +18,7 @@ const WORKER_PATH = resolve(
   'worker',
   'procedural_asset.py',
 );
+const PROCEDURAL_BUILDER_VERSION = '2';
 
 function sortedDefinition(
   definition: ProceduralAssetDefinition,
@@ -87,7 +89,10 @@ function rotateVector(q: Quaternion, value: Vector): Vector {
   ];
 }
 
-export function proceduralAssetDescriptor(input: unknown): AssetDescriptor {
+export function proceduralAssetDescriptor(
+  input: unknown,
+  exportedNodeIndices?: ReadonlyMap<string, number>,
+): AssetDescriptor {
   const definition = ProceduralAssetDefinitionSchema.parse(input);
   const orderedParts = [...definition.parts].sort((a, b) =>
     a.id.localeCompare(b.id),
@@ -95,16 +100,22 @@ export function proceduralAssetDescriptor(input: unknown): AssetDescriptor {
   const nodeIndex = new Map(
     orderedParts.map((part, index) => [part.id, index + 1]),
   );
+  const resolvedNodeIndex = (partId: string): number => {
+    const index = exportedNodeIndices?.get(partId) ?? nodeIndex.get(partId);
+    if (index === undefined)
+      throw new Error(`Missing exported GLB node mapping for part "${partId}"`);
+    return index;
+  };
   const partHandles = orderedParts.map((part) => ({
     id: `part.${part.id}`,
     kind: 'node' as const,
-    target: { nodeIndex: nodeIndex.get(part.id)! },
+    target: { nodeIndex: resolvedNodeIndex(part.id) },
     space: 'local' as const,
   }));
   const authoredHandles = definition.handles.map((handle) => ({
     id: handle.id,
     kind: handle.kind,
-    target: { nodeIndex: nodeIndex.get(handle.partId)! },
+    target: { nodeIndex: resolvedNodeIndex(handle.partId) },
     space: handle.space,
     ...(handle.role ? { role: handle.role } : {}),
   }));
@@ -165,7 +176,7 @@ export function proceduralAssetDescriptor(input: unknown): AssetDescriptor {
           rotation: multiplyQuaternion(parent.rotation, localRotation),
         }
       : { position: localPosition, rotation: localRotation };
-    restTransforms[String(nodeIndex.get(partIdValue)!)] = transform;
+    restTransforms[String(resolvedNodeIndex(partIdValue))] = transform;
     return transform;
   };
   for (const part of orderedParts) visit(part.id);
@@ -204,6 +215,69 @@ export function proceduralAssetDescriptor(input: unknown): AssetDescriptor {
   });
 }
 
+function exportedNodeIndices(
+  definition: ProceduralAssetDefinition,
+  inspection: Awaited<ReturnType<typeof inspectGlbFile>>,
+): Map<string, number> {
+  const expected = new Set(definition.parts.map((part) => part.id));
+  const mapping = new Map<string, number>();
+  const roots = inspection.nodes.filter(
+    (node) =>
+      node.extras &&
+      typeof node.extras === 'object' &&
+      !Array.isArray(node.extras) &&
+      (node.extras as Record<string, unknown>)['filmieProceduralRoot'] === true,
+  );
+  if (roots.length !== 1)
+    throw new Error(
+      `Expected exactly one procedural GLB root marker, found ${roots.length}`,
+    );
+  for (const node of inspection.nodes) {
+    const extras =
+      node.extras &&
+      typeof node.extras === 'object' &&
+      !Array.isArray(node.extras)
+        ? (node.extras as Record<string, unknown>)
+        : {};
+    const partId =
+      typeof extras['filmieProceduralPartId'] === 'string'
+        ? extras['filmieProceduralPartId']
+        : typeof extras['filmie_procedural_part_id'] === 'string'
+          ? extras['filmie_procedural_part_id']
+          : undefined;
+    if (!partId) continue;
+    if (!expected.has(partId))
+      throw new Error(
+        `Exported GLB contains unknown procedural part "${partId}"`,
+      );
+    if (mapping.has(partId))
+      throw new Error(
+        `Exported GLB contains duplicate procedural part "${partId}"`,
+      );
+    mapping.set(partId, node.index);
+  }
+  if (mapping.size !== expected.size)
+    throw new Error(
+      `Exported GLB is missing procedural part mappings (${mapping.size}/${expected.size})`,
+    );
+  const childrenByNode = new Map(
+    inspection.nodes.map((node) => [node.index, new Set(node.children)]),
+  );
+  for (const part of definition.parts) {
+    const parentIndex = part.parentId
+      ? mapping.get(part.parentId)
+      : roots[0]!.index;
+    const childIndex = mapping.get(part.id);
+    if (parentIndex === undefined || childIndex === undefined)
+      throw new Error(`Exported GLB hierarchy cannot resolve "${part.id}"`);
+    if (!childrenByNode.get(parentIndex)?.has(childIndex))
+      throw new Error(
+        `Exported GLB hierarchy does not preserve parent "${part.parentId ?? '<root>'}" for "${part.id}"`,
+      );
+  }
+  return mapping;
+}
+
 function rejected(registryPath: string, message: string): AssetPublishReport {
   return {
     status: 'rejected',
@@ -240,18 +314,21 @@ export async function buildProceduralAsset(options: {
       ...rejected(options.registryPath, parsed.error.message),
     };
   const definition = sortedDefinition(parsed.data);
-  const descriptor = proceduralAssetDescriptor(definition);
   const definitionSha256 = canonicalJsonSha256(definition);
+  const cacheKey = canonicalJsonSha256({
+    builderVersion: PROCEDURAL_BUILDER_VERSION,
+    definition,
+  });
   const cacheDirectory = resolve(
     options.cacheDirectory ??
       resolve(dirname(resolve(options.registryPath)), '.procedural'),
   );
-  const outputPath = resolve(cacheDirectory, `${definitionSha256}.glb`);
+  const outputPath = resolve(cacheDirectory, `${cacheKey}.glb`);
   await mkdir(cacheDirectory, { recursive: true });
   try {
     await readFile(outputPath);
   } catch {
-    const specDirectory = resolve(cacheDirectory, `${definitionSha256}.work`);
+    const specDirectory = resolve(cacheDirectory, `${cacheKey}.work`);
     const specPath = resolve(specDirectory, 'spec.json');
     let ownsBuild = false;
     try {
@@ -310,6 +387,22 @@ export async function buildProceduralAsset(options: {
       if (ownsBuild) await rm(specDirectory, { recursive: true, force: true });
     }
   }
+  let descriptor: AssetDescriptor;
+  try {
+    const inspection = await inspectGlbFile(outputPath);
+    descriptor = proceduralAssetDescriptor(
+      definition,
+      exportedNodeIndices(definition, inspection),
+    );
+  } catch (error) {
+    return {
+      ...rejected(
+        options.registryPath,
+        error instanceof Error ? error.message : String(error),
+      ),
+      definitionSha256,
+    };
+  }
   const result = await publishAsset({
     inputPath: outputPath,
     registryPath: options.registryPath,
@@ -327,6 +420,7 @@ export async function buildProceduralAsset(options: {
     metadata: {
       ...(options.metadata ?? {}),
       proceduralDefinitionSha256: definitionSha256,
+      proceduralBuilderVersion: PROCEDURAL_BUILDER_VERSION,
       proceduralKind: definition.kind,
     },
   });

@@ -339,6 +339,17 @@ it('builds deterministic procedural descriptors with articulated mappings', () =
   });
   expect(first.articulation.joints[0]?.child).toBe('part.arm');
   expect(first.restTransforms?.['1']?.position).toEqual([0, 1, 0]);
+  const exported = proceduralAssetDescriptor(
+    definition,
+    new Map([
+      ['arm', 7],
+      ['base', 3],
+    ]),
+  );
+  expect(
+    exported.handles.find((handle) => handle.id === 'part.arm')?.target,
+  ).toEqual({ nodeIndex: 7 });
+  expect(exported.restTransforms?.['7']?.position).toEqual([0, 1, 0]);
 });
 
 it('rejects invalid procedural hierarchies and articulated scale', () => {
