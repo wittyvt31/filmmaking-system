@@ -5,6 +5,7 @@ import sys
 
 import bpy
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from geometry_builder import build_mesh
 from visual_runtime import build_material
 
