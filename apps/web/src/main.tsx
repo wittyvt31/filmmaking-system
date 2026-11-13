@@ -8,39 +8,8 @@ import type {
   Validation,
 } from '@filmmaking/web-api/types';
 import { JsonEditor } from './editor.js';
-
-class RequestError extends Error {
-  constructor(
-    message: string,
-    readonly issues?: Validation['issues'],
-  ) {
-    super(message);
-  }
-}
-
-async function api<T>(
-  path: string,
-  payload?: object,
-  signal?: AbortSignal,
-): Promise<T> {
-  const response = await fetch('/api/' + path, {
-    ...(payload
-      ? {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        }
-      : {}),
-    ...(signal ? { signal } : {}),
-  });
-  const data = (await response.json()) as T & {
-    error?: string;
-    issues?: Validation['issues'];
-  };
-  if (!response.ok)
-    throw new RequestError(data.error ?? 'Request failed.', data.issues);
-  return data;
-}
+import { api, RequestError } from './api.js';
+import { AssetStudio } from './asset-studio.js';
 
 const projectPath = (id: string) => 'projects/' + id;
 const time = (value: string) =>
@@ -52,6 +21,7 @@ const active = (run: Run) =>
   run.status === 'queued' || run.status === 'running';
 
 function Studio() {
+  const [workspace, setWorkspace] = useState<'production' | 'assets'>('production');
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [catalogs, setCatalogs] = useState<string[]>([]);
   const [project, setProject] = useState<ProjectSummary>();
@@ -247,6 +217,20 @@ function Studio() {
           </span>
           Filmie <span className="muted">Studio</span>
         </div>
+        <nav className="workspace-switch" aria-label="Workspaces">
+          <button
+            aria-pressed={workspace === 'production'}
+            onClick={() => setWorkspace('production')}
+          >
+            Production
+          </button>
+          <button
+            aria-pressed={workspace === 'assets'}
+            onClick={() => setWorkspace('assets')}
+          >
+            Asset Studio
+          </button>
+        </nav>
         <span className="local">Local workspace</span>
       </header>
       {error && (
@@ -255,8 +239,22 @@ function Studio() {
           <button onClick={() => setError('')}>Dismiss</button>
         </div>
       )}
-      <main>
-        <aside className="sidebar">
+      <main className={workspace === 'assets' ? 'asset-main' : undefined}>
+        {workspace === 'assets' ? (
+          <AssetStudio
+            projects={projects}
+            onAttached={(id) => {
+              if (project?.id !== id) return;
+              void api<{ project: ProjectSummary; assets: AssetReference[] }>(
+                projectPath(id),
+              )
+                .then((result) => setAssets(result.assets))
+                .catch(report);
+            }}
+          />
+        ) : (
+          <>
+            <aside className="sidebar">
           <div className="section-heading">
             <h2>Projects</h2>
             <button
@@ -554,6 +552,8 @@ function Studio() {
               Create project
             </button>
           </section>
+        )}
+          </>
         )}
       </main>
       {dialog && (
