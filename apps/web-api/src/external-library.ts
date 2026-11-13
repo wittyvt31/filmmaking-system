@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   existsSync,
   lstatSync,
@@ -27,6 +27,7 @@ import {
 import { publishAsset, renderAssetPreview } from '@filmmaking/engine-blender';
 import { ApiError, WorkspaceStore, atomicWrite } from './store.js';
 import { AssetStudioService } from './asset-studio.js';
+import { stampGlbObjectIndices } from './external-glb.js';
 
 const nonEmpty = z.string().trim().min(1).max(256);
 const shortId = StableIdSchema;
@@ -439,13 +440,15 @@ export class ExternalLibraryService {
         schemaVersion: 1,
         assetId: request.assetId,
         assetVersion: request.version,
-        handles: inspection.nodes.map((node) => ({
-          id: 'node.' + node.index,
-          kind: jointNodes.has(node.index) ? 'bone' : 'node',
-          target: { nodeIndex: node.index },
-          space: 'local',
-          ...(node.name ? { role: node.name } : {}),
-        })),
+        handles: inspection.nodes
+          .filter((node) => node.mesh !== undefined && !jointNodes.has(node.index))
+          .map((node) => ({
+            id: 'node.' + node.index,
+            kind: 'node',
+            target: { nodeIndex: node.index },
+            space: 'local',
+            ...(node.name ? { role: node.name } : {}),
+          })),
         capabilities: {
           verified: ['geometry'],
           unsupported: [],
@@ -494,19 +497,28 @@ export class ExternalLibraryService {
             }
           : {}),
       };
-      const result = await publishAsset({
-        inputPath: sourceFile(this.root, request.filename),
-        descriptor,
-        registryPath: this.registryPath,
-        artifactDirectory: join(this.root, 'artifacts'),
-        reportDirectory: join(this.root, 'reports'),
-        metadata,
-        license: {
-          name: request.license.name,
-          restrictions: request.license.restrictions,
-          ...(request.license.url ? { url: request.license.url } : {}),
-        },
-      });
+      // The source remains byte-for-byte unchanged. The published GLB receives
+      // deterministic node identity metadata for the headless Blender importer.
+      const staged = join(this.root, 'inbox', '.filmie-' + randomUUID() + '.glb');
+      let result: Awaited<ReturnType<typeof publishAsset>>;
+      try {
+        await stampGlbObjectIndices(sourceFile(this.root, request.filename), staged);
+        result = await publishAsset({
+          inputPath: staged,
+          descriptor,
+          registryPath: this.registryPath,
+          artifactDirectory: join(this.root, 'artifacts'),
+          reportDirectory: join(this.root, 'reports'),
+          metadata,
+          license: {
+            name: request.license.name,
+            restrictions: request.license.restrictions,
+            ...(request.license.url ? { url: request.license.url } : {}),
+          },
+        });
+      } finally {
+        await rm(staged, { force: true });
+      }
       if (result.status === 'rejected')
         throw new ApiError(
           422,
