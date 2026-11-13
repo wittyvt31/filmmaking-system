@@ -159,6 +159,62 @@ it('publishes one real GLB, applies themed world references and preserves immuta
   expect(() => library.applyWorld(project.id, world.id, world.version)).toThrow('collides');
 });
 
+it('assembles a reviewed humanoid as a rigged Filmie character rather than a static prop', () => {
+  const { root, store, library } = setup();
+  const registryRoot = join(root, 'asset-studio');
+  const hash = 'b'.repeat(64);
+  const mapping = {
+    pelvis: 'Hips', spine: 'Spine', chest: 'Spine2', neck: 'Neck', head: 'Head',
+    'upper_arm.L': 'LeftArm', 'forearm.L': 'LeftForeArm', 'hand.L': 'LeftHand',
+    'thigh.L': 'LeftUpLeg', 'shin.L': 'LeftLeg', 'foot.L': 'LeftFoot',
+    'upper_arm.R': 'RightArm', 'forearm.R': 'RightForeArm', 'hand.R': 'RightHand',
+    'thigh.R': 'RightUpLeg', 'shin.R': 'RightLeg', 'foot.R': 'RightFoot',
+  };
+  writeFileSync(join(registryRoot, 'assets.json'), JSON.stringify([{
+    assetId: 'characters.daughter.test',
+    version: '1.0.0',
+    type: 'model',
+    contentHash: hash,
+    sourceUri: 'artifacts/' + hash + '.glb',
+    metadata: {
+      filmieLibrary: { category: 'character', universeId: 'cinematic-horror', themes: ['horror'] },
+      rigProfile: 'FilmieHumanoid', rigVersion: 1, rigJointMap: mapping,
+    },
+    license: { name: 'Fixture', restrictions: [] },
+    provenance: { source: 'test' },
+  }]));
+  const world = library.saveWorld({
+    id: 'world.daughter-test',
+    version: '1.0.0',
+    name: 'Daughter exterior',
+    universeId: 'cinematic-horror',
+    theme: 'horror',
+    instances: [{
+      id: 'daughter',
+      assetId: 'characters.daughter.test',
+      version: '1.0.0',
+      transform: identity,
+      characterHeight: 1.2,
+    }],
+  });
+  const project = store.create(
+    'Daughter Test', '3d-production', '[]',
+    readFileSync('examples/3d-production/manifest.json', 'utf8'),
+  );
+  const applied = library.applyWorld(project.id, world.id, world.version);
+  const manifest = JSON.parse(readFileSync(
+    store.revisionPath(store.project(project.id), applied.revisionId),
+    'utf8',
+  )) as { shots: { requiredAssets: { assetId: string }[];
+      scene: { characters: { id: string; source: { kind: string; body: { height: number } } }[];
+        world: { entities: { id: string }[] } } }[] };
+  const character = manifest.shots[0]!.scene.characters.find((item) => item.id === 'daughter');
+  expect(character?.source.kind).toBe('imported');
+  expect(character?.source.body.height).toBe(1.2);
+  expect(manifest.shots[0]!.scene.world.entities.some((item) => item.id === 'daughter')).toBe(false);
+  expect(manifest.shots[0]!.requiredAssets.some((item) => item.assetId === 'characters.daughter.test')).toBe(true);
+});
+
 it('offers the Blender bridge HTTP API only through local server routes', async () => {
   const { root, catalog, library } = setup();
   const server = createFilmieServer({
