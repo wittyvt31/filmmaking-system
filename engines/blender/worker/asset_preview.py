@@ -25,6 +25,7 @@ def read_spec():
 
 def main():
     spec = read_spec()
+    bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
     root, semantic_nodes = import_model(
         {
