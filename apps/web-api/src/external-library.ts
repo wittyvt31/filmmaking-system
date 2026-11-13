@@ -406,7 +406,11 @@ export class ExternalLibraryService {
     const world = this.getWorld(worldId, version);
     const project = this.store.project(projectId);
     const current = JSON.parse(readFileSync(this.store.revisionPath(project, project.revisions[0]!.id), 'utf8')) as {
-      shots?: { id?: string; scene?: { world?: { entities?: unknown[] } } }[];
+      shots?: {
+        id?: string;
+        requiredAssets?: { assetId: string; version: string }[];
+        scene?: { world?: { entities?: unknown[] } };
+      }[];
     };
     if (!Array.isArray(current.shots) || !current.shots.length)
       throw new ApiError(422, 'A production project must contain shots with world scenes.');
@@ -427,6 +431,16 @@ export class ExternalLibraryService {
       if (entities.some((entity) => used.has(entity.id)))
         throw new ApiError(409, 'World instance ID collides with an existing scene entity. Rename the world instance.');
       shot.scene.world.entities.push(...entities);
+      const required = shot.requiredAssets ?? [];
+      const keys = new Set(required.map((item) => item.assetId + '@' + item.version));
+      for (const instance of world.instances) {
+        const key = instance.assetId + '@' + instance.version;
+        if (!keys.has(key)) {
+          required.push({ assetId: instance.assetId, version: instance.version });
+          keys.add(key);
+        }
+      }
+      shot.requiredAssets = required;
     }
     const manifest = ProjectManifestSchema.safeParse(current);
     if (!manifest.success)
