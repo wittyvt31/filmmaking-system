@@ -20,7 +20,10 @@ import {
 } from '../engines/blender/src/asset-factory.js';
 import { publishAsset } from '../engines/blender/src/asset-publisher.js';
 import { proceduralAssetDescriptor } from '../engines/blender/src/procedural-assets.js';
-import { evaluateArticulatedKinematics } from '@filmmaking/scene';
+import {
+  createArticulatedKinematicsEvaluator,
+  evaluateArticulatedKinematics,
+} from '@filmmaking/scene';
 import { expect, it } from 'vitest';
 
 function glb(json: Record<string, unknown>): Uint8Array {
@@ -253,6 +256,33 @@ it('evaluates deterministic hierarchical articulated kinematics', () => {
   expect(first).toEqual(second);
   expect(first.jointStates).toEqual({ base: Math.PI / 2, slide: 2 });
   expect(first.nodeTransforms[2]?.position[1]).toBeCloseTo(2);
+
+  const prepared = createArticulatedKinematicsEvaluator(descriptor);
+  const poses = [
+    { base: 0, slide: 0 },
+    { base: Math.PI / 2, slide: 2 },
+    { base: -Math.PI / 4, slide: 3 },
+    { base: 0, slide: 0 },
+  ];
+  for (const controls of poses)
+    expect(prepared(controls)).toEqual(
+      evaluateArticulatedKinematics(descriptor, controls),
+    );
+  // A reusable evaluator cannot retain the previous frame's joint state.
+  expect(prepared(poses[0])).toEqual(prepared(poses[3]));
+
+  const baseTransforms = {
+    0: { position: [3, 0, 0] as [number, number, number], rotation: [1, 0, 0, 0] as [number, number, number, number] },
+  };
+  expect(
+    createArticulatedKinematicsEvaluator(descriptor, baseTransforms)(poses[1]),
+  ).toEqual(evaluateArticulatedKinematics(descriptor, poses[1], baseTransforms));
+  expect(() => prepared({ unknown: 1 })).toThrow(
+    'Unknown articulated runtime control "unknown"',
+  );
+  expect(() => prepared({ base: Number.NaN })).toThrow(
+    'Invalid articulated runtime control "base"',
+  );
 });
 
 it('builds deterministic procedural descriptors with articulated mappings', () => {
