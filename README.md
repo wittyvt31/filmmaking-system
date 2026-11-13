@@ -43,6 +43,27 @@ See [Asset Lab](examples/asset-lab/README.md) for requirements, expected output
 and guidance. The preview is intentionally lightweight; it is not a cinematic
 shot render.
 
+### Import Blendkit and other external assets into reusable worlds
+
+Install the included [Filmie Asset Bridge](tools/blender/filmie_bridge/README.md)
+in Blender 5.2.3. With `pnpm web` running, import a licensed asset into
+Blender, select the model's meshes and armature where appropriate, and use
+**N → Filmie → Publish Selection**. The add-on exports a self-contained GLB,
+submits it to Filmie's local private asset inbox, and publishes an immutable
+asset version. It does **not** automatically download or scrape Blendkit.
+
+In Filmie Studio, open **Library & Worlds** to inspect staged GLBs, review
+character bone/facial compatibility, assign assets to visual universes and
+themes, assemble a world from reusable instances and save a versioned world
+package. Applying a saved world to a production creates a new manifest revision,
+updates shot `requiredAssets`, and attaches the immutable asset references
+without duplicating the model files.
+
+A complete humanoid name map is not automatic rig retargeting; rest-pose
+compatibility, skin deformation and facial expressions must still be verified
+with the specific source character. The first world assembler places models
+using numeric transforms; it is not yet a visual drag-and-drop 3D world editor.
+
 ### Create assets visually in Filmie Studio
 
 Run `pnpm web`, open [Filmie Studio](http://127.0.0.1:4173), and switch to
