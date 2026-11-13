@@ -178,7 +178,9 @@ export function AssetStudio({
   }, [definition]);
 
   const part = definition?.parts.find((item) => item.id === selected);
-  const selectedJoint = definition?.joints.find((item) => item.id === selectedJointId);
+  const selectedJoint = definition?.joints.find(
+    (item) => item.id === selectedJointId,
+  );
   const mesh = definition?.meshes.find((item) => item.id === part?.meshId);
   const material = definition?.materials.find(
     (item) => item.id === mesh?.materialId,
@@ -354,8 +356,9 @@ export function AssetStudio({
   }
 
   function editJoint(
-    change: (joint: ProceduralAssetDefinition['joints'][number]) =>
-      ProceduralAssetDefinition['joints'][number],
+    change: (
+      joint: ProceduralAssetDefinition['joints'][number],
+    ) => ProceduralAssetDefinition['joints'][number],
   ) {
     modify((current) => ({
       ...current,
@@ -368,7 +371,9 @@ export function AssetStudio({
   function removeJoint() {
     if (!definition || !selectedJoint) return;
     modify((current) => {
-      const joints = current.joints.filter((item) => item.id !== selectedJointId);
+      const joints = current.joints.filter(
+        (item) => item.id !== selectedJointId,
+      );
       return {
         ...current,
         joints,
@@ -393,7 +398,9 @@ export function AssetStudio({
   function duplicateMaterial() {
     if (!definition || !mesh || !material) return;
     let index = definition.materials.length + 1;
-    while (definition.materials.some((item) => item.id === 'mat.custom-' + index))
+    while (
+      definition.materials.some((item) => item.id === 'mat.custom-' + index)
+    )
       index += 1;
     const id = 'mat.custom-' + index;
     const meshId = mesh.id;
