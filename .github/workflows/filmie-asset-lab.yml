@@ -13,6 +13,9 @@ on:
       - engines/blender/worker/asset_preview.py
       - engines/blender/worker/model_import.py
       - examples/asset-lab/**
+      - apps/web/src/**
+      - apps/web-api/src/**
+      - scripts/smoke_asset_studio.py
 
 permissions:
   contents: read
@@ -42,7 +45,9 @@ jobs:
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y blender python3-numpy python3-pil libegl1 libgl1-mesa-dri xvfb xauth
           blender --version | head -n 2
       - name: Build asset pipeline
-        run: pnpm exec tsc -b packages/contracts packages/assets packages/scene engines/blender apps/cli --pretty false
+        run: pnpm exec tsc -b packages/contracts packages/assets packages/scene engines/blender apps/cli apps/web-api apps/web --pretty false
+      - name: Bundle browser workspaces
+        run: pnpm --filter @filmmaking/web build
       - name: Generate, validate, publish and reimport preview
         run: |
           mkdir -p renders/asset-lab
@@ -94,6 +99,19 @@ jobs:
           assert result["build"]["status"] == "reused", result
           assert result["preview"]["status"] == "rendered", result
           PY
+      - name: Verify browser API creates a real published asset and project attachment
+        run: |
+          mkdir -p renders/asset-lab
+          printf '%s\\n' '#!/bin/sh' 'exec xvfb-run -a blender "$@"' > /tmp/filmie-blender
+          chmod +x /tmp/filmie-blender
+          FILMIE_BLENDER=/tmp/filmie-blender FILMIE_WEB_PORT=4173 \\
+            node apps/web-api/dist/index.js > renders/asset-lab/web-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" || true' EXIT
+          python3 scripts/smoke_asset_studio.py || {
+            cat renders/asset-lab/web-server.log
+            exit 1
+          }
       - uses: actions/upload-artifact@v4
         if: always()
         with:
