@@ -272,11 +272,16 @@ it('evaluates deterministic hierarchical articulated kinematics', () => {
   expect(prepared(poses[0])).toEqual(prepared(poses[3]));
 
   const baseTransforms = {
-    0: { position: [3, 0, 0] as [number, number, number], rotation: [1, 0, 0, 0] as [number, number, number, number] },
+    0: {
+      position: [3, 0, 0] as [number, number, number],
+      rotation: [1, 0, 0, 0] as [number, number, number, number],
+    },
   };
   expect(
     createArticulatedKinematicsEvaluator(descriptor, baseTransforms)(poses[1]),
-  ).toEqual(evaluateArticulatedKinematics(descriptor, poses[1], baseTransforms));
+  ).toEqual(
+    evaluateArticulatedKinematics(descriptor, poses[1], baseTransforms),
+  );
   expect(() => prepared({ unknown: 1 })).toThrow(
     'Unknown articulated runtime control "unknown"',
   );
