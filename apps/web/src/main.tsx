@@ -103,7 +103,7 @@ function Studio() {
 
   const projectId = project?.id;
   useEffect(() => {
-    if (!projectId) return;
+    if (!projectId || workspace !== 'production') return;
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout>;
     async function refresh() {
@@ -140,7 +140,7 @@ function Studio() {
       controller.abort();
       clearTimeout(timer);
     };
-  }, [projectId, selectedRun]);
+  }, [projectId, selectedRun, workspace]);
 
   useEffect(() => {
     if (!dirty) return;
