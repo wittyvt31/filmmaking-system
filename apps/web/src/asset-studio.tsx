@@ -689,7 +689,9 @@ export function AssetStudio({
               </div>
               <details className="asset-joint-list" open>
                 <summary>Articulation ({definition.joints.length})</summary>
-                <button disabled={busy} onClick={addJoint}>+ Add joint to selected child</button>
+                <button disabled={busy} onClick={addJoint}>
+                  + Add joint to selected child
+                </button>
                 {definition.joints.map((joint) => (
                   <button
                     key={joint.id}
@@ -1105,9 +1107,13 @@ export function AssetStudio({
                         }))
                       }
                     >
-                      {['revolute', 'prismatic', 'fixed', 'continuous'].map((kind) => (
-                        <option value={kind} key={kind}>{kind}</option>
-                      ))}
+                      {['revolute', 'prismatic', 'fixed', 'continuous'].map(
+                        (kind) => (
+                          <option value={kind} key={kind}>
+                            {kind}
+                          </option>
+                        ),
+                      )}
                     </select>
                   </label>
                   <label>
@@ -1124,7 +1130,9 @@ export function AssetStudio({
                       {definition.parts
                         .filter((item) => item.id !== selectedJoint.childPartId)
                         .map((item) => (
-                          <option key={item.id} value={item.id}>{item.id}</option>
+                          <option key={item.id} value={item.id}>
+                            {item.id}
+                          </option>
                         ))}
                     </select>
                   </label>
@@ -1140,9 +1148,13 @@ export function AssetStudio({
                       }
                     >
                       {definition.parts
-                        .filter((item) => item.id !== selectedJoint.parentPartId)
+                        .filter(
+                          (item) => item.id !== selectedJoint.parentPartId,
+                        )
                         .map((item) => (
-                          <option key={item.id} value={item.id}>{item.id}</option>
+                          <option key={item.id} value={item.id}>
+                            {item.id}
+                          </option>
                         ))}
                     </select>
                   </label>
@@ -1156,10 +1168,15 @@ export function AssetStudio({
                             <input
                               type="number"
                               step="0.1"
-                              value={selectedJoint.axis?.[index] ?? (axis === 'z' ? 1 : 0)}
+                              value={
+                                selectedJoint.axis?.[index] ??
+                                (axis === 'z' ? 1 : 0)
+                              }
                               onChange={(event) =>
                                 editJoint((current) => {
-                                  const vector = [...(current.axis ?? [0, 0, 1])] as [number, number, number];
+                                  const vector = [
+                                    ...(current.axis ?? [0, 0, 1]),
+                                  ] as [number, number, number];
                                   vector[index] = Number(event.target.value);
                                   return { ...current, axis: vector };
                                 })
@@ -1212,15 +1229,23 @@ export function AssetStudio({
                       value={selectedJoint.controlId ?? ''}
                       onChange={(event) =>
                         editJoint((current) => {
-                          const { controlId: _unused, ...withoutControl } = current;
+                          const { controlId: _unused, ...withoutControl } =
+                            current;
                           return event.target.value
-                            ? { ...withoutControl, controlId: event.target.value }
+                            ? {
+                                ...withoutControl,
+                                controlId: event.target.value,
+                              }
                             : withoutControl;
                         })
                       }
                     />
                   </label>
-                  <button className="asset-remove" disabled={busy} onClick={removeJoint}>
+                  <button
+                    className="asset-remove"
+                    disabled={busy}
+                    onClick={removeJoint}
+                  >
                     Remove joint
                   </button>
                 </section>
