@@ -40,3 +40,35 @@ export interface Output {
   url: string;
   kind: 'image' | 'video' | 'file';
 }
+
+export interface AssetStudioIssue {
+  path: string;
+  message: string;
+}
+
+export interface AssetStudioValidation {
+  valid: boolean;
+  issues: AssetStudioIssue[];
+  partCount?: number;
+  meshCount?: number;
+  jointCount?: number;
+}
+
+export interface AssetStudioAsset {
+  assetId: string;
+  version: string;
+  contentHash: string;
+  glbUrl: string;
+  previewUrl?: string;
+  partCount: number;
+  jointCount: number;
+}
+
+export interface AssetStudioBuildResult {
+  status: 'published' | 'reused';
+  asset: AssetStudioAsset;
+  preview: {
+    status: 'rendered' | 'rejected';
+    message?: string;
+  };
+}
