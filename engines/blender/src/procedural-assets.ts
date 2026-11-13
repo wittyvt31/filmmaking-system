@@ -1,4 +1,5 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { createHash, randomUUID } from 'node:crypto';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -427,4 +428,111 @@ export async function buildProceduralAsset(options: {
     },
   });
   return { ...result, definitionSha256 };
+}
+
+const PREVIEW_WORKER_PATH = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  '..',
+  'worker',
+  'asset_preview.py',
+);
+
+export interface ProceduralAssetPreviewReport {
+  status: 'rendered' | 'rejected';
+  outputPath: string;
+  sha256?: string;
+  byteLength?: number;
+  message?: string;
+}
+
+/**
+ * Import the actual published GLB in a fresh Blender process, validate semantic
+ * node bindings, and produce a lightweight visual inspection image.
+ */
+export async function renderAssetPreview(options: {
+  inputPath: string;
+  outputPath: string;
+  assetId: string;
+  version: string;
+  descriptor: unknown;
+  blenderPath?: string;
+  timeoutMs?: number;
+  signal?: AbortSignal;
+}): Promise<ProceduralAssetPreviewReport> {
+  const outputPath = resolve(options.outputPath);
+  const inputPath = resolve(options.inputPath);
+  const reject = (message: string): ProceduralAssetPreviewReport => ({
+    status: 'rejected',
+    outputPath,
+    message,
+  });
+  const parsed = AssetDescriptorSchema.safeParse(options.descriptor);
+  if (!parsed.success)
+    return reject(`Invalid preview descriptor: ${parsed.error.message}`);
+  const descriptor = parsed.data;
+  await mkdir(dirname(outputPath), { recursive: true });
+  const specPath = resolve(
+    dirname(outputPath),
+    `.filmie-preview-${randomUUID()}.json`,
+  );
+  try {
+    await writeFile(
+      specPath,
+      JSON.stringify({
+        inputPath,
+        outputPath,
+        assetId: options.assetId,
+        version: options.version,
+        descriptor,
+      }),
+      { flag: 'wx' },
+    );
+    // Do not accept a stale image from a previous attempt.
+    await rm(outputPath, { force: true });
+    const process = await runBlenderProcess(
+      options.blenderPath ?? defaultBlenderExecutable(),
+      [
+        '--background',
+        '--factory-startup',
+        '--python-exit-code',
+        '1',
+        '--python',
+        PREVIEW_WORKER_PATH,
+        '--',
+        specPath,
+      ],
+      {
+        ...(options.timeoutMs !== undefined
+          ? { timeoutMs: options.timeoutMs }
+          : {}),
+        ...(options.signal ? { signal: options.signal } : {}),
+      },
+    );
+    if (process.code !== 0)
+      return reject(
+        process.timedOut
+          ? 'Blender asset preview timed out.'
+          : process.interrupted
+            ? 'Blender asset preview was interrupted.'
+            : process.stderr.trim() ||
+              process.stdout.trim() ||
+              `Blender preview exited with code ${process.code ?? 'unknown'}.`,
+      );
+    const png = await readFile(outputPath);
+    if (
+      png.length < 8 ||
+      !png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+    )
+      return reject('Blender preview did not produce a valid PNG.');
+    return {
+      status: 'rendered',
+      outputPath,
+      byteLength: png.length,
+      sha256: createHash('sha256').update(png).digest('hex'),
+    };
+  } catch (error) {
+    return reject(error instanceof Error ? error.message : String(error));
+  } finally {
+    await rm(specPath, { force: true });
+  }
 }
