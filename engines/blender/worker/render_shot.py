@@ -339,11 +339,30 @@ def create_scene(spec):
                 "Articulated motion references an unknown entity: "
                 + track["objectId"]
             )
+        def hierarchy_depth(obj):
+            depth = 0
+            parent = obj.parent
+            while parent is not None:
+                depth += 1
+                parent = parent.parent
+            return depth
+
         for frame_data in track["frames"]:
             frame = int(frame_data["frame"])
-            for node_index, pose in sorted(
-                frame_data["nodes"].items(), key=lambda item: int(item[0])
-            ):
+            # Evaluate animated roots and parent constraints at the target
+            # frame, not whichever scene frame happened to be active.
+            scene.frame_set(frame)
+            # Parent transforms must be assigned before descendants: GLB node
+            # indices do not imply Blender hierarchy order.
+            ordered_nodes = sorted(
+                frame_data["nodes"].items(),
+                key=lambda item: (
+                    hierarchy_depth(node_objects[str(item[0])])
+                    if str(item[0]) in node_objects else -1,
+                    int(item[0]),
+                ),
+            )
+            for node_index, pose in ordered_nodes:
                 obj = node_objects.get(str(node_index))
                 if obj is None:
                     raise RuntimeError(
