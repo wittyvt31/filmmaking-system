@@ -13,5 +13,5 @@
       "path": "../web-api"
     }
   ],
-  "include": ["src/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }
