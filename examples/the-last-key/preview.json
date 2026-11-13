@@ -3172,20 +3172,20 @@
                       "interpolation": "ease"
                     },
                     {
-                      "frame": 239,
-                      "rotationDegrees": [
-                        0,
-                        0,
-                        0
-                      ],
-                      "interpolation": "ease"
-                    },
-                    {
                       "frame": 220,
                       "rotationDegrees": [
                         -55,
                         0,
                         -48
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 239,
+                      "rotationDegrees": [
+                        0,
+                        0,
+                        0
                       ],
                       "interpolation": "ease"
                     },
@@ -3240,18 +3240,18 @@
                       "interpolation": "ease"
                     },
                     {
-                      "frame": 239,
+                      "frame": 220,
                       "rotationDegrees": [
-                        0,
+                        -85,
                         0,
                         0
                       ],
                       "interpolation": "ease"
                     },
                     {
-                      "frame": 220,
+                      "frame": 239,
                       "rotationDegrees": [
-                        -85,
+                        0,
                         0,
                         0
                       ],
