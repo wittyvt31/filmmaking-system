@@ -39,19 +39,21 @@ jobs:
       - name: Install headless Blender
         run: |
           sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y blender python3-numpy python3-pil
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y blender python3-numpy python3-pil libegl1 libgl1-mesa-dri xvfb xauth
           blender --version | head -n 2
       - name: Build asset pipeline
         run: pnpm exec tsc -b packages/contracts packages/assets packages/scene engines/blender apps/cli --pretty false
       - name: Generate, validate, publish and reimport preview
         run: |
           mkdir -p renders/asset-lab
+          printf '%s\\n' '#!/bin/sh' 'exec xvfb-run -a blender "$@"' > /tmp/filmie-blender
+          chmod +x /tmp/filmie-blender
           node apps/cli/dist/index.js build-procedural-asset \
             --definition examples/asset-lab/crane.definition.json \
             --registry renders/asset-lab/assets.json \
             --license-name "Filmie reference demo" \
             --preview renders/asset-lab/crane.png \
-            --blender blender \
+            --blender /tmp/filmie-blender \
             --timeout 180000 > renders/asset-lab/build.json || {
               cat renders/asset-lab/build.json
               exit 1
@@ -77,7 +79,7 @@ jobs:
             --registry renders/asset-lab/assets.json \
             --license-name "Filmie reference demo" \
             --preview renders/asset-lab/crane.png \
-            --blender blender \
+            --blender /tmp/filmie-blender \
             --timeout 180000 > renders/asset-lab/repeated.json
           python3 - <<'PY'
           import json
