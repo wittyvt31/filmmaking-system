@@ -52,6 +52,7 @@ jobs:
         env:
           FILMIE_BLENDER: /tmp/filmie-blender
         run: |
+          set -o pipefail
           mkdir -p renders/last-key
           if [ "$PROFILE" = "preview" ]; then
             cp examples/the-last-key/preview.json examples/the-last-key/manifest.json
