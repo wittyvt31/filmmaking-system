@@ -1,0 +1,4171 @@
+{
+  "projectId": "filmie.last-key-elite",
+  "version": "2.0.0",
+  "video": {
+    "resolution": {
+      "width": 960,
+      "height": 540
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    }
+  },
+  "renderPolicy": {
+    "outputDimensions": {
+      "width": 960,
+      "height": 540
+    },
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "container": "mp4",
+    "pixelFormat": "yuv420p",
+    "colorProfile": "bt709",
+    "quality": {
+      "mode": "crf",
+      "value": 19
+    },
+    "renderer": {
+      "id": "blender",
+      "config": {
+        "engine": "BLENDER_EEVEE",
+        "samples": 24
+      }
+    }
+  },
+  "shots": [
+    {
+      "id": "shot.last-key",
+      "durationFrames": 240,
+      "visualDescription": "The Last Key: the Seeker reaches toward an ancient brass key despite the Guardian's warning. The key tumbles from the pedestal; a huge brass-trimmed vault door swings open onto a luminous blue void, and both recoil.",
+      "composition": {
+        "framing": "Seven cinematic camera compositions",
+        "subjectPlacement": "Key and two performers before the mechanical vault",
+        "cameraMovement": "Deliberate close-ups and final reveal push",
+        "instructions": []
+      },
+      "requiredAssets": [
+        {
+          "assetId": "character.facial-performer",
+          "version": "1.0.0"
+        }
+      ],
+      "scene": {
+        "stylePreset": "stylized_3d",
+        "styleVersion": "1.0.0",
+        "world": {
+          "schemaVersion": 1,
+          "materials": [
+            {
+              "id": "floor",
+              "color": [
+                0.065,
+                0.085,
+                0.105
+              ],
+              "roughness": 0.72,
+              "procedural": {
+                "kind": "noise",
+                "scale": 26,
+                "color": [
+                  0.12,
+                  0.15,
+                  0.17
+                ]
+              }
+            },
+            {
+              "id": "wall",
+              "color": [
+                0.07,
+                0.13,
+                0.16
+              ],
+              "roughness": 0.88,
+              "procedural": {
+                "kind": "noise",
+                "scale": 18,
+                "color": [
+                  0.12,
+                  0.2,
+                  0.23
+                ]
+              }
+            },
+            {
+              "id": "brass",
+              "color": [
+                0.66,
+                0.4,
+                0.13
+              ],
+              "metallic": 0.85,
+              "roughness": 0.26
+            },
+            {
+              "id": "dark-metal",
+              "color": [
+                0.09,
+                0.12,
+                0.15
+              ],
+              "metallic": 0.75,
+              "roughness": 0.35
+            },
+            {
+              "id": "elite.obsidian",
+              "color": [
+                0.025,
+                0.04,
+                0.055
+              ],
+              "roughness": 0.4,
+              "metallic": 0.35
+            },
+            {
+              "id": "elite.gold",
+              "color": [
+                0.71,
+                0.46,
+                0.16
+              ],
+              "roughness": 0.25,
+              "metallic": 0.83
+            },
+            {
+              "id": "elite.bluestone",
+              "color": [
+                0.105,
+                0.16,
+                0.2
+              ],
+              "roughness": 0.78,
+              "metallic": 0.1
+            },
+            {
+              "id": "elite.aether",
+              "color": [
+                0.025,
+                0.24,
+                0.4
+              ],
+              "roughness": 0.32,
+              "metallic": 0.15,
+              "emission": {
+                "color": [
+                  0.18,
+                  0.61,
+                  1
+                ],
+                "strength": 3
+              }
+            },
+            {
+              "id": "elite.rune",
+              "color": [
+                0.06,
+                0.4,
+                0.6
+              ],
+              "roughness": 0.4,
+              "metallic": 0.15,
+              "emission": {
+                "color": [
+                  0.2,
+                  0.75,
+                  1
+                ],
+                "strength": 2
+              }
+            }
+          ],
+          "entities": [
+            {
+              "id": "vault.chamber",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "room",
+                "dimensions": {
+                  "x": 5.6,
+                  "y": 5.8,
+                  "z": 3.1
+                },
+                "floor": {
+                  "thickness": 0.15,
+                  "materialId": "floor"
+                },
+                "walls": [
+                  {
+                    "side": "north",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "west",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  },
+                  {
+                    "side": "east",
+                    "thickness": 0.16,
+                    "materialId": "wall"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "vault.pedestal",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": -0.65,
+                  "z": 0.55
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.65,
+                  "y": 0.65,
+                  "z": 1.1
+                },
+                "materialId": "dark-metal"
+              }
+            },
+            {
+              "id": "vault.key",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": -0.65,
+                  "z": 1.12
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.22,
+                  "y": 0.032,
+                  "z": 0.035
+                },
+                "materialId": "brass"
+              },
+              "physics": {
+                "mode": "kinematic",
+                "keyframes": [
+                  {
+                    "frame": 0,
+                    "pose": {
+                      "position": [
+                        0,
+                        -0.65,
+                        1.12
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 135,
+                    "pose": {
+                      "position": [
+                        0,
+                        -0.65,
+                        1.12
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 145,
+                    "pose": {
+                      "position": [
+                        0.09,
+                        -0.69,
+                        1.16
+                      ],
+                      "rotation": [
+                        0.9890158633619168,
+                        0,
+                        0,
+                        0.14780941112961063
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 157,
+                    "pose": {
+                      "position": [
+                        0.36,
+                        -0.77,
+                        1
+                      ],
+                      "rotation": [
+                        0.8526401643540922,
+                        0,
+                        0,
+                        0.5224985647159488
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 169,
+                    "pose": {
+                      "position": [
+                        0.65,
+                        -0.83,
+                        0.6
+                      ],
+                      "rotation": [
+                        0.4771587602596084,
+                        0,
+                        0,
+                        0.8788171126619654
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 183,
+                    "pose": {
+                      "position": [
+                        0.94,
+                        -0.92,
+                        0.19
+                      ],
+                      "rotation": [
+                        -0.3255681544571564,
+                        0,
+                        0,
+                        0.9455185755993168
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 192,
+                    "pose": {
+                      "position": [
+                        0.96,
+                        -0.92,
+                        0.23
+                      ],
+                      "rotation": [
+                        -0.5519369853120581,
+                        0,
+                        0,
+                        0.8338858220671682
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 205,
+                    "pose": {
+                      "position": [
+                        1,
+                        -0.93,
+                        0.18
+                      ],
+                      "rotation": [
+                        -0.6156614753256583,
+                        0,
+                        0,
+                        0.788010753606722
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 239,
+                    "pose": {
+                      "position": [
+                        1,
+                        -0.93,
+                        0.18
+                      ],
+                      "rotation": [
+                        -0.6156614753256583,
+                        0,
+                        0,
+                        0.788010753606722
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "vault.key.bow.left",
+              "parentId": "vault.key",
+              "transform": {
+                "position": {
+                  "x": -0.23,
+                  "y": -0.65,
+                  "z": 1.12
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.025,
+                  "y": 0.14,
+                  "z": 0.035
+                },
+                "materialId": "brass"
+              },
+              "physics": {
+                "mode": "kinematic",
+                "keyframes": [
+                  {
+                    "frame": 0,
+                    "pose": {
+                      "position": [
+                        -0.23,
+                        -0.65,
+                        1.12
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 135,
+                    "pose": {
+                      "position": [
+                        -0.23,
+                        -0.65,
+                        1.12
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 145,
+                    "pose": {
+                      "position": [
+                        -0.12995009387149817,
+                        -0.7572454920862294,
+                        1.16
+                      ],
+                      "rotation": [
+                        0.9890158633619168,
+                        0,
+                        0,
+                        0.14780941112961063
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 157,
+                    "pose": {
+                      "position": [
+                        0.2555821850599042,
+                        -0.9749315005633246,
+                        1
+                      ],
+                      "rotation": [
+                        0.8526401643540922,
+                        0,
+                        0,
+                        0.5224985647159488
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 169,
+                    "pose": {
+                      "position": [
+                        0.7752669780534562,
+                        -1.0228942306274476,
+                        0.6
+                      ],
+                      "rotation": [
+                        0.4771587602596084,
+                        0,
+                        0,
+                        0.8788171126619654
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 183,
+                    "pose": {
+                      "position": [
+                        1.121242473329546,
+                        -0.7783978606750988,
+                        0.19
+                      ],
+                      "rotation": [
+                        -0.3255681544571564,
+                        0,
+                        0,
+                        0.9455185755993168
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 192,
+                    "pose": {
+                      "position": [
+                        1.049868159552533,
+                        -0.7082838837059388,
+                        0.23
+                      ],
+                      "rotation": [
+                        -0.5519369853120581,
+                        0,
+                        0,
+                        0.8338858220671682
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 205,
+                    "pose": {
+                      "position": [
+                        1.0556420359879235,
+                        -0.7068319829565208,
+                        0.18
+                      ],
+                      "rotation": [
+                        -0.6156614753256583,
+                        0,
+                        0,
+                        0.788010753606722
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 239,
+                    "pose": {
+                      "position": [
+                        1.0556420359879235,
+                        -0.7068319829565208,
+                        0.18
+                      ],
+                      "rotation": [
+                        -0.6156614753256583,
+                        0,
+                        0,
+                        0.788010753606722
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "vault.key.bow.top",
+              "parentId": "vault.key",
+              "transform": {
+                "position": {
+                  "x": -0.17,
+                  "y": -0.5900000000000001,
+                  "z": 1.12
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.14,
+                  "y": 0.025,
+                  "z": 0.035
+                },
+                "materialId": "brass"
+              },
+              "physics": {
+                "mode": "kinematic",
+                "keyframes": [
+                  {
+                    "frame": 0,
+                    "pose": {
+                      "position": [
+                        -0.17,
+                        -0.5900000000000001,
+                        1.12
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 135,
+                    "pose": {
+                      "position": [
+                        -0.17,
+                        -0.5900000000000001,
+                        1.12
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 145,
+                    "pose": {
+                      "position": [
+                        -0.09011411079708023,
+                        -0.6823249044450831,
+                        1.16
+                      ],
+                      "rotation": [
+                        0.9890158633619168,
+                        0,
+                        0,
+                        0.14780941112961063
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 157,
+                    "pose": {
+                      "position": [
+                        0.22936122359297498,
+                        -0.8942316791276498,
+                        1
+                      ],
+                      "rotation": [
+                        0.8526401643540922,
+                        0,
+                        0,
+                        0.5224985647159488
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 169,
+                    "pose": {
+                      "position": [
+                        0.6922684018758292,
+                        -1.0052523386516237,
+                        0.6
+                      ],
+                      "rotation": [
+                        0.4771587602596084,
+                        0,
+                        0,
+                        0.8788171126619654
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 183,
+                    "pose": {
+                      "position": [
+                        1.110901516632682,
+                        -0.8626181944110415,
+                        0.19
+                      ],
+                      "rotation": [
+                        -0.3255681544571564,
+                        0,
+                        0,
+                        0.9455185755993168
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 192,
+                    "pose": {
+                      "position": [
+                        1.081654583050323,
+                        -0.7869580426224416,
+                        0.23
+                      ],
+                      "rotation": [
+                        -0.5519369853120581,
+                        0,
+                        0,
+                        0.8338858220671682
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 205,
+                    "pose": {
+                      "position": [
+                        1.0993444658285034,
+                        -0.7795650402690607,
+                        0.18
+                      ],
+                      "rotation": [
+                        -0.6156614753256583,
+                        0,
+                        0,
+                        0.788010753606722
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 239,
+                    "pose": {
+                      "position": [
+                        1.0993444658285034,
+                        -0.7795650402690607,
+                        0.18
+                      ],
+                      "rotation": [
+                        -0.6156614753256583,
+                        0,
+                        0,
+                        0.788010753606722
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "vault.key.bow.bottom",
+              "parentId": "vault.key",
+              "transform": {
+                "position": {
+                  "x": -0.17,
+                  "y": -0.71,
+                  "z": 1.12
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.14,
+                  "y": 0.025,
+                  "z": 0.035
+                },
+                "materialId": "brass"
+              },
+              "physics": {
+                "mode": "kinematic",
+                "keyframes": [
+                  {
+                    "frame": 0,
+                    "pose": {
+                      "position": [
+                        -0.17,
+                        -0.71,
+                        1.12
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 135,
+                    "pose": {
+                      "position": [
+                        -0.17,
+                        -0.71,
+                        1.12
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 145,
+                    "pose": {
+                      "position": [
+                        -0.05502950623035183,
+                        -0.7970814751606473,
+                        1.16
+                      ],
+                      "rotation": [
+                        0.9890158633619168,
+                        0,
+                        0,
+                        0.14780941112961063
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 157,
+                    "pose": {
+                      "position": [
+                        0.3362820064955791,
+                        -0.9487105390963954,
+                        1
+                      ],
+                      "rotation": [
+                        0.8526401643540922,
+                        0,
+                        0,
+                        0.5224985647159488
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 169,
+                    "pose": {
+                      "position": [
+                        0.7929088700292801,
+                        -0.9398956544498205,
+                        0.6
+                      ],
+                      "rotation": [
+                        0.4771587602596084,
+                        0,
+                        0,
+                        0.8788171126619654
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 183,
+                    "pose": {
+                      "position": [
+                        1.0370221395936032,
+                        -0.7680569039782349,
+                        0.19
+                      ],
+                      "rotation": [
+                        -0.3255681544571564,
+                        0,
+                        0,
+                        0.9455185755993168
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 192,
+                    "pose": {
+                      "position": [
+                        0.9711940006360301,
+                        -0.7400703072037287,
+                        0.23
+                      ],
+                      "rotation": [
+                        -0.5519369853120581,
+                        0,
+                        0,
+                        0.8338858220671682
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 205,
+                    "pose": {
+                      "position": [
+                        0.9829089786753837,
+                        -0.7505344127971006,
+                        0.18
+                      ],
+                      "rotation": [
+                        -0.6156614753256583,
+                        0,
+                        0,
+                        0.788010753606722
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 239,
+                    "pose": {
+                      "position": [
+                        0.9829089786753837,
+                        -0.7505344127971006,
+                        0.18
+                      ],
+                      "rotation": [
+                        -0.6156614753256583,
+                        0,
+                        0,
+                        0.788010753606722
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "vault.key.bow.right",
+              "parentId": "vault.key",
+              "transform": {
+                "position": {
+                  "x": -0.11,
+                  "y": -0.65,
+                  "z": 1.12
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.025,
+                  "y": 0.14,
+                  "z": 0.035
+                },
+                "materialId": "brass"
+              },
+              "physics": {
+                "mode": "kinematic",
+                "keyframes": [
+                  {
+                    "frame": 0,
+                    "pose": {
+                      "position": [
+                        -0.11,
+                        -0.65,
+                        1.12
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 135,
+                    "pose": {
+                      "position": [
+                        -0.11,
+                        -0.65,
+                        1.12
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 145,
+                    "pose": {
+                      "position": [
+                        -0.015193523155933905,
+                        -0.722160887519501,
+                        1.16
+                      ],
+                      "rotation": [
+                        0.9890158633619168,
+                        0,
+                        0,
+                        0.14780941112961063
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 157,
+                    "pose": {
+                      "position": [
+                        0.31006104502864984,
+                        -0.8680107176607205,
+                        1
+                      ],
+                      "rotation": [
+                        0.8526401643540922,
+                        0,
+                        0,
+                        0.5224985647159488
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 169,
+                    "pose": {
+                      "position": [
+                        0.709910293851653,
+                        -0.9222537624739966,
+                        0.6
+                      ],
+                      "rotation": [
+                        0.4771587602596084,
+                        0,
+                        0,
+                        0.8788171126619654
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 183,
+                    "pose": {
+                      "position": [
+                        1.0266811828967395,
+                        -0.8522772377141776,
+                        0.19
+                      ],
+                      "rotation": [
+                        -0.3255681544571564,
+                        0,
+                        0,
+                        0.9455185755993168
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 192,
+                    "pose": {
+                      "position": [
+                        1.00298042413382,
+                        -0.8187444661202317,
+                        0.23
+                      ],
+                      "rotation": [
+                        -0.5519369853120581,
+                        0,
+                        0,
+                        0.8338858220671682
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 205,
+                    "pose": {
+                      "position": [
+                        1.0266114085159634,
+                        -0.8232674701096404,
+                        0.18
+                      ],
+                      "rotation": [
+                        -0.6156614753256583,
+                        0,
+                        0,
+                        0.788010753606722
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 239,
+                    "pose": {
+                      "position": [
+                        1.0266114085159634,
+                        -0.8232674701096404,
+                        0.18
+                      ],
+                      "rotation": [
+                        -0.6156614753256583,
+                        0,
+                        0,
+                        0.788010753606722
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "vault.key.tooth.outer",
+              "parentId": "vault.key",
+              "transform": {
+                "position": {
+                  "x": 0.11,
+                  "y": -0.685,
+                  "z": 1.12
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.032,
+                  "y": 0.085,
+                  "z": 0.035
+                },
+                "materialId": "brass"
+              },
+              "physics": {
+                "mode": "kinematic",
+                "keyframes": [
+                  {
+                    "frame": 0,
+                    "pose": {
+                      "position": [
+                        0.11,
+                        -0.685,
+                        1.12
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 135,
+                    "pose": {
+                      "position": [
+                        0.11,
+                        -0.685,
+                        1.12
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 145,
+                    "pose": {
+                      "position": [
+                        0.2054265328212297,
+                        -0.6913097789392051,
+                        1.16
+                      ],
+                      "rotation": [
+                        0.9890158633619168,
+                        0,
+                        0,
+                        0.14780941112961063
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 157,
+                    "pose": {
+                      "position": [
+                        0.441124183317943,
+                        -0.6878789498301637,
+                        1
+                      ],
+                      "rotation": [
+                        0.8526401643540922,
+                        0,
+                        0,
+                        0.5224985647159488
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 169,
+                    "pose": {
+                      "position": [
+                        0.6194431760264368,
+                        -0.7186838713004774,
+                        0.6
+                      ],
+                      "rotation": [
+                        0.4771587602596084,
+                        0,
+                        0,
+                        0.8788171126619654
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 183,
+                    "pose": {
+                      "position": [
+                        0.8317706654668625,
+                        -0.9601423859095872,
+                        0.19
+                      ],
+                      "rotation": [
+                        -0.3255681544571564,
+                        0,
+                        0,
+                        0.9455185755993168
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 192,
+                    "pose": {
+                      "position": [
+                        0.8848019059953445,
+                        -1.0075799443826439,
+                        0.23
+                      ],
+                      "rotation": [
+                        -0.5519369853120581,
+                        0,
+                        0,
+                        0.8338858220671682
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 205,
+                    "pose": {
+                      "position": [
+                        0.9394282410643767,
+                        -1.0282652635443712,
+                        0.18
+                      ],
+                      "rotation": [
+                        -0.6156614753256583,
+                        0,
+                        0,
+                        0.788010753606722
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 239,
+                    "pose": {
+                      "position": [
+                        0.9394282410643767,
+                        -1.0282652635443712,
+                        0.18
+                      ],
+                      "rotation": [
+                        -0.6156614753256583,
+                        0,
+                        0,
+                        0.788010753606722
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "vault.key.tooth.inner",
+              "parentId": "vault.key",
+              "transform": {
+                "position": {
+                  "x": 0.065,
+                  "y": -0.68,
+                  "z": 1.12
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.028,
+                  "y": 0.07,
+                  "z": 0.035
+                },
+                "materialId": "brass"
+              },
+              "physics": {
+                "mode": "kinematic",
+                "keyframes": [
+                  {
+                    "frame": 0,
+                    "pose": {
+                      "position": [
+                        0.065,
+                        -0.68,
+                        1.12
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 135,
+                    "pose": {
+                      "position": [
+                        0.065,
+                        -0.68,
+                        1.12
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 145,
+                    "pose": {
+                      "position": [
+                        0.16093096027927942,
+                        -0.6996849818719132,
+                        1.16
+                      ],
+                      "rotation": [
+                        0.9890158633619168,
+                        0,
+                        0,
+                        0.14780941112961063
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 157,
+                    "pose": {
+                      "position": [
+                        0.4162395782087216,
+                        -0.7257042909199425,
+                        1
+                      ],
+                      "rotation": [
+                        0.8526401643540922,
+                        0,
+                        0,
+                        0.5224985647159488
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 169,
+                    "pose": {
+                      "position": [
+                        0.639758579762386,
+                        -0.7591472420330966,
+                        0.6
+                      ],
+                      "rotation": [
+                        0.4771587602596084,
+                        0,
+                        0,
+                        0.8788171126619654
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 183,
+                    "pose": {
+                      "position": [
+                        0.8703094567557933,
+                        -0.9363776732879661,
+                        0.19
+                      ],
+                      "rotation": [
+                        -0.3255681544571564,
+                        0,
+                        0,
+                        0.9455185755993168
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 192,
+                    "pose": {
+                      "position": [
+                        0.9069873310446239,
+                        -0.9681108816197305,
+                        0.23
+                      ],
+                      "rotation": [
+                        -0.5519369853120581,
+                        0,
+                        0,
+                        0.8338858220671682
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 205,
+                    "pose": {
+                      "position": [
+                        0.9551662049977416,
+                        -0.9858115653399497,
+                        0.18
+                      ],
+                      "rotation": [
+                        -0.6156614753256583,
+                        0,
+                        0,
+                        0.788010753606722
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 239,
+                    "pose": {
+                      "position": [
+                        0.9551662049977416,
+                        -0.9858115653399497,
+                        0.18
+                      ],
+                      "rotation": [
+                        -0.6156614753256583,
+                        0,
+                        0,
+                        0.788010753606722
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "vault.door.frame",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 2.55,
+                  "z": 1.45
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 2.45,
+                  "y": 0.35,
+                  "z": 2.9
+                },
+                "materialId": "brass"
+              }
+            },
+            {
+              "id": "vault.door",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 2.28,
+                  "z": 1.45
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 2.15,
+                  "y": 0.22,
+                  "z": 2.65
+                },
+                "materialId": "dark-metal"
+              },
+              "physics": {
+                "mode": "kinematic",
+                "keyframes": [
+                  {
+                    "frame": 0,
+                    "pose": {
+                      "position": [
+                        0,
+                        2.28,
+                        1.45
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 177,
+                    "pose": {
+                      "position": [
+                        0,
+                        2.28,
+                        1.45
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 191,
+                    "pose": {
+                      "position": [
+                        -0.05334839723828266,
+                        2.6168285238686924,
+                        1.45
+                      ],
+                      "rotation": [
+                        0.9876883405951378,
+                        0,
+                        0,
+                        0.15643446504023087
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 205,
+                    "pose": {
+                      "position": [
+                        -0.27997214022964034,
+                        3.0093523609311554,
+                        1.45
+                      ],
+                      "rotation": [
+                        0.9335804264972017,
+                        0,
+                        0,
+                        0.35836794954530027
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 221,
+                    "pose": {
+                      "position": [
+                        -0.717198043775021,
+                        3.30426495665664,
+                        1.45
+                      ],
+                      "rotation": [
+                        0.8191520442889918,
+                        0,
+                        0,
+                        0.573576436351046
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 239,
+                    "pose": {
+                      "position": [
+                        -0.9950002404050527,
+                        3.3658522209200026,
+                        1.45
+                      ],
+                      "rotation": [
+                        0.737277336810124,
+                        0,
+                        0,
+                        0.6755902076156602
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "vault.door.plate",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 2.13,
+                  "z": 1.55
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.8,
+                  "y": 0.08,
+                  "z": 0.8
+                },
+                "materialId": "brass"
+              },
+              "physics": {
+                "mode": "kinematic",
+                "keyframes": [
+                  {
+                    "frame": 0,
+                    "pose": {
+                      "position": [
+                        0,
+                        2.13,
+                        1.55
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 177,
+                    "pose": {
+                      "position": [
+                        0,
+                        2.13,
+                        1.55
+                      ],
+                      "rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 191,
+                    "pose": {
+                      "position": [
+                        -0.006995848082040582,
+                        2.4741700464244194,
+                        1.55
+                      ],
+                      "rotation": [
+                        0.9876883405951378,
+                        0,
+                        0,
+                        0.15643446504023087
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 205,
+                    "pose": {
+                      "position": [
+                        -0.17960254927581165,
+                        2.8978806371095462,
+                        1.55
+                      ],
+                      "rotation": [
+                        0.9335804264972017,
+                        0,
+                        0,
+                        0.35836794954530027
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 221,
+                    "pose": {
+                      "position": [
+                        -0.5762441506571349,
+                        3.25296193515779,
+                        1.55
+                      ],
+                      "rotation": [
+                        0.8191520442889918,
+                        0,
+                        0,
+                        0.573576436351046
+                      ]
+                    }
+                  },
+                  {
+                    "frame": 239,
+                    "pose": {
+                      "position": [
+                        -0.845571035691291,
+                        3.352778859507854,
+                        1.55
+                      ],
+                      "rotation": [
+                        0.737277336810124,
+                        0,
+                        0,
+                        0.6755902076156602
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "vault.arch.left",
+              "transform": {
+                "position": {
+                  "x": -1.68,
+                  "y": 2.42,
+                  "z": 1.43
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.38,
+                  "y": 0.28,
+                  "z": 2.86
+                },
+                "materialId": "dark-metal"
+              }
+            },
+            {
+              "id": "vault.arch.right",
+              "transform": {
+                "position": {
+                  "x": 1.68,
+                  "y": 2.42,
+                  "z": 1.43
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.38,
+                  "y": 0.28,
+                  "z": 2.86
+                },
+                "materialId": "dark-metal"
+              }
+            },
+            {
+              "id": "vault.arch.gold.left",
+              "transform": {
+                "position": {
+                  "x": -1.46,
+                  "y": 2.22,
+                  "z": 1.43
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.045,
+                  "y": 0.045,
+                  "z": 2.68
+                },
+                "materialId": "brass"
+              }
+            },
+            {
+              "id": "vault.arch.gold.right",
+              "transform": {
+                "position": {
+                  "x": 1.46,
+                  "y": 2.22,
+                  "z": 1.43
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.045,
+                  "y": 0.045,
+                  "z": 2.68
+                },
+                "materialId": "brass"
+              }
+            },
+            {
+              "id": "vault.arch.lintel",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 2.42,
+                  "z": 2.94
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 3.75,
+                  "y": 0.32,
+                  "z": 0.18
+                },
+                "materialId": "dark-metal"
+              }
+            },
+            {
+              "id": "vault.arch.lintel.inlay",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 2.235,
+                  "z": 2.94
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 3.32,
+                  "y": 0.035,
+                  "z": 0.035
+                },
+                "materialId": "brass"
+              }
+            },
+            {
+              "id": "vault.floor.inlay.left",
+              "transform": {
+                "position": {
+                  "x": -1.25,
+                  "y": -0.15,
+                  "z": 0.018
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.045,
+                  "y": 3.6,
+                  "z": 0.025
+                },
+                "materialId": "brass"
+              }
+            },
+            {
+              "id": "vault.floor.inlay.right",
+              "transform": {
+                "position": {
+                  "x": 1.25,
+                  "y": -0.15,
+                  "z": 0.018
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.045,
+                  "y": 3.6,
+                  "z": 0.025
+                },
+                "materialId": "brass"
+              }
+            },
+            {
+              "id": "vault.portal.glow",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 2.73,
+                  "z": 1.42
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 1.83,
+                  "y": 0.07,
+                  "z": 2.31
+                },
+                "materialId": "elite.aether"
+              }
+            },
+            {
+              "id": "vault.portal.dark",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 2.81,
+                  "z": 1.43
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 1.72,
+                  "y": 0.04,
+                  "z": 2.15
+                },
+                "materialId": "elite.obsidian"
+              }
+            },
+            {
+              "id": "vault.portal.glyph.0",
+              "transform": {
+                "position": {
+                  "x": -0.72,
+                  "y": 2.68,
+                  "z": 0.65
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.1,
+                  "y": 0.04,
+                  "z": 0.18
+                },
+                "materialId": "elite.rune"
+              }
+            },
+            {
+              "id": "vault.portal.glyph.1",
+              "transform": {
+                "position": {
+                  "x": -0.36,
+                  "y": 2.68,
+                  "z": 0.65
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.1,
+                  "y": 0.04,
+                  "z": 0.18
+                },
+                "materialId": "elite.rune"
+              }
+            },
+            {
+              "id": "vault.portal.glyph.2",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 2.68,
+                  "z": 0.65
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.1,
+                  "y": 0.04,
+                  "z": 0.18
+                },
+                "materialId": "elite.rune"
+              }
+            },
+            {
+              "id": "vault.portal.glyph.3",
+              "transform": {
+                "position": {
+                  "x": 0.3600000000000001,
+                  "y": 2.68,
+                  "z": 0.65
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.1,
+                  "y": 0.04,
+                  "z": 0.18
+                },
+                "materialId": "elite.rune"
+              }
+            },
+            {
+              "id": "vault.portal.glyph.4",
+              "transform": {
+                "position": {
+                  "x": 0.72,
+                  "y": 2.68,
+                  "z": 0.65
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.1,
+                  "y": 0.04,
+                  "z": 0.18
+                },
+                "materialId": "elite.rune"
+              }
+            },
+            {
+              "id": "vault.portal.glyph.5",
+              "transform": {
+                "position": {
+                  "x": -0.72,
+                  "y": 2.68,
+                  "z": 2.12
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.1,
+                  "y": 0.04,
+                  "z": 0.18
+                },
+                "materialId": "elite.rune"
+              }
+            },
+            {
+              "id": "vault.portal.glyph.6",
+              "transform": {
+                "position": {
+                  "x": -0.36,
+                  "y": 2.68,
+                  "z": 2.12
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.1,
+                  "y": 0.04,
+                  "z": 0.18
+                },
+                "materialId": "elite.rune"
+              }
+            },
+            {
+              "id": "vault.portal.glyph.7",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 2.68,
+                  "z": 2.12
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.1,
+                  "y": 0.04,
+                  "z": 0.18
+                },
+                "materialId": "elite.rune"
+              }
+            },
+            {
+              "id": "vault.portal.glyph.8",
+              "transform": {
+                "position": {
+                  "x": 0.3600000000000001,
+                  "y": 2.68,
+                  "z": 2.12
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.1,
+                  "y": 0.04,
+                  "z": 0.18
+                },
+                "materialId": "elite.rune"
+              }
+            },
+            {
+              "id": "vault.portal.glyph.9",
+              "transform": {
+                "position": {
+                  "x": 0.72,
+                  "y": 2.68,
+                  "z": 2.12
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.1,
+                  "y": 0.04,
+                  "z": 0.18
+                },
+                "materialId": "elite.rune"
+              }
+            },
+            {
+              "id": "vault.column.west.0",
+              "transform": {
+                "position": {
+                  "x": -2.27,
+                  "y": 1.25,
+                  "z": 0.24
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.38,
+                  "y": 0.35,
+                  "z": 0.16
+                },
+                "materialId": "elite.bluestone"
+              }
+            },
+            {
+              "id": "vault.column.east.0",
+              "transform": {
+                "position": {
+                  "x": 2.27,
+                  "y": 1.25,
+                  "z": 0.24
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.38,
+                  "y": 0.35,
+                  "z": 0.16
+                },
+                "materialId": "elite.bluestone"
+              }
+            },
+            {
+              "id": "vault.column.west.1",
+              "transform": {
+                "position": {
+                  "x": -2.27,
+                  "y": 1.25,
+                  "z": 0.83
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.38,
+                  "y": 0.35,
+                  "z": 0.16
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.column.east.1",
+              "transform": {
+                "position": {
+                  "x": 2.27,
+                  "y": 1.25,
+                  "z": 0.83
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.38,
+                  "y": 0.35,
+                  "z": 0.16
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.column.west.2",
+              "transform": {
+                "position": {
+                  "x": -2.27,
+                  "y": 1.25,
+                  "z": 1.42
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.38,
+                  "y": 0.35,
+                  "z": 0.16
+                },
+                "materialId": "elite.bluestone"
+              }
+            },
+            {
+              "id": "vault.column.east.2",
+              "transform": {
+                "position": {
+                  "x": 2.27,
+                  "y": 1.25,
+                  "z": 1.42
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.38,
+                  "y": 0.35,
+                  "z": 0.16
+                },
+                "materialId": "elite.bluestone"
+              }
+            },
+            {
+              "id": "vault.column.west.3",
+              "transform": {
+                "position": {
+                  "x": -2.27,
+                  "y": 1.25,
+                  "z": 2.01
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.38,
+                  "y": 0.35,
+                  "z": 0.16
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.column.east.3",
+              "transform": {
+                "position": {
+                  "x": 2.27,
+                  "y": 1.25,
+                  "z": 2.01
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.38,
+                  "y": 0.35,
+                  "z": 0.16
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.column.west.4",
+              "transform": {
+                "position": {
+                  "x": -2.27,
+                  "y": 1.25,
+                  "z": 2.5999999999999996
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.38,
+                  "y": 0.35,
+                  "z": 0.16
+                },
+                "materialId": "elite.bluestone"
+              }
+            },
+            {
+              "id": "vault.column.east.4",
+              "transform": {
+                "position": {
+                  "x": 2.27,
+                  "y": 1.25,
+                  "z": 2.5999999999999996
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.38,
+                  "y": 0.35,
+                  "z": 0.16
+                },
+                "materialId": "elite.bluestone"
+              }
+            },
+            {
+              "id": "vault.floor.inset.0",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": -2,
+                  "z": 0.02
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 4.55,
+                  "y": 0.022,
+                  "z": 0.012
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.floor.grid.0",
+              "transform": {
+                "position": {
+                  "x": -1.9,
+                  "y": 0,
+                  "z": 0.02
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.022,
+                  "y": 4.85,
+                  "z": 0.012
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.floor.inset.1",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": -1,
+                  "z": 0.02
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 4.55,
+                  "y": 0.022,
+                  "z": 0.012
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.floor.grid.1",
+              "transform": {
+                "position": {
+                  "x": -0.95,
+                  "y": 0,
+                  "z": 0.02
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.022,
+                  "y": 4.85,
+                  "z": 0.012
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.floor.inset.2",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0.02
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 4.55,
+                  "y": 0.022,
+                  "z": 0.012
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.floor.grid.2",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0.02
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.022,
+                  "y": 4.85,
+                  "z": 0.012
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.floor.inset.3",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 1,
+                  "z": 0.02
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 4.55,
+                  "y": 0.022,
+                  "z": 0.012
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.floor.grid.3",
+              "transform": {
+                "position": {
+                  "x": 0.9499999999999997,
+                  "y": 0,
+                  "z": 0.02
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.022,
+                  "y": 4.85,
+                  "z": 0.012
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.floor.inset.4",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 2,
+                  "z": 0.02
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 4.55,
+                  "y": 0.022,
+                  "z": 0.012
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.floor.grid.4",
+              "transform": {
+                "position": {
+                  "x": 1.9,
+                  "y": 0,
+                  "z": 0.02
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.022,
+                  "y": 4.85,
+                  "z": 0.012
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.ceiling.beam.0",
+              "transform": {
+                "position": {
+                  "x": -1.8,
+                  "y": 0,
+                  "z": 3.06
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.075,
+                  "y": 4.45,
+                  "z": 0.07
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.ceiling.beam.1",
+              "transform": {
+                "position": {
+                  "x": -0.9,
+                  "y": 0,
+                  "z": 3.06
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.075,
+                  "y": 4.45,
+                  "z": 0.07
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.ceiling.beam.2",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 3.06
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.075,
+                  "y": 4.45,
+                  "z": 0.07
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.ceiling.beam.3",
+              "transform": {
+                "position": {
+                  "x": 0.9000000000000001,
+                  "y": 0,
+                  "z": 3.06
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.075,
+                  "y": 4.45,
+                  "z": 0.07
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.ceiling.beam.4",
+              "transform": {
+                "position": {
+                  "x": 1.8,
+                  "y": 0,
+                  "z": 3.06
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.075,
+                  "y": 4.45,
+                  "z": 0.07
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.pedestal.cap",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": -0.65,
+                  "z": 1.115
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.7,
+                  "y": 0.7,
+                  "z": 0.035
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.pedestal.top",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": -0.65,
+                  "z": 1.147
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.55,
+                  "y": 0.55,
+                  "z": 0.028
+                },
+                "materialId": "elite.obsidian"
+              }
+            },
+            {
+              "id": "vault.pedestal.trim.0",
+              "transform": {
+                "position": {
+                  "x": -0.28,
+                  "y": -0.93,
+                  "z": 0.62
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.065,
+                  "y": 0.065,
+                  "z": 1.05
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.pedestal.trim.1",
+              "transform": {
+                "position": {
+                  "x": 0.28,
+                  "y": -0.93,
+                  "z": 0.62
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.065,
+                  "y": 0.065,
+                  "z": 1.05
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.pedestal.trim.2",
+              "transform": {
+                "position": {
+                  "x": -0.28,
+                  "y": -0.37,
+                  "z": 0.62
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.065,
+                  "y": 0.065,
+                  "z": 1.05
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.pedestal.trim.3",
+              "transform": {
+                "position": {
+                  "x": 0.28,
+                  "y": -0.37,
+                  "z": 0.62
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.065,
+                  "y": 0.065,
+                  "z": 1.05
+                },
+                "materialId": "elite.gold"
+              }
+            },
+            {
+              "id": "vault.door.crest",
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 2.1,
+                  "z": 2.24
+                },
+                "rotationDegrees": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scale": 1
+              },
+              "geometry": {
+                "kind": "box",
+                "dimensions": {
+                  "x": 0.85,
+                  "y": 0.072,
+                  "z": 0.11
+                },
+                "materialId": "elite.gold"
+              }
+            }
+          ]
+        },
+        "motionClips": [],
+        "interactions": [],
+        "characters": [
+          {
+            "id": "guardian",
+            "transform": {
+              "position": {
+                "x": -0.85,
+                "y": 0,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "scale": 1
+            },
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "source": {
+              "kind": "imported",
+              "asset": {
+                "assetId": "character.facial-performer",
+                "version": "1.0.0"
+              },
+              "body": {
+                "height": 1.72,
+                "shoulderWidth": 0.245,
+                "build": 1
+              },
+              "materials": [
+                {
+                  "id": "guardian.jacket",
+                  "color": [
+                    0.07,
+                    0.16,
+                    0.24
+                  ],
+                  "roughness": 0.42,
+                  "procedural": {
+                    "kind": "noise",
+                    "scale": 32,
+                    "color": [
+                      0.1,
+                      0.35,
+                      0.42
+                    ]
+                  }
+                }
+              ],
+              "materialOverrides": {
+                "mode": "slots",
+                "slots": [
+                  {
+                    "source": "Humanoid top",
+                    "materialId": "guardian.jacket"
+                  }
+                ]
+              }
+            },
+            "motion": [],
+            "poses": {
+              "root": [],
+              "joints": [
+                {
+                  "joint": "upper_arm.R",
+                  "keys": [
+                    {
+                      "frame": 0,
+                      "rotationDegrees": [
+                        0,
+                        0,
+                        0
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 104,
+                      "rotationDegrees": [
+                        0,
+                        0,
+                        0
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 122,
+                      "rotationDegrees": [
+                        -25,
+                        0,
+                        -55
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 138,
+                      "rotationDegrees": [
+                        -25,
+                        0,
+                        -55
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 165,
+                      "rotationDegrees": [
+                        5,
+                        0,
+                        -15
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 239,
+                      "rotationDegrees": [
+                        0,
+                        0,
+                        0
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 220,
+                      "rotationDegrees": [
+                        -55,
+                        0,
+                        -48
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 239,
+                      "rotationDegrees": [
+                        -68,
+                        0,
+                        -38
+                      ],
+                      "interpolation": "ease"
+                    }
+                  ]
+                },
+                {
+                  "joint": "forearm.R",
+                  "keys": [
+                    {
+                      "frame": 0,
+                      "rotationDegrees": [
+                        0,
+                        0,
+                        0
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 122,
+                      "rotationDegrees": [
+                        -75,
+                        0,
+                        0
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 138,
+                      "rotationDegrees": [
+                        -75,
+                        0,
+                        0
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 165,
+                      "rotationDegrees": [
+                        -20,
+                        0,
+                        0
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 239,
+                      "rotationDegrees": [
+                        0,
+                        0,
+                        0
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 220,
+                      "rotationDegrees": [
+                        -85,
+                        0,
+                        0
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 239,
+                      "rotationDegrees": [
+                        -90,
+                        0,
+                        0
+                      ],
+                      "interpolation": "ease"
+                    }
+                  ]
+                }
+              ]
+            },
+            "deformation": {
+              "skinning": "preserve-volume",
+              "subdivision": 0
+            },
+            "facial": {
+              "rigId": "face.study",
+              "layers": [],
+              "speech": [
+                {
+                  "kind": "phoneme",
+                  "id": "AA",
+                  "startFrame": 34,
+                  "endFrame": 43,
+                  "fadeInFrames": 2,
+                  "fadeOutFrames": 2
+                },
+                {
+                  "kind": "viseme",
+                  "id": "round",
+                  "startFrame": 45,
+                  "endFrame": 54,
+                  "fadeInFrames": 2,
+                  "fadeOutFrames": 2
+                },
+                {
+                  "kind": "phoneme",
+                  "id": "AA",
+                  "startFrame": 57,
+                  "endFrame": 67,
+                  "fadeInFrames": 2,
+                  "fadeOutFrames": 2
+                }
+              ],
+              "blinks": [
+                {
+                  "control": "blink",
+                  "startFrame": 32,
+                  "closeFrames": 2,
+                  "holdFrames": 1,
+                  "openFrames": 2
+                },
+                {
+                  "control": "blink",
+                  "startFrame": 220,
+                  "closeFrames": 2,
+                  "holdFrames": 1,
+                  "openFrames": 2
+                }
+              ],
+              "gaze": [
+                {
+                  "joint": "head",
+                  "target": {
+                    "kind": "entity",
+                    "entityId": "seeker",
+                    "joint": "head"
+                  },
+                  "forward": [
+                    0,
+                    0,
+                    1
+                  ],
+                  "startFrame": 0,
+                  "endFrame": 174,
+                  "weight": 0.55
+                },
+                {
+                  "joint": "head",
+                  "target": {
+                    "kind": "point",
+                    "position": [
+                      0,
+                      2.28,
+                      1.45
+                    ]
+                  },
+                  "forward": [
+                    0,
+                    0,
+                    1
+                  ],
+                  "startFrame": 210,
+                  "endFrame": 240,
+                  "weight": 0.65
+                }
+              ],
+              "overrides": []
+            }
+          },
+          {
+            "id": "seeker",
+            "transform": {
+              "position": {
+                "x": 0.55,
+                "y": 0,
+                "z": 0
+              },
+              "rotationDegrees": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "scale": 1
+            },
+            "rig": {
+              "profile": "FilmieHumanoid",
+              "version": 1
+            },
+            "source": {
+              "kind": "imported",
+              "asset": {
+                "assetId": "character.facial-performer",
+                "version": "1.0.0"
+              },
+              "body": {
+                "height": 1.72,
+                "shoulderWidth": 0.245,
+                "build": 1
+              },
+              "materials": [
+                {
+                  "id": "seeker.jacket",
+                  "color": [
+                    0.61,
+                    0.27,
+                    0.085
+                  ],
+                  "roughness": 0.42,
+                  "procedural": {
+                    "kind": "noise",
+                    "scale": 32,
+                    "color": [
+                      0.8,
+                      0.48,
+                      0.18
+                    ]
+                  }
+                }
+              ],
+              "materialOverrides": {
+                "mode": "slots",
+                "slots": [
+                  {
+                    "source": "Humanoid top",
+                    "materialId": "seeker.jacket"
+                  }
+                ]
+              }
+            },
+            "motion": [],
+            "poses": {
+              "root": [],
+              "joints": [
+                {
+                  "joint": "upper_arm.R",
+                  "keys": [
+                    {
+                      "frame": 0,
+                      "rotationDegrees": [
+                        0,
+                        0,
+                        0
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 70,
+                      "rotationDegrees": [
+                        0,
+                        0,
+                        0
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 96,
+                      "rotationDegrees": [
+                        -38,
+                        0,
+                        18
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 132,
+                      "rotationDegrees": [
+                        -48,
+                        0,
+                        24
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 145,
+                      "rotationDegrees": [
+                        18,
+                        0,
+                        -32
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 170,
+                      "rotationDegrees": [
+                        25,
+                        0,
+                        -39
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 215,
+                      "rotationDegrees": [
+                        -40,
+                        0,
+                        -35
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 239,
+                      "rotationDegrees": [
+                        -70,
+                        0,
+                        -28
+                      ],
+                      "interpolation": "ease"
+                    }
+                  ]
+                },
+                {
+                  "joint": "forearm.R",
+                  "keys": [
+                    {
+                      "frame": 0,
+                      "rotationDegrees": [
+                        0,
+                        0,
+                        0
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 74,
+                      "rotationDegrees": [
+                        0,
+                        0,
+                        0
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 110,
+                      "rotationDegrees": [
+                        -32,
+                        0,
+                        0
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 137,
+                      "rotationDegrees": [
+                        -40,
+                        0,
+                        0
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 163,
+                      "rotationDegrees": [
+                        -12,
+                        0,
+                        -7
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 215,
+                      "rotationDegrees": [
+                        -65,
+                        0,
+                        -20
+                      ],
+                      "interpolation": "ease"
+                    },
+                    {
+                      "frame": 239,
+                      "rotationDegrees": [
+                        -85,
+                        0,
+                        -26
+                      ],
+                      "interpolation": "ease"
+                    }
+                  ]
+                }
+              ]
+            },
+            "deformation": {
+              "skinning": "preserve-volume",
+              "subdivision": 0
+            },
+            "facial": {
+              "rigId": "face.study",
+              "layers": [],
+              "speech": [],
+              "blinks": [
+                {
+                  "control": "blink",
+                  "startFrame": 74,
+                  "closeFrames": 2,
+                  "holdFrames": 1,
+                  "openFrames": 2
+                },
+                {
+                  "control": "blink",
+                  "startFrame": 216,
+                  "closeFrames": 2,
+                  "holdFrames": 1,
+                  "openFrames": 2
+                }
+              ],
+              "gaze": [
+                {
+                  "joint": "head",
+                  "target": {
+                    "kind": "point",
+                    "position": [
+                      0,
+                      -0.65,
+                      1.12
+                    ]
+                  },
+                  "forward": [
+                    0,
+                    0,
+                    1
+                  ],
+                  "startFrame": 72,
+                  "endFrame": 107,
+                  "weight": 0.6
+                },
+                {
+                  "joint": "head",
+                  "target": {
+                    "kind": "entity",
+                    "entityId": "guardian",
+                    "joint": "head"
+                  },
+                  "forward": [
+                    0,
+                    0,
+                    1
+                  ],
+                  "startFrame": 108,
+                  "endFrame": 173,
+                  "weight": 0.65
+                },
+                {
+                  "joint": "head",
+                  "target": {
+                    "kind": "point",
+                    "position": [
+                      0,
+                      2.28,
+                      1.45
+                    ]
+                  },
+                  "forward": [
+                    0,
+                    0,
+                    1
+                  ],
+                  "startFrame": 210,
+                  "endFrame": 240,
+                  "weight": 0.7
+                }
+              ],
+              "overrides": []
+            }
+          }
+        ],
+        "lights": [
+          {
+            "id": "cinema.amber.key",
+            "type": "area",
+            "position": {
+              "x": -2.15,
+              "y": -2,
+              "z": 2.85
+            },
+            "target": {
+              "x": 0,
+              "y": -0.45,
+              "z": 1.25
+            },
+            "energy": 175,
+            "color": [
+              1,
+              0.72,
+              0.39
+            ],
+            "size": 1.3
+          },
+          {
+            "id": "cinema.teal.fill",
+            "type": "area",
+            "position": {
+              "x": 2.35,
+              "y": -1.7,
+              "z": 2.2
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1.25
+            },
+            "energy": 42,
+            "color": [
+              0.34,
+              0.68,
+              0.86
+            ],
+            "size": 2.6
+          },
+          {
+            "id": "cinema.rim",
+            "type": "area",
+            "position": {
+              "x": 0.85,
+              "y": 1.4,
+              "z": 2.75
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1.45
+            },
+            "energy": 115,
+            "color": [
+              0.53,
+              0.82,
+              1
+            ],
+            "size": 1.25
+          },
+          {
+            "id": "cinema.vault.glint",
+            "type": "area",
+            "position": {
+              "x": -1.8,
+              "y": 1.45,
+              "z": 2.75
+            },
+            "target": {
+              "x": 0,
+              "y": 2.25,
+              "z": 1.5
+            },
+            "energy": 85,
+            "color": [
+              1,
+              0.63,
+              0.27
+            ],
+            "size": 1.1
+          },
+          {
+            "id": "cinema.pedestal.accent",
+            "type": "area",
+            "position": {
+              "x": 0.45,
+              "y": -0.95,
+              "z": 2.45
+            },
+            "target": {
+              "x": 0,
+              "y": -0.65,
+              "z": 1.12
+            },
+            "energy": 38,
+            "color": [
+              1,
+              0.8,
+              0.48
+            ],
+            "size": 0.8
+          },
+          {
+            "id": "vault.aether.blue",
+            "type": "area",
+            "position": {
+              "x": 0,
+              "y": 1.9,
+              "z": 2.6
+            },
+            "target": {
+              "x": 0,
+              "y": 0,
+              "z": 1.45
+            },
+            "energy": 190,
+            "color": [
+              0.22,
+              0.61,
+              1
+            ],
+            "size": 1.75
+          },
+          {
+            "id": "vault.key.gold",
+            "type": "area",
+            "position": {
+              "x": 0.1,
+              "y": -0.8,
+              "z": 2.72
+            },
+            "target": {
+              "x": 0,
+              "y": -0.65,
+              "z": 1.14
+            },
+            "energy": 92,
+            "color": [
+              1,
+              0.8,
+              0.43
+            ],
+            "size": 0.75
+          }
+        ],
+        "camera": {
+          "type": "rigs",
+          "rigs": [
+            {
+              "id": "vault.establish",
+              "position": [
+                {
+                  "frame": 0,
+                  "value": [
+                    0,
+                    -2.42,
+                    1.8
+                  ]
+                }
+              ],
+              "lookAt": {
+                "kind": "point",
+                "position": [
+                  0,
+                  0.6,
+                  1.45
+                ]
+              },
+              "optics": {
+                "focalLength": 29
+              }
+            },
+            {
+              "id": "guardian.warn",
+              "position": [
+                {
+                  "frame": 0,
+                  "value": [
+                    -1.48,
+                    -1.7,
+                    1.66
+                  ]
+                }
+              ],
+              "lookAt": {
+                "kind": "entity",
+                "entityId": "guardian",
+                "joint": "head"
+              },
+              "optics": {
+                "focalLength": 63
+              }
+            },
+            {
+              "id": "key.glimmer",
+              "position": [
+                {
+                  "frame": 0,
+                  "value": [
+                    0.98,
+                    -1.55,
+                    1.73
+                  ]
+                }
+              ],
+              "lookAt": {
+                "kind": "point",
+                "position": [
+                  0,
+                  -0.65,
+                  1.12
+                ]
+              },
+              "optics": {
+                "focalLength": 58
+              }
+            },
+            {
+              "id": "seeker.reaches",
+              "position": [
+                {
+                  "frame": 0,
+                  "value": [
+                    1.58,
+                    -2.1,
+                    1.86
+                  ]
+                }
+              ],
+              "lookAt": {
+                "kind": "point",
+                "position": [
+                  0,
+                  -0.6,
+                  1.22
+                ]
+              },
+              "optics": {
+                "focalLength": 40
+              }
+            },
+            {
+              "id": "key.falls",
+              "position": [
+                {
+                  "frame": 0,
+                  "value": [
+                    1.44,
+                    -1.55,
+                    1.02
+                  ]
+                }
+              ],
+              "lookAt": {
+                "kind": "point",
+                "position": [
+                  0.64,
+                  -0.84,
+                  0.58
+                ]
+              },
+              "optics": {
+                "focalLength": 53
+              }
+            },
+            {
+              "id": "vault.reveal",
+              "position": [
+                {
+                  "frame": 0,
+                  "value": [
+                    1.55,
+                    0.12,
+                    1.84
+                  ]
+                }
+              ],
+              "lookAt": {
+                "kind": "point",
+                "position": [
+                  0,
+                  2.75,
+                  1.46
+                ]
+              },
+              "optics": {
+                "focalLength": 37
+              }
+            },
+            {
+              "id": "two.reaction",
+              "position": [
+                {
+                  "frame": 0,
+                  "value": [
+                    0,
+                    -2.43,
+                    1.67
+                  ]
+                }
+              ],
+              "lookAt": {
+                "kind": "point",
+                "position": [
+                  0,
+                  0.52,
+                  1.27
+                ]
+              },
+              "optics": {
+                "focalLength": 36
+              }
+            }
+          ],
+          "cuts": [
+            {
+              "cameraId": "vault.establish",
+              "startFrame": 0,
+              "endFrame": 31
+            },
+            {
+              "cameraId": "guardian.warn",
+              "startFrame": 31,
+              "endFrame": 69
+            },
+            {
+              "cameraId": "key.glimmer",
+              "startFrame": 69,
+              "endFrame": 103
+            },
+            {
+              "cameraId": "seeker.reaches",
+              "startFrame": 103,
+              "endFrame": 144
+            },
+            {
+              "cameraId": "key.falls",
+              "startFrame": 144,
+              "endFrame": 185
+            },
+            {
+              "cameraId": "vault.reveal",
+              "startFrame": 185,
+              "endFrame": 216
+            },
+            {
+              "cameraId": "two.reaction",
+              "startFrame": 216,
+              "endFrame": 240
+            }
+          ]
+        },
+        "visualSettings": {
+          "saturation": 1.08,
+          "roughnessScale": 0.85,
+          "exposure": 0.12
+        },
+        "facialRigs": [
+          {
+            "id": "face.study",
+            "bones": [
+              {
+                "id": "face.jaw",
+                "source": "DemoJaw",
+                "parent": "head",
+                "head": [
+                  0,
+                  -0.043000000000000003,
+                  1.58412
+                ],
+                "tail": [
+                  0,
+                  -0.1118,
+                  1.54112
+                ],
+                "min": [
+                  -30,
+                  -10,
+                  -10
+                ],
+                "max": [
+                  35,
+                  10,
+                  10
+                ]
+              },
+              {
+                "id": "face.eye.L",
+                "source": "DemoEyeL",
+                "parent": "head",
+                "head": [
+                  0.04128,
+                  -0.08428000000000001,
+                  1.61852
+                ],
+                "tail": [
+                  0.04128,
+                  -0.1634,
+                  1.61852
+                ],
+                "min": [
+                  -50,
+                  -50,
+                  -50
+                ],
+                "max": [
+                  50,
+                  50,
+                  50
+                ]
+              },
+              {
+                "id": "face.eye.R",
+                "source": "DemoEyeR",
+                "parent": "head",
+                "head": [
+                  -0.04128,
+                  -0.08428000000000001,
+                  1.61852
+                ],
+                "tail": [
+                  -0.04128,
+                  -0.1634,
+                  1.61852
+                ],
+                "min": [
+                  -50,
+                  -50,
+                  -50
+                ],
+                "max": [
+                  50,
+                  50,
+                  50
+                ]
+              }
+            ],
+            "controls": {
+              "smile": [
+                {
+                  "kind": "morph",
+                  "mesh": "Facial Surface",
+                  "target": "Smile"
+                }
+              ],
+              "round": [
+                {
+                  "kind": "morph",
+                  "mesh": "Facial Surface",
+                  "target": "Round"
+                }
+              ],
+              "blink": [
+                {
+                  "kind": "morph",
+                  "mesh": "Facial Surface",
+                  "target": "Blink"
+                }
+              ],
+              "jaw": [
+                {
+                  "kind": "bone",
+                  "joint": "face.jaw",
+                  "rotationDegrees": [
+                    22,
+                    0,
+                    0
+                  ]
+                }
+              ]
+            },
+            "expressions": {
+              "warm": {
+                "smile": 0.75
+              }
+            },
+            "visemes": {
+              "open": {
+                "jaw": 0.9
+              },
+              "round": {
+                "jaw": 0.28,
+                "round": 0.8
+              }
+            },
+            "phonemes": {
+              "AA": "open",
+              "OO": "round"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "timeline": {
+    "durationFrames": 240,
+    "videoTracks": [
+      {
+        "id": "video.main",
+        "clips": [
+          {
+            "shotId": "shot.last-key",
+            "startFrame": 0
+          }
+        ]
+      }
+    ],
+    "audioTracks": [],
+    "transitions": []
+  }
+}
