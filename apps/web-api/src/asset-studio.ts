@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join, relative, resolve } from 'node:path';
 import { AssetRegistry, type AssetVersion } from '@filmmaking/assets';
 import { ProceduralAssetDefinitionSchema } from '@filmmaking/contracts';
@@ -243,11 +243,9 @@ export class AssetStudioService {
     const project = this.store.project(projectId);
     const source = this.find(assetId, version);
     const registryPath = this.store.registryPath(project.id);
-    const entries = this.store
-      .projects()
-      .some((candidate) => candidate.id === project.id)
-      ? (JSON.parse(readFileSync(registryPath, 'utf8')) as unknown[])
-      : [];
+    const entries = JSON.parse(
+      readFileSync(registryPath, 'utf8'),
+    ) as unknown[];
     const registry = new AssetRegistry(entries);
     const existing = registry
       .list()
