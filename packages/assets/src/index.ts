@@ -8,6 +8,8 @@ import {
   AssetVersionReferenceSchema,
   StableIdSchema,
   type AssetVersionReference,
+  AssetDescriptorSchema,
+  type AssetDescriptor,
 } from '@filmmaking/contracts';
 import { z } from 'zod';
 
@@ -61,11 +63,20 @@ export const AssetVersionSchema = z
         acquiredAt: z.iso.datetime().optional(),
       })
       .strict(),
+    descriptor: AssetDescriptorSchema.optional(),
   })
   .strict();
 
 export type AssetVersion = z.infer<typeof AssetVersionSchema>;
 export type ResolvedAsset = AssetVersion & { localPath: string };
+export { AssetDescriptorSchema };
+export type { AssetDescriptor };
+export {
+  GlbInspectionError,
+  inspectGlbBytes,
+  inspectGlbFile,
+  type GlbAssetInspection,
+} from './glb-inspector.js';
 
 export function modelImportFormat(asset: {
   type: string;

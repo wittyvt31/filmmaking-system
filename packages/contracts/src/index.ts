@@ -26,3 +26,4 @@ export * from './retargeting.js';
 export * from './secondary-motion.js';
 export * from './articulated-dynamics.js';
 export * from './world-joints.js';
+export * from './asset-descriptor.js';

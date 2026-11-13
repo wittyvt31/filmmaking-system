@@ -12,6 +12,7 @@ import {
 } from '@filmmaking/orchestrator';
 import { FfmpegMediaEngine } from '@filmmaking/media';
 import { BlenderRendererAdapter } from '@filmmaking/engine-blender';
+import { inspectGlbFile } from '@filmmaking/assets';
 
 const cli = createCommand('filmie')
   .description(
@@ -149,6 +150,21 @@ cli
       !report.media.ffprobeAvailable
     )
       process.exitCode = 1;
+  });
+
+cli
+  .command('inspect-asset')
+  .description('Inspect a GLB asset and report verified structural properties.')
+  .requiredOption('--file <path>', 'GLB file to inspect')
+  .option(
+    '--descriptor <path>',
+    'Optional authored, versioned asset descriptor JSON',
+  )
+  .action(async ({ file, descriptor }) => {
+    const descriptorInput = descriptor
+      ? JSON.parse(await readFile(resolve(descriptor), 'utf8'))
+      : undefined;
+    printJson(await inspectGlbFile(resolve(file), descriptorInput));
   });
 
 projectOptions(
