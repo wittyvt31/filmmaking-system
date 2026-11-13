@@ -28,6 +28,21 @@ pnpm filmie normalize-asset --input path\to\input.glb --output path\to\filmie-as
 Normalization canonicalizes the GLB JSON chunk, preserves the binary payload and
 component references, and rejects external resources or ambiguous transforms.
 
+## Asset Lab — test real procedural model generation
+
+Generate a deterministic articulated crane, publish the resulting GLB and
+reimport it into Blender for a quick material/geometry preview:
+
+```powershell
+pnpm filmie build-procedural-asset --definition examples/asset-lab/crane.definition.json --registry renders/asset-lab/assets.json --license-name "Filmie reference demo" --preview renders/asset-lab/crane.png
+```
+
+Open `renders/asset-lab/crane.png` to inspect the result. The same directory
+contains the immutable content-addressed GLB, registry and validation reports.
+See [Asset Lab](examples/asset-lab/README.md) for requirements, expected output
+and guidance. The preview is intentionally lightweight; it is not a cinematic
+shot render.
+
 Run `pnpm web` and open [Filmie Studio](http://127.0.0.1:4173). Create a project from the `3d-production` catalog, edit and validate the manifest, save a revision, then run it. Restart the command after changing frontend or API source. To access it from your local network, set `FILMIE_WEB_HOST=0.0.0.0` and `FILMIE_WEB_ALLOWED_HOSTS` to the server's IP address before running `pnpm web`; allow the selected port through the Windows firewall on a private network only. The app has no authentication, so only expose it to trusted devices.
 
 The web app stores project revisions and run history in `.filmie/`, writes outputs to `renders/web/`, and shares the production cache with the CLI. Set `FILMIE_WEB_PORT` to change the port or `FILMIE_WEB_CATALOGS` to use another folder of prepared projects, each with a `manifest.json` and `assets.json`. Keep the catalog asset files available for reruns.
