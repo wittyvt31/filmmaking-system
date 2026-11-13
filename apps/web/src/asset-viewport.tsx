@@ -30,9 +30,9 @@ const normal = (v: Vec3): Vec3 => {
 };
 
 function rotate(point: Vec3, degrees: { x: number; y: number; z: number }): Vec3 {
-  const [x, y, z] = [degrees.x, degrees.y, degrees.z].map(
-    (value) => (value * Math.PI) / 180,
-  );
+  const x = (degrees.x * Math.PI) / 180;
+  const y = (degrees.y * Math.PI) / 180;
+  const z = (degrees.z * Math.PI) / 180;
   const a: Vec3 = [
     point[0],
     point[1] * Math.cos(x) - point[2] * Math.sin(x),
@@ -75,7 +75,10 @@ function transformPoint(
 
 function shapeSurfaces(shape: Shape): Vec3[][] {
   if (shape.kind === 'box') {
-    const [x, y, z] = shape.dimensions.map((value) => value / 2);
+    const [dx, dy, dz] = shape.dimensions;
+    const x = dx / 2;
+    const y = dy / 2;
+    const z = dz / 2;
     const v: Vec3[] = [
       [-x, -y, -z],
       [x, -y, -z],
