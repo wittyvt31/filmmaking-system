@@ -6,6 +6,7 @@ import {
 import { join } from 'node:path';
 import { listOutputs, sendFile, sendOutput } from './files.js';
 import { ProductionService } from './production.js';
+import { AssetStudioService } from './asset-studio.js';
 import { ApiError, WorkspaceStore } from './store.js';
 
 function json(response: ServerResponse, data: unknown, status = 200): void {
@@ -72,6 +73,11 @@ export function createFilmieServer(options: {
     options.outputDirectory,
     options.cacheDirectory,
   );
+  const assetStudio = new AssetStudioService(
+    options.dataDirectory,
+    options.catalogsDirectory,
+    store,
+  );
   const server = createServer((request, response) => {
     response.setHeader('X-Content-Type-Options', 'nosniff');
     response.setHeader(
@@ -118,6 +124,40 @@ export function createFilmieServer(options: {
       }
       const [, api, resource, id, action, ...rest] = url.pathname.split('/');
       if (api !== 'api') throw new ApiError(404, 'Route not found.');
+      if (resource === 'asset-studio') {
+        if (method === 'GET' && id === 'template' && !action)
+          return json(response, { definition: assetStudio.template() });
+        if (method === 'GET' && id === 'assets' && !action)
+          return json(response, { assets: assetStudio.list() });
+        if (method === 'GET' && id === 'definitions' && action && rest.length === 1)
+          return json(response, {
+            definition: assetStudio.definition(
+              decodeURIComponent(action),
+              decodeURIComponent(rest[0]!),
+            ),
+          });
+        if (method === 'GET' && id === 'files' && action && rest.length === 1) {
+          const file = assetStudio.file(action, rest[0]!);
+          await sendFile(request, response, file.path, file.type);
+          return;
+        }
+        if (method === 'POST' && !action) {
+          const input = await body(request);
+          if (id === 'validate')
+            return json(response, assetStudio.validate(input['definition']));
+          if (id === 'build')
+            return json(response, await assetStudio.build(input['definition']), 201);
+          if (id === 'attach')
+            return json(
+              response,
+              assetStudio.attach(
+                field(input, 'projectId'),
+                field(input, 'assetId'),
+                field(input, 'version'),
+              ),
+            );
+        }
+      }
       if (resource === 'projects' && !id && method === 'GET')
         return json(response, {
           projects: store.projects(),
