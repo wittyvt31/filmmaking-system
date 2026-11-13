@@ -31,6 +31,8 @@ jobs:
         run: pnpm exec tsc -b packages/contracts packages/assets packages/scene engines/blender apps/cli --pretty false
       - name: Test asset and articulation contracts
         run: pnpm exec vitest run tests/asset-descriptor.test.ts --reporter=dot
-      - name: Check formatting of affected TypeScript
+      - name: Check Python asset workers compile
+        run: python3 -m py_compile engines/blender/worker/procedural_asset.py engines/blender/worker/asset_preview.py engines/blender/worker/model_import.py
+      - name: Check formatting of asset pipeline
         run: |
-          pnpm exec prettier --check packages/scene/src/articulated-kinematics.ts packages/scene/src/index.ts engines/blender/src/index.ts tests/asset-descriptor.test.ts
+          pnpm exec prettier --check packages/scene/src/articulated-kinematics.ts packages/scene/src/index.ts engines/blender/src/index.ts engines/blender/src/procedural-assets.ts apps/cli/src/index.ts tests/asset-descriptor.test.ts examples/asset-lab/crane.definition.json
