@@ -107,15 +107,24 @@ def import_model(asset, destination, character=False):
                     "Semantic handle node index is outside the imported GLB: "
                     + handle.get("id", "unknown")
                 )
-            mapped = objects_by_node_index.get(node_index)
-            if mapped is None and 0 <= node_index < len(nodes):
-                extras = nodes[node_index].get("extras", {})
-                if isinstance(extras, dict):
-                    part_id = extras.get("filmieProceduralPartId") or extras.get(
-                        "filmie_procedural_part_id"
+            extras = nodes[node_index].get("extras", {})
+            part_id = None
+            if isinstance(extras, dict):
+                part_id = extras.get("filmieProceduralPartId") or extras.get(
+                    "filmie_procedural_part_id"
+                )
+            indexed = objects_by_node_index.get(node_index)
+            if isinstance(part_id, str):
+                # The GLB document is authoritative: an importer-generated index
+                # marker must never redirect a procedural handle to another part.
+                mapped = objects_by_part_id.get(part_id)
+                if indexed is not None and mapped is not None and indexed != mapped:
+                    raise ValueError(
+                        "Conflicting GLB index and procedural part metadata for handle: "
+                        + handle.get("id", "unknown")
                     )
-                    if isinstance(part_id, str):
-                        mapped = objects_by_part_id.get(part_id)
+            else:
+                mapped = indexed
             if mapped is None:
                 raise ValueError(
                     "GLB lacks deterministic semantic node metadata for handle: "
