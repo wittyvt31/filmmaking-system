@@ -16,6 +16,7 @@ import {
   buildProceduralAsset,
   convertAssetToGlb,
   publishAsset,
+  renderAssetPreview,
 } from '@filmmaking/engine-blender';
 import { inspectGlbFile, normalizeGlbFile } from '@filmmaking/assets';
 
@@ -312,6 +313,10 @@ cli
   .option('--report-directory <directory>', 'Diagnostic report directory')
   .option('--cache-directory <directory>', 'Procedural GLB cache directory')
   .option(
+    '--preview <path>',
+    'Render a quick PNG preview by reimporting the published GLB in Blender',
+  )
+  .option(
     '--metadata <json>',
     'Additional JSON object to store in asset metadata',
   )
@@ -331,6 +336,7 @@ cli
       artifactDirectory,
       reportDirectory,
       cacheDirectory,
+      preview,
       metadata,
       blender,
       timeout,
@@ -354,8 +360,38 @@ cli
           restrictions: licenseRestriction,
         },
       });
-      printJson(report);
-      if (report.status === 'rejected') process.exitCode = 1;
+      if (report.status === 'rejected' || !preview) {
+        printJson(report);
+        if (report.status === 'rejected') process.exitCode = 1;
+        return;
+      }
+      if (!report.artifactPath || !report.assetId || !report.version)
+        throw new Error('Published procedural asset has no resolvable artifact.');
+      const registryEntries = JSON.parse(
+        await readFile(resolve(registry), 'utf8'),
+      ) as {
+        assetId: string;
+        version: string;
+        descriptor?: unknown;
+      }[];
+      const published = registryEntries.find(
+        (asset) =>
+          asset.assetId === report.assetId &&
+          asset.version === report.version,
+      );
+      if (!published?.descriptor)
+        throw new Error('Published procedural asset descriptor is missing.');
+      const previewReport = await renderAssetPreview({
+        inputPath: report.artifactPath,
+        outputPath: preview,
+        assetId: report.assetId,
+        version: report.version,
+        descriptor: published.descriptor,
+        ...(blender === undefined ? {} : { blenderPath: blender }),
+        ...(timeout === undefined ? {} : { timeoutMs: timeout }),
+      });
+      printJson({ build: report, preview: previewReport });
+      if (previewReport.status === 'rejected') process.exitCode = 1;
     },
   );
 
