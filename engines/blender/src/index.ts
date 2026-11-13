@@ -1010,16 +1010,15 @@ export class BlenderRendererAdapter implements RendererAdapter {
             `Articulated entity "${track.objectId}" has no model asset`,
           );
         const asset = resolveModelAsset(reference);
-        if (!asset.descriptor)
+        const descriptor = asset.descriptor;
+        if (!descriptor)
           throw new BlenderFailure(
             'INVALID_INSTRUCTIONS',
             `Articulated entity "${track.objectId}" requires a published semantic descriptor`,
           );
         const knownControls = new Set([
-          ...asset.descriptor.articulation.joints.map((joint) => joint.id),
-          ...asset.descriptor.articulation.controls.map(
-            (control) => control.id,
-          ),
+          ...descriptor.articulation.joints.map((joint) => joint.id),
+          ...descriptor.articulation.controls.map((control) => control.id),
         ]);
         for (const control of track.controls)
           if (!knownControls.has(control.id))
@@ -1031,7 +1030,32 @@ export class BlenderRendererAdapter implements RendererAdapter {
         // Compile the descriptor and joint graph once per asset instance.
         // The keys are ordered by the scene contract, so a cursor avoids
         // searching and reversing every control track for every frame.
-        const evaluate = createArticulatedKinematicsEvaluator(asset.descriptor);
+        const evaluate = createArticulatedKinematicsEvaluator(descriptor);
+        // Only joint-controlled children need keyframes. Non-articulated
+        // descendants inherit their Blender parent transform automatically.
+        const animatedNodeIndices = [
+          ...new Set(
+            descriptor.articulation.joints.map((joint) => {
+              const resolved = descriptor.resolvedHandles?.find(
+                (handle) => handle.id === joint.child,
+              );
+              const authored = descriptor.handles.find(
+                (handle) => handle.id === joint.child,
+              );
+              const nodeIndex =
+                resolved?.nodeIndex ??
+                (authored && typeof authored.target !== 'string'
+                  ? authored.target.nodeIndex
+                  : undefined);
+              if (nodeIndex === undefined)
+                throw new BlenderFailure(
+                  'INVALID_INSTRUCTIONS',
+                  `Articulated joint "${joint.id}" has no deterministic child node`,
+                );
+              return nodeIndex;
+            }),
+          ),
+        ].sort((a, b) => a - b);
         const samplers = track.controls.map((control) => ({
           id: control.id,
           keys: control.keys,
@@ -1057,10 +1081,18 @@ export class BlenderRendererAdapter implements RendererAdapter {
                     (right.frame - left.frame);
           }
           const evaluated = evaluate(controls);
-          frames.push({
-            frame: frame + 1,
-            nodes: evaluated.nodeTransforms,
-          });
+          const nodes = Object.fromEntries(
+            animatedNodeIndices.map((index) => {
+              const pose = evaluated.nodeTransforms[index];
+              if (!pose)
+                throw new BlenderFailure(
+                  'INVALID_INSTRUCTIONS',
+                  `Articulated node ${index} has no evaluated transform`,
+                );
+              return [index, pose];
+            }),
+          );
+          frames.push({ frame: frame + 1, nodes });
         }
         return { objectId: track.objectId, frames };
       });
