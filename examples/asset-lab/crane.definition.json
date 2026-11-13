@@ -6,41 +6,25 @@
   "materials": [
     {
       "id": "gunmetal",
-      "color": [
-        0.17,
-        0.23,
-        0.31
-      ],
+      "color": [0.17, 0.23, 0.31],
       "metallic": 0.5,
       "roughness": 0.42
     },
     {
       "id": "construction-yellow",
-      "color": [
-        0.94,
-        0.58,
-        0.08
-      ],
+      "color": [0.94, 0.58, 0.08],
       "metallic": 0.15,
       "roughness": 0.5
     },
     {
       "id": "silver",
-      "color": [
-        0.55,
-        0.66,
-        0.72
-      ],
+      "color": [0.55, 0.66, 0.72],
       "metallic": 0.65,
       "roughness": 0.33
     },
     {
       "id": "signal-red",
-      "color": [
-        0.86,
-        0.12,
-        0.14
-      ],
+      "color": [0.86, 0.12, 0.14],
       "metallic": 0.1,
       "roughness": 0.45
     }
@@ -51,11 +35,7 @@
       "materialId": "gunmetal",
       "shape": {
         "kind": "box",
-        "dimensions": [
-          2.2,
-          1.5,
-          0.36
-        ]
+        "dimensions": [2.2, 1.5, 0.36]
       }
     },
     {
@@ -73,11 +53,7 @@
       "materialId": "construction-yellow",
       "shape": {
         "kind": "box",
-        "dimensions": [
-          3.5,
-          0.32,
-          0.3
-        ]
+        "dimensions": [3.5, 0.32, 0.3]
       }
     },
     {
@@ -85,11 +61,7 @@
       "materialId": "gunmetal",
       "shape": {
         "kind": "box",
-        "dimensions": [
-          0.9,
-          0.85,
-          0.5
-        ]
+        "dimensions": [0.9, 0.85, 0.5]
       }
     },
     {
@@ -254,11 +226,7 @@
       "type": "revolute",
       "parentPartId": "foundation",
       "childPartId": "turret",
-      "axis": [
-        0,
-        0,
-        1
-      ],
+      "axis": [0, 0, 1],
       "limits": {
         "lower": -1.5,
         "upper": 1.5
@@ -271,11 +239,7 @@
       "type": "revolute",
       "parentPartId": "turret",
       "childPartId": "boom",
-      "axis": [
-        0,
-        1,
-        0
-      ],
+      "axis": [0, 1, 0],
       "limits": {
         "lower": -0.75,
         "upper": 0.75
@@ -288,11 +252,7 @@
       "type": "prismatic",
       "parentPartId": "boom",
       "childPartId": "hook",
-      "axis": [
-        0,
-        0,
-        -1
-      ],
+      "axis": [0, 0, -1],
       "limits": {
         "lower": 0,
         "upper": 1.1
@@ -303,9 +263,7 @@
   ],
   "capabilities": {
     "assetClass": "prop",
-    "requirements": [
-      "articulation"
-    ],
+    "requirements": ["articulation"],
     "mappings": [
       {
         "capability": "articulation",
