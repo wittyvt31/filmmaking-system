@@ -57,6 +57,7 @@ const worldInstance = z.object({
   version: AssetVersionReferenceSchema.shape.version,
   transform: SceneTransformSchema,
   role: shortId.optional(),
+  characterHeight: z.number().finite().min(0.5).max(3).optional(),
 }).strict();
 const worldSchema = z.object({
   id: shortId,
@@ -409,28 +410,63 @@ export class ExternalLibraryService {
       shots?: {
         id?: string;
         requiredAssets?: { assetId: string; version: string }[];
-        scene?: { world?: { entities?: unknown[] } };
+        scene?: { world?: { entities?: unknown[] }; characters?: { id?: string }[] };
       }[];
     };
     if (!Array.isArray(current.shots) || !current.shots.length)
       throw new ApiError(422, 'A production project must contain shots with world scenes.');
-    const entities = world.instances.map((instance) => ({
-      id: instance.id,
-      transform: instance.transform,
-      geometry: {
-        kind: 'asset' as const,
-        asset: { assetId: instance.assetId, version: instance.version },
-      },
-    }));
+    const entities: {
+      id: string;
+      transform: WorldPackage['instances'][number]['transform'];
+      geometry: { kind: 'asset'; asset: { assetId: string; version: string } };
+    }[] = [];
+    const characters: {
+      id: string;
+      transform: WorldPackage['instances'][number]['transform'];
+      rig: { profile: 'FilmieHumanoid'; version: 1 };
+      source: { kind: 'imported'; asset: { assetId: string; version: string };
+        body: { height: number } };
+    }[] = [];
+    for (const instance of world.instances) {
+      const asset = this.asset(instance.assetId, instance.version);
+      const kind = (asset.metadata['filmieLibrary'] as Record<string, unknown> | undefined)?.['category'];
+      if (kind === 'character' &&
+          asset.metadata['rigProfile'] === 'FilmieHumanoid' &&
+          asset.metadata['rigVersion'] === 1 &&
+          asset.metadata['rigJointMap']) {
+        characters.push({
+          id: instance.id,
+          transform: instance.transform,
+          rig: { profile: 'FilmieHumanoid', version: 1 },
+          source: {
+            kind: 'imported',
+            asset: { assetId: instance.assetId, version: instance.version },
+            body: { height: instance.characterHeight ?? 1.65 },
+          },
+        });
+      } else {
+        entities.push({
+          id: instance.id,
+          transform: instance.transform,
+          geometry: {
+            kind: 'asset',
+            asset: { assetId: instance.assetId, version: instance.version },
+          },
+        });
+      }
+    }
     for (const shot of current.shots) {
       if (!shot.scene?.world || !Array.isArray(shot.scene.world.entities))
         throw new ApiError(422, 'All shots must contain a world before assembly.');
       const used = new Set(shot.scene.world.entities.map((item) =>
         typeof item === 'object' && item !== null && 'id' in item ? (item as { id: unknown }).id : undefined,
       ));
-      if (entities.some((entity) => used.has(entity.id)))
-        throw new ApiError(409, 'World instance ID collides with an existing scene entity. Rename the world instance.');
+      const existingCharacters = shot.scene.characters ?? [];
+      for (const character of existingCharacters) used.add(character.id);
+      if ([...entities, ...characters].some((entity) => used.has(entity.id)))
+        throw new ApiError(409, 'World instance ID collides with an existing scene entity or character. Rename the world instance.');
       shot.scene.world.entities.push(...entities);
+      shot.scene.characters = [...existingCharacters, ...characters];
       const required = shot.requiredAssets ?? [];
       const keys = new Set(required.map((item) => item.assetId + '@' + item.version));
       for (const instance of world.instances) {
