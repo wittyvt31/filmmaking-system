@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { AssetDescriptorSchema } from '@filmmaking/contracts';
 import {
   AssetVersionSchema,
+  AssetRegistry,
   inspectGlbBytes,
   normalizeGlbFile,
   validateAssetDescriptor,
@@ -13,6 +14,7 @@ import {
   assetFactoryFormat,
   convertAssetToGlb,
 } from '../engines/blender/src/asset-factory.js';
+import { publishAsset } from '../engines/blender/src/asset-publisher.js';
 import { expect, it } from 'vitest';
 
 function glb(json: Record<string, unknown>): Uint8Array {
@@ -376,6 +378,73 @@ it('converts GLB through the existing canonicalization path and detects formats'
     expect(result.sourceFormat).toBe('glb');
     expect(result.outputSha256).toMatch(/^[a-f0-9]{64}$/);
     expect(result.after?.nodes[0]?.name).toBe('Root');
+  } finally {
+    await rm(temporary, { recursive: true, force: true });
+  }
+});
+
+it('publishes deterministic content-addressed assets and reuses registry entries', async () => {
+  const temporary = await mkdtemp(join(tmpdir(), 'filmie-asset-publish-'));
+  try {
+    const inputPath = join(temporary, 'input.glb');
+    const registryPath = join(temporary, 'assets.json');
+    const descriptor = {
+      schemaVersion: 1,
+      assetId: 'published.model',
+      assetVersion: '1.0.0',
+      provenance: { source: 'focused-test' },
+    };
+    await writeFile(
+      inputPath,
+      glb({
+        scenes: [{ nodes: [0] }],
+        nodes: [{ name: 'Root', mesh: 0 }],
+        meshes: [
+          { name: 'Body', primitives: [{ attributes: { POSITION: 0 } }] },
+        ],
+      }),
+    );
+    const publishOptions = {
+      inputPath,
+      descriptor,
+      registryPath,
+      license: { name: 'test', restrictions: [] },
+    };
+    const first = await publishAsset(publishOptions);
+    const second = await publishAsset(publishOptions);
+    expect(first.status).toBe('published');
+    expect(second.status).toBe('reused');
+    expect(first.artifactPath).toBe(second.artifactPath);
+    const registry = new AssetRegistry(
+      JSON.parse(await readFile(registryPath, 'utf8')),
+    );
+    const asset = registry.resolve({
+      assetId: 'published.model',
+      version: '1.0.0',
+    });
+    expect(asset.contentHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(asset.descriptor?.assetId).toBe('published.model');
+  } finally {
+    await rm(temporary, { recursive: true, force: true });
+  }
+});
+
+it('rejects publishing descriptors without immutable identity', async () => {
+  const temporary = await mkdtemp(join(tmpdir(), 'filmie-asset-publish-'));
+  try {
+    const inputPath = join(temporary, 'input.glb');
+    await writeFile(inputPath, glb({ nodes: [], meshes: [] }));
+    const result = await publishAsset({
+      inputPath,
+      descriptor: {
+        schemaVersion: 1,
+        provenance: { source: 'focused-test' },
+      },
+      registryPath: join(temporary, 'assets.json'),
+      license: { name: 'test', restrictions: [] },
+    });
+    expect(result.status).toBe('rejected');
+    expect(result.diagnostics[0]?.code).toBe('IDENTITY_MISSING');
   } finally {
     await rm(temporary, { recursive: true, force: true });
   }

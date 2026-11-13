@@ -14,6 +14,7 @@ import { FfmpegMediaEngine } from '@filmmaking/media';
 import {
   BlenderRendererAdapter,
   convertAssetToGlb,
+  publishAsset,
 } from '@filmmaking/engine-blender';
 import { inspectGlbFile, normalizeGlbFile } from '@filmmaking/assets';
 
@@ -221,6 +222,73 @@ cli
     printJson(report);
     if (report.status === 'rejected') process.exitCode = 1;
   });
+
+cli
+  .command('publish-asset')
+  .description('Validate, normalize, and publish an immutable model asset.')
+  .requiredOption('--input <path>', 'Source asset path')
+  .requiredOption('--descriptor <path>', 'Authored asset descriptor JSON')
+  .requiredOption('--registry <path>', 'Asset registry JSON path')
+  .requiredOption('--license-name <name>', 'License name')
+  .option('--license-url <url>', 'License URL')
+  .option(
+    '--license-restriction <restriction>',
+    'License restriction (repeatable)',
+    (value: string, previous: string[] = []) => [...previous, value],
+    [],
+  )
+  .option(
+    '--artifact-directory <directory>',
+    'Content-addressed artifact directory',
+  )
+  .option('--report-directory <directory>', 'Diagnostic report directory')
+  .option(
+    '--metadata <json>',
+    'Additional JSON object to store in asset metadata',
+  )
+  .option('--blender <path>', 'Blender executable override')
+  .option(
+    '--timeout <milliseconds>',
+    'Optional Blender conversion timeout',
+    (value: string) => Number.parseInt(value, 10),
+  )
+  .action(
+    async ({
+      input,
+      descriptor,
+      registry,
+      licenseName,
+      licenseUrl,
+      licenseRestriction,
+      artifactDirectory,
+      reportDirectory,
+      metadata,
+      blender,
+      timeout,
+    }) => {
+      const descriptorInput = JSON.parse(
+        await readFile(resolve(descriptor), 'utf8'),
+      );
+      const metadataInput = metadata ? JSON.parse(metadata) : undefined;
+      const report = await publishAsset({
+        inputPath: input,
+        descriptor: descriptorInput,
+        registryPath: registry,
+        ...(artifactDirectory === undefined ? {} : { artifactDirectory }),
+        ...(reportDirectory === undefined ? {} : { reportDirectory }),
+        ...(metadataInput === undefined ? {} : { metadata: metadataInput }),
+        ...(blender === undefined ? {} : { blenderPath: blender }),
+        ...(timeout === undefined ? {} : { timeoutMs: timeout }),
+        license: {
+          name: licenseName,
+          ...(licenseUrl === undefined ? {} : { url: licenseUrl }),
+          restrictions: licenseRestriction,
+        },
+      });
+      printJson(report);
+      if (report.status === 'rejected') process.exitCode = 1;
+    },
+  );
 
 projectOptions(
   cli

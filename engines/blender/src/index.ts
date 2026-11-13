@@ -46,6 +46,7 @@ export {
   convertAssetToGlb,
   type AssetFactoryReport,
 } from './asset-factory.js';
+export { publishAsset, type AssetPublishReport } from './asset-publisher.js';
 const RENDERER_ID = 'blender';
 const ENGINE_PACKAGE_DIRECTORY = resolve(
   dirname(fileURLToPath(import.meta.url)),
