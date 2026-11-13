@@ -133,19 +133,19 @@ export function AssetStudio({
         controller.signal,
       ),
     ])
-      .then(([template, assets]) => {
+      .then(async ([template, assets]) => {
         if (controller.signal.aborted) return;
         let initial = template.definition;
         try {
           const saved = localStorage.getItem('filmie.asset-studio.draft');
           if (saved) {
             const parsed = JSON.parse(saved) as ProceduralAssetDefinition;
-            if (
-              parsed &&
-              Array.isArray(parsed.parts) &&
-              Array.isArray(parsed.meshes)
-            )
-              initial = parsed;
+            const check = await api<AssetStudioValidation>(
+              'asset-studio/validate',
+              { definition: parsed },
+              controller.signal,
+            );
+            if (check.valid) initial = parsed;
           }
         } catch {
           // Browsers may disallow storage; the server template remains usable.
@@ -473,12 +473,21 @@ export function AssetStudio({
             onChange={(event) => {
               const file = event.target.files?.[0];
               if (!file) return;
-              void file.text().then((text) => {
-                try {
-                  load(JSON.parse(text) as ProceduralAssetDefinition);
-                } catch (cause) {
-                  setError('Could not import JSON: ' + message(cause));
-                }
+              void perform(async () => {
+                const parsed = JSON.parse(
+                  await file.text(),
+                ) as ProceduralAssetDefinition;
+                const check = await api<AssetStudioValidation>(
+                  'asset-studio/validate',
+                  { definition: parsed },
+                );
+                if (!check.valid)
+                  throw new Error(
+                    'Imported definition is invalid:\\n' +
+                      check.issues.map((issue) => issue.path + ': ' + issue.message).join('\\n'),
+                  );
+                load(parsed);
+                setNotice('Imported and validated the asset definition.');
               });
               event.currentTarget.value = '';
             }}
