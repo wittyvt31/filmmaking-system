@@ -705,6 +705,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
           localPath: asset.localPath,
           contentHash: asset.contentHash,
           metadata: asset.metadata,
+          ...(asset.descriptor ? { descriptor: asset.descriptor } : {}),
         };
       };
       const resolveModelAsset = (reference: {

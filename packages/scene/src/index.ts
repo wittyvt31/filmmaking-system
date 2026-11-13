@@ -43,6 +43,8 @@ export * from './contact-response.js';
 export * from './rigid-transforms.js';
 export { identity, multiply } from './motion-math.js';
 export { constrainMotion, forwardKinematics } from './spatial-constraints.js';
+export { evaluateArticulatedKinematics } from './articulated-kinematics.js';
+export type { ArticulatedKinematicResult } from './articulated-kinematics.js';
 
 export { compileWorld } from './world.js';
 export { prepareCharacter } from './character.js';

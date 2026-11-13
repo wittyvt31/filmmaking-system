@@ -3,6 +3,16 @@ import { z } from 'zod';
 const nonEmpty = z.string().min(1);
 const vector3 = z.tuple([z.number(), z.number(), z.number()]);
 const quaternion = z.tuple([z.number(), z.number(), z.number(), z.number()]);
+const rigidTransform = z
+  .object({
+    position: vector3,
+    rotation: quaternion,
+  })
+  .strict();
+const identityTransform = {
+  position: [0, 0, 0] as [number, number, number],
+  rotation: [1, 0, 0, 0] as [number, number, number, number],
+};
 export const AssetTransformSpaceSchema = z.enum(['local', 'parent', 'world']);
 const semanticTarget = z.union([
   nonEmpty,
@@ -37,6 +47,45 @@ const resolvedHandle = z
       1,
     'Resolved handles must identify exactly one GLB target',
   );
+const articulationJoint = z
+  .object({
+    id: nonEmpty,
+    type: z.enum([
+      'revolute',
+      'prismatic',
+      'fixed',
+      'continuous',
+      'hinge',
+      'slider',
+      'ball',
+    ]),
+    parent: nonEmpty,
+    child: nonEmpty,
+    pivot: nonEmpty.optional(),
+    axis: vector3.optional(),
+    parentTransform: rigidTransform.default(identityTransform),
+    childTransform: rigidTransform.default(identityTransform),
+    degreesOfFreedom: z.number().int().min(0).max(3).optional(),
+    limits: z
+      .object({
+        lower: z.number().finite().optional(),
+        upper: z.number().finite().optional(),
+      })
+      .strict()
+      .optional(),
+    defaultValue: z.number().finite().default(0),
+    control: nonEmpty.optional(),
+  })
+  .strict();
+const articulationControl = z
+  .object({
+    id: nonEmpty,
+    handle: nonEmpty,
+    channel: z.enum(['position', 'rotation', 'value']),
+    joints: z.array(nonEmpty).min(1),
+    defaultValue: z.number().finite().default(0),
+  })
+  .strict();
 
 export const AssetDescriptorSchema = z
   .object({
@@ -90,29 +139,11 @@ export const AssetDescriptorSchema = z
     resolvedHandles: z.array(resolvedHandle).optional(),
     articulation: z
       .object({
-        joints: z
-          .array(
-            z
-              .object({
-                id: nonEmpty,
-                type: z.enum(['fixed', 'hinge', 'slider', 'ball']),
-                parent: nonEmpty,
-                child: nonEmpty,
-                axis: vector3.optional(),
-                limits: z
-                  .object({
-                    lower: z.number().optional(),
-                    upper: z.number().optional(),
-                  })
-                  .strict()
-                  .optional(),
-              })
-              .strict(),
-          )
-          .default([]),
+        joints: z.array(articulationJoint).default([]),
+        controls: z.array(articulationControl).default([]),
       })
       .strict()
-      .default({ joints: [] }),
+      .default({ joints: [], controls: [] }),
     colliders: z
       .array(
         z

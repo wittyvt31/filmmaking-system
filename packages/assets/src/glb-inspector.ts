@@ -376,6 +376,9 @@ export function validateAssetDescriptor(
   };
   const seenHandles = new Set<string>();
   const seenJoints = new Set<string>();
+  const handlesById = new Map(
+    descriptor.handles.map((handle) => [handle.id, handle]),
+  );
   const skeletonJointIndices = new Set(
     inspection.skeletons.flatMap((skeleton) => skeleton.joints),
   );
@@ -485,9 +488,6 @@ export function validateAssetDescriptor(
         ),
       );
   }
-  const handlesById = new Map(
-    descriptor.handles.map((handle) => [handle.id, handle]),
-  );
   for (const [index, mapping] of descriptor.capabilities.mappings.entries()) {
     const path = `capabilities.mappings[${index}]`;
     const key = `${mapping.capability}\u0000${mapping.handle}`;
@@ -582,10 +582,81 @@ export function validateAssetDescriptor(
         ),
       );
     seenJoints.add(joint.id);
-    nodeByName(joint.parent, `${path}.parent`);
-    nodeByName(joint.child, `${path}.child`);
+    const expectedDof =
+      joint.type === 'fixed' ? 0 : joint.type === 'ball' ? 3 : 1;
+    if ((joint.degreesOfFreedom ?? expectedDof) !== expectedDof)
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'INVALID_JOINT_DOF',
+          `${path}.degreesOfFreedom`,
+          `Joint type "${joint.type}" requires ${expectedDof} degrees of freedom.`,
+        ),
+      );
+    const nodeByReference = (reference: string, referencePath: string) => {
+      const handle = handlesById.get(reference);
+      if (!handle) return nodeByName(reference, referencePath);
+      if (handle.kind === 'material') {
+        diagnostics.push(
+          diagnostic(
+            'error',
+            'INCOMPATIBLE_HANDLE_REFERENCE',
+            referencePath,
+            `Articulation reference "${reference}" cannot use a material handle.`,
+          ),
+        );
+        return undefined;
+      }
+      const resolved = resolvedHandles.find((item) => item.id === reference);
+      if (resolved?.nodeIndex !== undefined) return resolved.nodeIndex;
+      if (typeof handle.target === 'string')
+        return nodeByName(handle.target, referencePath);
+      return nodeByTarget(handle.target, referencePath);
+    };
     if (
-      (joint.type === 'hinge' || joint.type === 'slider') &&
+      joint.limits?.lower !== undefined &&
+      joint.defaultValue < joint.limits.lower
+    )
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'JOINT_DEFAULT_BELOW_LIMIT',
+          `${path}.defaultValue`,
+          'Joint default value is below its lower limit.',
+        ),
+      );
+    if (
+      joint.limits?.upper !== undefined &&
+      joint.defaultValue > joint.limits.upper
+    )
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'JOINT_DEFAULT_ABOVE_LIMIT',
+          `${path}.defaultValue`,
+          'Joint default value exceeds its upper limit.',
+        ),
+      );
+    const parentIndex = nodeByReference(joint.parent, `${path}.parent`);
+    const childIndex = nodeByReference(joint.child, `${path}.child`);
+    if (
+      parentIndex !== undefined &&
+      childIndex !== undefined &&
+      parentIndex === childIndex
+    )
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'ARTICULATION_SELF_REFERENCE',
+          path,
+          'An articulation joint cannot connect a node to itself.',
+        ),
+      );
+    if (joint.pivot) nodeByReference(joint.pivot, `${path}.pivot`);
+    if (
+      ['revolute', 'prismatic', 'hinge', 'slider', 'continuous'].includes(
+        joint.type,
+      ) &&
       (!joint.axis ||
         joint.axis.every((component) => component === 0) ||
         !joint.axis.every(Number.isFinite))
@@ -621,6 +692,84 @@ export function validateAssetDescriptor(
           'Fixed joints do not use axis or scalar limits in the GLB descriptor.',
         ),
       );
+    if (
+      joint.control &&
+      !descriptor.articulation.controls.some(
+        (control) =>
+          control.id === joint.control && control.joints.includes(joint.id),
+      )
+    )
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'CONFLICTING_ARTICULATION_CONTROL',
+          `${path}.control`,
+          `Control "${joint.control}" does not declare this joint in its controlled set.`,
+        ),
+      );
+  }
+  const graph = new Map<number, number[]>();
+  for (const joint of descriptor.articulation.joints) {
+    const parent = resolvedHandles.find(
+      (handle) => handle.id === joint.parent,
+    )?.nodeIndex;
+    const child = resolvedHandles.find(
+      (handle) => handle.id === joint.child,
+    )?.nodeIndex;
+    if (parent === undefined || child === undefined) continue;
+    graph.set(parent, [...(graph.get(parent) ?? []), child]);
+  }
+  const visiting = new Set<number>();
+  const visited = new Set<number>();
+  const visit = (node: number): void => {
+    if (visiting.has(node)) {
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'ARTICULATION_CYCLE',
+          'articulation.joints',
+          'Articulation parent-child relationships must form an acyclic hierarchy.',
+        ),
+      );
+      return;
+    }
+    if (visited.has(node)) return;
+    visiting.add(node);
+    for (const child of graph.get(node) ?? []) visit(child);
+    visiting.delete(node);
+    visited.add(node);
+  };
+  for (const node of graph.keys()) visit(node);
+  for (const [index, control] of descriptor.articulation.controls.entries()) {
+    const handle = handlesById.get(control.handle);
+    if (!handle)
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'MISSING_ARTICULATION_CONTROL_HANDLE',
+          `articulation.controls[${index}].handle`,
+          `Control handle "${control.handle}" was not declared.`,
+        ),
+      );
+    else if (!['control-target', 'node', 'pivot'].includes(handle.kind))
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'INCOMPATIBLE_ARTICULATION_CONTROL_HANDLE',
+          `articulation.controls[${index}].handle`,
+          `Handle "${control.handle}" cannot drive articulation controls.`,
+        ),
+      );
+    for (const jointId of control.joints)
+      if (!seenJoints.has(jointId))
+        diagnostics.push(
+          diagnostic(
+            'error',
+            'MISSING_ARTICULATION_CONTROL_JOINT',
+            `articulation.controls[${index}].joints`,
+            `Control references unknown joint "${jointId}".`,
+          ),
+        );
   }
 
   for (const [index, socket] of descriptor.sockets.entries()) {

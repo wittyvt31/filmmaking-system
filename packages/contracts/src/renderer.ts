@@ -1,6 +1,7 @@
 import type { CompiledSceneInstruction } from './compiled-scene.js';
 import type { Rational, RenderPolicy } from './render-policy.js';
 import type { Shot } from './shots.js';
+import type { AssetDescriptor } from './asset-descriptor.js';
 
 export type RenderArtifactType =
   'video/mp4' | 'image-sequence/png' | 'image/png';
@@ -26,6 +27,7 @@ export interface RendererAssetInput {
   localPath: string;
   contentHash: string;
   metadata: Record<string, unknown>;
+  descriptor?: AssetDescriptor;
 }
 
 export type RenderArtifactRequest =

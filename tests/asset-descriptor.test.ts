@@ -16,6 +16,7 @@ import {
   convertAssetToGlb,
 } from '../engines/blender/src/asset-factory.js';
 import { publishAsset } from '../engines/blender/src/asset-publisher.js';
+import { evaluateArticulatedKinematics } from '@filmmaking/scene';
 import { expect, it } from 'vitest';
 
 function glb(json: Record<string, unknown>): Uint8Array {
@@ -209,6 +210,45 @@ it('rejects semantic handles that use ambiguous name targets during publishing',
   } finally {
     await rm(temporary, { recursive: true, force: true });
   }
+});
+
+it('evaluates deterministic hierarchical articulated kinematics', () => {
+  const descriptor = {
+    schemaVersion: 1,
+    handles: [
+      { id: 'root', kind: 'node', target: { nodeIndex: 0 } },
+      { id: 'arm', kind: 'node', target: { nodeIndex: 1 } },
+      { id: 'tip', kind: 'node', target: { nodeIndex: 2 } },
+    ],
+    articulation: {
+      joints: [
+        {
+          id: 'base',
+          type: 'revolute',
+          parent: 'root',
+          child: 'arm',
+          axis: [0, 0, 1],
+          limits: { lower: -Math.PI, upper: Math.PI },
+          defaultValue: Math.PI / 2,
+        },
+        {
+          id: 'slide',
+          type: 'prismatic',
+          parent: 'arm',
+          child: 'tip',
+          axis: [1, 0, 0],
+          limits: { lower: 0, upper: 3 },
+          defaultValue: 2,
+        },
+      ],
+    },
+    provenance: { source: 'test' },
+  };
+  const first = evaluateArticulatedKinematics(descriptor);
+  const second = evaluateArticulatedKinematics(descriptor);
+  expect(first).toEqual(second);
+  expect(first.jointStates).toEqual({ base: Math.PI / 2, slide: 2 });
+  expect(first.nodeTransforms[2]?.position[1]).toBeCloseTo(2);
 });
 
 it('validates authored references separately from runtime animation support', () => {
