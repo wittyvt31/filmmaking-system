@@ -3183,15 +3183,6 @@
                     {
                       "frame": 239,
                       "rotationDegrees": [
-                        0,
-                        0,
-                        0
-                      ],
-                      "interpolation": "ease"
-                    },
-                    {
-                      "frame": 239,
-                      "rotationDegrees": [
                         -68,
                         0,
                         -38
@@ -3243,15 +3234,6 @@
                       "frame": 220,
                       "rotationDegrees": [
                         -85,
-                        0,
-                        0
-                      ],
-                      "interpolation": "ease"
-                    },
-                    {
-                      "frame": 239,
-                      "rotationDegrees": [
-                        0,
                         0,
                         0
                       ],
