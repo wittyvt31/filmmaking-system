@@ -1,0 +1,33 @@
+name: Filmie core integration
+
+on:
+  push:
+    branches: [filmieTwo]
+  pull_request:
+    branches: [filmieTwo, master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: filmie-core-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  articulation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.16.1
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.17.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Check affected TypeScript projects
+        run: pnpm exec tsc -b packages/contracts packages/assets packages/scene engines/blender apps/cli --pretty false
+      - name: Test asset and articulation contracts
+        run: pnpm exec vitest run tests/asset-descriptor.test.ts --reporter=dot
