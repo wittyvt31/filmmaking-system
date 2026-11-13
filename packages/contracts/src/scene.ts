@@ -68,6 +68,50 @@ const SceneCameraSchema = z.discriminatedUnion('type', [
     .strict(),
 ]);
 
+const ArticulatedControlTrackSchema = z
+  .object({
+    objectId: StableIdSchema,
+    controls: z
+      .array(
+        z
+          .object({
+            id: StableIdSchema,
+            keys: z
+              .array(
+                z
+                  .object({
+                    frame: z.number().int().nonnegative().safe(),
+                    value: z.number().finite(),
+                  })
+                  .strict(),
+              )
+              .min(1),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict()
+  .superRefine((track, context) => {
+    const ids = new Set<string>();
+    for (const [index, control] of track.controls.entries()) {
+      if (ids.has(control.id))
+        context.addIssue({
+          code: 'custom',
+          path: ['controls', index, 'id'],
+          message: `Duplicate articulated control "${control.id}".`,
+        });
+      ids.add(control.id);
+      for (let key = 1; key < control.keys.length; key += 1)
+        if (control.keys[key]!.frame <= control.keys[key - 1]!.frame)
+          context.addIssue({
+            code: 'custom',
+            path: ['controls', index, 'keys', key, 'frame'],
+            message: 'Articulated control keys must be strictly ordered.',
+          });
+    }
+  });
+
 const SceneLightBaseSchema = z.object({
   id: StableIdSchema,
   position: z
@@ -124,6 +168,10 @@ export const ShotSceneSchema = z
     world: WorldSchema.optional(),
     characters: z.array(SceneCharacterSchema).default([]),
     interactions: z.array(ObjectInteractionSchema).max(32).default([]),
+    articulatedMotion: z
+      .array(ArticulatedControlTrackSchema)
+      .max(128)
+      .default([]),
     contactGraph: ContactGraphSchema.optional(),
     contactResponse: SceneContactResponseSchema.optional(),
     props: z

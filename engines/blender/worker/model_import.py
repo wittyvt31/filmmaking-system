@@ -21,6 +21,7 @@ def validate_glb(path):
             uri = entry.get("uri")
             if uri is not None and not uri.startswith("data:"):
                 raise ValueError("GLB must be self-contained; external buffers or textures are unsupported")
+    return document
 
 
 def import_model(asset, destination, character=False):
@@ -28,8 +29,9 @@ def import_model(asset, destination, character=False):
     format_name = asset["format"]
     before = set(bpy.data.objects)
     collections = set(bpy.data.collections)
+    document = None
     if format_name == "glb":
-        validate_glb(path)
+        document = validate_glb(path)
         # Importer-generated bone widgets belong to a hidden collection. Skip
         # them so moving model objects into the destination never exposes them.
         result = bpy.ops.import_scene.gltf(filepath=path, disable_bone_shape=True)
@@ -68,7 +70,32 @@ def import_model(asset, destination, character=False):
             bpy.data.collections.remove(collection)
     for name in ("assetId", "version", "format"):
         root["filmie_model_" + name] = asset[name]
-    return root
+    articulation_nodes = {}
+    descriptor = asset.get("descriptor")
+    if descriptor and document:
+        objects_by_name = {}
+        for obj in objects:
+            objects_by_name.setdefault(obj.name, []).append(obj)
+        nodes = document.get("nodes", [])
+        for handle in descriptor.get("resolvedHandles", []):
+            node_index = handle.get("nodeIndex")
+            if node_index is None:
+                continue
+            if node_index < 0 or node_index >= len(nodes):
+                raise ValueError(
+                    "Semantic handle node index is outside the imported GLB: "
+                    + handle.get("id", "unknown")
+                )
+            node_name = nodes[node_index].get("name")
+            matches = objects_by_name.get(node_name, []) if node_name else []
+            if len(matches) != 1:
+                raise ValueError(
+                    "Semantic handle node mapping is unresolved or ambiguous: "
+                    + handle.get("id", "unknown")
+                )
+            articulation_nodes[str(node_index)] = matches[0]
+            matches[0]["filmie_glb_node_index"] = int(node_index)
+    return root, articulation_nodes
 
 
 def instantiate_with_materials(instantiate, asset, transform, entity_id, collection, overrides, materials):

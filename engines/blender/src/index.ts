@@ -37,7 +37,11 @@ import {
 } from '@filmmaking/contracts';
 import { AssetRegistryError, modelImportFormat } from '@filmmaking/assets';
 import { ArtifactCache } from '@filmmaking/cache';
-import { compileScene, SCENE_COMPILER_VERSION } from '@filmmaking/scene';
+import {
+  compileScene,
+  evaluateArticulatedKinematics,
+  SCENE_COMPILER_VERSION,
+} from '@filmmaking/scene';
 import { prepareSimulation, simulationDependency } from './simulation-cache.js';
 
 export const EXPECTED_BLENDER_VERSION = '5.2.3';
@@ -983,6 +987,73 @@ export class BlenderRendererAdapter implements RendererAdapter {
             rendererVersion,
           })
         : undefined;
+      const articulatedMotion = scene.articulatedMotion?.map((track) => {
+        const character = scene.characters.find(
+          (candidate) => candidate.id === track.objectId,
+        );
+        const prop = scene.props.find(
+          (candidate) => candidate.id === track.objectId,
+        );
+        const reference =
+          character && 'asset' in character
+            ? character.asset
+            : character?.source.kind === 'imported'
+              ? character.source.asset
+              : prop?.asset;
+        if (!reference)
+          throw new BlenderFailure(
+            'INVALID_INSTRUCTIONS',
+            `Articulated entity "${track.objectId}" has no model asset`,
+          );
+        const asset = resolveModelAsset(reference);
+        if (!asset.descriptor)
+          throw new BlenderFailure(
+            'INVALID_INSTRUCTIONS',
+            `Articulated entity "${track.objectId}" requires a published semantic descriptor`,
+          );
+        const valueAt = (
+          keys: readonly { frame: number; value: number }[],
+          frame: number,
+        ) => {
+          const right = keys.find((key) => key.frame >= frame);
+          const left = [...keys].reverse().find((key) => key.frame <= frame);
+          if (!left) return keys[0]!.value;
+          if (!right || right.frame === left.frame) return left.value;
+          return (
+            left.value +
+            ((right.value - left.value) * (frame - left.frame)) /
+              (right.frame - left.frame)
+          );
+        };
+        const knownControls = new Set([
+          ...asset.descriptor.articulation.joints.map((joint) => joint.id),
+          ...asset.descriptor.articulation.controls.map((control) => control.id),
+        ]);
+        for (const control of track.controls)
+          if (!knownControls.has(control.id))
+            throw new BlenderFailure(
+              'INVALID_INSTRUCTIONS',
+              `Articulated control "${control.id}" is not declared by ${reference.assetId}@${reference.version}`,
+            );
+        const frames = [];
+        for (let frame = 0; frame < shot.durationFrames; frame += 1) {
+          const controls = Object.fromEntries(
+            track.controls.map((control) => [
+              control.id,
+              valueAt(control.keys, frame),
+            ]),
+          );
+          const evaluated = evaluateArticulatedKinematics(
+            asset.descriptor,
+            controls,
+          );
+          frames.push({
+            frame: frame + 1,
+            nodes: evaluated.nodeTransforms,
+          });
+        }
+        return { objectId: track.objectId, frames };
+      });
       const workerSpec = {
         durationFrames: shot.durationFrames,
         frameRate: settings.frameRate,
@@ -1102,6 +1173,7 @@ export class BlenderRendererAdapter implements RendererAdapter {
           };
         }),
         objectMotion: scene.objectMotion ?? [],
+        ...(articulatedMotion?.length ? { articulatedMotion } : {}),
         secondaryMotion: scene.secondaryMotion ?? [],
         ...(baked && simulation
           ? {

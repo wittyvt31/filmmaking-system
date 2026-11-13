@@ -85,6 +85,11 @@ export function compileScene(
     ...scene.characters.map((character) => character.id),
     ...scene.props.map((prop) => prop.id),
   ]);
+  for (const track of scene.articulatedMotion)
+    if (!entities.has(track.objectId))
+      throw new TypeError(
+        `Articulated motion targets unknown scene entity "${track.objectId}"`,
+      );
   for (const character of scene.characters) {
     for (const action of character.actions) {
       if (
@@ -495,6 +500,9 @@ export function compileScene(
     ...(world ? { world } : {}),
     ...(physics ? { physics } : {}),
     ...(objectMotion ? { objectMotion } : {}),
+    ...(scene.articulatedMotion.length
+      ? { articulatedMotion: scene.articulatedMotion }
+      : {}),
     ...(secondaryMotionTracks.length
       ? { secondaryMotion: secondaryMotionTracks }
       : {}),
@@ -532,6 +540,9 @@ export function compileScene(
     ...(physics ? { physics } : {}),
     characters,
     ...(objectMotion ? { objectMotion } : {}),
+    ...(scene.articulatedMotion.length
+      ? { articulatedMotion: scene.articulatedMotion }
+      : {}),
     ...(secondaryMotionTracks.length
       ? { secondaryMotion: secondaryMotionTracks }
       : {}),

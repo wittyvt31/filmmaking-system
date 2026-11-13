@@ -23,6 +23,13 @@ export interface CompiledSceneInstruction {
   world?: CompiledWorld;
   physics?: PhysicsSimulation;
   objectMotion?: { objectId: string; poses: RigidTransform[] }[];
+  articulatedMotion?: {
+    objectId: string;
+    controls: {
+      id: string;
+      keys: { frame: number; value: number }[];
+    }[];
+  }[];
   secondaryMotion?: {
     ownerId: string;
     bindings: {

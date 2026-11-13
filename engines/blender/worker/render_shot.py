@@ -84,11 +84,13 @@ def instantiate_asset(asset, transform, entity_id, parent_collection=None, root_
             collection = bpy.data.collections.new("Filmie Imported Character")
             parent_collection.children.link(collection)
             parent_collection = collection
-        root = import_model(asset, parent_collection, character=bool(root_marker))
+        root, articulation_nodes = import_model(
+            asset, parent_collection, character=bool(root_marker)
+        )
         if root_marker:
             root[root_marker] = True
         place_asset(root, transform, entity_id)
-        return root, {}
+        return root, {"__articulation_nodes": articulation_nodes}
     collection_name = asset.get("metadata", {}).get("blenderCollection")
     if not collection_name:
         raise RuntimeError(
@@ -288,9 +290,14 @@ def create_scene(spec):
     scene["filmie_character_cache_hits"] = 0
     for character in spec["characters"]:
         if "source" in character:
-            root, rig, cache_hit = prepare_character(scene, character, instantiate_asset, world_entities)
+            root, rig, cache_hit, articulation_nodes = prepare_character(
+                scene, character, instantiate_asset, world_entities
+            )
             apply_poses(character, root, rig, action_fcurves)
             entity_roots[character["id"]] = root
+            control_objects[character["id"]] = {
+                "__articulation_nodes": articulation_nodes
+            }
             scene["filmie_character_cache_hits"] += int(cache_hit)
             continue
         root, controls = instantiate_asset(
@@ -322,6 +329,51 @@ def create_scene(spec):
         for curve in action_fcurves(root.animation_data.action):
             for point in curve.keyframe_points:
                 point.interpolation = "LINEAR"
+
+    for track in spec.get("articulatedMotion", []):
+        root = entity_roots.get(track["objectId"])
+        controls = control_objects.get(track["objectId"], {})
+        node_objects = controls.get("__articulation_nodes", {})
+        if root is None:
+            raise RuntimeError(
+                "Articulated motion references an unknown entity: "
+                + track["objectId"]
+            )
+        for frame_data in track["frames"]:
+            frame = int(frame_data["frame"])
+            for node_index, pose in sorted(
+                frame_data["nodes"].items(), key=lambda item: int(item[0])
+            ):
+                obj = node_objects.get(str(node_index))
+                if obj is None:
+                    raise RuntimeError(
+                        "Articulated motion node mapping is unresolved for "
+                        + track["objectId"]
+                        + ":"
+                        + str(node_index)
+                    )
+                position = pose["position"]
+                rotation = pose["rotation"]
+                if (
+                    len(position) != 3
+                    or len(rotation) != 4
+                    or not all(math.isfinite(float(value)) for value in position + rotation)
+                ):
+                    raise RuntimeError(
+                        "Invalid articulated transform for "
+                        + track["objectId"]
+                        + ":"
+                        + str(node_index)
+                    )
+                obj.matrix_world = (
+                    root.matrix_world
+                    @ Matrix.Translation(Vector(tuple(float(value) for value in position)))
+                    @ Quaternion(tuple(float(value) for value in rotation)).to_matrix().to_4x4()
+                )
+                obj.rotation_mode = "QUATERNION"
+                obj.keyframe_insert(data_path="location", frame=frame)
+                obj.keyframe_insert(data_path="rotation_quaternion", frame=frame)
+                obj.keyframe_insert(data_path="scale", frame=frame)
 
     if "cinematography" in spec:
         install_cameras(scene, spec["cinematography"], action_fcurves)

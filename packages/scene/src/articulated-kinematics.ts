@@ -70,6 +70,16 @@ export function evaluateArticulatedKinematics(
   baseTransforms: Readonly<Record<number, RigidTransform>> = {},
 ): ArticulatedKinematicResult {
   const descriptor = AssetDescriptorSchema.parse(input);
+  const knownControls = new Set([
+    ...descriptor.articulation.joints.map((joint) => joint.id),
+    ...descriptor.articulation.controls.map((control) => control.id),
+  ]);
+  for (const [id, value] of Object.entries(controls)) {
+    if (!knownControls.has(id))
+      throw new TypeError(`Unknown articulated runtime control "${id}"`);
+    if (!Number.isFinite(value))
+      throw new TypeError(`Invalid articulated runtime control "${id}"`);
+  }
   const joints = [...descriptor.articulation.joints].sort((a, b) =>
     a.id < b.id ? -1 : a.id > b.id ? 1 : 0,
   );

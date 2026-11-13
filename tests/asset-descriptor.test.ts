@@ -251,6 +251,33 @@ it('evaluates deterministic hierarchical articulated kinematics', () => {
   expect(first.nodeTransforms[2]?.position[1]).toBeCloseTo(2);
 });
 
+it('rejects undeclared articulated runtime controls', () => {
+  expect(() =>
+    evaluateArticulatedKinematics(
+      {
+        schemaVersion: 1,
+        handles: [
+          { id: 'root', kind: 'node', target: { nodeIndex: 0 } },
+          { id: 'child', kind: 'node', target: { nodeIndex: 1 } },
+        ],
+        articulation: {
+          joints: [
+            {
+              id: 'hinge',
+              type: 'revolute',
+              parent: 'root',
+              child: 'child',
+              axis: [0, 0, 1],
+            },
+          ],
+        },
+        provenance: { source: 'test' },
+      },
+      { unknown: 1 },
+    ),
+  ).toThrow('Unknown articulated runtime control "unknown"');
+});
+
 it('validates authored references separately from runtime animation support', () => {
   const report = inspectGlbBytes(
     glb({

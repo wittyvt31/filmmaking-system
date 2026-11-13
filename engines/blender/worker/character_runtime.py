@@ -106,6 +106,11 @@ def prepare_character(scene, character, instantiate_asset, parents):
             if cache:
                 collection.name = name
                 write_collection(cache, collection)
+        articulation_nodes = {
+            str(obj["filmie_glb_node_index"]): obj
+            for obj in collection.all_objects
+            if "filmie_glb_node_index" in obj
+        }
     else:
         name = "Filmie Humanoid " + cache["key"][:32] if cache else "Filmie Humanoid"
         collection = read_collection(cache, name) if cache else None
@@ -152,7 +157,7 @@ def prepare_character(scene, character, instantiate_asset, parents):
     rig["filmie_rig_version"] = character["rig"]["version"]
     for bone in rig.pose.bones:
         bone.matrix_basis = Matrix.Identity(4)
-    return root, rig, cache_hit
+    return root, rig, cache_hit, articulation_nodes if source["kind"] == "imported" else {}
 
 
 def interpolate(owner, paths, keys, action_fcurves):
