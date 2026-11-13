@@ -514,7 +514,10 @@ main.asset-main {
 }
 .asset-studio-main {
   display: grid;
-  grid-template-columns: minmax(185px, 235px) minmax(340px, 1fr) minmax(215px, 285px);
+  grid-template-columns: minmax(185px, 235px) minmax(340px, 1fr) minmax(
+      215px,
+      285px
+    );
   gap: 0.8rem;
   align-items: stretch;
 }

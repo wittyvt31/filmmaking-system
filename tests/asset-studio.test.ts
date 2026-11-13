@@ -1,6 +1,12 @@
 import { afterEach, expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative, resolve } from 'node:path';
 import type { AddressInfo } from 'node:net';
@@ -14,12 +20,15 @@ const roots: string[] = [];
 const servers: ReturnType<typeof createFilmieServer>[] = [];
 afterEach(async () => {
   await Promise.all(
-    servers.splice(0).map(
-      (server) =>
-        new Promise<void>((resolve) => server.close(() => resolve())),
-    ),
+    servers
+      .splice(0)
+      .map(
+        (server) =>
+          new Promise<void>((resolve) => server.close(() => resolve())),
+      ),
   );
-  for (const path of roots.splice(0)) rmSync(path, { recursive: true, force: true });
+  for (const path of roots.splice(0))
+    rmSync(path, { recursive: true, force: true });
 });
 
 function setup() {
@@ -49,8 +58,9 @@ it('validates real procedural geometry and rejects malformed definitions', () =>
   });
   const invalid = fixture();
   invalid['parts'] = [];
-  expect(studio.validate(invalid).issues.some((item) => item.path === 'parts'))
-    .toBe(true);
+  expect(
+    studio.validate(invalid).issues.some((item) => item.path === 'parts'),
+  ).toBe(true);
   expect(studio.list()).toEqual([]);
 });
 
@@ -70,7 +80,9 @@ it('serves the fixture and browser validation through restricted local routes', 
 
   const template = await fetch(url + '/template');
   expect(template.status).toBe(200);
-  const example = (await template.json()) as { definition: Record<string, unknown> };
+  const example = (await template.json()) as {
+    definition: Record<string, unknown>;
+  };
   expect(example.definition['assetId']).toBe('filmie.demo.crane');
 
   const validation = await fetch(url + '/validate', {
@@ -117,7 +129,9 @@ it('attaches published immutable asset versions to the project registry', () => 
   // Reattaching the same immutable version must not duplicate it.
   studio.attach(project.id, content.assetId, content.version);
   const entries = new AssetRegistry(
-    JSON.parse(readFileSync(store.registryPath(project.id), 'utf8')) as unknown[],
+    JSON.parse(
+      readFileSync(store.registryPath(project.id), 'utf8'),
+    ) as unknown[],
   ).list();
   expect(entries).toHaveLength(1);
   const expectedUri = relative(

@@ -129,7 +129,12 @@ export function createFilmieServer(options: {
           return json(response, { definition: assetStudio.template() });
         if (method === 'GET' && id === 'assets' && !action)
           return json(response, { assets: assetStudio.list() });
-        if (method === 'GET' && id === 'definitions' && action && rest.length === 1)
+        if (
+          method === 'GET' &&
+          id === 'definitions' &&
+          action &&
+          rest.length === 1
+        )
           return json(response, {
             definition: assetStudio.definition(
               decodeURIComponent(action),
@@ -146,7 +151,11 @@ export function createFilmieServer(options: {
           if (id === 'validate')
             return json(response, assetStudio.validate(input['definition']));
           if (id === 'build')
-            return json(response, await assetStudio.build(input['definition']), 201);
+            return json(
+              response,
+              await assetStudio.build(input['definition']),
+              201,
+            );
           if (id === 'attach')
             return json(
               response,

@@ -17,7 +17,9 @@ import type {
 } from './types.js';
 
 const identifierHash = (assetId: string, version: string) =>
-  createHash('sha256').update(JSON.stringify([assetId, version])).digest('hex');
+  createHash('sha256')
+    .update(JSON.stringify([assetId, version]))
+    .digest('hex');
 
 function issue(error: { path: PropertyKey[]; message: string }) {
   return {
@@ -127,9 +129,10 @@ export class AssetStudioService {
               '.png',
           }
         : {}),
-      partCount: asset.descriptor?.handles.filter(
-        (handle) => handle.id.startsWith('part.'),
-      ).length ?? 0,
+      partCount:
+        asset.descriptor?.handles.filter((handle) =>
+          handle.id.startsWith('part.'),
+        ).length ?? 0,
       jointCount: asset.descriptor?.articulation.joints.length ?? 0,
     };
   }
@@ -165,10 +168,15 @@ export class AssetStudioService {
     if (!validation.valid)
       throw new ApiError(
         422,
-        validation.issues.map((entry) => entry.path + ': ' + entry.message).join('\n'),
+        validation.issues
+          .map((entry) => entry.path + ': ' + entry.message)
+          .join('\n'),
       );
     if (this.building)
-      throw new ApiError(409, 'Another asset is being generated. Retry when it finishes.');
+      throw new ApiError(
+        409,
+        'Another asset is being generated. Retry when it finishes.',
+      );
     this.building = true;
     try {
       const definition = ProceduralAssetDefinitionSchema.parse(input);
@@ -199,10 +207,16 @@ export class AssetStudioService {
       await mkdir(dirname(definitionPath), { recursive: true });
       // Immutable publication succeeded; the corresponding authored
       // definition is now safe to retain for reopening and editing.
-      await writeFile(definitionPath, JSON.stringify(definition, null, 2) + '\n');
+      await writeFile(
+        definitionPath,
+        JSON.stringify(definition, null, 2) + '\n',
+      );
       const preview = await renderAssetPreview({
         inputPath: result.artifactPath!,
-        outputPath: this.previewFile(definition.assetId, definition.assetVersion),
+        outputPath: this.previewFile(
+          definition.assetId,
+          definition.assetVersion,
+        ),
         assetId: asset.assetId,
         version: asset.version,
         descriptor: asset.descriptor,
@@ -232,7 +246,7 @@ export class AssetStudioService {
     const entries = this.store
       .projects()
       .some((candidate) => candidate.id === project.id)
-      ? JSON.parse(readFileSync(registryPath, 'utf8')) as unknown[]
+      ? (JSON.parse(readFileSync(registryPath, 'utf8')) as unknown[])
       : [];
     const registry = new AssetRegistry(entries);
     const existing = registry
@@ -262,7 +276,12 @@ export class AssetStudioService {
   file(kind: string, filename: string): { path: string; type: string } {
     if (kind === 'artifacts') {
       const match = /^([a-f0-9]{64})\.glb$/.exec(filename);
-      if (!match || !this.registry().list().some((asset) => asset.contentHash === match[1]))
+      if (
+        !match ||
+        !this.registry()
+          .list()
+          .some((asset) => asset.contentHash === match[1])
+      )
         throw new ApiError(404, 'Asset file not found.');
       return {
         path: join(this.root, 'artifacts', filename),
@@ -277,7 +296,8 @@ export class AssetStudioService {
           .list()
           .some(
             (asset) =>
-              identifierHash(asset.assetId, asset.version) + '.png' === filename,
+              identifierHash(asset.assetId, asset.version) + '.png' ===
+              filename,
           )
       )
         throw new ApiError(404, 'Preview not found.');

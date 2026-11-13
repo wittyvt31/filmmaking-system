@@ -21,7 +21,9 @@ const active = (run: Run) =>
   run.status === 'queued' || run.status === 'running';
 
 function Studio() {
-  const [workspace, setWorkspace] = useState<'production' | 'assets'>('production');
+  const [workspace, setWorkspace] = useState<'production' | 'assets'>(
+    'production',
+  );
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [catalogs, setCatalogs] = useState<string[]>([]);
   const [project, setProject] = useState<ProjectSummary>();
@@ -255,304 +257,321 @@ function Studio() {
         ) : (
           <>
             <aside className="sidebar">
-          <div className="section-heading">
-            <h2>Projects</h2>
-            <button
-              disabled={pending || !catalogs.length}
-              onClick={() => setDialog('new')}
-            >
-              + New
-            </button>
-          </div>
-          {!projects.length && (
-            <p className="muted">Create a project from a prepared catalog.</p>
-          )}
-          <nav aria-label="Projects">
-            {projects.map((item) => (
-              <button
-                key={item.id}
-                disabled={pending}
-                aria-current={project?.id === item.id ? 'page' : undefined}
-                onClick={() => {
-                  if (project?.id !== item.id && leave())
-                    void perform(() => open(item.id));
-                }}
-              >
-                <strong>{item.name}</strong>
-                <small>
-                  {item.catalog} · {item.revisions.length} revisions
-                </small>
-              </button>
-            ))}
-          </nav>
-          {project && (
-            <details className="assets">
-              <summary>Asset references ({assets.length})</summary>
-              <ul>
-                {assets.map((asset) => (
-                  <li key={asset.assetId + '@' + asset.version}>
-                    <code>{asset.assetId}</code>
-                    <small>
-                      {asset.version} · {asset.type}
-                    </small>
-                  </li>
-                ))}
-              </ul>
-            </details>
-          )}
-        </aside>
-        {project ? (
-          <>
-            <section className="workspace">
-              <div className="workspace-head">
-                <div>
-                  <h1>{project.name}</h1>
-                  <p className="muted">
-                    manifest.json {dirty && '· Unsaved changes'}
-                  </p>
-                </div>
-                <button
-                  disabled={pending}
-                  onClick={() => setDialog('duplicate')}
-                >
-                  Duplicate revision
-                </button>
-              </div>
-              <div className="toolbar">
-                <label>
-                  <span className="sr-only">Revision history</span>
-                  <select
-                    value={revision}
-                    disabled={pending}
-                    onChange={(event) => {
-                      const id = event.target.value;
-                      if (leave())
-                        void perform(() => loadRevision(project, id));
-                    }}
-                  >
-                    {project.revisions.map((item) => (
-                      <option value={item.id} key={item.id}>
-                        r{revisionNumber(item.id)} · {time(item.createdAt)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <button
-                  disabled={pending}
-                  onClick={() => {
-                    try {
-                      change(JSON.stringify(JSON.parse(text), null, 2) + '\n');
-                    } catch (cause) {
-                      report(cause);
-                    }
-                  }}
-                >
-                  Format
-                </button>
-                <button
-                  disabled={pending}
-                  onClick={() =>
-                    void perform(async () =>
-                      setValidation(
-                        await api<Validation>(
-                          projectPath(project.id) + '/validate',
-                          { text },
-                        ),
-                      ),
-                    )
-                  }
-                >
-                  Validate
-                </button>
-                <button
-                  disabled={pending || !dirty}
-                  onClick={() =>
-                    void perform(async () => {
-                      const next = await api<ProjectSummary>(
-                        projectPath(project.id) + '/revisions',
-                        { text, baseRevisionId: project.revisions[0]!.id },
-                      );
-                      setProject(next);
-                      replace(next);
-                      setRevision(next.revisions[0]!.id);
-                      setSaved(text);
-                    })
-                  }
-                >
-                  Save revision
-                </button>
-                <button
-                  className="primary run"
-                  disabled={pending || dirty}
-                  title={dirty ? 'Save a revision before running' : undefined}
-                  onClick={() =>
-                    void perform(() => runRevision(project.id, revision))
-                  }
-                >
-                  Run revision
-                </button>
-              </div>
-              <JsonEditor
-                value={text}
-                onChange={change}
-                invalid={!!validation?.issues.length}
-                readOnly={pending}
-              />
-              {validation && (
-                <section className="validation" aria-live="polite">
-                  {validation.issues.length ? (
-                    <>
-                      <strong>
-                        {validation.issues.length} validation issues
-                      </strong>
-                      <ul>
-                        {validation.issues.map((issue, index) => (
-                          <li key={index}>
-                            <code>{issue.path}</code> {issue.message}
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  ) : (
-                    <strong className="success">
-                      Valid · {validation.shots} shots · {validation.frames}{' '}
-                      frames
-                    </strong>
-                  )}
-                </section>
-              )}
-            </section>
-            <aside className="activity">
               <div className="section-heading">
-                <h2>Production runs</h2>
+                <h2>Projects</h2>
+                <button
+                  disabled={pending || !catalogs.length}
+                  onClick={() => setDialog('new')}
+                >
+                  + New
+                </button>
               </div>
-              {pollError && <p role="alert">{pollError}</p>}
-              {!runs.length && (
+              {!projects.length && (
                 <p className="muted">
-                  Run a saved revision to see its progress and outputs.
+                  Create a project from a prepared catalog.
                 </p>
               )}
-              <div className="history">
-                {runs.map((run) => (
+              <nav aria-label="Projects">
+                {projects.map((item) => (
                   <button
-                    key={run.id}
-                    aria-pressed={run.id === selectedRun}
+                    key={item.id}
+                    disabled={pending}
+                    aria-current={project?.id === item.id ? 'page' : undefined}
                     onClick={() => {
-                      setSelectedRun(run.id);
-                      setDetail(undefined);
-                      setPreview('');
+                      if (project?.id !== item.id && leave())
+                        void perform(() => open(item.id));
                     }}
                   >
-                    <span>
-                      r{revisionNumber(run.revisionId)} · {time(run.createdAt)}
-                    </span>
-                    <small className={'status ' + run.status}>
-                      {run.status}
+                    <strong>{item.name}</strong>
+                    <small>
+                      {item.catalog} · {item.revisions.length} revisions
                     </small>
                   </button>
                 ))}
-              </div>
-              {detail && (
-                <div className="run-detail">
-                  <p className={'status ' + detail.run.status} role="status">
-                    {detail.run.status}
-                    {active(detail.run) &&
-                      ' · ' +
-                        (detail.run.logs.at(-1) ?? 'Waiting for production')}
-                  </p>
-                  {detail.run.error && (
-                    <p role="alert" className="failure">
-                      {detail.run.error}
-                    </p>
-                  )}
-                  {!active(detail.run) && (
+              </nav>
+              {project && (
+                <details className="assets">
+                  <summary>Asset references ({assets.length})</summary>
+                  <ul>
+                    {assets.map((asset) => (
+                      <li key={asset.assetId + '@' + asset.version}>
+                        <code>{asset.assetId}</code>
+                        <small>
+                          {asset.version} · {asset.type}
+                        </small>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+            </aside>
+            {project ? (
+              <>
+                <section className="workspace">
+                  <div className="workspace-head">
+                    <div>
+                      <h1>{project.name}</h1>
+                      <p className="muted">
+                        manifest.json {dirty && '· Unsaved changes'}
+                      </p>
+                    </div>
                     <button
-                      className="rerun"
+                      disabled={pending}
+                      onClick={() => setDialog('duplicate')}
+                    >
+                      Duplicate revision
+                    </button>
+                  </div>
+                  <div className="toolbar">
+                    <label>
+                      <span className="sr-only">Revision history</span>
+                      <select
+                        value={revision}
+                        disabled={pending}
+                        onChange={(event) => {
+                          const id = event.target.value;
+                          if (leave())
+                            void perform(() => loadRevision(project, id));
+                        }}
+                      >
+                        {project.revisions.map((item) => (
+                          <option value={item.id} key={item.id}>
+                            r{revisionNumber(item.id)} · {time(item.createdAt)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <button
+                      disabled={pending}
+                      onClick={() => {
+                        try {
+                          change(
+                            JSON.stringify(JSON.parse(text), null, 2) + '\n',
+                          );
+                        } catch (cause) {
+                          report(cause);
+                        }
+                      }}
+                    >
+                      Format
+                    </button>
+                    <button
                       disabled={pending}
                       onClick={() =>
-                        void perform(() =>
-                          runRevision(project.id, detail.run.revisionId),
+                        void perform(async () =>
+                          setValidation(
+                            await api<Validation>(
+                              projectPath(project.id) + '/validate',
+                              { text },
+                            ),
+                          ),
                         )
                       }
                     >
-                      Rerun r{revisionNumber(detail.run.revisionId)}
+                      Validate
                     </button>
-                  )}
-                  {detail.run.progress && (
-                    <label className="shot-progress">
-                      {detail.run.progress.completed} /{' '}
-                      {detail.run.progress.total} shots prepared
-                      <progress
-                        value={detail.run.progress.completed}
-                        max={detail.run.progress.total}
-                      />
-                    </label>
-                  )}
-                  {detail.run.cacheHits && (
-                    <p className="muted">
-                      Cache · {detail.run.cacheHits.shots} shots
-                      {detail.run.cacheHits.assembly && ' · assembly reused'}
-                    </p>
-                  )}
-                  <details open>
-                    <summary>Logs ({detail.run.logs.length})</summary>
-                    <pre className="logs">
-                      {detail.run.logs.join('\n') ||
-                        'Waiting for pipeline logs…'}
-                    </pre>
-                  </details>
-                  {detail.outputs.length > 0 && (
-                    <section className="outputs">
-                      <h3>Outputs</h3>
-                      {currentOutput?.kind === 'video' && (
-                        <video
-                          key={currentOutput.url}
-                          src={currentOutput.url}
-                          controls
-                          preload="metadata"
-                        />
+                    <button
+                      disabled={pending || !dirty}
+                      onClick={() =>
+                        void perform(async () => {
+                          const next = await api<ProjectSummary>(
+                            projectPath(project.id) + '/revisions',
+                            { text, baseRevisionId: project.revisions[0]!.id },
+                          );
+                          setProject(next);
+                          replace(next);
+                          setRevision(next.revisions[0]!.id);
+                          setSaved(text);
+                        })
+                      }
+                    >
+                      Save revision
+                    </button>
+                    <button
+                      className="primary run"
+                      disabled={pending || dirty}
+                      title={
+                        dirty ? 'Save a revision before running' : undefined
+                      }
+                      onClick={() =>
+                        void perform(() => runRevision(project.id, revision))
+                      }
+                    >
+                      Run revision
+                    </button>
+                  </div>
+                  <JsonEditor
+                    value={text}
+                    onChange={change}
+                    invalid={!!validation?.issues.length}
+                    readOnly={pending}
+                  />
+                  {validation && (
+                    <section className="validation" aria-live="polite">
+                      {validation.issues.length ? (
+                        <>
+                          <strong>
+                            {validation.issues.length} validation issues
+                          </strong>
+                          <ul>
+                            {validation.issues.map((issue, index) => (
+                              <li key={index}>
+                                <code>{issue.path}</code> {issue.message}
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      ) : (
+                        <strong className="success">
+                          Valid · {validation.shots} shots · {validation.frames}{' '}
+                          frames
+                        </strong>
                       )}
-                      {currentOutput?.kind === 'image' && (
-                        <img src={currentOutput.url} alt={currentOutput.name} />
-                      )}
-                      <ul>
-                        {detail.outputs.map((item) => (
-                          <li key={item.url}>
-                            {item.kind !== 'file' && (
-                              <button
-                                onClick={() => setPreview(item.url)}
-                                aria-pressed={currentOutput?.url === item.url}
-                              >
-                                Preview
-                              </button>
-                            )}
-                            <a href={item.url} download title={item.name}>
-                              {item.name.split('/').at(-1)}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
                     </section>
                   )}
-                </div>
-              )}
-            </aside>
-          </>
-        ) : (
-          <section className="empty">
-            <h1>Open a production project</h1>
-            <p className="muted">
-              Start with a prepared manifest and its versioned assets.
-            </p>
-            <button
-              className="primary"
-              disabled={!catalogs.length || pending}
-              onClick={() => setDialog('new')}
-            >
-              Create project
-            </button>
-          </section>
-        )}
+                </section>
+                <aside className="activity">
+                  <div className="section-heading">
+                    <h2>Production runs</h2>
+                  </div>
+                  {pollError && <p role="alert">{pollError}</p>}
+                  {!runs.length && (
+                    <p className="muted">
+                      Run a saved revision to see its progress and outputs.
+                    </p>
+                  )}
+                  <div className="history">
+                    {runs.map((run) => (
+                      <button
+                        key={run.id}
+                        aria-pressed={run.id === selectedRun}
+                        onClick={() => {
+                          setSelectedRun(run.id);
+                          setDetail(undefined);
+                          setPreview('');
+                        }}
+                      >
+                        <span>
+                          r{revisionNumber(run.revisionId)} ·{' '}
+                          {time(run.createdAt)}
+                        </span>
+                        <small className={'status ' + run.status}>
+                          {run.status}
+                        </small>
+                      </button>
+                    ))}
+                  </div>
+                  {detail && (
+                    <div className="run-detail">
+                      <p
+                        className={'status ' + detail.run.status}
+                        role="status"
+                      >
+                        {detail.run.status}
+                        {active(detail.run) &&
+                          ' · ' +
+                            (detail.run.logs.at(-1) ??
+                              'Waiting for production')}
+                      </p>
+                      {detail.run.error && (
+                        <p role="alert" className="failure">
+                          {detail.run.error}
+                        </p>
+                      )}
+                      {!active(detail.run) && (
+                        <button
+                          className="rerun"
+                          disabled={pending}
+                          onClick={() =>
+                            void perform(() =>
+                              runRevision(project.id, detail.run.revisionId),
+                            )
+                          }
+                        >
+                          Rerun r{revisionNumber(detail.run.revisionId)}
+                        </button>
+                      )}
+                      {detail.run.progress && (
+                        <label className="shot-progress">
+                          {detail.run.progress.completed} /{' '}
+                          {detail.run.progress.total} shots prepared
+                          <progress
+                            value={detail.run.progress.completed}
+                            max={detail.run.progress.total}
+                          />
+                        </label>
+                      )}
+                      {detail.run.cacheHits && (
+                        <p className="muted">
+                          Cache · {detail.run.cacheHits.shots} shots
+                          {detail.run.cacheHits.assembly &&
+                            ' · assembly reused'}
+                        </p>
+                      )}
+                      <details open>
+                        <summary>Logs ({detail.run.logs.length})</summary>
+                        <pre className="logs">
+                          {detail.run.logs.join('\n') ||
+                            'Waiting for pipeline logs…'}
+                        </pre>
+                      </details>
+                      {detail.outputs.length > 0 && (
+                        <section className="outputs">
+                          <h3>Outputs</h3>
+                          {currentOutput?.kind === 'video' && (
+                            <video
+                              key={currentOutput.url}
+                              src={currentOutput.url}
+                              controls
+                              preload="metadata"
+                            />
+                          )}
+                          {currentOutput?.kind === 'image' && (
+                            <img
+                              src={currentOutput.url}
+                              alt={currentOutput.name}
+                            />
+                          )}
+                          <ul>
+                            {detail.outputs.map((item) => (
+                              <li key={item.url}>
+                                {item.kind !== 'file' && (
+                                  <button
+                                    onClick={() => setPreview(item.url)}
+                                    aria-pressed={
+                                      currentOutput?.url === item.url
+                                    }
+                                  >
+                                    Preview
+                                  </button>
+                                )}
+                                <a href={item.url} download title={item.name}>
+                                  {item.name.split('/').at(-1)}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </section>
+                      )}
+                    </div>
+                  )}
+                </aside>
+              </>
+            ) : (
+              <section className="empty">
+                <h1>Open a production project</h1>
+                <p className="muted">
+                  Start with a prepared manifest and its versioned assets.
+                </p>
+                <button
+                  className="primary"
+                  disabled={!catalogs.length || pending}
+                  onClick={() => setDialog('new')}
+                >
+                  Create project
+                </button>
+              </section>
+            )}
           </>
         )}
       </main>

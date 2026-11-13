@@ -36,10 +36,19 @@ function newBox(): ProceduralAssetDefinition {
     assetVersion: '1.0.0',
     kind: 'mechanical-prop',
     materials: [
-      { id: 'mat.base', color: [0.32, 0.62, 0.86], metallic: 0.15, roughness: 0.55 },
+      {
+        id: 'mat.base',
+        color: [0.32, 0.62, 0.86],
+        metallic: 0.15,
+        roughness: 0.55,
+      },
     ],
     meshes: [
-      { id: 'mesh.body', materialId: 'mat.base', shape: { kind: 'box', dimensions: [1.5, 1, 0.8] } },
+      {
+        id: 'mesh.body',
+        materialId: 'mat.base',
+        shape: { kind: 'box', dimensions: [1.5, 1, 0.8] },
+      },
     ],
     parts: [{ id: 'body', meshId: 'mesh.body', transform: baseTransform() }],
     handles: [],
@@ -131,7 +140,11 @@ export function AssetStudio({
           const saved = localStorage.getItem('filmie.asset-studio.draft');
           if (saved) {
             const parsed = JSON.parse(saved) as ProceduralAssetDefinition;
-            if (parsed && Array.isArray(parsed.parts) && Array.isArray(parsed.meshes))
+            if (
+              parsed &&
+              Array.isArray(parsed.parts) &&
+              Array.isArray(parsed.meshes)
+            )
               initial = parsed;
           }
         } catch {
@@ -172,7 +185,9 @@ export function AssetStudio({
     [definition],
   );
 
-  function modify(change: (value: ProceduralAssetDefinition) => ProceduralAssetDefinition) {
+  function modify(
+    change: (value: ProceduralAssetDefinition) => ProceduralAssetDefinition,
+  ) {
     setDefinition((current) => (current ? change(current) : current));
     setValidation(undefined);
     setResult(undefined);
@@ -182,7 +197,9 @@ export function AssetStudio({
   function editPart(change: (value: Part) => Part) {
     modify((current) => ({
       ...current,
-      parts: current.parts.map((item) => (item.id === selected ? change(item) : item)),
+      parts: current.parts.map((item) =>
+        item.id === selected ? change(item) : item,
+      ),
     }));
   }
 
@@ -191,7 +208,9 @@ export function AssetStudio({
     if (!id) return;
     modify((current) => ({
       ...current,
-      meshes: current.meshes.map((item) => (item.id === id ? change(item) : item)),
+      meshes: current.meshes.map((item) =>
+        item.id === id ? change(item) : item,
+      ),
     }));
   }
 
@@ -220,7 +239,9 @@ export function AssetStudio({
   }
 
   async function refreshLibrary() {
-    const assets = await api<{ assets: AssetStudioAsset[] }>('asset-studio/assets');
+    const assets = await api<{ assets: AssetStudioAsset[] }>(
+      'asset-studio/assets',
+    );
     setLibrary(assets.assets);
   }
 
@@ -268,7 +289,8 @@ export function AssetStudio({
   function addPart() {
     if (!definition) return;
     let index = definition.parts.length + 1;
-    while (definition.parts.some((value) => value.id === 'part-' + index)) index += 1;
+    while (definition.parts.some((value) => value.id === 'part-' + index))
+      index += 1;
     const id = 'part-' + index;
     const meshId = 'mesh.' + id;
     const parentId = selected || undefined;
@@ -306,10 +328,18 @@ export function AssetStudio({
           joint.pivotPartId === part.id,
       ) ||
       definition.handles.some((handle) => handle.partId === part.id) ||
-      definition.sockets.some((socket) => socket.node === part.id || socket.node === 'part.' + part.id) ||
-      definition.colliders.some((collider) => collider.node === part.id || collider.node === 'part.' + part.id);
+      definition.sockets.some(
+        (socket) =>
+          socket.node === part.id || socket.node === 'part.' + part.id,
+      ) ||
+      definition.colliders.some(
+        (collider) =>
+          collider.node === part.id || collider.node === 'part.' + part.id,
+      );
     if (referenced) {
-      setError('Remove linked children, joints and handles before deleting this part.');
+      setError(
+        'Remove linked children, joints and handles before deleting this part.',
+      );
       return;
     }
     const meshId = part.meshId;
@@ -323,17 +353,24 @@ export function AssetStudio({
           : current.meshes.filter((item) => item.id !== meshId),
       };
     });
-    setSelected(definition.parts.find((item) => item.id !== selected)?.id ?? '');
+    setSelected(
+      definition.parts.find((item) => item.id !== selected)?.id ?? '',
+    );
   }
 
   async function validate() {
     if (!definition) return;
     await perform(async () => {
-      const response = await api<AssetStudioValidation>('asset-studio/validate', {
-        definition,
-      });
+      const response = await api<AssetStudioValidation>(
+        'asset-studio/validate',
+        {
+          definition,
+        },
+      );
       setValidation(response);
-      setNotice(response.valid ? 'Definition is valid and ready to generate.' : '');
+      setNotice(
+        response.valid ? 'Definition is valid and ready to generate.' : '',
+      );
     });
   }
 
@@ -377,7 +414,9 @@ export function AssetStudio({
         version: asset.version,
       });
       setNotice(
-        asset.assetId + '@' + asset.version +
+        asset.assetId +
+          '@' +
+          asset.version +
           ' added to the project registry. Reference it in a scene manifest to use it.',
       );
       onAttached?.(projectId);
@@ -399,24 +438,33 @@ export function AssetStudio({
           <p className="eyebrow">ASSET FACTORY / PROCEDURAL</p>
           <h1>Asset Studio</h1>
           <p className="muted">
-            Author geometry and materials, publish a GLB, and inspect a real Blender render.
+            Author geometry and materials, publish a GLB, and inspect a real
+            Blender render.
           </p>
         </div>
         <div className="asset-actions">
-          <button disabled={busy} onClick={() => load(newBox())}>New box</button>
+          <button disabled={busy} onClick={() => load(newBox())}>
+            New box
+          </button>
           <button
             disabled={busy}
             onClick={() =>
               void perform(async () => {
-                const response = await api<{ definition: ProceduralAssetDefinition }>('asset-studio/template');
+                const response = await api<{
+                  definition: ProceduralAssetDefinition;
+                }>('asset-studio/template');
                 load(response.definition);
               })
             }
           >
             Crane preset
           </button>
-          <button disabled={busy} onClick={() => upload.current?.click()}>Import JSON</button>
-          <button disabled={!definition} onClick={downloadDefinition}>Export JSON</button>
+          <button disabled={busy} onClick={() => upload.current?.click()}>
+            Import JSON
+          </button>
+          <button disabled={!definition} onClick={downloadDefinition}>
+            Export JSON
+          </button>
           <input
             ref={upload}
             type="file"
@@ -438,8 +486,16 @@ export function AssetStudio({
         </div>
       </div>
 
-      {error && <div className="asset-alert" role="alert">{error}</div>}
-      {notice && <div className="asset-notice" role="status">{notice}</div>}
+      {error && (
+        <div className="asset-alert" role="alert">
+          {error}
+        </div>
+      )}
+      {notice && (
+        <div className="asset-notice" role="status">
+          {notice}
+        </div>
+      )}
 
       {definition ? (
         <>
@@ -449,7 +505,10 @@ export function AssetStudio({
               <input
                 value={definition.assetId}
                 onChange={(event) =>
-                  modify((current) => ({ ...current, assetId: event.target.value }))
+                  modify((current) => ({
+                    ...current,
+                    assetId: event.target.value,
+                  }))
                 }
               />
             </label>
@@ -458,7 +517,10 @@ export function AssetStudio({
               <input
                 value={definition.assetVersion}
                 onChange={(event) =>
-                  modify((current) => ({ ...current, assetVersion: event.target.value }))
+                  modify((current) => ({
+                    ...current,
+                    assetVersion: event.target.value,
+                  }))
                 }
               />
             </label>
@@ -469,7 +531,8 @@ export function AssetStudio({
                 onChange={(event) =>
                   modify((current) => ({
                     ...current,
-                    kind: event.target.value as ProceduralAssetDefinition['kind'],
+                    kind: event.target
+                      .value as ProceduralAssetDefinition['kind'],
                   }))
                 }
               >
@@ -480,7 +543,9 @@ export function AssetStudio({
                   'modular-environment',
                   'articulated-assembly',
                 ].map((kind) => (
-                  <option key={kind} value={kind}>{kind.replaceAll('-', ' ')}</option>
+                  <option key={kind} value={kind}>
+                    {kind.replaceAll('-', ' ')}
+                  </option>
                 ))}
               </select>
             </label>
@@ -490,7 +555,9 @@ export function AssetStudio({
             <aside className="asset-part-list">
               <div className="section-heading">
                 <h2>Geometry hierarchy</h2>
-                <button disabled={busy} onClick={addPart}>+ Part</button>
+                <button disabled={busy} onClick={addPart}>
+                  + Part
+                </button>
               </div>
               <div className="asset-parts">
                 {definition.parts.map((item) => (
@@ -501,7 +568,10 @@ export function AssetStudio({
                     onClick={() => setSelected(item.id)}
                   >
                     <strong>{item.id}</strong>
-                    <small>{item.parentId ? '↳ ' + item.parentId : 'Root'} · {item.meshId}</small>
+                    <small>
+                      {item.parentId ? '↳ ' + item.parentId : 'Root'} ·{' '}
+                      {item.meshId}
+                    </small>
                   </button>
                 ))}
               </div>
@@ -515,11 +585,14 @@ export function AssetStudio({
                 {definition.joints.map((joint) => (
                   <div key={joint.id}>
                     <strong>{joint.id}</strong>
-                    <small>{joint.type} · {joint.parentPartId} → {joint.childPartId}</small>
+                    <small>
+                      {joint.type} · {joint.parentPartId} → {joint.childPartId}
+                    </small>
                   </div>
                 ))}
                 <p className="muted">
-                  Adjust detailed joint limits and semantic mappings in Advanced JSON.
+                  Adjust detailed joint limits and semantic mappings in Advanced
+                  JSON.
                 </p>
               </details>
             </aside>
@@ -541,21 +614,40 @@ export function AssetStudio({
               </div>
               {mode === 'visual' ? (
                 <>
-                  <AssetViewport definition={definition} selected={selected} onSelect={setSelected} />
+                  <AssetViewport
+                    definition={definition}
+                    selected={selected}
+                    onSelect={setSelected}
+                  />
                   <p className="asset-hint">
-                    Live geometry preview · Blender generates the final authoritative GLB.
-                    Shapes, hierarchy and material colors update immediately.
+                    Live geometry preview · Blender generates the final
+                    authoritative GLB. Shapes, hierarchy and material colors
+                    update immediately.
                   </p>
                 </>
               ) : (
                 <>
-                  <JsonEditor value={raw} onChange={setRaw} invalid={!!error} readOnly={busy} />
-                  <button className="primary" onClick={applyJson} disabled={busy}>Apply JSON to scene</button>
+                  <JsonEditor
+                    value={raw}
+                    onChange={setRaw}
+                    invalid={!!error}
+                    readOnly={busy}
+                  />
+                  <button
+                    className="primary"
+                    onClick={applyJson}
+                    disabled={busy}
+                  >
+                    Apply JSON to scene
+                  </button>
                 </>
               )}
 
               <div className="asset-build-bar">
-                <button onClick={() => void validate()} disabled={busy || mode === 'json'}>
+                <button
+                  onClick={() => void validate()}
+                  disabled={busy || mode === 'json'}
+                >
                   Validate
                 </button>
                 <button
@@ -570,14 +662,19 @@ export function AssetStudio({
                 <div className="asset-validation" aria-live="polite">
                   {validation.valid ? (
                     <strong className="success">
-                      Valid · {validation.partCount} parts · {validation.jointCount} joints
+                      Valid · {validation.partCount} parts ·{' '}
+                      {validation.jointCount} joints
                     </strong>
                   ) : (
                     <>
-                      <strong>{validation.issues.length} validation issue(s)</strong>
+                      <strong>
+                        {validation.issues.length} validation issue(s)
+                      </strong>
                       <ul>
                         {validation.issues.map((issue, index) => (
-                          <li key={index}><code>{issue.path}</code>: {issue.message}</li>
+                          <li key={index}>
+                            <code>{issue.path}</code>: {issue.message}
+                          </li>
                         ))}
                       </ul>
                     </>
@@ -591,19 +688,36 @@ export function AssetStudio({
                     <span className="success">{result.status}</span>
                   </div>
                   {result.asset.previewUrl && (
-                    <img src={result.asset.previewUrl + '?asset=' + result.asset.contentHash} alt="Real Blender rendering of generated asset" />
+                    <img
+                      src={
+                        result.asset.previewUrl +
+                        '?asset=' +
+                        result.asset.contentHash
+                      }
+                      alt="Real Blender rendering of generated asset"
+                    />
                   )}
                   <div className="asset-output-links">
-                    <a href={result.asset.glbUrl} download>Download GLB</a>
-                    {result.asset.previewUrl && <a href={result.asset.previewUrl} download>Download PNG</a>}
-                    <span className="muted">{result.asset.contentHash.slice(0, 16)}…</span>
+                    <a href={result.asset.glbUrl} download>
+                      Download GLB
+                    </a>
+                    {result.asset.previewUrl && (
+                      <a href={result.asset.previewUrl} download>
+                        Download PNG
+                      </a>
+                    )}
+                    <span className="muted">
+                      {result.asset.contentHash.slice(0, 16)}…
+                    </span>
                   </div>
                 </div>
               )}
             </div>
 
             <aside className="asset-properties">
-              <div className="section-heading"><h2>Properties</h2></div>
+              <div className="section-heading">
+                <h2>Properties</h2>
+              </div>
               {part && mesh ? (
                 <div className="asset-property-fields">
                   <h3>{part.id}</h3>
@@ -614,21 +728,28 @@ export function AssetStudio({
                       onChange={(event) =>
                         editPart((current) => ({
                           ...current,
-                          ...(event.target.value ? { parentId: event.target.value } : { parentId: undefined }),
+                          ...(event.target.value
+                            ? { parentId: event.target.value }
+                            : { parentId: undefined }),
                         }))
                       }
                     >
                       <option value="">None (root)</option>
-                      {validParts.filter((id) => id !== part.id).map((id) => (
-                        <option key={id} value={id}>{id}</option>
-                      ))}
+                      {validParts
+                        .filter((id) => id !== part.id)
+                        .map((id) => (
+                          <option key={id} value={id}>
+                            {id}
+                          </option>
+                        ))}
                     </select>
                   </label>
 
                   <h3>Position (m)</h3>
                   <div className="asset-vector">
                     {axes.map((axis) => (
-                      <label key={axis}>{axis.toUpperCase()}
+                      <label key={axis}>
+                        {axis.toUpperCase()}
                         <input
                           type="number"
                           step="0.1"
@@ -653,7 +774,8 @@ export function AssetStudio({
                   <h3>Rotation (degrees)</h3>
                   <div className="asset-vector">
                     {axes.map((axis) => (
-                      <label key={axis}>{axis.toUpperCase()}
+                      <label key={axis}>
+                        {axis.toUpperCase()}
                         <input
                           type="number"
                           step="5"
@@ -688,10 +810,16 @@ export function AssetStudio({
                       }
                     >
                       {['box', 'cylinder', 'sphere', 'cone'].map((kind) => (
-                        <option key={kind} value={kind}>{kind}</option>
+                        <option key={kind} value={kind}>
+                          {kind}
+                        </option>
                       ))}
-                      {!['box', 'sphere', 'cylinder', 'cone'].includes(mesh.shape.kind) && (
-                        <option value={mesh.shape.kind}>{mesh.shape.kind} (advanced)</option>
+                      {!['box', 'sphere', 'cylinder', 'cone'].includes(
+                        mesh.shape.kind,
+                      ) && (
+                        <option value={mesh.shape.kind}>
+                          {mesh.shape.kind} (advanced)
+                        </option>
                       )}
                     </select>
                   </label>
@@ -699,18 +827,29 @@ export function AssetStudio({
                   {mesh.shape.kind === 'box' && (
                     <div className="asset-vector">
                       {axes.map((axis, index) => (
-                        <label key={axis}>{axis.toUpperCase()}
+                        <label key={axis}>
+                          {axis.toUpperCase()}
                           <input
                             type="number"
                             min="0.001"
                             step="0.1"
-                            value={mesh.shape.kind === 'box' ? mesh.shape.dimensions[index] : 1}
+                            value={
+                              mesh.shape.kind === 'box'
+                                ? mesh.shape.dimensions[index]
+                                : 1
+                            }
                             onChange={(event) =>
                               editMesh((current) => {
-                                if (current.shape.kind !== 'box') return current;
-                                const dimensions = [...current.shape.dimensions] as [number, number, number];
+                                if (current.shape.kind !== 'box')
+                                  return current;
+                                const dimensions = [
+                                  ...current.shape.dimensions,
+                                ] as [number, number, number];
                                 dimensions[index] = Number(event.target.value);
-                                return { ...current, shape: { kind: 'box', dimensions } };
+                                return {
+                                  ...current,
+                                  shape: { kind: 'box', dimensions },
+                                };
                               })
                             }
                           />
@@ -731,14 +870,18 @@ export function AssetStudio({
                             if (!('radius' in current.shape)) return current;
                             return {
                               ...current,
-                              shape: { ...current.shape, radius: Number(event.target.value) },
+                              shape: {
+                                ...current.shape,
+                                radius: Number(event.target.value),
+                              },
                             };
                           })
                         }
                       />
                     </label>
                   )}
-                  {(mesh.shape.kind === 'cone' || mesh.shape.kind === 'cylinder') && (
+                  {(mesh.shape.kind === 'cone' ||
+                    mesh.shape.kind === 'cylinder') && (
                     <label>
                       Height
                       <input
@@ -748,11 +891,17 @@ export function AssetStudio({
                         value={mesh.shape.height}
                         onChange={(event) =>
                           editMesh((current) => {
-                            if (current.shape.kind !== 'cone' && current.shape.kind !== 'cylinder')
+                            if (
+                              current.shape.kind !== 'cone' &&
+                              current.shape.kind !== 'cylinder'
+                            )
                               return current;
                             return {
                               ...current,
-                              shape: { ...current.shape, height: Number(event.target.value) },
+                              shape: {
+                                ...current.shape,
+                                height: Number(event.target.value),
+                              },
                             };
                           })
                         }
@@ -766,17 +915,23 @@ export function AssetStudio({
                     <select
                       value={mesh.materialId}
                       onChange={(event) =>
-                        editMesh((current) => ({ ...current, materialId: event.target.value }))
+                        editMesh((current) => ({
+                          ...current,
+                          materialId: event.target.value,
+                        }))
                       }
                     >
                       {definition.materials.map((item) => (
-                        <option key={item.id} value={item.id}>{item.id}</option>
+                        <option key={item.id} value={item.id}>
+                          {item.id}
+                        </option>
                       ))}
                     </select>
                   </label>
                   {material && (
                     <>
-                      <label>Color
+                      <label>
+                        Color
                         <input
                           type="color"
                           value={toHex(material.color)}
@@ -789,7 +944,8 @@ export function AssetStudio({
                         />
                       </label>
                       {(['roughness', 'metallic'] as const).map((field) => (
-                        <label key={field}>{field}
+                        <label key={field}>
+                          {field}
                           <input
                             type="range"
                             min="0"
@@ -808,12 +964,18 @@ export function AssetStudio({
                       ))}
                     </>
                   )}
-                  <button className="asset-remove" disabled={busy} onClick={removePart}>
+                  <button
+                    className="asset-remove"
+                    disabled={busy}
+                    onClick={removePart}
+                  >
                     Remove selected part
                   </button>
                 </div>
               ) : (
-                <p className="muted">Select a part to edit its geometry and materials.</p>
+                <p className="muted">
+                  Select a part to edit its geometry and materials.
+                </p>
               )}
             </aside>
           </div>
@@ -826,47 +988,74 @@ export function AssetStudio({
         <div className="section-heading">
           <div>
             <h2>Published library</h2>
-            <p className="muted">Immutable generated assets · available for production</p>
+            <p className="muted">
+              Immutable generated assets · available for production
+            </p>
           </div>
           <label className="asset-project-select">
             Attach to project
-            <select value={projectId} onChange={(event) => setProjectId(event.target.value)}>
+            <select
+              value={projectId}
+              onChange={(event) => setProjectId(event.target.value)}
+            >
               <option value="">Select a project</option>
               {projects.map((item) => (
-                <option key={item.id} value={item.id}>{item.name}</option>
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
               ))}
             </select>
           </label>
         </div>
-        {!library.length && <p className="muted">No generated assets yet. Publish your first asset above.</p>}
+        {!library.length && (
+          <p className="muted">
+            No generated assets yet. Publish your first asset above.
+          </p>
+        )}
         <div className="asset-library-grid">
           {library.map((asset) => (
-            <div className="asset-library-item" key={asset.assetId + '@' + asset.version}>
+            <div
+              className="asset-library-item"
+              key={asset.assetId + '@' + asset.version}
+            >
               {asset.previewUrl ? (
-                <img src={asset.previewUrl} alt={'Preview of ' + asset.assetId} />
+                <img
+                  src={asset.previewUrl}
+                  alt={'Preview of ' + asset.assetId}
+                />
               ) : (
                 <div className="asset-no-preview">No preview</div>
               )}
               <strong>{asset.assetId}</strong>
-              <small>{asset.version} · {asset.partCount} parts · {asset.jointCount} joints</small>
+              <small>
+                {asset.version} · {asset.partCount} parts · {asset.jointCount}{' '}
+                joints
+              </small>
               <div className="asset-library-actions">
                 <button
                   disabled={busy}
                   onClick={() =>
                     void perform(async () => {
-                      const entry = await api<{ definition: ProceduralAssetDefinition }>(
+                      const entry = await api<{
+                        definition: ProceduralAssetDefinition;
+                      }>(
                         'asset-studio/definitions/' +
-                          encodeURIComponent(asset.assetId) + '/' +
+                          encodeURIComponent(asset.assetId) +
+                          '/' +
                           encodeURIComponent(asset.version),
                       );
                       load(entry.definition);
-                      setNotice('Loaded a published definition. Change the version before publishing edits.');
+                      setNotice(
+                        'Loaded a published definition. Change the version before publishing edits.',
+                      );
                     })
                   }
                 >
                   Edit
                 </button>
-                <a href={asset.glbUrl} download>GLB</a>
+                <a href={asset.glbUrl} download>
+                  GLB
+                </a>
                 <button
                   disabled={busy || !projectId}
                   onClick={() => void attach(asset)}

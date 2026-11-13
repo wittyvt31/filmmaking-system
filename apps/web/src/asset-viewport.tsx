@@ -7,11 +7,7 @@ type Part = ProceduralAssetDefinition['parts'][number];
 type Surface = { points: Vec3[]; color: Vec3; partId: string };
 type Camera = { yaw: number; elevation: number; zoom: number };
 
-const add = (a: Vec3, b: Vec3): Vec3 => [
-  a[0] + b[0],
-  a[1] + b[1],
-  a[2] + b[2],
-];
+const add = (a: Vec3, b: Vec3): Vec3 => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
 const subtract = (a: Vec3, b: Vec3): Vec3 => [
   a[0] - b[0],
   a[1] - b[1],
@@ -22,14 +18,16 @@ const cross = (a: Vec3, b: Vec3): Vec3 => [
   a[2] * b[0] - a[0] * b[2],
   a[0] * b[1] - a[1] * b[0],
 ];
-const dot = (a: Vec3, b: Vec3) =>
-  a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const dot = (a: Vec3, b: Vec3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const normal = (v: Vec3): Vec3 => {
   const length = Math.hypot(...v) || 1;
   return [v[0] / length, v[1] / length, v[2] / length];
 };
 
-function rotate(point: Vec3, degrees: { x: number; y: number; z: number }): Vec3 {
+function rotate(
+  point: Vec3,
+  degrees: { x: number; y: number; z: number },
+): Vec3 {
   const x = (degrees.x * Math.PI) / 180;
   const y = (degrees.y * Math.PI) / 180;
   const z = (degrees.z * Math.PI) / 180;
@@ -158,12 +156,8 @@ function shapeSurfaces(shape: Shape): Vec3[][] {
     );
 
   if (shape.kind === 'extrusion') {
-    const base = shape.polygon.map(
-      ([x, y]): Vec3 => [x, y, 0],
-    );
-    const top = shape.polygon.map(
-      ([x, y]): Vec3 => [x, y, shape.depth],
-    );
+    const base = shape.polygon.map(([x, y]): Vec3 => [x, y, 0]);
+    const top = shape.polygon.map(([x, y]): Vec3 => [x, y, shape.depth]);
     return [
       [...base].reverse(),
       top,
@@ -191,8 +185,9 @@ function buildSurfaces(definition: ProceduralAssetDefinition) {
   for (const part of definition.parts) {
     const mesh = meshes.get(part.meshId);
     if (!mesh) continue;
-    const color: Vec3 = (materials.get(mesh.materialId)?.color ??
-      [0.65, 0.72, 0.8]) as Vec3;
+    const color: Vec3 = (materials.get(mesh.materialId)?.color ?? [
+      0.65, 0.72, 0.8,
+    ]) as Vec3;
     const polygons = shapeSurfaces(mesh.shape);
     if (!polygons.length) unsupported += 1;
     centers.set(part.id, transformPoint([0, 0, 0], part, parts));
@@ -276,7 +271,10 @@ function render(
     const lineB: Vec3 = [center[0] + i, center[1] + gridSize, z];
     const lineC: Vec3 = [center[0] - gridSize, center[1] + i, z];
     const lineD: Vec3 = [center[0] + gridSize, center[1] + i, z];
-    for (const [from, to] of [[lineA, lineB], [lineC, lineD]]) {
+    for (const [from, to] of [
+      [lineA, lineB],
+      [lineC, lineD],
+    ]) {
       const a = perspective(from!);
       const b = perspective(to!);
       ctx.beginPath();
@@ -305,11 +303,16 @@ function render(
         subtract(face.points[2]!, face.points[0]!),
       ),
     );
-    const light = Math.max(0.25, Math.min(1, 0.62 + dot(surfaceNormal, normal([0.4, -0.6, 0.85])) * 0.35));
+    const light = Math.max(
+      0.25,
+      Math.min(1, 0.62 + dot(surfaceNormal, normal([0.4, -0.6, 0.85])) * 0.35),
+    );
     ctx.fillStyle =
       'rgb(' +
       face.color
-        .map((value) => Math.round(Math.max(0, Math.min(1, value * light)) * 255))
+        .map((value) =>
+          Math.round(Math.max(0, Math.min(1, value * light)) * 255),
+        )
         .join(',') +
       ')';
     ctx.beginPath();
@@ -375,7 +378,10 @@ export function AssetViewport({
           setCamera((current) => ({
             ...current,
             yaw: current.yaw + dx * 0.008,
-            elevation: Math.max(-1.45, Math.min(1.45, current.elevation + dy * 0.008)),
+            elevation: Math.max(
+              -1.45,
+              Math.min(1.45, current.elevation + dy * 0.008),
+            ),
           }));
         }}
         onPointerUp={(event) => {
@@ -391,13 +397,30 @@ export function AssetViewport({
               const maximum: Vec3 = [0, 1, 2].map((axis) =>
                 Math.max(...points.map((point) => point[axis]!)),
               ) as Vec3;
-              const center = add(minimum, maximum).map((value) => value / 2) as Vec3;
-              const span = Math.max(1, Math.hypot(...subtract(maximum, minimum)));
-              const scale = (Math.min(bounds.width, bounds.height) * 0.78 * camera.zoom) / span;
+              const center = add(minimum, maximum).map(
+                (value) => value / 2,
+              ) as Vec3;
+              const span = Math.max(
+                1,
+                Math.hypot(...subtract(maximum, minimum)),
+              );
+              const scale =
+                (Math.min(bounds.width, bounds.height) * 0.78 * camera.zoom) /
+                span;
               const nearest = [...model.centers.entries()]
                 .map(([id, point]) => {
-                  const screen = project(point, center, camera, bounds.width, bounds.height, scale);
-                  return { id, distance: Math.hypot(screen[0] - x, screen[1] - y) };
+                  const screen = project(
+                    point,
+                    center,
+                    camera,
+                    bounds.width,
+                    bounds.height,
+                    scale,
+                  );
+                  return {
+                    id,
+                    distance: Math.hypot(screen[0] - x, screen[1] - y),
+                  };
                 })
                 .sort((a, b) => a.distance - b.distance)[0];
               if (nearest && nearest.distance < 45) onSelect(nearest.id);
@@ -405,24 +428,32 @@ export function AssetViewport({
           }
           drag.current = null;
         }}
-        onPointerCancel={() => { drag.current = null; }}
+        onPointerCancel={() => {
+          drag.current = null;
+        }}
         onWheel={(event) => {
           event.preventDefault();
           setCamera((current) => ({
             ...current,
-            zoom: Math.max(0.35, Math.min(4, current.zoom * (event.deltaY > 0 ? 0.92 : 1.08))),
+            zoom: Math.max(
+              0.35,
+              Math.min(4, current.zoom * (event.deltaY > 0 ? 0.92 : 1.08)),
+            ),
           }));
         }}
       />
       <div className="viewport-caption">
         <span>DRAG · ORBIT &nbsp; SCROLL · ZOOM</span>
-        <button onClick={() => setCamera({ yaw: 0.8, elevation: 0.4, zoom: 1 })}>
+        <button
+          onClick={() => setCamera({ yaw: 0.8, elevation: 0.4, zoom: 1 })}
+        >
           Reset view
         </button>
       </div>
       {model.unsupported > 0 && (
         <p className="viewport-note">
-          {model.unsupported} advanced mesh(es) require a generated Blender preview.
+          {model.unsupported} advanced mesh(es) require a generated Blender
+          preview.
         </p>
       )}
     </div>
