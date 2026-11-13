@@ -43,6 +43,33 @@ See [Asset Lab](examples/asset-lab/README.md) for requirements, expected output
 and guidance. The preview is intentionally lightweight; it is not a cinematic
 shot render.
 
+### Create assets visually in Filmie Studio
+
+Run `pnpm web`, open [Filmie Studio](http://127.0.0.1:4173), and switch to
+**Asset Studio** in the header. No manifest or existing production project is
+required to start asset authoring.
+
+1. Choose **Crane preset** (articulated) or **New box**, or import an authored
+   procedural JSON definition.
+2. Add or select parts in the hierarchy; edit dimensions, parent, position,
+   rotation, materials, and joint controls. Orbit/zoom the lightweight
+   **authoring viewport** to inspect structural changes.
+3. Select **Validate**, then **Generate + publish GLB**. The local Blender
+   process exports and validates the real GLB, publishes an immutable version,
+   and renders a separate PNG preview from the published asset.
+4. Download either output from the asset library, or select a project and
+   **Attach** the published version to that project's registry. Reference the
+   exact asset ID and version in the project manifest to use it in production.
+
+The interactive viewport is an efficient authoring preview of primitive geometry,
+not a full GLB renderer. Imported procedural curves/sweeps are verified through
+the Blender preview. The service persists authored definitions, registry,
+content-addressed GLBs, and previews under `.filmie/asset-studio/`, and preserves
+the current unpublished editor draft in the browser. Change `assetVersion`
+when publishing modified geometry; existing published versions are immutable.
+
+[View automated Asset Studio build/attach smoke](https://github.com/wittyvt31/filmmaking-system/actions/workflows/filmie-asset-lab.yml).
+
 Run `pnpm web` and open [Filmie Studio](http://127.0.0.1:4173). Create a project from the `3d-production` catalog, edit and validate the manifest, save a revision, then run it. Restart the command after changing frontend or API source. To access it from your local network, set `FILMIE_WEB_HOST=0.0.0.0` and `FILMIE_WEB_ALLOWED_HOSTS` to the server's IP address before running `pnpm web`; allow the selected port through the Windows firewall on a private network only. The app has no authentication, so only expose it to trusted devices.
 
 The web app stores project revisions and run history in `.filmie/`, writes outputs to `renders/web/`, and shares the production cache with the CLI. Set `FILMIE_WEB_PORT` to change the port or `FILMIE_WEB_CATALOGS` to use another folder of prepared projects, each with a `manifest.json` and `assets.json`. Keep the catalog asset files available for reruns.
