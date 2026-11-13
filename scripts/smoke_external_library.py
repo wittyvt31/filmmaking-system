@@ -46,9 +46,11 @@ def run():
         "themes": ["horror"],
         "sourceProvider": "Filmie Blender smoke fixture",
         "license": {"name": "Filmie test fixture", "restrictions": []},
+        "preview": True,
     }
     published = api("/external-library/import", metadata)
     assert published["status"] == "published", published
+    assert published["preview"]["status"] == "rendered", published
     model = api("/external-library/assets")
     assert any(item["assetId"] == metadata["assetId"] for item in model["assets"])
     glb_bytes = urlopen(
