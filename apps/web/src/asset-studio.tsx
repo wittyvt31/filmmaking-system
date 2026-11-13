@@ -107,6 +107,7 @@ export function AssetStudio({
 }) {
   const [definition, setDefinition] = useState<ProceduralAssetDefinition>();
   const [selected, setSelected] = useState('');
+  const [selectedJointId, setSelectedJointId] = useState('');
   const [library, setLibrary] = useState<AssetStudioAsset[]>([]);
   const [validation, setValidation] = useState<AssetStudioValidation>();
   const [result, setResult] = useState<AssetStudioBuildResult>();
@@ -152,6 +153,7 @@ export function AssetStudio({
         }
         setDefinition(initial);
         setSelected(initial.parts[0]?.id ?? '');
+        setSelectedJointId(initial.joints[0]?.id ?? '');
         setLibrary(assets.assets);
       })
       .catch((cause: unknown) => {
@@ -176,6 +178,7 @@ export function AssetStudio({
   }, [definition]);
 
   const part = definition?.parts.find((item) => item.id === selected);
+  const selectedJoint = definition?.joints.find((item) => item.id === selectedJointId);
   const mesh = definition?.meshes.find((item) => item.id === part?.meshId);
   const material = definition?.materials.find(
     (item) => item.id === mesh?.materialId,
@@ -248,6 +251,7 @@ export function AssetStudio({
   function load(value: ProceduralAssetDefinition) {
     setDefinition(value);
     setSelected(value.parts[0]?.id ?? '');
+    setSelectedJointId(value.joints[0]?.id ?? '');
     setMode('visual');
     setRaw('');
     setValidation(undefined);
@@ -315,6 +319,91 @@ export function AssetStudio({
       ],
     }));
     setSelected(id);
+  }
+
+  function addJoint() {
+    if (!definition) return;
+    const child = definition.parts.find(
+      (item) => item.id === selected && item.parentId,
+    );
+    if (!child?.parentId) {
+      setError('Select a child part with a parent before adding a joint.');
+      return;
+    }
+    let index = definition.joints.length + 1;
+    while (definition.joints.some((value) => value.id === 'joint-' + index))
+      index += 1;
+    const id = 'joint-' + index;
+    modify((current) => ({
+      ...current,
+      joints: [
+        ...current.joints,
+        {
+          id,
+          type: 'revolute',
+          parentPartId: child.parentId!,
+          childPartId: child.id,
+          axis: [0, 0, 1],
+          limits: { lower: -1, upper: 1 },
+          defaultValue: 0,
+          controlId: 'control.' + id,
+        },
+      ],
+    }));
+    setSelectedJointId(id);
+  }
+
+  function editJoint(
+    change: (joint: ProceduralAssetDefinition['joints'][number]) =>
+      ProceduralAssetDefinition['joints'][number],
+  ) {
+    modify((current) => ({
+      ...current,
+      joints: current.joints.map((item) =>
+        item.id === selectedJointId ? change(item) : item,
+      ),
+    }));
+  }
+
+  function removeJoint() {
+    if (!definition || !selectedJoint) return;
+    modify((current) => {
+      const joints = current.joints.filter((item) => item.id !== selectedJointId);
+      return {
+        ...current,
+        joints,
+        capabilities: joints.length
+          ? current.capabilities
+          : {
+              ...current.capabilities,
+              requirements: current.capabilities.requirements.filter(
+                (item) => item !== 'articulation',
+              ),
+              mappings: current.capabilities.mappings.filter(
+                (item) => item.capability !== 'articulation',
+              ),
+            },
+      };
+    });
+    setSelectedJointId(
+      definition.joints.find((item) => item.id !== selectedJointId)?.id ?? '',
+    );
+  }
+
+  function duplicateMaterial() {
+    if (!definition || !mesh || !material) return;
+    let index = definition.materials.length + 1;
+    while (definition.materials.some((item) => item.id === 'mat.custom-' + index))
+      index += 1;
+    const id = 'mat.custom-' + index;
+    const meshId = mesh.id;
+    modify((current) => ({
+      ...current,
+      materials: [...current.materials, { ...material, id }],
+      meshes: current.meshes.map((item) =>
+        item.id === meshId ? { ...item, materialId: id } : item,
+      ),
+    }));
   }
 
   function removePart() {
