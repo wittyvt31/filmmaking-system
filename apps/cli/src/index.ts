@@ -366,7 +366,9 @@ cli
         return;
       }
       if (!report.artifactPath || !report.assetId || !report.version)
-        throw new Error('Published procedural asset has no resolvable artifact.');
+        throw new Error(
+          'Published procedural asset has no resolvable artifact.',
+        );
       const registryEntries = JSON.parse(
         await readFile(resolve(registry), 'utf8'),
       ) as {
@@ -376,8 +378,7 @@ cli
       }[];
       const published = registryEntries.find(
         (asset) =>
-          asset.assetId === report.assetId &&
-          asset.version === report.version,
+          asset.assetId === report.assetId && asset.version === report.version,
       );
       if (!published?.descriptor)
         throw new Error('Published procedural asset descriptor is missing.');
