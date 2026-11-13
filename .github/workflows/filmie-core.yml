@@ -33,5 +33,4 @@ jobs:
         run: pnpm exec vitest run tests/asset-descriptor.test.ts --reporter=dot
       - name: Check formatting of affected TypeScript
         run: |
-          pnpm exec prettier --write packages/scene/src/articulated-kinematics.ts tests/asset-descriptor.test.ts
-          git diff --exit-code -- packages/scene/src/articulated-kinematics.ts tests/asset-descriptor.test.ts
+          pnpm exec prettier --check packages/scene/src/articulated-kinematics.ts packages/scene/src/index.ts engines/blender/src/index.ts tests/asset-descriptor.test.ts
