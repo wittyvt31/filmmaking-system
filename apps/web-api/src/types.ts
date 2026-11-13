@@ -72,3 +72,5 @@ export interface AssetStudioBuildResult {
     message?: string;
   };
 }
+
+export type { ProceduralAssetDefinition } from '@filmmaking/contracts';
