@@ -34,6 +34,7 @@ def apply_transform(obj, transform):
 
 def main():
     spec = read_spec()
+    bpy.ops.wm.read_factory_settings(use_empty=True)
     definition = spec["definition"]
     output = os.path.abspath(spec["outputPath"])
     materials = {
