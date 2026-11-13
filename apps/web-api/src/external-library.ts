@@ -441,7 +441,9 @@ export class ExternalLibraryService {
         assetId: request.assetId,
         assetVersion: request.version,
         handles: inspection.nodes
-          .filter((node) => node.mesh !== undefined && !jointNodes.has(node.index))
+          .filter(
+            (node) => node.mesh !== undefined && !jointNodes.has(node.index),
+          )
           .map((node) => ({
             id: 'node.' + node.index,
             kind: 'node',
@@ -499,10 +501,17 @@ export class ExternalLibraryService {
       };
       // The source remains byte-for-byte unchanged. The published GLB receives
       // deterministic node identity metadata for the headless Blender importer.
-      const staged = join(this.root, 'inbox', '.filmie-' + randomUUID() + '.glb');
+      const staged = join(
+        this.root,
+        'inbox',
+        '.filmie-' + randomUUID() + '.glb',
+      );
       let result: Awaited<ReturnType<typeof publishAsset>>;
       try {
-        await stampGlbObjectIndices(sourceFile(this.root, request.filename), staged);
+        await stampGlbObjectIndices(
+          sourceFile(this.root, request.filename),
+          staged,
+        );
         result = await publishAsset({
           inputPath: staged,
           descriptor,

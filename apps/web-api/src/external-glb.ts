@@ -15,11 +15,13 @@ export async function stampGlbObjectIndices(
   if (inputPath === outputPath)
     throw new TypeError('An indexed GLB must be written to a new file.');
   const original = await readFile(inputPath);
-  if (original.length < 20)
-    throw new TypeError('GLB is truncated.');
+  if (original.length < 20) throw new TypeError('GLB is truncated.');
   if (original.toString('ascii', 0, 4) !== 'glTF')
     throw new TypeError('Input is not GLB.');
-  if (original.readUInt32LE(4) !== 2 || original.readUInt32LE(8) !== original.length)
+  if (
+    original.readUInt32LE(4) !== 2 ||
+    original.readUInt32LE(8) !== original.length
+  )
     throw new TypeError('Invalid GLB version or length.');
   const length = original.readUInt32LE(12);
   if (
@@ -38,7 +40,10 @@ export async function stampGlbObjectIndices(
       throw new TypeError('GLB contains a non-object node.');
     const node = raw as Record<string, unknown>;
     const extras = node['extras'];
-    if (extras !== undefined && (!extras || typeof extras !== 'object' || Array.isArray(extras)))
+    if (
+      extras !== undefined &&
+      (!extras || typeof extras !== 'object' || Array.isArray(extras))
+    )
       throw new TypeError('GLB node extras must be an object.');
     node['extras'] = {
       ...(extras as Record<string, unknown> | undefined),
