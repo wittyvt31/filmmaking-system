@@ -118,6 +118,7 @@ export interface LibraryWorldInstance {
     scale: number;
   };
   role?: string;
+  characterHeight?: number;
 }
 
 export interface LibraryWorld {
