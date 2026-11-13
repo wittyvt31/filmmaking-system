@@ -13,6 +13,7 @@ export * from './world.js';
 export * from './shots.js';
 export * from './project-manifest.js';
 export * from './production-package.js';
+export * from './procedural-asset.js';
 export * from './compiled-scene.js';
 export * from './renderer.js';
 export * from './serialization.js';

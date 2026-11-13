@@ -137,6 +137,7 @@ export const AssetDescriptorSchema = z
         mappings: [],
       }),
     resolvedHandles: z.array(resolvedHandle).optional(),
+    restTransforms: z.record(z.string(), rigidTransform).optional(),
     articulation: z
       .object({
         joints: z.array(articulationJoint).default([]),

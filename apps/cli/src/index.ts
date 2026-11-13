@@ -13,6 +13,7 @@ import {
 import { FfmpegMediaEngine } from '@filmmaking/media';
 import {
   BlenderRendererAdapter,
+  buildProceduralAsset,
   convertAssetToGlb,
   publishAsset,
 } from '@filmmaking/engine-blender';
@@ -269,6 +270,7 @@ cli
       const descriptorInput = JSON.parse(
         await readFile(resolve(descriptor), 'utf8'),
       );
+
       const metadataInput = metadata ? JSON.parse(metadata) : undefined;
       const report = await publishAsset({
         inputPath: input,
@@ -279,6 +281,73 @@ cli
         ...(metadataInput === undefined ? {} : { metadata: metadataInput }),
         ...(blender === undefined ? {} : { blenderPath: blender }),
         ...(timeout === undefined ? {} : { timeoutMs: timeout }),
+        license: {
+          name: licenseName,
+          ...(licenseUrl === undefined ? {} : { url: licenseUrl }),
+          restrictions: licenseRestriction,
+        },
+      });
+      printJson(report);
+      if (report.status === 'rejected') process.exitCode = 1;
+    },
+  );
+
+cli
+  .command('build-procedural-asset')
+  .description('Build, validate, and publish a deterministic procedural asset.')
+  .requiredOption('--definition <path>', 'Procedural asset definition JSON')
+  .requiredOption('--registry <path>', 'Asset registry JSON path')
+  .requiredOption('--license-name <name>', 'License name')
+  .option('--license-url <url>', 'License URL')
+  .option(
+    '--license-restriction <restriction>',
+    'License restriction (repeatable)',
+    (value: string, previous: string[] = []) => [...previous, value],
+    [],
+  )
+  .option(
+    '--artifact-directory <directory>',
+    'Content-addressed artifact directory',
+  )
+  .option('--report-directory <directory>', 'Diagnostic report directory')
+  .option('--cache-directory <directory>', 'Procedural GLB cache directory')
+  .option(
+    '--metadata <json>',
+    'Additional JSON object to store in asset metadata',
+  )
+  .option('--blender <path>', 'Blender executable override')
+  .option(
+    '--timeout <milliseconds>',
+    'Optional Blender build timeout',
+    (value: string) => Number.parseInt(value, 10),
+  )
+  .action(
+    async ({
+      definition,
+      registry,
+      licenseName,
+      licenseUrl,
+      licenseRestriction,
+      artifactDirectory,
+      reportDirectory,
+      cacheDirectory,
+      metadata,
+      blender,
+      timeout,
+    }) => {
+      const definitionInput = JSON.parse(
+        await readFile(resolve(definition), 'utf8'),
+      );
+      const metadataInput = metadata ? JSON.parse(metadata) : undefined;
+      const report = await buildProceduralAsset({
+        definition: definitionInput,
+        registryPath: registry,
+        ...(artifactDirectory === undefined ? {} : { artifactDirectory }),
+        ...(reportDirectory === undefined ? {} : { reportDirectory }),
+        ...(cacheDirectory === undefined ? {} : { cacheDirectory }),
+        ...(blender === undefined ? {} : { blenderPath: blender }),
+        ...(timeout === undefined ? {} : { timeoutMs: timeout }),
+        ...(metadataInput === undefined ? {} : { metadata: metadataInput }),
         license: {
           name: licenseName,
           ...(licenseUrl === undefined ? {} : { url: licenseUrl }),

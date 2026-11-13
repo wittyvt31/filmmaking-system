@@ -2,7 +2,10 @@ import { createHash } from 'node:crypto';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { AssetDescriptorSchema } from '@filmmaking/contracts';
+import {
+  AssetDescriptorSchema,
+  ProceduralAssetDefinitionSchema,
+} from '@filmmaking/contracts';
 import {
   AssetVersionSchema,
   AssetRegistry,
@@ -16,6 +19,7 @@ import {
   convertAssetToGlb,
 } from '../engines/blender/src/asset-factory.js';
 import { publishAsset } from '../engines/blender/src/asset-publisher.js';
+import { proceduralAssetDescriptor } from '../engines/blender/src/procedural-assets.js';
 import { evaluateArticulatedKinematics } from '@filmmaking/scene';
 import { expect, it } from 'vitest';
 
@@ -249,6 +253,149 @@ it('evaluates deterministic hierarchical articulated kinematics', () => {
   expect(first).toEqual(second);
   expect(first.jointStates).toEqual({ base: Math.PI / 2, slide: 2 });
   expect(first.nodeTransforms[2]?.position[1]).toBeCloseTo(2);
+});
+
+it('builds deterministic procedural descriptors with articulated mappings', () => {
+  const definition = {
+    schemaVersion: 1 as const,
+    assetId: 'procedural-crane',
+    assetVersion: '1.0.0',
+    kind: 'articulated-assembly' as const,
+    materials: [
+      {
+        id: 'paint',
+        color: [0.2, 0.3, 0.4] as [number, number, number],
+        metallic: 0.5,
+        roughness: 0.4,
+      },
+    ],
+    meshes: [
+      {
+        id: 'base-mesh',
+        materialId: 'paint',
+        shape: {
+          kind: 'box' as const,
+          dimensions: [1, 1, 1] as [number, number, number],
+        },
+      },
+      {
+        id: 'arm-mesh',
+        materialId: 'paint',
+        shape: {
+          kind: 'box' as const,
+          dimensions: [0.2, 2, 0.2] as [number, number, number],
+        },
+      },
+    ],
+    parts: [
+      {
+        id: 'arm',
+        meshId: 'arm-mesh',
+        parentId: 'base',
+        transform: {
+          position: { x: 0, y: 1, z: 0 },
+          rotationDegrees: { x: 0, y: 0, z: 0 },
+          scale: 1,
+        },
+      },
+      {
+        id: 'base',
+        meshId: 'base-mesh',
+        transform: {
+          position: { x: 0, y: 0, z: 0 },
+          rotationDegrees: { x: 0, y: 0, z: 0 },
+          scale: 1,
+        },
+      },
+    ],
+    handles: [
+      { id: 'arm.control', kind: 'control-target' as const, partId: 'arm' },
+    ],
+    joints: [
+      {
+        id: 'boom',
+        type: 'revolute' as const,
+        parentPartId: 'base',
+        childPartId: 'arm',
+        axis: [0, 0, 1] as [number, number, number],
+        controlId: 'arm.control',
+      },
+    ],
+    provenance: { source: 'test' },
+  };
+  expect(ProceduralAssetDefinitionSchema.parse(definition).parts[0]?.id).toBe(
+    'arm',
+  );
+  const first = proceduralAssetDescriptor(definition);
+  const second = proceduralAssetDescriptor({
+    ...definition,
+    parts: [...definition.parts].reverse(),
+  });
+  expect(first).toEqual(second);
+  expect(
+    first.handles.find((handle) => handle.id === 'part.arm')?.target,
+  ).toEqual({
+    nodeIndex: 1,
+  });
+  expect(first.articulation.joints[0]?.child).toBe('part.arm');
+  expect(first.restTransforms?.['1']?.position).toEqual([0, 1, 0]);
+});
+
+it('rejects invalid procedural hierarchies and articulated scale', () => {
+  const result = ProceduralAssetDefinitionSchema.safeParse({
+    schemaVersion: 1,
+    assetId: 'invalid-prop',
+    assetVersion: '1.0.0',
+    kind: 'articulated-assembly',
+    materials: [{ id: 'paint', color: [0, 0, 0], metallic: 0, roughness: 0.5 }],
+    meshes: [
+      {
+        id: 'mesh',
+        materialId: 'paint',
+        shape: { kind: 'box', dimensions: [1, 1, 1] },
+      },
+    ],
+    parts: [
+      {
+        id: 'base',
+        meshId: 'mesh',
+        parentId: 'arm',
+        transform: {
+          position: { x: 0, y: 0, z: 0 },
+          rotationDegrees: { x: 0, y: 0, z: 0 },
+          scale: 2,
+        },
+      },
+      {
+        id: 'arm',
+        meshId: 'mesh',
+        parentId: 'base',
+        transform: {
+          position: { x: 0, y: 0, z: 0 },
+          rotationDegrees: { x: 0, y: 0, z: 0 },
+          scale: 1,
+        },
+      },
+    ],
+    joints: [
+      {
+        id: 'joint',
+        type: 'revolute',
+        parentPartId: 'base',
+        childPartId: 'arm',
+        axis: [0, 0, 1],
+      },
+    ],
+    provenance: { source: 'test' },
+  });
+  expect(result.success).toBe(false);
+  if (!result.success)
+    expect(result.error.issues.map((issue) => issue.message)).toEqual(
+      expect.arrayContaining([
+        'Part hierarchy contains a cycle',
+        'Articulated procedural parts must use unit scale so rest transforms remain physical',
+      ]),
+    );
 });
 
 it('rejects undeclared articulated runtime controls', () => {

@@ -51,6 +51,10 @@ export {
   type AssetFactoryReport,
 } from './asset-factory.js';
 export { publishAsset, type AssetPublishReport } from './asset-publisher.js';
+export {
+  buildProceduralAsset,
+  proceduralAssetDescriptor,
+} from './procedural-assets.js';
 const RENDERER_ID = 'blender';
 const ENGINE_PACKAGE_DIRECTORY = resolve(
   dirname(fileURLToPath(import.meta.url)),
@@ -1027,7 +1031,9 @@ export class BlenderRendererAdapter implements RendererAdapter {
         };
         const knownControls = new Set([
           ...asset.descriptor.articulation.joints.map((joint) => joint.id),
-          ...asset.descriptor.articulation.controls.map((control) => control.id),
+          ...asset.descriptor.articulation.controls.map(
+            (control) => control.id,
+          ),
         ]);
         for (const control of track.controls)
           if (!knownControls.has(control.id))

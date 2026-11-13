@@ -73,9 +73,21 @@ def import_model(asset, destination, character=False):
     articulation_nodes = {}
     descriptor = asset.get("descriptor")
     if descriptor and document:
-        objects_by_name = {}
+        objects_by_node_index = {}
+        marker_keys = (
+            "filmie_glb_node_index",
+            "filmieGlbNodeIndex",
+            "gltf2io_gltf2_node",
+            "gltf2io_gltf2_node_index",
+        )
         for obj in objects:
-            objects_by_name.setdefault(obj.name, []).append(obj)
+            for key in marker_keys:
+                marker = obj.get(key)
+                if isinstance(marker, int):
+                    if marker in objects_by_node_index and objects_by_node_index[marker] != obj:
+                        raise ValueError("Duplicate deterministic GLB node mapping: " + str(marker))
+                    objects_by_node_index[marker] = obj
+                    break
         nodes = document.get("nodes", [])
         for handle in descriptor.get("resolvedHandles", []):
             node_index = handle.get("nodeIndex")
@@ -86,15 +98,14 @@ def import_model(asset, destination, character=False):
                     "Semantic handle node index is outside the imported GLB: "
                     + handle.get("id", "unknown")
                 )
-            node_name = nodes[node_index].get("name")
-            matches = objects_by_name.get(node_name, []) if node_name else []
-            if len(matches) != 1:
+            mapped = objects_by_node_index.get(node_index)
+            if mapped is None:
                 raise ValueError(
-                    "Semantic handle node mapping is unresolved or ambiguous: "
+                    "GLB lacks deterministic semantic node metadata for handle: "
                     + handle.get("id", "unknown")
                 )
-            articulation_nodes[str(node_index)] = matches[0]
-            matches[0]["filmie_glb_node_index"] = int(node_index)
+            articulation_nodes[str(node_index)] = mapped
+            mapped["filmie_glb_node_index"] = int(node_index)
     return root, articulation_nodes
 
 

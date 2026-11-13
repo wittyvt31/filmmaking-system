@@ -101,8 +101,12 @@ export function evaluateArticulatedKinematics(
       joint.limits?.upper,
     );
   }
+  const authoredTransforms: Record<string, RigidTransform> = {
+    ...(descriptor.restTransforms ?? {}),
+    ...baseTransforms,
+  };
   const nodeTransforms = new Map<number, RigidTransform>(
-    Object.entries(baseTransforms).map(([index, transform]) => [
+    Object.entries(authoredTransforms).map(([index, transform]) => [
       Number(index),
       transform,
     ]),
@@ -126,12 +130,18 @@ export function evaluateArticulatedKinematics(
     );
     if (parentJoint) evaluateJoint(parentJoint);
     const parent = nodeTransforms.get(parentNode) ?? identity();
+    const authoredParent = authoredTransforms[parentNode] ?? identity();
+    const authoredChild = authoredTransforms[childNode] ?? identity();
+    const restLocal = composeTransform(
+      inverseTransform(authoredParent),
+      authoredChild,
+    );
     const local = composeTransform(
+      composeTransform(restLocal, joint.parentTransform),
       composeTransform(
-        joint.parentTransform,
         motionTransform(joint, jointStates[joint.id]!),
+        inverseTransform(joint.childTransform),
       ),
-      inverseTransform(joint.childTransform),
     );
     const child = composeTransform(parent, local);
     nodeTransforms.set(childNode, child);
