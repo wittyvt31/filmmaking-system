@@ -12,7 +12,7 @@ import {
 } from '@filmmaking/orchestrator';
 import { FfmpegMediaEngine } from '@filmmaking/media';
 import { BlenderRendererAdapter } from '@filmmaking/engine-blender';
-import { inspectGlbFile } from '@filmmaking/assets';
+import { inspectGlbFile, normalizeGlbFile } from '@filmmaking/assets';
 
 const cli = createCommand('filmie')
   .description(
@@ -165,6 +165,28 @@ cli
       ? JSON.parse(await readFile(resolve(descriptor), 'utf8'))
       : undefined;
     printJson(await inspectGlbFile(resolve(file), descriptorInput));
+  });
+
+cli
+  .command('normalize-asset')
+  .description('Normalize a self-contained GLB for Filmie compatibility.')
+  .requiredOption('--input <path>', 'Source GLB file')
+  .requiredOption('--output <path>', 'Normalized output GLB file')
+  .option(
+    '--descriptor <path>',
+    'Optional authored, versioned asset descriptor JSON',
+  )
+  .action(async ({ input, output, descriptor }) => {
+    const descriptorInput = descriptor
+      ? JSON.parse(await readFile(resolve(descriptor), 'utf8'))
+      : undefined;
+    const report = await normalizeGlbFile(
+      resolve(input),
+      resolve(output),
+      descriptorInput,
+    );
+    printJson(report);
+    if (report.status === 'rejected') process.exitCode = 1;
   });
 
 projectOptions(

@@ -1,8 +1,12 @@
 import { createHash } from 'node:crypto';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { AssetDescriptorSchema } from '@filmmaking/contracts';
 import {
   AssetVersionSchema,
   inspectGlbBytes,
+  normalizeGlbFile,
   validateAssetDescriptor,
 } from '@filmmaking/assets';
 import { expect, it } from 'vitest';
@@ -267,4 +271,81 @@ it('reports missing, ambiguous, invalid, and unsupported descriptor mappings', (
     ]),
   );
   expect(report.animationCompatibility.status).toBe('unsupported');
+});
+
+it('normalizes self-contained GLBs without changing the source and is stable', async () => {
+  const temporary = await mkdtemp(join(tmpdir(), 'filmie-glb-normalize-'));
+  try {
+    const inputPath = join(temporary, 'input.glb');
+    const outputPath = join(temporary, 'normalized.glb');
+    const repeatedPath = join(temporary, 'repeated.glb');
+    const source = glb({
+      asset: { version: '2.0' },
+      scenes: [{ nodes: [0] }],
+      nodes: [{ name: 'Root', translation: [0, 0, 0] }],
+      buffers: [{ byteLength: 0 }],
+    });
+    await writeFile(inputPath, source);
+    const first = await normalizeGlbFile(inputPath, outputPath);
+    expect(first.status).toBe('normalized');
+    expect(first.outputSha256).toBeDefined();
+    expect(first.after?.nodes).toEqual(first.before?.nodes);
+    expect(await readFile(inputPath)).toEqual(Buffer.from(source));
+
+    const second = await normalizeGlbFile(outputPath, repeatedPath);
+    expect(second.status).toBe('normalized');
+    expect(second.outputSha256).toBe(first.outputSha256);
+    expect(second.after?.nodes).toEqual(first.after?.nodes);
+  } finally {
+    await rm(temporary, { recursive: true, force: true });
+  }
+});
+
+it('rejects external resources before writing a normalized output', async () => {
+  const temporary = await mkdtemp(join(tmpdir(), 'filmie-glb-reject-'));
+  try {
+    const inputPath = join(temporary, 'input.glb');
+    const outputPath = join(temporary, 'normalized.glb');
+    await writeFile(
+      inputPath,
+      glb({
+        buffers: [{ uri: 'outside.bin', byteLength: 4 }],
+        images: [{ uri: 'outside.png' }],
+      }),
+    );
+    const result = await normalizeGlbFile(inputPath, outputPath);
+    expect(result.status).toBe('rejected');
+    expect(result.diagnostics.map((item) => item.code)).toContain(
+      'EXTERNAL_RESOURCE',
+    );
+    await expect(readFile(outputPath)).rejects.toThrow();
+  } finally {
+    await rm(temporary, { recursive: true, force: true });
+  }
+});
+
+it('rejects ambiguous node transforms instead of rewriting them', async () => {
+  const temporary = await mkdtemp(join(tmpdir(), 'filmie-glb-transform-'));
+  try {
+    const inputPath = join(temporary, 'input.glb');
+    const outputPath = join(temporary, 'normalized.glb');
+    await writeFile(
+      inputPath,
+      glb({
+        nodes: [
+          {
+            matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+            translation: [0, 0, 0],
+          },
+        ],
+      }),
+    );
+    const result = await normalizeGlbFile(inputPath, outputPath);
+    expect(result.status).toBe('rejected');
+    expect(result.diagnostics.map((item) => item.code)).toContain(
+      'AMBIGUOUS_NODE_TRANSFORM',
+    );
+  } finally {
+    await rm(temporary, { recursive: true, force: true });
+  }
 });

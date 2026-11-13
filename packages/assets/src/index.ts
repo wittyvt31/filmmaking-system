@@ -75,10 +75,12 @@ export {
   GlbInspectionError,
   inspectGlbBytes,
   inspectGlbFile,
+  normalizeGlbFile,
   validateAssetDescriptor,
   type DescriptorValidation,
   type GlbDiagnostic,
   type GlbAssetInspection,
+  type GlbNormalizationReport,
 } from './glb-inspector.js';
 
 export function modelImportFormat(asset: {

@@ -19,6 +19,15 @@ pnpm filmie inspect-asset --file path\to\asset.glb --descriptor path\to\asset-de
 Authored handles, articulation, colliders, sockets, and material semantics are
 accepted only from the versioned descriptor; the inspector does not infer them.
 
+Normalize a self-contained GLB without modifying the source:
+
+```powershell
+pnpm filmie normalize-asset --input path\to\input.glb --output path\to\filmie-asset.glb
+```
+
+Normalization canonicalizes the GLB JSON chunk, preserves the binary payload and
+component references, and rejects external resources or ambiguous transforms.
+
 Run `pnpm web` and open [Filmie Studio](http://127.0.0.1:4173). Create a project from the `3d-production` catalog, edit and validate the manifest, save a revision, then run it. Restart the command after changing frontend or API source. To access it from your local network, set `FILMIE_WEB_HOST=0.0.0.0` and `FILMIE_WEB_ALLOWED_HOSTS` to the server's IP address before running `pnpm web`; allow the selected port through the Windows firewall on a private network only. The app has no authentication, so only expose it to trusted devices.
 
 The web app stores project revisions and run history in `.filmie/`, writes outputs to `renders/web/`, and shares the production cache with the CLI. Set `FILMIE_WEB_PORT` to change the port or `FILMIE_WEB_CATALOGS` to use another folder of prepared projects, each with a `manifest.json` and `assets.json`. Keep the catalog asset files available for reruns.

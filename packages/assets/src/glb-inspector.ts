@@ -1,4 +1,6 @@
-import { readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
 import {
   AssetDescriptorSchema,
   type AssetDescriptor,
@@ -46,6 +48,7 @@ type JsonRecord = Record<string, unknown> & {
   uri?: unknown;
   mimeType?: unknown;
   bufferView?: unknown;
+  buffers?: unknown;
   animations?: unknown;
   channels?: unknown;
   target?: unknown;
@@ -183,6 +186,20 @@ export interface DescriptorValidation {
   verifiedReferences: string[];
   unknownCapabilities: string[];
   unsupportedCapabilities: string[];
+}
+
+export interface GlbNormalizationReport {
+  status: 'normalized' | 'rejected';
+  inputPath: string;
+  outputPath: string;
+  inputSha256: string;
+  outputSha256?: string;
+  changed: boolean;
+  actions: string[];
+  warnings: GlbDiagnostic[];
+  diagnostics: GlbDiagnostic[];
+  before?: GlbAssetInspection;
+  after?: GlbAssetInspection;
 }
 
 export class GlbInspectionError extends Error {
@@ -967,4 +984,232 @@ export async function inspectGlbFile(
   descriptorInput?: unknown,
 ): Promise<GlbAssetInspection> {
   return inspectGlbBytes(await readFile(path), descriptorInput);
+}
+
+function sha256(bytes: Uint8Array): string {
+  return createHash('sha256').update(bytes).digest('hex');
+}
+
+function normalizedJsonChunk(json: JsonRecord): Uint8Array {
+  const encoded = new TextEncoder().encode(JSON.stringify(json));
+  const paddedLength = Math.ceil(encoded.length / 4) * 4;
+  const chunk = new Uint8Array(paddedLength);
+  chunk.set(encoded);
+  chunk.fill(0x20, encoded.length);
+  return chunk;
+}
+
+function normalizeBytes(bytes: Uint8Array): {
+  output: Uint8Array;
+  diagnostics: GlbDiagnostic[];
+  actions: string[];
+} {
+  const parsed = parseGlb(bytes);
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const diagnostics: GlbDiagnostic[] = [];
+  const actions = [
+    'validated-glb-v2-container',
+    'preserved-gltf-meter-y-up-convention-for-blender-import',
+    'preserved-hierarchy-pivots-materials-skinning-and-animation-references',
+  ];
+  const buffers = array(parsed.json.buffers);
+  if (buffers.length > 1)
+    diagnostics.push(
+      diagnostic(
+        'error',
+        'UNSUPPORTED_BUFFER_LAYOUT',
+        'buffers',
+        'GLB normalization supports one embedded binary buffer.',
+      ),
+    );
+  for (const [index, section] of [
+    ['buffers', buffers],
+    ['images', array(parsed.json.images)],
+  ] as const) {
+    for (const [entryIndex, value] of section.entries()) {
+      const uri = record(value).uri;
+      if (typeof uri === 'string' && !uri.startsWith('data:'))
+        diagnostics.push(
+          diagnostic(
+            'error',
+            'EXTERNAL_RESOURCE',
+            `${index}[${entryIndex}].uri`,
+            'Self-contained GLB normalization cannot embed or rewrite external resources.',
+          ),
+        );
+    }
+  }
+  for (const [index, value] of array(parsed.json.nodes).entries()) {
+    const node = record(value);
+    const hasMatrix = node.matrix !== undefined;
+    const hasTrs = ['translation', 'rotation', 'scale'].some(
+      (key) => node[key] !== undefined,
+    );
+    if (hasMatrix && hasTrs)
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'AMBIGUOUS_NODE_TRANSFORM',
+          `nodes[${index}]`,
+          'A node cannot be normalized safely when matrix and TRS transforms are both present.',
+        ),
+      );
+  }
+  const jsonChunk = normalizedJsonChunk(parsed.json);
+  let binaryChunk = new Uint8Array();
+  let offset = 12;
+  const unknownChunks: number[] = [];
+  while (offset + 8 <= bytes.byteLength) {
+    const length = view.getUint32(offset, true);
+    const type = view.getUint32(offset + 4, true);
+    offset += 8;
+    const chunk = bytes.subarray(offset, offset + length);
+    if (type === 0x004e4942) binaryChunk = chunk.slice();
+    else if (type !== 0x4e4f534a) unknownChunks.push(type);
+    offset += length;
+  }
+  if (unknownChunks.length)
+    diagnostics.push(
+      diagnostic(
+        'error',
+        'UNSUPPORTED_GLB_CHUNK',
+        'chunks',
+        'Normalization would discard an unsupported GLB chunk.',
+      ),
+    );
+  if (diagnostics.some((item) => item.severity === 'error'))
+    return { output: bytes, diagnostics, actions };
+  const output = new Uint8Array(
+    12 +
+      8 +
+      jsonChunk.length +
+      (binaryChunk.length ? 8 + binaryChunk.length : 0),
+  );
+  const outputView = new DataView(output.buffer);
+  outputView.setUint32(0, 0x46546c67, true);
+  outputView.setUint32(4, 2, true);
+  outputView.setUint32(8, output.length, true);
+  let outputOffset = 12;
+  outputView.setUint32(outputOffset, jsonChunk.length, true);
+  outputView.setUint32(outputOffset + 4, 0x4e4f534a, true);
+  output.set(jsonChunk, outputOffset + 8);
+  outputOffset += 8 + jsonChunk.length;
+  if (binaryChunk.length) {
+    outputView.setUint32(outputOffset, binaryChunk.length, true);
+    outputView.setUint32(outputOffset + 4, 0x004e4942, true);
+    output.set(binaryChunk, outputOffset + 8);
+  }
+  actions.push('canonicalized-json-chunk');
+  return { output, diagnostics, actions };
+}
+
+export async function normalizeGlbFile(
+  inputPath: string,
+  outputPath: string,
+  descriptorInput?: unknown,
+): Promise<GlbNormalizationReport> {
+  const input = resolve(inputPath);
+  const output = resolve(outputPath);
+  const bytes = await readFile(input);
+  const inputSha256 = sha256(bytes);
+  const base = {
+    inputPath: input,
+    outputPath: output,
+    inputSha256,
+    changed: false,
+  };
+  if (input === output)
+    return {
+      ...base,
+      status: 'rejected',
+      actions: [],
+      warnings: [],
+      diagnostics: [
+        diagnostic(
+          'error',
+          'INPUT_OUTPUT_SAME_PATH',
+          'outputPath',
+          'Input and output paths must be different to preserve the source asset.',
+        ),
+      ],
+    };
+  let before: GlbAssetInspection;
+  try {
+    before = inspectGlbBytes(bytes, descriptorInput);
+  } catch (error) {
+    return {
+      ...base,
+      status: 'rejected',
+      actions: [],
+      warnings: [],
+      diagnostics: [
+        diagnostic(
+          'error',
+          'GLB_INSPECTION_FAILED',
+          'input',
+          error instanceof Error ? error.message : String(error),
+        ),
+      ],
+    };
+  }
+  const normalized = normalizeBytes(bytes);
+  const diagnostics = [
+    ...normalized.diagnostics,
+    ...before.structuralDiagnostics,
+    ...(before.descriptorValidation?.diagnostics ?? []),
+  ];
+  if (before.descriptorValidation?.status === 'invalid')
+    diagnostics.push(
+      diagnostic(
+        'error',
+        'DESCRIPTOR_INCOMPATIBLE',
+        'descriptor',
+        'Authored descriptor references are incompatible with the GLB.',
+      ),
+    );
+  if (diagnostics.some((item) => item.severity === 'error'))
+    return {
+      ...base,
+      status: 'rejected',
+      actions: normalized.actions,
+      warnings: diagnostics.filter((item) => item.severity === 'warning'),
+      diagnostics,
+      before,
+    };
+  const temporary = `${output}.${process.pid}.${Date.now()}.partial`;
+  try {
+    await mkdir(dirname(output), { recursive: true });
+    await writeFile(temporary, normalized.output, { flag: 'wx' });
+    await rename(temporary, output);
+  } catch (error) {
+    await rm(temporary, { force: true });
+    return {
+      ...base,
+      status: 'rejected',
+      actions: normalized.actions,
+      warnings: [],
+      diagnostics: [
+        diagnostic(
+          'error',
+          'OUTPUT_WRITE_FAILED',
+          'outputPath',
+          error instanceof Error ? error.message : String(error),
+        ),
+      ],
+      before,
+    };
+  }
+  const outputSha256 = sha256(normalized.output);
+  const after = inspectGlbBytes(normalized.output, descriptorInput);
+  return {
+    ...base,
+    status: 'normalized',
+    outputSha256,
+    changed: inputSha256 !== outputSha256,
+    actions: normalized.actions,
+    warnings: diagnostics.filter((item) => item.severity === 'warning'),
+    diagnostics,
+    before,
+    after,
+  };
 }
