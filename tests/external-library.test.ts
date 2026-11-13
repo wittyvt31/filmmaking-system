@@ -11,6 +11,7 @@ import {
 } from '../apps/web-api/src/external-library.js';
 import { WorkspaceStore } from '../apps/web-api/src/store.js';
 import { createFilmieServer } from '../apps/web-api/src/server.js';
+import { stampGlbObjectIndices } from '../apps/web-api/src/external-glb.js';
 
 const folders: string[] = [];
 const servers: ReturnType<typeof createFilmieServer>[] = [];
@@ -75,6 +76,34 @@ const identity = {
   rotationDegrees: { x: 0, y: 0, z: 0 },
   scale: 1,
 };
+
+it('stamps the correct GLB node indices without modifying source or dropping metadata', async () => {
+  const { root } = setup();
+  const input = join(root, 'original.glb');
+  const output = join(root, 'indexed.glb');
+  const original = makeGlb({
+    asset: { version: '2.0' },
+    nodes: [
+      { name: 'House', mesh: 0, extras: { author: 'original artist' } },
+      { name: 'DoorPivot', extras: { hinge: true } },
+    ],
+    scenes: [{ nodes: [0] }],
+    meshes: [{ primitives: [{ attributes: { POSITION: 0 } }] }],
+  });
+  writeFileSync(input, original);
+  await stampGlbObjectIndices(input, output);
+  const after = inspectGlbBytes(readFileSync(output));
+  expect(after.nodes[0]?.extras).toMatchObject({
+    author: 'original artist',
+    filmie_glb_node_index: 0,
+  });
+  expect(after.nodes[1]?.extras).toMatchObject({
+    hinge: true,
+    filmie_glb_node_index: 1,
+  });
+  expect(readFileSync(input)).toEqual(Buffer.from(original));
+  await expect(stampGlbObjectIndices(input, input)).rejects.toThrow('new file');
+});
 
 it('validates inbox paths and reports the real available rig capabilities', async () => {
   const { library } = setup();
