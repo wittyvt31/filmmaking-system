@@ -1,0 +1,92 @@
+name: Filmie asset generation smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [filmieTwo]
+    paths:
+      - .github/workflows/filmie-asset-lab.yml
+      - apps/cli/src/index.ts
+      - engines/blender/src/procedural-assets.ts
+      - engines/blender/src/asset-publisher.ts
+      - engines/blender/worker/procedural_asset.py
+      - engines/blender/worker/asset_preview.py
+      - engines/blender/worker/model_import.py
+      - examples/asset-lab/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: asset-lab-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.16.1
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.17.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install headless Blender
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y blender
+          blender --version | head -n 2
+      - name: Build asset pipeline
+        run: pnpm exec tsc -b packages/contracts packages/assets packages/scene engines/blender apps/cli --pretty false
+      - name: Generate, validate, publish and reimport preview
+        run: |
+          mkdir -p renders/asset-lab
+          node apps/cli/dist/index.js build-procedural-asset \
+            --definition examples/asset-lab/crane.definition.json \
+            --registry renders/asset-lab/assets.json \
+            --license-name "Filmie reference demo" \
+            --preview renders/asset-lab/crane.png \
+            --blender blender \
+            --timeout 180000 > renders/asset-lab/build.json
+          python3 - <<'PY'
+          import glob, json
+          from pathlib import Path
+          result = json.loads(Path("renders/asset-lab/build.json").read_text())
+          assert result["build"]["status"] == "published", result
+          assert result["preview"]["status"] == "rendered", result
+          png = Path("renders/asset-lab/crane.png").read_bytes()
+          assert png[:8] == bytes([137, 80, 78, 71, 13, 10, 26, 10])
+          assets = json.loads(Path("renders/asset-lab/assets.json").read_text())
+          assert len(assets) == 1 and assets[0]["assetId"] == "filmie.demo.crane"
+          assert len(assets[0]["descriptor"]["resolvedHandles"]) >= 6
+          assert len(glob.glob("renders/asset-lab/artifacts/*.glb")) == 1
+          print("Asset Lab: published GLB, semantic mappings and reimported PNG verified.")
+          PY
+      - name: Confirm immutable publishing is reusable
+        run: |
+          node apps/cli/dist/index.js build-procedural-asset \
+            --definition examples/asset-lab/crane.definition.json \
+            --registry renders/asset-lab/assets.json \
+            --license-name "Filmie reference demo" \
+            --preview renders/asset-lab/crane.png \
+            --blender blender \
+            --timeout 180000 > renders/asset-lab/repeated.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path("renders/asset-lab/repeated.json").read_text())
+          assert result["build"]["status"] == "reused", result
+          assert result["preview"]["status"] == "rendered", result
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: filmie-asset-lab
+          path: |
+            renders/asset-lab/
+          retention-days: 7
