@@ -345,6 +345,14 @@ export function LibraryStudio({
                   </label>
                 )),
               )}
+              <label>Character height (m)
+                <input type="number" min="0.5" max="3" step="0.05"
+                  value={instance.characterHeight ?? 1.65}
+                  onChange={(event) => editInstance(instance.id, (current) => ({
+                    ...current, characterHeight: Number(event.target.value),
+                  }))}
+                />
+              </label>
               <label>Scale<input type="number" min="0.01" step="0.1" value={instance.transform.scale} onChange={(event) =>
                 editInstance(instance.id, (current) => ({
                   ...current,
