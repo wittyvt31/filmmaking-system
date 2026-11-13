@@ -101,7 +101,9 @@ export function proceduralAssetDescriptor(
     orderedParts.map((part, index) => [part.id, index + 1]),
   );
   const resolvedNodeIndex = (partId: string): number => {
-    const index = exportedNodeIndices?.get(partId) ?? nodeIndex.get(partId);
+    const index = exportedNodeIndices
+      ? exportedNodeIndices.get(partId)
+      : nodeIndex.get(partId);
     if (index === undefined)
       throw new Error(`Missing exported GLB node mapping for part "${partId}"`);
     return index;

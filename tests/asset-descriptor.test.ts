@@ -350,6 +350,12 @@ it('builds deterministic procedural descriptors with articulated mappings', () =
     exported.handles.find((handle) => handle.id === 'part.arm')?.target,
   ).toEqual({ nodeIndex: 7 });
   expect(exported.restTransforms?.['7']?.position).toEqual([0, 1, 0]);
+  expect(() =>
+    proceduralAssetDescriptor(definition, new Map([['arm', 7]])),
+  ).toThrow('Missing exported GLB node mapping for part "base"');
+  expect(() => proceduralAssetDescriptor(definition, new Map())).toThrow(
+    'Missing exported GLB node mapping for part "arm"',
+  );
 });
 
 it('rejects invalid procedural hierarchies and articulated scale', () => {
