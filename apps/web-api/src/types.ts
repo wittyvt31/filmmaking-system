@@ -74,3 +74,74 @@ export interface AssetStudioBuildResult {
 }
 
 export type { ProceduralAssetDefinition } from '@filmmaking/contracts';
+
+export interface VisualUniverse {
+  id: string;
+  name: string;
+  visualStyle: string;
+  description: string;
+  palette: string[];
+  shadingNotes: string;
+}
+
+export interface LibraryAsset {
+  assetId: string;
+  version: string;
+  contentHash: string;
+  category: string;
+  glbUrl: string;
+  library: {
+    category?: string;
+    universeId?: string;
+    themes?: string[];
+    familyId?: string;
+    sourceProvider?: string;
+    sourceUrl?: string;
+  };
+  rigCompatibility: null | {
+    status: string;
+    boneCount?: number;
+    missingJoints?: string[];
+    facial?: string;
+    morphTargetCount?: number;
+    issues?: string[];
+  };
+}
+
+export interface LibraryWorldInstance {
+  id: string;
+  assetId: string;
+  version: string;
+  transform: {
+    position: { x: number; y: number; z: number };
+    rotationDegrees: { x: number; y: number; z: number };
+    scale: number;
+  };
+  role?: string;
+}
+
+export interface LibraryWorld {
+  id: string;
+  version: string;
+  name: string;
+  universeId: string;
+  theme: string;
+  instances: LibraryWorldInstance[];
+}
+
+export interface LibraryInspection {
+  meshCount: number;
+  nodeCount: number;
+  materialCount: number;
+  animationCount: number;
+  character: {
+    status: string;
+    skeletonCount: number;
+    boneCount: number;
+    missingJoints: string[];
+    suggestedJointMap: Record<string, string>;
+    morphTargetCount: number;
+    facial: string;
+    issues: string[];
+  };
+}
