@@ -52,7 +52,10 @@ jobs:
             --license-name "Filmie reference demo" \
             --preview renders/asset-lab/crane.png \
             --blender blender \
-            --timeout 180000 > renders/asset-lab/build.json
+            --timeout 180000 > renders/asset-lab/build.json || {
+              cat renders/asset-lab/build.json
+              exit 1
+            }
           python3 - <<'PY'
           import glob, json
           from pathlib import Path
