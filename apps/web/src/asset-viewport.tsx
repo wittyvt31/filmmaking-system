@@ -183,7 +183,10 @@ function buildSurfaces(definition: ProceduralAssetDefinition) {
   const centers = new Map<string, Vec3>();
   const minimum: Vec3 = [Infinity, Infinity, Infinity];
   const maximum: Vec3 = [-Infinity, -Infinity, -Infinity];
-  const faceBudget = Math.max(20, Math.floor(12_000 / Math.max(1, definition.parts.length)));
+  const faceBudget = Math.max(
+    20,
+    Math.floor(12_000 / Math.max(1, definition.parts.length)),
+  );
   let unsupported = 0;
   for (const part of definition.parts) {
     const mesh = meshes.get(part.meshId);

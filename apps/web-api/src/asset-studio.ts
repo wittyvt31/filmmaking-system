@@ -243,9 +243,7 @@ export class AssetStudioService {
     const project = this.store.project(projectId);
     const source = this.find(assetId, version);
     const registryPath = this.store.registryPath(project.id);
-    const entries = JSON.parse(
-      readFileSync(registryPath, 'utf8'),
-    ) as unknown[];
+    const entries = JSON.parse(readFileSync(registryPath, 'utf8')) as unknown[];
     const registry = new AssetRegistry(entries);
     const existing = registry
       .list()

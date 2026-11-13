@@ -484,7 +484,9 @@ export function AssetStudio({
                 if (!check.valid)
                   throw new Error(
                     'Imported definition is invalid:\\n' +
-                      check.issues.map((issue) => issue.path + ': ' + issue.message).join('\\n'),
+                      check.issues
+                        .map((issue) => issue.path + ': ' + issue.message)
+                        .join('\\n'),
                   );
                 load(parsed);
                 setNotice('Imported and validated the asset definition.');
