@@ -181,6 +181,9 @@ function buildSurfaces(definition: ProceduralAssetDefinition) {
   );
   const surfaces: Surface[] = [];
   const centers = new Map<string, Vec3>();
+  const minimum: Vec3 = [Infinity, Infinity, Infinity];
+  const maximum: Vec3 = [-Infinity, -Infinity, -Infinity];
+  const faceBudget = Math.max(20, Math.floor(12_000 / Math.max(1, definition.parts.length)));
   let unsupported = 0;
   for (const part of definition.parts) {
     const mesh = meshes.get(part.meshId);
@@ -191,14 +194,29 @@ function buildSurfaces(definition: ProceduralAssetDefinition) {
     const polygons = shapeSurfaces(mesh.shape);
     if (!polygons.length) unsupported += 1;
     centers.set(part.id, transformPoint([0, 0, 0], part, parts));
-    for (const polygon of polygons)
-      surfaces.push({
-        partId: part.id,
-        color,
-        points: polygon.map((point) => transformPoint(point, part, parts)),
-      });
+    // Keep the editor responsive for large procedurally generated assemblies.
+    // Full geometry still goes to the authoritative Blender builder.
+    const stride = Math.max(1, Math.ceil(polygons.length / faceBudget));
+    for (let index = 0; index < polygons.length; index += stride) {
+      const points = polygons[index]!.map((point) =>
+        transformPoint(point, part, parts),
+      );
+      for (const point of points)
+        for (let axis = 0; axis < 3; axis += 1) {
+          minimum[axis] = Math.min(minimum[axis]!, point[axis]!);
+          maximum[axis] = Math.max(maximum[axis]!, point[axis]!);
+        }
+      surfaces.push({ partId: part.id, color, points });
+    }
   }
-  return { surfaces, centers, unsupported };
+  return {
+    surfaces,
+    centers,
+    unsupported,
+    minimum,
+    maximum,
+    hasGeometry: surfaces.length > 0,
+  };
 }
 
 function project(
@@ -246,14 +264,9 @@ function render(
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = '#0d141d';
   ctx.fillRect(0, 0, width, height);
-  const points = definition.surfaces.flatMap((face) => face.points);
-  if (!points.length) return;
-  const boundsMin: Vec3 = [0, 1, 2].map((axis) =>
-    Math.min(...points.map((point) => point[axis]!)),
-  ) as Vec3;
-  const boundsMax: Vec3 = [0, 1, 2].map((axis) =>
-    Math.max(...points.map((point) => point[axis]!)),
-  ) as Vec3;
+  if (!definition.hasGeometry) return;
+  const boundsMin = definition.minimum;
+  const boundsMax = definition.maximum;
   const center: Vec3 = add(boundsMin, boundsMax).map(
     (value) => value / 2,
   ) as Vec3;
@@ -389,14 +402,9 @@ export function AssetViewport({
             const bounds = canvas.current.getBoundingClientRect();
             const x = event.clientX - bounds.left;
             const y = event.clientY - bounds.top;
-            const points = model.surfaces.flatMap((face) => face.points);
-            if (points.length) {
-              const minimum: Vec3 = [0, 1, 2].map((axis) =>
-                Math.min(...points.map((point) => point[axis]!)),
-              ) as Vec3;
-              const maximum: Vec3 = [0, 1, 2].map((axis) =>
-                Math.max(...points.map((point) => point[axis]!)),
-              ) as Vec3;
+            if (model.hasGeometry) {
+              const minimum = model.minimum;
+              const maximum = model.maximum;
               const center = add(minimum, maximum).map(
                 (value) => value / 2,
               ) as Vec3;
