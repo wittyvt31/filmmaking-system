@@ -35,6 +35,4 @@ jobs:
         run: python3 -m py_compile engines/blender/worker/procedural_asset.py engines/blender/worker/asset_preview.py engines/blender/worker/model_import.py
       - name: Check formatting of asset pipeline
         run: |
-          pnpm exec prettier --write packages/scene/src/articulated-kinematics.ts packages/scene/src/index.ts engines/blender/src/index.ts engines/blender/src/procedural-assets.ts apps/cli/src/index.ts tests/asset-descriptor.test.ts examples/asset-lab/crane.definition.json
-          git diff -- packages/scene/src/articulated-kinematics.ts packages/scene/src/index.ts engines/blender/src/index.ts engines/blender/src/procedural-assets.ts apps/cli/src/index.ts tests/asset-descriptor.test.ts examples/asset-lab/crane.definition.json
-          git diff --exit-code -- packages/scene/src/articulated-kinematics.ts packages/scene/src/index.ts engines/blender/src/index.ts engines/blender/src/procedural-assets.ts apps/cli/src/index.ts tests/asset-descriptor.test.ts examples/asset-lab/crane.definition.json
+          pnpm exec prettier --check packages/scene/src/articulated-kinematics.ts packages/scene/src/index.ts engines/blender/src/index.ts engines/blender/src/procedural-assets.ts apps/cli/src/index.ts tests/asset-descriptor.test.ts examples/asset-lab/crane.definition.json
