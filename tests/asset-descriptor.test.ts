@@ -292,7 +292,10 @@ it('evaluates deterministic hierarchical articulated kinematics', () => {
 
 it('includes a deterministic articulated asset-lab fixture ready for GLB export', async () => {
   const input = JSON.parse(
-    await readFile(join('examples', 'asset-lab', 'crane.definition.json'), 'utf8'),
+    await readFile(
+      join('examples', 'asset-lab', 'crane.definition.json'),
+      'utf8',
+    ),
   );
   const definition = ProceduralAssetDefinitionSchema.parse(input);
   const descriptor = proceduralAssetDescriptor(definition);
