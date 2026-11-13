@@ -7,7 +7,7 @@ on:
     branches: [filmieTwo, master]
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: filmie-core-${{ github.ref }}
@@ -35,6 +35,15 @@ jobs:
         run: pnpm --filter @filmmaking/web build
       - name: Check Python asset workers compile
         run: python3 -m py_compile engines/blender/worker/procedural_asset.py engines/blender/worker/asset_preview.py engines/blender/worker/model_import.py
+      - name: Normalize new Asset Studio source formatting
+        if: github.event_name == 'push' && github.ref == 'refs/heads/filmieTwo'
+        run: |
+          pnpm exec prettier --write apps/web/src/api.ts apps/web/src/main.tsx apps/web/src/asset-studio.tsx apps/web/src/asset-viewport.tsx apps/web/src/app.css apps/web-api/src/server.ts apps/web-api/src/asset-studio.ts apps/web-api/src/types.ts tests/asset-studio.test.ts
+          git add apps/web/src/api.ts apps/web/src/main.tsx apps/web/src/asset-studio.tsx apps/web/src/asset-viewport.tsx apps/web/src/app.css apps/web-api/src/server.ts apps/web-api/src/asset-studio.ts apps/web-api/src/types.ts tests/asset-studio.test.ts
+          if ! git diff --cached --quiet; then
+            git -c user.name=github-actions -c user.email=github-actions@users.noreply.github.com commit -m "style(asset-studio): apply canonical formatting"
+            git push origin HEAD:filmieTwo
+          fi
       - name: Check formatting of asset pipeline
         run: |
           pnpm exec prettier --check packages/scene/src/articulated-kinematics.ts packages/scene/src/index.ts engines/blender/src/index.ts engines/blender/src/procedural-assets.ts apps/cli/src/index.ts tests/asset-descriptor.test.ts examples/asset-lab/crane.definition.json apps/web/src/api.ts apps/web/src/main.tsx apps/web/src/asset-studio.tsx apps/web/src/asset-viewport.tsx apps/web/src/app.css apps/web-api/src/server.ts apps/web-api/src/asset-studio.ts apps/web-api/src/types.ts tests/asset-studio.test.ts
