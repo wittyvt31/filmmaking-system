@@ -1,0 +1,29 @@
+name: Temporary Filmie format pass
+on:
+  push:
+    branches: [filmieTwo]
+    paths: [.github/workflows/filmie-format-once.yml]
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.16.1
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.17.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply canonical Prettier formatting
+        run: |
+          pnpm exec prettier --write apps/web/src/main.tsx apps/web/src/app.css apps/web/src/library-studio.tsx apps/web-api/src/server.ts apps/web-api/src/external-library.ts apps/web-api/src/types.ts tests/external-library.test.ts packages/contracts/src/index.ts engines/blender/src/asset-publisher.ts
+          git add apps/web/src/main.tsx apps/web/src/app.css apps/web/src/library-studio.tsx apps/web-api/src/server.ts apps/web-api/src/external-library.ts apps/web-api/src/types.ts tests/external-library.test.ts packages/contracts/src/index.ts engines/blender/src/asset-publisher.ts
+          if ! git diff --cached --quiet; then
+            git -c user.name=github-actions -c user.email=github-actions@users.noreply.github.com commit -m "style(library): apply canonical formatter to asset integration"
+            git push origin HEAD:filmieTwo
+          fi
