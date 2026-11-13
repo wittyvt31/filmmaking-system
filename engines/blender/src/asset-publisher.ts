@@ -220,7 +220,7 @@ export async function publishAsset(options: {
   const stagingDirectory = resolve(registryDirectory, '.publishing');
   const stagingPath = resolve(
     stagingDirectory,
-    `${descriptor.assetId}.${descriptor.assetVersion}.${randomUUID()}.glb`,
+    `${sha256(new TextEncoder().encode(JSON.stringify([descriptor.assetId, descriptor.assetVersion])))}.${randomUUID()}.glb`,
   );
   await mkdir(stagingDirectory, { recursive: true });
   let conversion: AssetFactoryReport;
@@ -395,7 +395,7 @@ export async function publishAsset(options: {
           registryDirectory,
           resolve(
             reportDirectory,
-            `${descriptor.assetId}.${descriptor.assetVersion}.json`,
+            `${sha256(new TextEncoder().encode(JSON.stringify([descriptor.assetId, descriptor.assetVersion])))}.json`,
           ),
         ),
       },
