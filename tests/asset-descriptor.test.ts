@@ -290,6 +290,32 @@ it('evaluates deterministic hierarchical articulated kinematics', () => {
   );
 });
 
+it('includes a deterministic articulated asset-lab fixture ready for GLB export', async () => {
+  const input = JSON.parse(
+    await readFile(join('examples', 'asset-lab', 'crane.definition.json'), 'utf8'),
+  );
+  const definition = ProceduralAssetDefinitionSchema.parse(input);
+  const descriptor = proceduralAssetDescriptor(definition);
+  expect(definition.parts).toHaveLength(6);
+  expect(definition.joints).toHaveLength(3);
+  expect(descriptor.capabilities.verified).toContain('articulation');
+  const zero = evaluateArticulatedKinematics(descriptor);
+  const pose = evaluateArticulatedKinematics(descriptor, {
+    'turret.yaw': 0.5,
+    'boom.pitch': 0.3,
+    'hook.lower': 0.45,
+  });
+  const boom = descriptor.handles.find((handle) => handle.id === 'part.boom');
+  expect(boom?.target).toEqual({ nodeIndex: 1 });
+  expect(pose.jointStates).toEqual({
+    'boom-pitch': 0.3,
+    'hook-slide': 0.45,
+    'turret-yaw': 0.5,
+  });
+  expect(pose.nodeTransforms[1]).not.toEqual(zero.nodeTransforms[1]);
+  expect(pose.nodeTransforms[5]).not.toEqual(zero.nodeTransforms[5]);
+});
+
 it('builds deterministic procedural descriptors with articulated mappings', () => {
   const definition = {
     schemaVersion: 1 as const,
