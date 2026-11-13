@@ -828,3 +828,35 @@ main.asset-main {
     height: 320px;
   }
 }
+
+.asset-joint-list > button {
+  width: 100%;
+  text-align: left;
+  display: grid;
+  gap: 0.2rem;
+  margin-top: 0.5rem;
+  font-size: 0.76rem;
+  overflow-wrap: anywhere;
+}
+.asset-joint-list > button[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: #3d3b2d;
+}
+.asset-joint-editor {
+  display: grid;
+  gap: 0.75rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.9rem;
+  margin-top: 1.2rem;
+}
+.asset-joint-editor label {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.asset-joint-editor input,
+.asset-joint-editor select {
+  min-width: 0;
+  width: 100%;
+}
