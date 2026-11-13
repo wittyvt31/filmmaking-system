@@ -107,9 +107,7 @@ export function createArticulatedKinematicsEvaluator(
       throw new TypeError(`Articulation joint "${joint.id}" references itself`);
     const authoredParent = authoredTransforms[parentNode] ?? identity();
     const authoredChild = authoredTransforms[childNode] ?? identity();
-    const control = joint.control
-      ? controlsById.get(joint.control)
-      : undefined;
+    const control = joint.control ? controlsById.get(joint.control) : undefined;
     return {
       joint,
       parentNode,
@@ -172,7 +170,13 @@ export function createArticulatedKinematicsEvaluator(
     }
 
     const nodeTransforms = new Map<number, RigidTransform>(initialTransforms);
-    for (const { joint, parentNode, childNode, restParent, inverseChild } of ordered) {
+    for (const {
+      joint,
+      parentNode,
+      childNode,
+      restParent,
+      inverseChild,
+    } of ordered) {
       const parent = nodeTransforms.get(parentNode) ?? identity();
       const local = composeTransform(
         composeTransform(
