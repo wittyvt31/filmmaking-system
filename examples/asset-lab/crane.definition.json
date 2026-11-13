@@ -1,0 +1,320 @@
+{
+  "schemaVersion": 1,
+  "assetId": "filmie.demo.crane",
+  "assetVersion": "1.0.0",
+  "kind": "articulated-assembly",
+  "materials": [
+    {
+      "id": "gunmetal",
+      "color": [
+        0.17,
+        0.23,
+        0.31
+      ],
+      "metallic": 0.5,
+      "roughness": 0.42
+    },
+    {
+      "id": "construction-yellow",
+      "color": [
+        0.94,
+        0.58,
+        0.08
+      ],
+      "metallic": 0.15,
+      "roughness": 0.5
+    },
+    {
+      "id": "silver",
+      "color": [
+        0.55,
+        0.66,
+        0.72
+      ],
+      "metallic": 0.65,
+      "roughness": 0.33
+    },
+    {
+      "id": "signal-red",
+      "color": [
+        0.86,
+        0.12,
+        0.14
+      ],
+      "metallic": 0.1,
+      "roughness": 0.45
+    }
+  ],
+  "meshes": [
+    {
+      "id": "foundation-mesh",
+      "materialId": "gunmetal",
+      "shape": {
+        "kind": "box",
+        "dimensions": [
+          2.2,
+          1.5,
+          0.36
+        ]
+      }
+    },
+    {
+      "id": "tower-mesh",
+      "materialId": "construction-yellow",
+      "shape": {
+        "kind": "cylinder",
+        "radius": 0.38,
+        "height": 1.1,
+        "segments": 32
+      }
+    },
+    {
+      "id": "boom-mesh",
+      "materialId": "construction-yellow",
+      "shape": {
+        "kind": "box",
+        "dimensions": [
+          3.5,
+          0.32,
+          0.3
+        ]
+      }
+    },
+    {
+      "id": "counterweight-mesh",
+      "materialId": "gunmetal",
+      "shape": {
+        "kind": "box",
+        "dimensions": [
+          0.9,
+          0.85,
+          0.5
+        ]
+      }
+    },
+    {
+      "id": "hook-mesh",
+      "materialId": "signal-red",
+      "shape": {
+        "kind": "sphere",
+        "radius": 0.25,
+        "segments": 24,
+        "rings": 12
+      }
+    },
+    {
+      "id": "cable-mesh",
+      "materialId": "silver",
+      "shape": {
+        "kind": "cylinder",
+        "radius": 0.045,
+        "height": 0.85,
+        "segments": 16
+      }
+    }
+  ],
+  "parts": [
+    {
+      "id": "hook",
+      "meshId": "hook-mesh",
+      "parentId": "boom",
+      "transform": {
+        "position": {
+          "x": 1.6,
+          "y": 0,
+          "z": -0.65
+        },
+        "rotationDegrees": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "scale": 1
+      }
+    },
+    {
+      "id": "boom",
+      "meshId": "boom-mesh",
+      "parentId": "turret",
+      "transform": {
+        "position": {
+          "x": 1.2,
+          "y": 0,
+          "z": 0.62
+        },
+        "rotationDegrees": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "scale": 1
+      }
+    },
+    {
+      "id": "turret",
+      "meshId": "tower-mesh",
+      "parentId": "foundation",
+      "transform": {
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0.76
+        },
+        "rotationDegrees": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "scale": 1
+      }
+    },
+    {
+      "id": "foundation",
+      "meshId": "foundation-mesh",
+      "transform": {
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0.15
+        },
+        "rotationDegrees": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "scale": 1
+      }
+    },
+    {
+      "id": "counterweight",
+      "meshId": "counterweight-mesh",
+      "parentId": "turret",
+      "transform": {
+        "position": {
+          "x": -0.7,
+          "y": 0,
+          "z": 0.25
+        },
+        "rotationDegrees": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "scale": 1
+      }
+    },
+    {
+      "id": "cable",
+      "meshId": "cable-mesh",
+      "parentId": "boom",
+      "transform": {
+        "position": {
+          "x": 1.6,
+          "y": 0,
+          "z": -0.35
+        },
+        "rotationDegrees": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "scale": 1
+      }
+    }
+  ],
+  "handles": [
+    {
+      "id": "turret.yaw",
+      "kind": "control-target",
+      "partId": "turret",
+      "space": "local"
+    },
+    {
+      "id": "boom.pitch",
+      "kind": "control-target",
+      "partId": "boom",
+      "space": "local"
+    },
+    {
+      "id": "hook.lower",
+      "kind": "control-target",
+      "partId": "hook",
+      "space": "local"
+    },
+    {
+      "id": "hook.socket",
+      "kind": "attachment-socket",
+      "partId": "hook",
+      "space": "local"
+    }
+  ],
+  "joints": [
+    {
+      "id": "turret-yaw",
+      "type": "revolute",
+      "parentPartId": "foundation",
+      "childPartId": "turret",
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "limits": {
+        "lower": -1.5,
+        "upper": 1.5
+      },
+      "defaultValue": 0,
+      "controlId": "turret.yaw"
+    },
+    {
+      "id": "boom-pitch",
+      "type": "revolute",
+      "parentPartId": "turret",
+      "childPartId": "boom",
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "limits": {
+        "lower": -0.75,
+        "upper": 0.75
+      },
+      "defaultValue": 0,
+      "controlId": "boom.pitch"
+    },
+    {
+      "id": "hook-slide",
+      "type": "prismatic",
+      "parentPartId": "boom",
+      "childPartId": "hook",
+      "axis": [
+        0,
+        0,
+        -1
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 1.1
+      },
+      "defaultValue": 0,
+      "controlId": "hook.lower"
+    }
+  ],
+  "capabilities": {
+    "assetClass": "prop",
+    "requirements": [
+      "articulation"
+    ],
+    "mappings": [
+      {
+        "capability": "articulation",
+        "handle": "boom.pitch",
+        "space": "local"
+      }
+    ]
+  },
+  "provenance": {
+    "source": "filmie-reference-asset-lab"
+  }
+}
